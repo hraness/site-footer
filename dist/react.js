@@ -164,17 +164,17 @@ var RA_MARK = '<svg aria-hidden="true" class="hraness-site-footer__mark" data-sl
 var HRANESS_SITE_FOOTER_INNER_HTML = `<div class="hraness-site-footer__inner"><a aria-label="Hraness home" class="hraness-site-footer__brand" href="https://hraness.com/">${RA_MARK}<span class="hraness-site-footer__wordmark">hraness</span></a><nav aria-label="Hraness links" class="hraness-site-footer__links"><a class="hraness-site-footer__newsletter" href="https://hraness.substack.com/subscribe">newsletter</a><ul class="hraness-site-footer__socials">${HRANESS_SOCIAL_LINKS.map((link) => `<li><a aria-label="${escapeAttribute(link.label)}" class="hraness-site-footer__social-link" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav></div>`;
 
 // src/react.tsx
-import { jsxDEV } from "react/jsx-dev-runtime";
+import { createElement } from "react";
 function HranessSiteFooter() {
-  return /* @__PURE__ */ jsxDEV("footer", {
+  return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
     className: HRANESS_FOOTER_CLASS_NAME,
     "data-slot": HRANESS_FOOTER_SLOT,
     dangerouslySetInnerHTML: { __html: HRANESS_SITE_FOOTER_INNER_HTML }
-  }, undefined, false, undefined, this);
+  });
 }
 export {
   HranessSiteFooter
 };
 
-//# debugId=31EFC9AB73F9F1B564756E2164756E21
+//# debugId=C6ACA131C94DE67364756E2164756E21

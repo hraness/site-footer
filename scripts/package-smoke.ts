@@ -57,3 +57,7 @@ if (typeof react.HranessSiteFooter !== "function") {
   throw new Error("The built React adapter is missing.");
 }
 
+const reactArtifact = await readFile(resolve(repository, "dist/react.js"), "utf8");
+if (reactArtifact.includes("jsxDEV") || reactArtifact.includes("jsx-dev-runtime")) {
+  throw new Error("The built React adapter depends on development-only JSX helpers.");
+}
