@@ -1,5 +1,5 @@
 .hraness-site-footer {
-  --hraness-site-footer-foreground: var(--plain-foreground, var(--foreground, CanvasText));
+  --hraness-site-footer-foreground: var(--plain-foreground, var(--foreground, currentColor));
   --hraness-site-footer-muted: var(--plain-muted, var(--muted, color-mix(in srgb, currentColor 68%, transparent)));
   --hraness-site-footer-line: var(--plain-line, var(--line, color-mix(in srgb, currentColor 18%, transparent)));
   --hraness-site-footer-focus: var(--plain-link, var(--focus, Highlight));
@@ -36,6 +36,7 @@
 .hraness-site-footer__brand {
   flex: 0 0 auto;
   gap: 0.625rem;
+  min-block-size: 2.5rem;
   border-radius: 0.375rem;
   color: inherit;
   font-weight: 650;
@@ -61,7 +62,10 @@
 }
 
 .hraness-site-footer__newsletter {
+  align-items: center;
+  display: inline-flex;
   flex: 0 0 auto;
+  min-block-size: 2.5rem;
   border-radius: 0.25rem;
   color: var(--hraness-site-footer-muted);
   font-weight: 550;
@@ -122,9 +126,14 @@
 }
 
 @media (pointer: coarse) {
+  .hraness-site-footer__brand,
+  .hraness-site-footer__newsletter,
+  .hraness-site-footer__social-link {
+    block-size: 3rem;
+  }
+
   .hraness-site-footer__social-link {
     inline-size: 3rem;
-    block-size: 3rem;
   }
 }
 
@@ -158,4 +167,3 @@
     outline-color: Highlight;
   }
 }
-
