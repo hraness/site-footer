@@ -1,0 +1,161 @@
+.hraness-site-footer {
+  --hraness-site-footer-foreground: var(--plain-foreground, var(--foreground, CanvasText));
+  --hraness-site-footer-muted: var(--plain-muted, var(--muted, color-mix(in srgb, currentColor 68%, transparent)));
+  --hraness-site-footer-line: var(--plain-line, var(--line, color-mix(in srgb, currentColor 18%, transparent)));
+  --hraness-site-footer-focus: var(--plain-link, var(--focus, Highlight));
+
+  inline-size: 100%;
+  border-block-start: 1px solid var(--hraness-site-footer-line);
+  background: transparent;
+  color: var(--hraness-site-footer-foreground);
+  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 0.875rem;
+}
+
+.hraness-site-footer__inner {
+  display: flex;
+  inline-size: 100%;
+  max-inline-size: var(--hraness-site-footer-measure, var(--plain-shell-measure, 72rem));
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1rem, 3vw, 2rem);
+  margin-inline: auto;
+  padding-block: clamp(1rem, 2.5vw, 1.5rem);
+  padding-inline: max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left)) max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right));
+}
+
+.hraness-site-footer__brand,
+.hraness-site-footer__links,
+.hraness-site-footer__socials,
+.hraness-site-footer__social-link {
+  display: flex;
+  align-items: center;
+}
+
+.hraness-site-footer__brand {
+  flex: 0 0 auto;
+  gap: 0.625rem;
+  border-radius: 0.375rem;
+  color: inherit;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.hraness-site-footer__mark {
+  inline-size: 2rem;
+  block-size: 2rem;
+  flex: 0 0 auto;
+}
+
+.hraness-site-footer__wordmark {
+  font-size: 1rem;
+}
+
+.hraness-site-footer__links {
+  min-inline-size: 0;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+.hraness-site-footer__newsletter {
+  flex: 0 0 auto;
+  border-radius: 0.25rem;
+  color: var(--hraness-site-footer-muted);
+  font-weight: 550;
+  text-underline-offset: 0.2em;
+}
+
+.hraness-site-footer__socials {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hraness-site-footer__socials > li {
+  display: contents;
+}
+
+.hraness-site-footer__social-link {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  flex: 0 0 auto;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--hraness-site-footer-muted);
+  text-decoration: none;
+}
+
+.hraness-site-footer__social-icon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+
+.hraness-site-footer :where(a):focus-visible {
+  outline: 2px solid var(--hraness-site-footer-focus);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .hraness-site-footer__brand:hover,
+  .hraness-site-footer__newsletter:hover,
+  .hraness-site-footer__social-link:hover {
+    color: var(--hraness-site-footer-foreground);
+  }
+
+  .hraness-site-footer__social-link:hover {
+    background: color-mix(in srgb, currentColor 9%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hraness-site-footer__brand,
+  .hraness-site-footer__newsletter,
+  .hraness-site-footer__social-link {
+    transition: color 120ms ease, background-color 120ms ease;
+  }
+}
+
+@media (pointer: coarse) {
+  .hraness-site-footer__social-link {
+    inline-size: 3rem;
+    block-size: 3rem;
+  }
+}
+
+@media (max-width: 44rem) {
+  .hraness-site-footer__inner,
+  .hraness-site-footer__links {
+    align-items: flex-start;
+  }
+
+  .hraness-site-footer__inner {
+    flex-direction: column;
+  }
+
+  .hraness-site-footer__links {
+    inline-size: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .hraness-site-footer__socials {
+    justify-content: flex-start;
+  }
+}
+
+@media (forced-colors: active) {
+  .hraness-site-footer__social-link {
+    border: 1px solid ButtonText;
+  }
+
+  .hraness-site-footer :where(a):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
