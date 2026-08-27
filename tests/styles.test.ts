@@ -25,7 +25,7 @@ test("the footer is a full-width persistent bar with a matching flow reservation
   expect(css).toContain("env(safe-area-inset-bottom)");
 });
 
-test("mobile shows only X and wider containers progressively reveal one social row", () => {
+test("mobile shows X, LinkedIn, and GitHub while wider containers progressively reveal one social row", () => {
   expect(css).toContain("--hraness-site-footer-social-target: 40px");
   expect(css).toMatch(
     /\.hraness-site-footer__wordmark \{[\s\S]*?display: none;/u,
@@ -34,8 +34,9 @@ test("mobile shows only X and wider containers progressively reveal one social r
     /\.hraness-site-footer__socials > li \{[\s\S]*?display: none;[\s\S]*?flex: 0 0 var\(--hraness-site-footer-social-target\);/u,
   );
   expect(css).toMatch(
-    /\.hraness-site-footer__socials > li:first-child \{[\s\S]*?display: block;/u,
+    /\.hraness-site-footer__socials > li:first-child,[\s\S]*?nth-child\(3\),[\s\S]*?nth-child\(6\) \{[\s\S]*?display: block;/u,
   );
+  expect(css).toContain("margin-inline-start: auto");
   expect(css).toMatch(
     /@container hraness-footer \(min-width: 704px\)[\s\S]*?\.hraness-site-footer__wordmark \{[\s\S]*?display: inline;[\s\S]*?nth-child\(-n \+ 6\)/u,
   );

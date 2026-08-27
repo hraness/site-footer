@@ -38,6 +38,7 @@ describe("Hraness site footer", () => {
     const links = [...(nav?.querySelectorAll("a") ?? [])];
 
     expect(footer?.getAttribute("aria-label")).toBe("Hraness network");
+    expect(footer?.getAttribute("data-brand")).toBe("visible");
     expect(links).toHaveLength(11);
     expect(socialItems).toHaveLength(10);
     expect(links[0]?.textContent).toBe("newsletter");
@@ -49,6 +50,20 @@ describe("Hraness site footer", () => {
       expect(link.getAttribute("title")).toBeTruthy();
       expect(link.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     }
+  });
+
+  test("can omit the duplicate Hraness brand without changing network links", () => {
+    const { document } = parseHTML(renderHranessSiteFooter({ showBrand: false }));
+    const footer = document.querySelector('footer[data-slot="hraness-site-footer"]');
+    const nav = footer?.querySelector('nav[aria-label="Hraness links"]');
+
+    expect(footer?.getAttribute("data-brand")).toBe("hidden");
+    expect(footer?.querySelector('.hraness-site-footer__brand')).toBeNull();
+    expect(footer?.querySelector('[data-slot="hraness-mark"]')).toBeNull();
+    expect(nav?.querySelectorAll("a")).toHaveLength(11);
+    expect(nav?.querySelector('a[aria-label="Hraness on GitHub"]')?.getAttribute("href")).toBe(
+      "https://github.com/hraness",
+    );
   });
 
   test("uses the exact raw Ra mark without image or mask dependencies", () => {

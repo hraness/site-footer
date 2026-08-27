@@ -18,6 +18,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 ```
 
+On hraness.com itself, omit the duplicate network brand while preserving the newsletter and social links:
+
+```tsx
+<HranessSiteFooter showBrand={false} />
+```
+
 ## Static HTML
 
 ```ts
@@ -25,6 +31,8 @@ import { renderHranessSiteFooter } from "@hraness/site-footer";
 
 const html = template.replace("{{HRANESS_SITE_FOOTER}}", renderHranessSiteFooter());
 ```
+
+Static Hraness pages use `renderHranessSiteFooter({ showBrand: false })` for the same unbranded variant.
 
 Include `@hraness/site-footer/styles.css` in the generated site stylesheet. Static consumers can resolve the exact installed file without assuming a `node_modules` path:
 
@@ -38,4 +46,4 @@ const footerStylesPath = fileURLToPath(
 
 ## Layout variables
 
-The footer follows each site's theme variables when present. It is a persistent, full-width bottom bar with enough flow space to keep the end of the page readable. Mobile shows the Hraness brand, newsletter, and X. Wider containers progressively reveal six, eight, and then all ten social links in one row. Products may set `--hraness-site-footer-z-index` when coordinating layered surfaces. The shared links, vectors, order, markup, and behavior stay package-owned.
+The footer follows each site's theme variables when present. It is a persistent, full-width bottom bar with enough flow space to keep the end of the page readable. Mobile shows the optional Hraness brand, newsletter, X, LinkedIn, and the Hraness organization GitHub link. Wider containers progressively reveal six, eight, and then all ten social links in one row. Products may set `--hraness-site-footer-z-index` when coordinating layered surfaces. The shared links, vectors, order, markup, and behavior stay package-owned.
