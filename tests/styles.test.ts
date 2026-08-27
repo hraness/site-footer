@@ -10,7 +10,17 @@ test("the stylesheet keeps responsive, coarse-pointer, focus, and forced-color c
   expect(css).toContain("env(safe-area-inset-left)");
   expect(css).toContain("var(--foreground, currentColor)");
   expect(css).toMatch(
-    /@media \(pointer: coarse\)[\s\S]*?\.hraness-site-footer__brand,[\s\S]*?\.hraness-site-footer__newsletter,[\s\S]*?\.hraness-site-footer__social-link/u,
+    /@media \(pointer: coarse\)[\s\S]*?\.hraness-site-footer__brand,[\s\S]*?\.hraness-site-footer__newsletter/u,
+  );
+});
+
+test("ten social links form a compact five-column by two-row grid", () => {
+  expect(css).toContain("padding-block: clamp(0.375rem, 1vw, 0.625rem)");
+  expect(css).toMatch(
+    /\.hraness-site-footer__socials \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(5, var\(--hraness-site-footer-social-target\)\);[\s\S]*?grid-template-rows: repeat\(2, var\(--hraness-site-footer-social-target\)\);/u,
+  );
+  expect(css).toMatch(
+    /@media \(pointer: coarse\)[\s\S]*?\.hraness-site-footer__socials \{[\s\S]*?--hraness-site-footer-social-target: 2\.75rem;/u,
   );
 });
 

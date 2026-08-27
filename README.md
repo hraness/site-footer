@@ -38,4 +38,4 @@ const footerStylesPath = fileURLToPath(
 
 ## Layout variables
 
-The footer follows each site's theme variables when present. A product may set `--hraness-site-footer-measure` to align the footer with its page measure. The shared links, vectors, order, markup, and behavior stay package-owned.
+The footer follows each site's theme variables when present. Its ten social icons use a compact five-column by two-row grid on every viewport. A product may set `--hraness-site-footer-measure` to align the footer with its page measure. The shared links, vectors, order, markup, and behavior stay package-owned.
