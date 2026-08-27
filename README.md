@@ -38,4 +38,4 @@ const footerStylesPath = fileURLToPath(
 
 ## Layout variables
 
-The footer follows each site's theme variables when present. Its ten social icons use a compact five-column by two-row grid on every viewport. A product may set `--hraness-site-footer-measure` to align the footer with its page measure. The shared links, vectors, order, markup, and behavior stay package-owned.
+The footer follows each site's theme variables when present. It is a persistent, full-width bottom bar with enough flow space to keep the end of the page readable. Mobile shows the Hraness brand, newsletter, and X. Wider containers progressively reveal six, eight, and then all ten social links in one row. Products may set `--hraness-site-footer-z-index` when coordinating layered surfaces. The shared links, vectors, order, markup, and behavior stay package-owned.
