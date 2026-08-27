@@ -34,10 +34,12 @@ describe("Hraness site footer", () => {
     const { document } = parseHTML(renderHranessSiteFooter());
     const footer = document.querySelector('footer[data-slot="hraness-site-footer"]');
     const nav = footer?.querySelector('nav[aria-label="Hraness links"]');
+    const socialItems = footer?.querySelectorAll(".hraness-site-footer__socials > li");
     const links = [...(nav?.querySelectorAll("a") ?? [])];
 
     expect(footer?.getAttribute("aria-label")).toBe("Hraness network");
     expect(links).toHaveLength(11);
+    expect(socialItems).toHaveLength(10);
     expect(links[0]?.textContent).toBe("newsletter");
     expect(links[0]?.getAttribute("href")).toBe(HRANESS_NEWSLETTER_URL);
     expect(links.slice(1).map((link) => link.getAttribute("href"))).toEqual(expectedSocialLinks.map(([, href]) => href));
