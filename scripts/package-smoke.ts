@@ -43,11 +43,15 @@ if (packageJson.exports?.["./styles.css"] !== "./styles.css") {
 }
 
 const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).href) as {
-  renderHranessSiteFooter?: () => string;
+  renderHranessSiteFooter?: (options?: { showBrand?: boolean }) => string;
 };
 const html = root.renderHranessSiteFooter?.();
 if (html === undefined || !html.includes('data-slot="hraness-site-footer"')) {
   throw new Error("The built root export does not render the canonical footer.");
+}
+const unbrandedHtml = root.renderHranessSiteFooter?.({ showBrand: false });
+if (unbrandedHtml === undefined || unbrandedHtml.includes('data-slot="hraness-mark"')) {
+  throw new Error("The built root export cannot omit duplicate Hraness branding.");
 }
 
 const react = await import(pathToFileURL(resolve(repository, "dist/react.js")).href) as {

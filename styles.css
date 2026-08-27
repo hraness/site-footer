@@ -77,6 +77,7 @@
   min-inline-size: 0;
   justify-content: flex-end;
   gap: 0.375rem;
+  margin-inline-start: auto;
 }
 
 .hraness-site-footer__newsletter {
@@ -110,7 +111,9 @@
   min-block-size: 0;
 }
 
-.hraness-site-footer__socials > li:first-child {
+.hraness-site-footer__socials > li:first-child,
+.hraness-site-footer__socials > li:nth-child(3),
+.hraness-site-footer__socials > li:nth-child(6) {
   display: block;
 }
 

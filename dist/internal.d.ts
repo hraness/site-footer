@@ -59,5 +59,5 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
     readonly title: "YouTube";
     readonly href: "https://www.youtube.com/@hraness";
 }];
-export declare const HRANESS_SITE_FOOTER_INNER_HTML: string;
+export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean): string;
 //# sourceMappingURL=internal.d.ts.map

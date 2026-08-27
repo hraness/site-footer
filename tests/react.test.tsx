@@ -6,5 +6,7 @@ import { HranessSiteFooter } from "../src/react.js";
 
 test("the React adapter renders the exact static contract", () => {
   expect(renderToStaticMarkup(<HranessSiteFooter />)).toBe(renderHranessSiteFooter());
+  expect(renderToStaticMarkup(<HranessSiteFooter showBrand={false} />)).toBe(
+    renderHranessSiteFooter({ showBrand: false }),
+  );
 });
-
