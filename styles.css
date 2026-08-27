@@ -72,7 +72,7 @@
 }
 
 .hraness-site-footer__socials {
-  --hraness-site-footer-social-target: 2.5rem;
+  --hraness-site-footer-social-target: 40px;
 
   display: grid;
   grid-template-columns: repeat(5, var(--hraness-site-footer-social-target));
@@ -136,7 +136,7 @@
   }
 
   .hraness-site-footer__socials {
-    --hraness-site-footer-social-target: 2.75rem;
+    --hraness-site-footer-social-target: 44px;
   }
 }
 
