@@ -43,13 +43,35 @@ if (packageJson.exports?.["./styles.css"] !== "./styles.css") {
 }
 
 const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).href) as {
-  renderHranessSiteFooter?: (options?: { showBrand?: boolean }) => string;
+  HRANESS_MAILING_SUBSCRIBE_URL?: string;
+  renderHranessSiteFooter?: (options: {
+    mailingList: { audience: string; kind: "signup" } | { kind: "none" };
+    showBrand?: boolean;
+  }) => string;
 };
-const html = root.renderHranessSiteFooter?.();
-if (html === undefined || !html.includes('data-slot="hraness-site-footer"')) {
+const html = root.renderHranessSiteFooter?.({
+  mailingList: { audience: "package-smoke", kind: "signup" },
+});
+if (
+  html === undefined
+  || !html.includes('data-slot="hraness-site-footer"')
+  || !html.includes('id="hraness-site-footer"')
+) {
   throw new Error("The built root export does not render the canonical footer.");
 }
-const unbrandedHtml = root.renderHranessSiteFooter?.({ showBrand: false });
+if (
+  root.HRANESS_MAILING_SUBSCRIBE_URL
+    !== "https://account.hraness.com/api/mailing/subscribe"
+  || !html.includes(`action="${root.HRANESS_MAILING_SUBSCRIBE_URL}"`)
+  || !html.includes('name="audience" type="hidden" value="package-smoke"')
+  || html.includes("substack.com")
+) {
+  throw new Error("The built root export lost its closed mailing-list contract.");
+}
+const unbrandedHtml = root.renderHranessSiteFooter?.({
+  mailingList: { kind: "none" },
+  showBrand: false,
+});
 if (unbrandedHtml === undefined || unbrandedHtml.includes('data-slot="hraness-mark"')) {
   throw new Error("The built root export cannot omit duplicate Hraness branding.");
 }
@@ -62,6 +84,9 @@ if (typeof react.HranessSiteFooter !== "function") {
 }
 
 const reactArtifact = await readFile(resolve(repository, "dist/react.js"), "utf8");
+if (!reactArtifact.startsWith('"use client";')) {
+  throw new Error("The built React adapter lost its client-component directive.");
+}
 if (reactArtifact.includes("jsxDEV") || reactArtifact.includes("jsx-dev-runtime")) {
   throw new Error("The built React adapter depends on development-only JSX helpers.");
 }

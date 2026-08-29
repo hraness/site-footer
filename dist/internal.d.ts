@@ -1,6 +1,30 @@
 export declare const HRANESS_FOOTER_LABEL = "Hraness network";
 export declare const HRANESS_FOOTER_CLASS_NAME = "hraness-site-footer";
 export declare const HRANESS_FOOTER_SLOT = "hraness-site-footer";
+export declare const HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
+export declare const HRANESS_MAILING_SOURCE = "hraness-site-footer";
+export declare const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
+export declare const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
+export type HranessMailingListConfig = Readonly<{
+    audience: string;
+    kind: "signup";
+}> | Readonly<{
+    kind: "none";
+}>;
+export type HranessMailingListRenderState = Readonly<{
+    kind: "idle";
+}> | Readonly<{
+    audience: string;
+    email: string;
+    kind: "pending";
+}> | Readonly<{
+    audience: string;
+    kind: "accepted";
+}> | Readonly<{
+    audience: string;
+    email: string;
+    kind: "error";
+}>;
 export type HranessSocialPlatform = "x" | "instagram" | "linkedin" | "bluesky" | "threads" | "github" | "tiktok" | "reddit" | "twitch" | "youtube";
 export interface HranessSocialLink {
     readonly platform: HranessSocialPlatform;
@@ -59,5 +83,6 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
     readonly title: "YouTube";
     readonly href: "https://www.youtube.com/@hraness";
 }];
-export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean): string;
+export declare function parseHranessMailingListConfig(value: HranessMailingListConfig): HranessMailingListConfig;
+export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean, mailingList: HranessMailingListConfig, state?: HranessMailingListRenderState): string;
 //# sourceMappingURL=internal.d.ts.map

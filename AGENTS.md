@@ -10,10 +10,11 @@
 # Guidelines
 
 - Use Bun 1.3.14 and run `bun run check` before handing off a change.
-- Keep the footer organization-owned and product-independent. Products may set documented CSS custom properties, but must not fork its links, vector mark, order, semantics, or interaction behavior.
+- Keep the footer organization-owned and product-independent. Products may select one explicit stable mailing-list audience or no mailing list and may set documented CSS custom properties, but must not fork the action, source, copy, social links, vector mark, order, semantics, or interaction behavior.
 - Keep the root export framework-neutral. React runtime belongs only behind `@hraness/site-footer/react`.
-- Preserve exact link order: newsletter, X, Instagram, LinkedIn, Bluesky, Threads, GitHub, TikTok, Reddit, Twitch, YouTube.
-- Keep all meaningful links accessible without JavaScript. Inline vectors must remain decorative and links must retain specific accessible names.
+- Preserve exact social-link order: X, Instagram, LinkedIn, Bluesky, Threads, GitHub, TikTok, Reddit, Twitch, YouTube.
+- Require every consumer to configure `mailingList` explicitly. Never infer the Hraness umbrella audience for a product site.
+- Keep the mailing form and all meaningful links functional without JavaScript. Inline vectors must remain decorative and controls and links must retain specific accessible names.
 - Bundle the reviewed HugeIcons vectors and retain their attribution so consumers do not inherit an icon-library runtime dependency.
 - Commit generated `dist/` artifacts only through the checked build. Never edit them by hand.
 - Deliver changes through a current-head pull request after the initial repository bootstrap. Never force-push.
