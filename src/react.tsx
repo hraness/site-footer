@@ -8,6 +8,11 @@ import {
   HRANESS_MAILING_SOURCE,
   HRANESS_MAILING_STATUS_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
+  HRANESS_TURNSTILE_RESPONSE_FIELD,
+  HRANESS_TURNSTILE_SCRIPT_SLOT,
+  HRANESS_TURNSTILE_SCRIPT_URL,
+  HRANESS_TURNSTILE_WIDGET_SLOT,
+  getHranessMailingTurnstileAction,
   parseHranessMailingListConfig,
   renderHranessSiteFooterInnerHtml,
   type HranessMailingListConfig,
@@ -22,6 +27,95 @@ import {
   useState,
   type FormEvent,
 } from "react";
+
+type TurnstileWidgetId = string;
+
+interface TurnstileRenderOptions {
+  readonly action: string;
+  readonly appearance: "interaction-only";
+  readonly callback: (token: string) => void;
+  readonly execution: "render";
+  readonly "error-callback": () => void;
+  readonly "expired-callback": () => void;
+  readonly "refresh-expired": "auto";
+  readonly "refresh-timeout": "auto";
+  readonly "response-field": true;
+  readonly "response-field-name": typeof HRANESS_TURNSTILE_RESPONSE_FIELD;
+  readonly retry: "auto";
+  readonly sitekey: string;
+  readonly size: "flexible";
+  readonly theme: "auto";
+  readonly "timeout-callback": () => void;
+  readonly "unsupported-callback": () => void;
+}
+
+interface TurnstileApi {
+  readonly remove: (widget: TurnstileWidgetId) => void;
+  readonly render: (
+    container: HTMLElement,
+    options: TurnstileRenderOptions,
+  ) => TurnstileWidgetId;
+  readonly reset: (widget: TurnstileWidgetId) => void;
+}
+
+let turnstileScriptPromise: Promise<TurnstileApi> | null = null;
+
+function installedTurnstile(): TurnstileApi | undefined {
+  return (window as Window & { turnstile?: TurnstileApi }).turnstile;
+}
+
+function loadTurnstile(): Promise<TurnstileApi> {
+  const installed = installedTurnstile();
+  if (installed !== undefined) return Promise.resolve(installed);
+  if (turnstileScriptPromise !== null) return turnstileScriptPromise;
+
+  turnstileScriptPromise = new Promise<TurnstileApi>((resolve, reject) => {
+    const scripts = document.querySelectorAll<HTMLScriptElement>("script[src]");
+    let script = [...scripts].find((candidate) =>
+      candidate.src === HRANESS_TURNSTILE_SCRIPT_URL
+    );
+    const created = script === undefined;
+    script ??= document.createElement("script");
+
+    const cleanup = () => {
+      script.removeEventListener("error", handleError);
+      script.removeEventListener("load", handleLoad);
+    };
+    const handleError = () => {
+      cleanup();
+      script.remove();
+      reject(new Error("Cloudflare Turnstile could not be loaded."));
+    };
+    const handleLoad = () => {
+      const api = installedTurnstile();
+      if (api === undefined) {
+        handleError();
+        return;
+      }
+      cleanup();
+      script.dataset.hranessTurnstileLoaded = "true";
+      resolve(api);
+    };
+
+    script.addEventListener("error", handleError, { once: true });
+    script.addEventListener("load", handleLoad, { once: true });
+
+    if (created) {
+      script.async = true;
+      script.defer = true;
+      script.dataset.slot = HRANESS_TURNSTILE_SCRIPT_SLOT;
+      script.src = HRANESS_TURNSTILE_SCRIPT_URL;
+      document.head.append(script);
+    } else if (installedTurnstile() !== undefined) {
+      queueMicrotask(handleLoad);
+    }
+  }).catch((error: unknown) => {
+    turnstileScriptPromise = null;
+    throw error;
+  });
+
+  return turnstileScriptPromise;
+}
 
 export interface HranessSiteFooterProps {
   /** Explicitly select one mailing-list audience or omit mailing-list UI. */
@@ -47,16 +141,21 @@ export function HranessSiteFooter({
 }: HranessSiteFooterProps) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
+  const [widgetRevision, setWidgetRevision] = useState(0);
   const activeRequest = useRef<AbortController | null>(null);
   const footer = useRef<HTMLElement | null>(null);
+  const turnstileApi = useRef<TurnstileApi | null>(null);
+  const turnstileToken = useRef<string | null>(null);
+  const turnstileWidget = useRef<TurnstileWidgetId | null>(null);
   const mailingListKey = mailingList.kind === "signup"
-    ? `signup:${mailingList.audience}`
+    ? `signup:${mailingList.audience}:${mailingList.turnstileSitekey}`
     : "none";
   const renderState = activeStateFor(mailingList, state);
 
   useEffect(() => {
     activeRequest.current?.abort();
     activeRequest.current = null;
+    turnstileToken.current = null;
     setState(IDLE_STATE);
   }, [mailingListKey]);
 
@@ -65,9 +164,92 @@ export function HranessSiteFooter({
   }, []);
 
   useEffect(() => {
+    if (
+      mailingList.kind !== "signup"
+      || renderState.kind === "accepted"
+      || renderState.kind === "pending"
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    let ownedWidget: TurnstileWidgetId | null = null;
+
+    const resetWidget = () => {
+      turnstileToken.current = null;
+      if (cancelled || ownedWidget === null) return;
+      try {
+        turnstileApi.current?.reset(ownedWidget);
+      } catch {
+        setWidgetRevision((revision) => revision + 1);
+      }
+    };
+    const reportChallengeError = () => {
+      if (cancelled) return;
+      const email = footer.current
+        ?.querySelector<HTMLInputElement>('input[name="email"]')
+        ?.value ?? "";
+      resetWidget();
+      setState({
+        audience: mailingList.audience,
+        email,
+        kind: "verification-error",
+      });
+    };
+
+    void loadTurnstile().then((api) => {
+      if (cancelled) return;
+      const container = footer.current?.querySelector<HTMLElement>(
+        `[data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}"]`,
+      );
+      if (container === null || container === undefined) return;
+
+      turnstileApi.current = api;
+      ownedWidget = api.render(container, {
+        action: getHranessMailingTurnstileAction(mailingList.audience),
+        appearance: "interaction-only",
+        callback: (token) => {
+          if (!cancelled) turnstileToken.current = token;
+        },
+        execution: "render",
+        "error-callback": reportChallengeError,
+        "expired-callback": resetWidget,
+        "refresh-expired": "auto",
+        "refresh-timeout": "auto",
+        "response-field": true,
+        "response-field-name": HRANESS_TURNSTILE_RESPONSE_FIELD,
+        retry: "auto",
+        sitekey: mailingList.turnstileSitekey,
+        size: "flexible",
+        theme: "auto",
+        "timeout-callback": resetWidget,
+        "unsupported-callback": reportChallengeError,
+      });
+      turnstileWidget.current = ownedWidget;
+    }).catch(() => {
+      reportChallengeError();
+    });
+
+    return () => {
+      cancelled = true;
+      turnstileToken.current = null;
+      if (ownedWidget !== null) {
+        try {
+          turnstileApi.current?.remove(ownedWidget);
+        } catch {
+          // The host page may have removed the package-owned container first.
+        }
+      }
+      if (turnstileWidget.current === ownedWidget) {
+        turnstileWidget.current = null;
+      }
+    };
+  }, [mailingList, renderState.kind, widgetRevision]);
+
+  useEffect(() => {
     if (renderState.kind === "idle") return;
 
-    if (renderState.kind === "error") {
+    if (renderState.kind === "error" || renderState.kind === "verification-error") {
       const emailControl = footer.current?.querySelector<HTMLInputElement>(
         'input[name="email"]',
       );
@@ -102,13 +284,25 @@ export function HranessSiteFooter({
     if (renderState.kind === "pending" || renderState.kind === "accepted") return;
 
     const email = emailControl.value;
+    const token = turnstileToken.current;
+    if (token === null || token.length === 0) {
+      setState({
+        audience: mailingList.audience,
+        email,
+        kind: "verification-error",
+      });
+      setWidgetRevision((revision) => revision + 1);
+      return;
+    }
     const body = new FormData();
     body.set("audience", mailingList.audience);
     body.set("email", email);
     body.set("source", HRANESS_MAILING_SOURCE);
+    body.set(HRANESS_TURNSTILE_RESPONSE_FIELD, token);
     const request = new AbortController();
     activeRequest.current?.abort();
     activeRequest.current = request;
+    turnstileToken.current = null;
     setState({ audience: mailingList.audience, email, kind: "pending" });
 
     void fetch(HRANESS_MAILING_SUBSCRIBE_URL, {
@@ -131,7 +325,12 @@ export function HranessSiteFooter({
   }, [mailingList, renderState.kind]);
 
   const innerHtml = useMemo(
-    () => renderHranessSiteFooterInnerHtml(showBrand, mailingList, renderState),
+    () => renderHranessSiteFooterInnerHtml(
+      showBrand,
+      mailingList,
+      renderState,
+      "explicit",
+    ),
     [mailingList, renderState, showBrand],
   );
 

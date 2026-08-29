@@ -157,7 +157,8 @@
 .hraness-site-footer__mailing-confirmation,
 .hraness-site-footer__mailing-controls,
 .hraness-site-footer__mailing-label,
-.hraness-site-footer__mailing-status {
+.hraness-site-footer__mailing-status,
+.hraness-site-footer__turnstile {
   box-sizing: border-box;
 }
 
@@ -171,9 +172,20 @@
 }
 
 .hraness-site-footer__mailing {
+  position: relative;
   display: grid;
   grid-template-rows: var(--hraness-site-footer-control-block-size) var(--hraness-site-footer-status-block-size);
   gap: 0.25rem;
+}
+
+.hraness-site-footer__turnstile {
+  position: absolute;
+  z-index: 1;
+  inset-inline-start: 0;
+  inset-block-end: calc(100% + 0.5rem);
+  inline-size: 100%;
+  max-inline-size: 30rem;
+  min-inline-size: 0;
 }
 
 .hraness-site-footer__mailing-controls {

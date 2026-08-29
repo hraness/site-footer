@@ -22,11 +22,21 @@ export const HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 export const HRANESS_MAILING_SOURCE = "hraness-site-footer";
 export const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 export const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
+export const HRANESS_TURNSTILE_RESPONSE_FIELD = "cf-turnstile-response";
+export const HRANESS_TURNSTILE_SCRIPT_SLOT = "hraness-turnstile-script";
+export const HRANESS_TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+export const HRANESS_TURNSTILE_WIDGET_SLOT = "hraness-turnstile-widget";
+
+const MAX_AUDIENCE_LENGTH = 24;
+const MAX_TURNSTILE_SITEKEY_LENGTH = 32;
+const AUDIENCE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const TURNSTILE_SITEKEY_PATTERN = /^[A-Za-z0-9_-]+$/u;
 
 export type HranessMailingListConfig =
   | Readonly<{
     audience: string;
     kind: "signup";
+    turnstileSitekey: string;
   }>
   | Readonly<{
     kind: "none";
@@ -36,7 +46,8 @@ export type HranessMailingListRenderState =
   | Readonly<{ kind: "idle" }>
   | Readonly<{ audience: string; email: string; kind: "pending" }>
   | Readonly<{ audience: string; kind: "accepted" }>
-  | Readonly<{ audience: string; email: string; kind: "error" }>;
+  | Readonly<{ audience: string; email: string; kind: "error" }>
+  | Readonly<{ audience: string; email: string; kind: "verification-error" }>;
 
 export type HranessSocialPlatform =
   | "x"
@@ -158,20 +169,42 @@ export function parseHranessMailingListConfig(
     throw new TypeError("Hraness site footer mailingList must be explicitly configured.");
   }
   if (value.kind === "none") return value;
-  if (value.kind !== "signup" || typeof value.audience !== "string") {
+  if (
+    value.kind !== "signup"
+    || typeof value.audience !== "string"
+    || !("turnstileSitekey" in value)
+    || typeof value.turnstileSitekey !== "string"
+  ) {
     throw new TypeError("Hraness site footer mailingList configuration is invalid.");
   }
   if (
     value.audience.length === 0
-    || value.audience.length > 128
+    || value.audience.length > MAX_AUDIENCE_LENGTH
     || value.audience.trim() !== value.audience
-    || /[\u0000-\u001f\u007f]/u.test(value.audience)
+    || !AUDIENCE_PATTERN.test(value.audience)
   ) {
     throw new TypeError(
-      "Hraness mailing-list audience IDs must be nonempty, stable strings of at most 128 characters.",
+      `Hraness mailing-list audience IDs must be canonical lowercase slugs of at most ${MAX_AUDIENCE_LENGTH} characters.`,
+    );
+  }
+  if (
+    value.turnstileSitekey.length === 0
+    || value.turnstileSitekey.length > MAX_TURNSTILE_SITEKEY_LENGTH
+    || !TURNSTILE_SITEKEY_PATTERN.test(value.turnstileSitekey)
+  ) {
+    throw new TypeError(
+      `Hraness mailing-list Turnstile sitekeys must contain 1-${MAX_TURNSTILE_SITEKEY_LENGTH} letters, numbers, underscores, or hyphens.`,
     );
   }
   return value;
+}
+
+export function getHranessMailingTurnstileAction(audience: string): string {
+  const action = `mailing_${audience.replaceAll("-", "_")}`;
+  if (action.length > 32 || !/^[a-z0-9_]+$/u.test(action)) {
+    throw new TypeError("Hraness mailing-list audience cannot produce a valid Turnstile action.");
+  }
+  return action;
 }
 
 function renderIconPaths(icon: IconDefinition): string {
@@ -209,13 +242,16 @@ const MAILING_IDLE_STATE = { kind: "idle" } as const satisfies HranessMailingLis
 function renderMailingList(
   mailingList: Extract<HranessMailingListConfig, { kind: "signup" }>,
   state: HranessMailingListRenderState,
+  turnstileMode: "explicit" | "implicit",
 ): string {
   if (state.kind === "accepted") {
     return `<div aria-live="polite" class="hraness-site-footer__mailing-confirmation" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" role="status" tabindex="-1">Check your email to confirm</div>`;
   }
 
   const stateKind = state.kind;
-  const email = state.kind === "pending" || state.kind === "error"
+  const email = state.kind === "pending"
+    || state.kind === "error"
+    || state.kind === "verification-error"
     ? ` value="${escapeAttribute(state.email)}"`
     : "";
   const pendingAttributes = state.kind === "pending"
@@ -225,22 +261,28 @@ function renderMailingList(
     ? ' aria-disabled="true" disabled=""'
     : "";
   const buttonLabel = state.kind === "pending" ? "Subscribing…" : "Subscribe";
-  const statusAttributes = state.kind === "error"
+  const statusAttributes = state.kind === "error" || state.kind === "verification-error"
     ? ' aria-live="assertive" role="alert"'
     : ' aria-live="polite" role="status"';
   const statusCopy = state.kind === "pending"
     ? "Submitting your email…"
     : state.kind === "error"
     ? "Couldn't subscribe. Try again."
+    : state.kind === "verification-error"
+    ? "Security check failed. Try again."
     : "";
+  const turnstileAction = getHranessMailingTurnstileAction(mailingList.audience);
+  const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
+  const turnstile = `<div class="hraness-site-footer__turnstile${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
 
-  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div><p class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
+  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
 }
 
 export function renderHranessSiteFooterInnerHtml(
   showBrand: boolean,
   mailingList: HranessMailingListConfig,
   state: HranessMailingListRenderState = MAILING_IDLE_STATE,
+  turnstileMode: "explicit" | "implicit" = "implicit",
 ): string {
   const mailingHtml = mailingList.kind === "none"
     ? ""
@@ -249,6 +291,10 @@ export function renderHranessSiteFooterInnerHtml(
       state.kind !== "idle" && state.audience === mailingList.audience
         ? state
         : MAILING_IDLE_STATE,
+      turnstileMode,
     );
-  return `<div class="hraness-site-footer__inner">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_SITE_FOOTER_LINKS_HTML}</div>`;
+  const turnstileScript = mailingList.kind === "signup" && turnstileMode === "implicit"
+    ? `<script async="" data-slot="${HRANESS_TURNSTILE_SCRIPT_SLOT}" defer="" src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>`
+    : "";
+  return `<div class="hraness-site-footer__inner">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_SITE_FOOTER_LINKS_HTML}</div>${turnstileScript}`;
 }

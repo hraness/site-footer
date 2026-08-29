@@ -44,13 +44,20 @@ if (packageJson.exports?.["./styles.css"] !== "./styles.css") {
 
 const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).href) as {
   HRANESS_MAILING_SUBSCRIBE_URL?: string;
+  HRANESS_TURNSTILE_SCRIPT_URL?: string;
   renderHranessSiteFooter?: (options: {
-    mailingList: { audience: string; kind: "signup" } | { kind: "none" };
+    mailingList:
+      | { audience: string; kind: "signup"; turnstileSitekey: string }
+      | { kind: "none" };
     showBrand?: boolean;
   }) => string;
 };
 const html = root.renderHranessSiteFooter?.({
-  mailingList: { audience: "package-smoke", kind: "signup" },
+  mailingList: {
+    audience: "package-smoke",
+    kind: "signup",
+    turnstileSitekey: "1x00000000000000000000AA",
+  },
 });
 if (
   html === undefined
@@ -62,8 +69,13 @@ if (
 if (
   root.HRANESS_MAILING_SUBSCRIBE_URL
     !== "https://account.hraness.com/api/mailing/subscribe"
+  || root.HRANESS_TURNSTILE_SCRIPT_URL
+    !== "https://challenges.cloudflare.com/turnstile/v0/api.js"
   || !html.includes(`action="${root.HRANESS_MAILING_SUBSCRIBE_URL}"`)
   || !html.includes('name="audience" type="hidden" value="package-smoke"')
+  || !html.includes('data-action="mailing_package_smoke"')
+  || !html.includes('data-response-field-name="cf-turnstile-response"')
+  || !html.includes(`src="${root.HRANESS_TURNSTILE_SCRIPT_URL}"`)
   || html.includes("substack.com")
 ) {
   throw new Error("The built root export lost its closed mailing-list contract.");

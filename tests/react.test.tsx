@@ -11,20 +11,27 @@ import {
 import { HranessSiteFooter } from "../src/react.js";
 
 const noMailingList = { kind: "none" } as const satisfies HranessMailingListConfig;
+const TURNSTILE_TEST_SITEKEY = "1x00000000000000000000AA";
 const mailingList = {
   audience: "soundfish",
   kind: "signup",
+  turnstileSitekey: TURNSTILE_TEST_SITEKEY,
 } as const satisfies HranessMailingListConfig;
 
-test("the idle React adapter renders the exact static contract", () => {
+test("the idle React adapter preserves content while selecting explicit Turnstile rendering", () => {
   const reactHtml = renderToStaticMarkup(
     <HranessSiteFooter mailingList={noMailingList} />,
   );
   expect(reactHtml).toBe(renderHranessSiteFooter({ mailingList: noMailingList }));
   expect(reactHtml.match(/id="hraness-site-footer"/gu)).toHaveLength(1);
-  expect(renderToStaticMarkup(
+  const signupHtml = renderToStaticMarkup(
     <HranessSiteFooter mailingList={mailingList} showBrand={false} />,
-  )).toBe(renderHranessSiteFooter({ mailingList, showBrand: false }));
+  );
+  expect(signupHtml).toContain('data-slot="hraness-turnstile-widget"');
+  expect(signupHtml).not.toContain("cf-turnstile");
+  expect(signupHtml).not.toContain("challenges.cloudflare.com/turnstile/v0/api.js");
+  expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
+  expect(signupHtml).not.toContain('data-slot="hraness-mark"');
 });
 
 test("the shared renderer bounds pending, accepted, and error states", () => {
@@ -59,12 +66,22 @@ test("the shared renderer bounds pending, accepted, and error states", () => {
   expect(error).toContain('role="alert"');
   expect(error).toContain("Couldn't subscribe. Try again.");
   expect(error).toContain('value="reader+&quot;retry&quot;@example.com"');
+
+  const verificationError = renderHranessSiteFooterInnerHtml(true, mailingList, {
+    audience: "soundfish",
+    email: "reader@example.com",
+    kind: "verification-error",
+  });
+  expect(verificationError).toContain('data-state="verification-error"');
+  expect(verificationError).toContain('aria-live="assertive"');
+  expect(verificationError).toContain("Security check failed. Try again.");
 });
 
 test("a stale response state cannot leak across audience changes", () => {
   const html = renderHranessSiteFooterInnerHtml(true, {
     audience: "aicharts",
     kind: "signup",
+    turnstileSitekey: TURNSTILE_TEST_SITEKEY,
   }, {
     audience: "soundfish",
     kind: "accepted",
@@ -75,7 +92,7 @@ test("a stale response state cannot leak across audience changes", () => {
   expect(html).not.toContain("Check your email to confirm");
 });
 
-test("the React adapter progressively posts, restores error focus, and confirms", async () => {
+test("the React adapter loads Turnstile once, gates posts, resets, restores focus, and confirms", async () => {
   const { window } = parseHTML('<div id="root"></div>');
   const overrides = {
     Comment: window.Comment,
@@ -138,6 +155,37 @@ test("the React adapter progressively posts, restores error focus, and confirms"
   };
   globalThis.fetch = mockFetch as typeof fetch;
 
+  type MockTurnstileOptions = Readonly<{
+    action: string;
+    appearance: string;
+    callback: (token: string) => void;
+    "error-callback": () => void;
+    "expired-callback": () => void;
+    "refresh-expired": string;
+    "response-field-name": string;
+    sitekey: string;
+  }>;
+  let latestTurnstileOptions: MockTurnstileOptions | undefined;
+  const renderedWidgets: string[] = [];
+  const removedWidgets: string[] = [];
+  const resetWidgets: string[] = [];
+  const mockTurnstile = {
+    remove(widget: string) {
+      removedWidgets.push(widget);
+    },
+    render(_container: HTMLElement, options: MockTurnstileOptions) {
+      latestTurnstileOptions = options;
+      const widget = `widget-${renderedWidgets.length + 1}`;
+      renderedWidgets.push(widget);
+      options.callback(`token-${widget}`);
+      return widget;
+    },
+    reset(widget: string) {
+      resetWidgets.push(widget);
+      latestTurnstileOptions?.callback(`refreshed-${widget}`);
+    },
+  };
+
   const container = window.document.querySelector<HTMLElement>("#root");
   expect(container).not.toBeNull();
   const { createRoot } = await import("react-dom/client");
@@ -162,6 +210,48 @@ test("the React adapter progressively posts, restores error focus, and confirms"
       await Promise.resolve();
     });
 
+    expect(request).toBeUndefined();
+    expect(container?.querySelector("form")?.getAttribute("data-state"))
+      .toBe("verification-error");
+    expect(container?.textContent).toContain("Security check failed. Try again.");
+    const scripts = window.document.querySelectorAll<HTMLScriptElement>(
+      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
+    );
+    expect(scripts).toHaveLength(1);
+
+    Object.defineProperty(window, "turnstile", {
+      configurable: true,
+      value: mockTurnstile,
+      writable: true,
+    });
+    await act(async () => {
+      scripts[0]?.dispatchEvent(new window.Event("load"));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(window.document.querySelectorAll(
+      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
+    )).toHaveLength(1);
+    expect(renderedWidgets).toHaveLength(1);
+    expect(latestTurnstileOptions?.sitekey).toBe(TURNSTILE_TEST_SITEKEY);
+    expect(latestTurnstileOptions?.action).toBe("mailing_soundfish");
+    expect(latestTurnstileOptions?.appearance).toBe("interaction-only");
+    expect(latestTurnstileOptions?.["refresh-expired"]).toBe("auto");
+    expect(latestTurnstileOptions?.["response-field-name"])
+      .toBe("cf-turnstile-response");
+
+    const verifiedForm = container?.querySelector<HTMLFormElement>("form");
+    expect(verifiedForm).not.toBeNull();
+
+    await act(async () => {
+      verifiedForm!.dispatchEvent(new window.Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      }));
+      await Promise.resolve();
+    });
+
     expect(request?.input).toBe("https://account.hraness.com/api/mailing/subscribe");
     expect(request?.init?.method).toBe("POST");
     expect(request?.init?.credentials).toBe("omit");
@@ -171,6 +261,7 @@ test("the React adapter progressively posts, restores error focus, and confirms"
     expect((body as FormData).get("audience")).toBe("soundfish");
     expect((body as FormData).get("email")).toBe("reader@example.com");
     expect((body as FormData).get("source")).toBe("hraness-site-footer");
+    expect((body as FormData).get("cf-turnstile-response")).toBe("token-widget-1");
     expect(container?.querySelector("form")?.getAttribute("data-state")).toBe("pending");
     expect(container?.textContent).toContain("Submitting your email…");
 
@@ -185,6 +276,12 @@ test("the React adapter progressively posts, restores error focus, and confirms"
     expect(errorInput?.value).toBe("reader@example.com");
     expect(errorStatus?.getAttribute("aria-live")).toBe("assertive");
     expect(window.document.activeElement).toBe(errorInput);
+
+    await act(async () => {
+      latestTurnstileOptions?.["expired-callback"]();
+      await Promise.resolve();
+    });
+    expect(resetWidgets).toContain(renderedWidgets.at(-1));
 
     await act(async () => {
       container?.querySelector("form")?.dispatchEvent(new window.Event("submit", {
@@ -203,6 +300,7 @@ test("the React adapter progressively posts, restores error focus, and confirms"
     expect(container?.querySelector("form")).toBeNull();
     expect(container?.querySelector('[data-state="accepted"]')?.textContent)
       .toBe("Check your email to confirm");
+    expect(removedWidgets.length).toBeGreaterThan(0);
   } finally {
     await act(async () => {
       root.unmount();

@@ -4,6 +4,9 @@ import {
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
   HRANESS_SOCIAL_LINKS,
+  HRANESS_TURNSTILE_RESPONSE_FIELD,
+  HRANESS_TURNSTILE_SCRIPT_URL,
+  getHranessMailingTurnstileAction,
   parseHranessMailingListConfig,
   renderHranessSiteFooterInnerHtml,
   type HranessMailingListConfig,
@@ -12,7 +15,12 @@ import {
 } from "./internal.js";
 
 export const HRANESS_HOME_URL = "https://hraness.com/";
-export { HRANESS_MAILING_SUBSCRIBE_URL };
+export {
+  HRANESS_MAILING_SUBSCRIBE_URL,
+  HRANESS_TURNSTILE_RESPONSE_FIELD,
+  HRANESS_TURNSTILE_SCRIPT_URL,
+  getHranessMailingTurnstileAction,
+};
 
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export const hranessSocialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS;
