@@ -249,7 +249,8 @@
   white-space: nowrap;
 }
 
-.hraness-site-footer__mailing[data-state="error"] .hraness-site-footer__mailing-status {
+.hraness-site-footer__mailing[data-state="error"] .hraness-site-footer__mailing-status,
+.hraness-site-footer__mailing[data-state="verification-error"] .hraness-site-footer__mailing-status {
   color: var(--hraness-site-footer-foreground);
 }
 

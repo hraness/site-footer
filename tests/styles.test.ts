@@ -56,6 +56,9 @@ test("the package owns a compact email field, adjacent action, and bounded statu
   expect(css).toMatch(
     /\.hraness-site-footer__turnstile \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\(100% \+ 0\.5rem\);[\s\S]*?max-inline-size: 30rem;/u,
   );
+  expect(css).toContain(
+    '.hraness-site-footer__mailing[data-state="verification-error"] .hraness-site-footer__mailing-status',
+  );
 });
 
 test("the accepted state stays inside the narrow mailing-list geometry", () => {

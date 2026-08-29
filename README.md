@@ -15,7 +15,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <>
       <main>{children}</main>
       <HranessSiteFooter
-        mailingList={{ audience: "soundfish", kind: "signup" }}
+        mailingList={{
+          audience: "soundfish",
+          kind: "signup",
+          turnstileSitekey: "<public Turnstile site key>",
+        }}
       />
     </>
   );
@@ -26,7 +30,11 @@ On hraness.com itself, select the umbrella audience and omit the duplicate netwo
 
 ```tsx
 <HranessSiteFooter
-  mailingList={{ audience: "hraness", kind: "signup" }}
+  mailingList={{
+    audience: "hraness",
+    kind: "signup",
+    turnstileSitekey: "<public Turnstile site key>",
+  }}
   showBrand={false}
 />
 ```
@@ -37,7 +45,14 @@ Products without a mailing list must opt out explicitly:
 <HranessSiteFooter mailingList={{ kind: "none" }} />
 ```
 
-The React adapter progressively enhances the native form. It preserves the form when JavaScript is unavailable, shows pending state during an enhanced request, replaces an accepted form with `Check your email to confirm`, and retains the address with bounded retry copy after an error. The error remains a live-region announcement while keyboard focus returns to the email field. Any successful HTTP status is treated as accepted; provider and validation details remain private to Accounts.
+The React adapter loads the exact Cloudflare Turnstile script once and renders a
+managed, interaction-only challenge bound to `mailing_<audience>`. It does not
+submit until the widget returns a short-lived proof. It shows pending state
+during the request, replaces an accepted form with `Check your email to
+confirm`, and retains the address with bounded retry copy after an error. The
+error remains a live-region announcement while keyboard focus returns to the
+email field. Any successful HTTP status is treated as accepted; provider and
+validation details remain private to Accounts.
 
 ## Static HTML
 
@@ -47,12 +62,18 @@ import { renderHranessSiteFooter } from "@hraness/site-footer";
 const html = template.replace(
   "{{HRANESS_SITE_FOOTER}}",
   renderHranessSiteFooter({
-    mailingList: { audience: "hra", kind: "signup" },
+    mailingList: {
+      audience: "hra",
+      kind: "signup",
+      turnstileSitekey: "<public Turnstile site key>",
+    },
   }),
 );
 ```
 
-Static Hraness pages pass `mailingList: { audience: "hraness", kind: "signup" }` and `showBrand: false` for the same unbranded variant. Static products without a list pass `mailingList: { kind: "none" }`.
+Static Hraness pages select the `hraness` audience, provide the same public
+site key, and pass `showBrand: false` for the unbranded variant. Static products
+without a list pass `mailingList: { kind: "none" }`.
 
 The native form posts to the package-owned Accounts action:
 
@@ -61,13 +82,29 @@ POST https://account.hraness.com/api/mailing/subscribe
 email=<visitor address>
 audience=<the consumer's explicit stable audience ID>
 source=hraness-site-footer
+cf-turnstile-response=<short-lived widget proof>
 ```
 
-Accounts owns the no-JavaScript response or redirect. Enhanced React requests send the same multipart form with `Accept: application/json` and omit credentials.
+The static renderer emits Cloudflare's exact Turnstile script and an implicit
+widget inside the form. Enhanced React requests render the widget explicitly,
+send the same multipart form with `Accept: application/json`, and omit
+credentials. Signup requires JavaScript because Accounts rejects every request
+without a server-verified Turnstile proof. The footer, brand, and social links
+remain meaningful without JavaScript.
 
 ## Content Security Policy
 
-Consumers that enable signup must add `https://account.hraness.com` to their existing `form-action` directive so the native and no-JavaScript submission can reach Accounts. Consumers using the React adapter must also add `https://account.hraness.com` to `connect-src` for the enhanced request. Preserve any other origins each site already requires when updating these directives.
+Consumers that enable signup must add `https://account.hraness.com` to their
+existing `form-action` directive. Consumers using the React adapter must also
+add `https://account.hraness.com` to `connect-src` for the enhanced request.
+Every signup consumer must permit `https://challenges.cloudflare.com` in both
+`script-src` and `frame-src`. Load the Turnstile script only from that exact
+origin and do not proxy, cache, or add Subresource Integrity to it. Preserve any
+other origins each site already requires when updating these directives.
+
+The Turnstile site key is intentionally public. Use the one managed widget
+whose checked hostname policy covers the six production roots. Never put its
+private secret in a browser environment or footer configuration.
 
 Include `@hraness/site-footer/styles.css` in the generated site stylesheet. Static consumers can resolve the exact installed file without assuming a `node_modules` path:
 

@@ -8,6 +8,7 @@ import {
   HRANESS_MAILING_SOURCE,
   HRANESS_MAILING_STATUS_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
+  HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL,
   HRANESS_TURNSTILE_RESPONSE_FIELD,
   HRANESS_TURNSTILE_SCRIPT_SLOT,
   HRANESS_TURNSTILE_SCRIPT_URL,
@@ -64,6 +65,17 @@ function installedTurnstile(): TurnstileApi | undefined {
   return (window as Window & { turnstile?: TurnstileApi }).turnstile;
 }
 
+function isTurnstileScript(script: HTMLScriptElement): boolean {
+  try {
+    const candidate = new URL(script.src, document.baseURI);
+    const canonical = new URL(HRANESS_TURNSTILE_SCRIPT_URL);
+    return candidate.origin === canonical.origin
+      && candidate.pathname === canonical.pathname;
+  } catch {
+    return false;
+  }
+}
+
 function loadTurnstile(): Promise<TurnstileApi> {
   const installed = installedTurnstile();
   if (installed !== undefined) return Promise.resolve(installed);
@@ -71,11 +83,10 @@ function loadTurnstile(): Promise<TurnstileApi> {
 
   turnstileScriptPromise = new Promise<TurnstileApi>((resolve, reject) => {
     const scripts = document.querySelectorAll<HTMLScriptElement>("script[src]");
-    let script = [...scripts].find((candidate) =>
-      candidate.src === HRANESS_TURNSTILE_SCRIPT_URL
-    );
-    const created = script === undefined;
-    script ??= document.createElement("script");
+    const existing = [...scripts].find(isTurnstileScript);
+    const reusable = existing?.dataset.hranessTurnstileLoading === "true";
+    if (existing !== undefined && !reusable) existing.remove();
+    const script = reusable ? existing : document.createElement("script");
 
     const cleanup = () => {
       script.removeEventListener("error", handleError);
@@ -93,6 +104,7 @@ function loadTurnstile(): Promise<TurnstileApi> {
         return;
       }
       cleanup();
+      delete script.dataset.hranessTurnstileLoading;
       script.dataset.hranessTurnstileLoaded = "true";
       resolve(api);
     };
@@ -100,11 +112,12 @@ function loadTurnstile(): Promise<TurnstileApi> {
     script.addEventListener("error", handleError, { once: true });
     script.addEventListener("load", handleLoad, { once: true });
 
-    if (created) {
+    if (!reusable) {
       script.async = true;
       script.defer = true;
       script.dataset.slot = HRANESS_TURNSTILE_SCRIPT_SLOT;
-      script.src = HRANESS_TURNSTILE_SCRIPT_URL;
+      script.dataset.hranessTurnstileLoading = "true";
+      script.src = HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL;
       document.head.append(script);
     } else if (installedTurnstile() !== undefined) {
       queueMicrotask(handleLoad);

@@ -5,6 +5,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { renderHranessSiteFooter } from "../src/index.js";
 import {
+  HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL,
+  HRANESS_TURNSTILE_SCRIPT_URL,
   renderHranessSiteFooterInnerHtml,
   type HranessMailingListConfig,
 } from "../src/internal.js";
@@ -192,6 +194,9 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
   const root = createRoot(container!);
 
   try {
+    const staleScript = window.document.createElement("script");
+    staleScript.src = `${HRANESS_TURNSTILE_SCRIPT_URL}?compat=implicit`;
+    window.document.head.append(staleScript);
     await act(async () => {
       root.render(<HranessSiteFooter mailingList={mailingList} />);
     });
@@ -215,9 +220,10 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
       .toBe("verification-error");
     expect(container?.textContent).toContain("Security check failed. Try again.");
     const scripts = window.document.querySelectorAll<HTMLScriptElement>(
-      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
+      `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
     );
     expect(scripts).toHaveLength(1);
+    expect(staleScript.isConnected).toBeFalse();
 
     Object.defineProperty(window, "turnstile", {
       configurable: true,
@@ -231,7 +237,7 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     });
 
     expect(window.document.querySelectorAll(
-      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
+      `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
     )).toHaveLength(1);
     expect(renderedWidgets).toHaveLength(1);
     expect(latestTurnstileOptions?.sitekey).toBe(TURNSTILE_TEST_SITEKEY);

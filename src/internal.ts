@@ -25,6 +25,7 @@ export const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/ma
 export const HRANESS_TURNSTILE_RESPONSE_FIELD = "cf-turnstile-response";
 export const HRANESS_TURNSTILE_SCRIPT_SLOT = "hraness-turnstile-script";
 export const HRANESS_TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+export const HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL = `${HRANESS_TURNSTILE_SCRIPT_URL}?render=explicit`;
 export const HRANESS_TURNSTILE_WIDGET_SLOT = "hraness-turnstile-widget";
 
 const MAX_AUDIENCE_LENGTH = 24;
