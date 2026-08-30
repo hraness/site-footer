@@ -245,7 +245,7 @@ import {
   useRef,
   useState
 } from "react";
-"use client";
+
 var MAX_TURNSTILE_TOKEN_LENGTH = 2048;
 var TURNSTILE_SCRIPT_LOAD_TIMEOUT_MS = 15000;
 var turnstileScriptPromise = null;
