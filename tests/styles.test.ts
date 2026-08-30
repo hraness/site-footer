@@ -63,7 +63,7 @@ test("the package owns a compact email field, adjacent action, and bounded statu
 
 test("the accepted state stays inside the narrow mailing-list geometry", () => {
   expect(css).toMatch(
-    /\.hraness-site-footer__mailing,[\s\S]*?\.hraness-site-footer__mailing-confirmation,[\s\S]*?\.hraness-site-footer__mailing-status \{[\s\S]*?box-sizing: border-box;/u,
+    /\.hraness-site-footer__mailing,[\s\S]*?\.hraness-site-footer__mailing-confirmation,[\s\S]*?\.hraness-site-footer__mailing-status,[\s\S]*?\.hraness-site-footer__turnstile \{[\s\S]*?box-sizing: border-box;/u,
   );
   expect(css).toMatch(
     /\.hraness-site-footer__mailing,\n\.hraness-site-footer__mailing-confirmation \{[\s\S]*?inline-size: min\(100%, 30rem\);[\s\S]*?min-inline-size: 0;/u,

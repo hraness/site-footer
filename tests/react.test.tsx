@@ -14,6 +14,7 @@ import { HranessSiteFooter } from "../src/react.js";
 
 const noMailingList = { kind: "none" } as const satisfies HranessMailingListConfig;
 const TURNSTILE_TEST_SITEKEY = "1x00000000000000000000AA";
+const TURNSTILE_SCRIPT_NONCE = "dGVzdC1ub25jZS0xMjM0";
 const mailingList = {
   audience: "soundfish",
   kind: "signup",
@@ -29,8 +30,20 @@ test("the idle React adapter preserves content while selecting explicit Turnstil
   const signupHtml = renderToStaticMarkup(
     <HranessSiteFooter mailingList={mailingList} showBrand={false} />,
   );
+  const normalizedStaticHtml = renderHranessSiteFooter({
+    mailingList,
+    showBrand: false,
+  })
+    .replace("hraness-site-footer__turnstile cf-turnstile", "hraness-site-footer__turnstile")
+    .replace(
+      `<script async="" data-slot="hraness-turnstile-script" defer="" src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>`,
+      "",
+    );
+  expect(signupHtml).toBe(normalizedStaticHtml);
   expect(signupHtml).toContain('data-slot="hraness-turnstile-widget"');
-  expect(signupHtml).not.toContain("cf-turnstile");
+  expect(signupHtml).not.toContain(
+    'class="hraness-site-footer__turnstile cf-turnstile"',
+  );
   expect(signupHtml).not.toContain("challenges.cloudflare.com/turnstile/v0/api.js");
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
   expect(signupHtml).not.toContain('data-slot="hraness-mark"');
@@ -55,6 +68,7 @@ test("the shared renderer bounds pending, accepted, and error states", () => {
   });
   expect(accepted).not.toContain("<form");
   expect(accepted).toContain('data-state="accepted"');
+  expect(accepted).toContain('aria-atomic="true"');
   expect(accepted).toContain('role="status"');
   expect(accepted).toContain("Check your email to confirm");
 
@@ -164,7 +178,9 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     "error-callback": () => void;
     "expired-callback": () => void;
     "refresh-expired": string;
+    execution: string;
     "response-field-name": string;
+    retry: string;
     sitekey: string;
   }>;
   let latestTurnstileOptions: MockTurnstileOptions | undefined;
@@ -194,11 +210,13 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
   const root = createRoot(container!);
 
   try {
-    const staleScript = window.document.createElement("script");
-    staleScript.src = `${HRANESS_TURNSTILE_SCRIPT_URL}?compat=implicit`;
-    window.document.head.append(staleScript);
     await act(async () => {
-      root.render(<HranessSiteFooter mailingList={mailingList} />);
+      root.render(
+        <HranessSiteFooter
+          mailingList={mailingList}
+          turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
+        />,
+      );
     });
 
     const form = container?.querySelector<HTMLFormElement>("form");
@@ -223,7 +241,7 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
       `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
     );
     expect(scripts).toHaveLength(1);
-    expect(staleScript.isConnected).toBeFalse();
+    expect(scripts[0]?.getAttribute("nonce")).toBe(TURNSTILE_SCRIPT_NONCE);
 
     Object.defineProperty(window, "turnstile", {
       configurable: true,
@@ -243,9 +261,22 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect(latestTurnstileOptions?.sitekey).toBe(TURNSTILE_TEST_SITEKEY);
     expect(latestTurnstileOptions?.action).toBe("mailing_soundfish");
     expect(latestTurnstileOptions?.appearance).toBe("interaction-only");
+    expect(latestTurnstileOptions?.execution).toBe("render");
     expect(latestTurnstileOptions?.["refresh-expired"]).toBe("auto");
+    expect(latestTurnstileOptions?.retry).toBe("auto");
     expect(latestTurnstileOptions?.["response-field-name"])
       .toBe("cf-turnstile-response");
+
+    await act(async () => {
+      root.render(
+        <HranessSiteFooter
+          mailingList={{ ...mailingList }}
+          turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
+        />,
+      );
+      await Promise.resolve();
+    });
+    expect(renderedWidgets).toHaveLength(1);
 
     const verifiedForm = container?.querySelector<HTMLFormElement>("form");
     expect(verifiedForm).not.toBeNull();
@@ -287,7 +318,9 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
       latestTurnstileOptions?.["expired-callback"]();
       await Promise.resolve();
     });
-    expect(resetWidgets).toContain(renderedWidgets.at(-1));
+    const latestRenderedWidget = renderedWidgets.at(-1);
+    expect(latestRenderedWidget).toBeDefined();
+    expect(resetWidgets).toContain(latestRenderedWidget!);
 
     await act(async () => {
       container?.querySelector("form")?.dispatchEvent(new window.Event("submit", {

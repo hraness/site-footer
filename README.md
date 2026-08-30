@@ -54,6 +54,10 @@ error remains a live-region announcement while keyboard focus returns to the
 email field. Any successful HTTP status is treated as accepted; provider and
 validation details remain private to Accounts.
 
+Treat the site key as an opaque public provider value. The package accepts
+bounded URL-safe keys that cover Cloudflare's current production and official
+test formats; it does not expose or accept the corresponding secret key.
+
 ## Static HTML
 
 ```ts
@@ -101,6 +105,26 @@ Every signup consumer must permit `https://challenges.cloudflare.com` in both
 `script-src` and `frame-src`. Load the Turnstile script only from that exact
 origin and do not proxy, cache, or add Subresource Integrity to it. Preserve any
 other origins each site already requires when updating these directives.
+
+Cloudflare recommends a CSP3 nonce with `strict-dynamic` when the host already
+uses nonce-based script admission. Pass the request-scoped base64 or base64url
+nonce through `turnstileScriptNonce` in either renderer:
+
+```tsx
+<HranessSiteFooter
+  mailingList={{
+    audience: "soundfish",
+    kind: "signup",
+    turnstileSitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
+  }}
+  turnstileScriptNonce={nonce}
+/>
+```
+
+The static renderer writes the nonce onto its `api.js` tag. The React adapter
+writes it when inserting that tag and reuses an already-present matching
+Turnstile script instead of replacing a host-owned nonce-bearing tag. Use the
+origin allowlist above when a static deployment has no request-scoped nonce.
 
 The Turnstile site key is intentionally public. Use the one managed widget
 whose checked hostname policy covers the six production roots. Never put its

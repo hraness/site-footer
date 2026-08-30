@@ -15,6 +15,7 @@ import {
   HRANESS_TURNSTILE_WIDGET_SLOT,
   getHranessMailingTurnstileAction,
   parseHranessMailingListConfig,
+  parseHranessTurnstileScriptNonce,
   renderHranessSiteFooterInnerHtml,
   type HranessMailingListConfig,
   type HranessMailingListRenderState,
@@ -30,6 +31,9 @@ import {
 } from "react";
 
 type TurnstileWidgetId = string;
+
+const MAX_TURNSTILE_TOKEN_LENGTH = 2_048;
+const TURNSTILE_SCRIPT_LOAD_TIMEOUT_MS = 15_000;
 
 interface TurnstileRenderOptions {
   readonly action: string;
@@ -76,7 +80,13 @@ function isTurnstileScript(script: HTMLScriptElement): boolean {
   }
 }
 
-function loadTurnstile(): Promise<TurnstileApi> {
+function isTurnstileToken(value: unknown): value is string {
+  return typeof value === "string"
+    && value.length > 0
+    && value.length <= MAX_TURNSTILE_TOKEN_LENGTH;
+}
+
+function loadTurnstile(scriptNonce?: string): Promise<TurnstileApi> {
   const installed = installedTurnstile();
   if (installed !== undefined) return Promise.resolve(installed);
   if (turnstileScriptPromise !== null) return turnstileScriptPromise;
@@ -84,17 +94,18 @@ function loadTurnstile(): Promise<TurnstileApi> {
   turnstileScriptPromise = new Promise<TurnstileApi>((resolve, reject) => {
     const scripts = document.querySelectorAll<HTMLScriptElement>("script[src]");
     const existing = [...scripts].find(isTurnstileScript);
-    const reusable = existing?.dataset.hranessTurnstileLoading === "true";
-    if (existing !== undefined && !reusable) existing.remove();
-    const script = reusable ? existing : document.createElement("script");
+    const ownsScript = existing === undefined;
+    const script = existing ?? document.createElement("script");
+    let timeout: ReturnType<typeof setTimeout> | undefined;
 
     const cleanup = () => {
+      if (timeout !== undefined) clearTimeout(timeout);
       script.removeEventListener("error", handleError);
       script.removeEventListener("load", handleLoad);
     };
     const handleError = () => {
       cleanup();
-      script.remove();
+      if (ownsScript) script.remove();
       reject(new Error("Cloudflare Turnstile could not be loaded."));
     };
     const handleLoad = () => {
@@ -111,12 +122,14 @@ function loadTurnstile(): Promise<TurnstileApi> {
 
     script.addEventListener("error", handleError, { once: true });
     script.addEventListener("load", handleLoad, { once: true });
+    timeout = setTimeout(handleError, TURNSTILE_SCRIPT_LOAD_TIMEOUT_MS);
 
-    if (!reusable) {
+    if (ownsScript) {
       script.async = true;
       script.defer = true;
       script.dataset.slot = HRANESS_TURNSTILE_SCRIPT_SLOT;
       script.dataset.hranessTurnstileLoading = "true";
+      if (scriptNonce !== undefined) script.setAttribute("nonce", scriptNonce);
       script.src = HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL;
       document.head.append(script);
     } else if (installedTurnstile() !== undefined) {
@@ -135,6 +148,8 @@ export interface HranessSiteFooterProps {
   readonly mailingList: HranessMailingListConfig;
   /** Omit the Hraness home link when the containing site already supplies that identity. */
   readonly showBrand?: boolean;
+  /** Optional per-response CSP nonce used only when this component inserts Turnstile. */
+  readonly turnstileScriptNonce?: string;
 }
 
 const IDLE_STATE = { kind: "idle" } as const satisfies HranessMailingListRenderState;
@@ -151,8 +166,12 @@ function activeStateFor(
 export function HranessSiteFooter({
   mailingList: mailingListInput,
   showBrand = true,
+  turnstileScriptNonce: turnstileScriptNonceInput,
 }: HranessSiteFooterProps) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const turnstileScriptNonce = parseHranessTurnstileScriptNonce(
+    turnstileScriptNonceInput,
+  );
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
   const [widgetRevision, setWidgetRevision] = useState(0);
   const activeRequest = useRef<AbortController | null>(null);
@@ -210,7 +229,7 @@ export function HranessSiteFooter({
       });
     };
 
-    void loadTurnstile().then((api) => {
+    void loadTurnstile(turnstileScriptNonce).then((api) => {
       if (cancelled) return;
       const container = footer.current?.querySelector<HTMLElement>(
         `[data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}"]`,
@@ -222,7 +241,12 @@ export function HranessSiteFooter({
         action: getHranessMailingTurnstileAction(mailingList.audience),
         appearance: "interaction-only",
         callback: (token) => {
-          if (!cancelled) turnstileToken.current = token;
+          if (cancelled) return;
+          if (!isTurnstileToken(token)) {
+            reportChallengeError();
+            return;
+          }
+          turnstileToken.current = token;
         },
         execution: "render",
         "error-callback": reportChallengeError,
@@ -257,7 +281,7 @@ export function HranessSiteFooter({
         turnstileWidget.current = null;
       }
     };
-  }, [mailingList, renderState.kind, widgetRevision]);
+  }, [mailingListKey, renderState.kind, turnstileScriptNonce, widgetRevision]);
 
   useEffect(() => {
     if (renderState.kind === "idle") return;
@@ -298,7 +322,7 @@ export function HranessSiteFooter({
 
     const email = emailControl.value;
     const token = turnstileToken.current;
-    if (token === null || token.length === 0) {
+    if (!isTurnstileToken(token)) {
       setState({
         audience: mailingList.audience,
         email,
@@ -335,7 +359,7 @@ export function HranessSiteFooter({
       activeRequest.current = null;
       setState({ audience: mailingList.audience, email, kind: "error" });
     });
-  }, [mailingList, renderState.kind]);
+  }, [mailingListKey, renderState.kind]);
 
   const innerHtml = useMemo(
     () => renderHranessSiteFooterInnerHtml(
