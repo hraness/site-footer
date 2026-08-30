@@ -107,7 +107,10 @@
 }
 
 .hraness-site-footer__links {
+  container-name: hraness-footer-links;
+  container-type: inline-size;
   grid-area: links;
+  inline-size: 100%;
   min-inline-size: 0;
   justify-content: flex-end;
   margin-inline-start: auto;
@@ -332,38 +335,22 @@
   .hraness-site-footer__wordmark {
     display: inline;
   }
+}
 
-  .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li:nth-child(-n + 6) {
+@container hraness-footer-links (min-width: 252px) {
+  .hraness-site-footer__socials > li:nth-child(-n + 6) {
     display: block;
   }
 }
 
-@container hraness-footer (min-width: 48rem) {
-  .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
+@container hraness-footer-links (min-width: 336px) {
+  .hraness-site-footer__socials > li:nth-child(-n + 8) {
     display: block;
   }
 }
 
-@container hraness-footer (min-width: 52rem) {
-  .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li {
-    display: block;
-  }
-}
-
-@container hraness-footer (min-width: 60rem) {
-  .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 6) {
-    display: block;
-  }
-}
-
-@container hraness-footer (min-width: 70rem) {
-  .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
-    display: block;
-  }
-}
-
-@container hraness-footer (min-width: 80rem) {
-  .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li {
+@container hraness-footer-links (min-width: 420px) {
+  .hraness-site-footer__socials > li {
     display: block;
   }
 }
@@ -372,40 +359,6 @@
   @media (min-width: 44rem) {
     .hraness-site-footer__wordmark {
       display: inline;
-    }
-
-    .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li:nth-child(-n + 6) {
-      display: block;
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
-      display: block;
-    }
-  }
-
-  @media (min-width: 52rem) {
-    .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li {
-      display: block;
-    }
-  }
-
-  @media (min-width: 60rem) {
-    .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 6) {
-      display: block;
-    }
-  }
-
-  @media (min-width: 70rem) {
-    .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
-      display: block;
-    }
-  }
-
-  @media (min-width: 80rem) {
-    .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li {
-      display: block;
     }
   }
 }
