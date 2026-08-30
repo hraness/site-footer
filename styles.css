@@ -313,7 +313,7 @@
   }
 }
 
-@media (min-width: 760px) {
+@media (min-width: 47.5rem) {
   .hraness-site-footer[data-mailing-list="signup"] {
     --hraness-site-footer-content-block-size: max(
       var(--hraness-site-footer-social-target),
@@ -328,7 +328,7 @@
   }
 }
 
-@container hraness-footer (min-width: 704px) {
+@container hraness-footer (min-width: 44rem) {
   .hraness-site-footer__wordmark {
     display: inline;
   }
@@ -338,38 +338,38 @@
   }
 }
 
-@container hraness-footer (min-width: 768px) {
+@container hraness-footer (min-width: 48rem) {
   .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
     display: block;
   }
 }
 
-@container hraness-footer (min-width: 832px) {
+@container hraness-footer (min-width: 52rem) {
   .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li {
     display: block;
   }
 }
 
-@container hraness-footer (min-width: 960px) {
+@container hraness-footer (min-width: 60rem) {
   .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 6) {
     display: block;
   }
 }
 
-@container hraness-footer (min-width: 1120px) {
+@container hraness-footer (min-width: 70rem) {
   .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
     display: block;
   }
 }
 
-@container hraness-footer (min-width: 1280px) {
+@container hraness-footer (min-width: 80rem) {
   .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li {
     display: block;
   }
 }
 
 @supports not (container-type: inline-size) {
-  @media (min-width: 704px) {
+  @media (min-width: 44rem) {
     .hraness-site-footer__wordmark {
       display: inline;
     }
@@ -379,31 +379,31 @@
     }
   }
 
-  @media (min-width: 768px) {
+  @media (min-width: 48rem) {
     .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
       display: block;
     }
   }
 
-  @media (min-width: 832px) {
+  @media (min-width: 52rem) {
     .hraness-site-footer[data-mailing-list="none"] .hraness-site-footer__socials > li {
       display: block;
     }
   }
 
-  @media (min-width: 960px) {
+  @media (min-width: 60rem) {
     .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 6) {
       display: block;
     }
   }
 
-  @media (min-width: 1120px) {
+  @media (min-width: 70rem) {
     .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li:nth-child(-n + 8) {
       display: block;
     }
   }
 
-  @media (min-width: 1280px) {
+  @media (min-width: 80rem) {
     .hraness-site-footer[data-mailing-list="signup"] .hraness-site-footer__socials > li {
       display: block;
     }
