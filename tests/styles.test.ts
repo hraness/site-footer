@@ -26,7 +26,7 @@ test("the fixed bar reserves one row without signup and responsive space with si
     /\.hraness-site-footer\[data-mailing-list="signup"\] \{[\s\S]*?--hraness-site-footer-content-block-size: calc\([\s\S]*?--hraness-site-footer-form-block-size/u,
   );
   expect(css).toMatch(
-    /@media \(min-width: 760px\)[\s\S]*?--hraness-site-footer-content-block-size: max\([\s\S]*?grid-template-areas: "brand mailing links"/u,
+    /@media \(min-width: 47\.5rem\)[\s\S]*?--hraness-site-footer-content-block-size: max\([\s\S]*?grid-template-areas: "brand mailing links"/u,
   );
   expect(css).toMatch(
     /\.hraness-site-footer\[data-mailing-list="none"\] \.hraness-site-footer__inner \{[\s\S]*?grid-template-areas: "brand links";/u,
@@ -85,11 +85,12 @@ test("social links keep their canonical mobile subset and reveal later around si
     /\.hraness-site-footer__socials > li:first-child,[\s\S]*?nth-child\(3\),[\s\S]*?nth-child\(6\) \{[\s\S]*?display: block;/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer \(min-width: 960px\)[\s\S]*?data-mailing-list="signup"[\s\S]*?nth-child\(-n \+ 6\)/u,
+    /@container hraness-footer \(min-width: 60rem\)[\s\S]*?data-mailing-list="signup"[\s\S]*?nth-child\(-n \+ 6\)/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer \(min-width: 1280px\)[\s\S]*?data-mailing-list="signup"[\s\S]*?\.hraness-site-footer__socials > li/u,
+    /@container hraness-footer \(min-width: 80rem\)[\s\S]*?data-mailing-list="signup"[\s\S]*?\.hraness-site-footer__socials > li/u,
   );
+  expect(css).not.toMatch(/min-width: (?:704|760|768|832|960|1120|1280)px/u);
 });
 
 test("all rules remain scoped to the package footer", () => {
