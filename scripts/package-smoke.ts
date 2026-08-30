@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const repository = resolve(import.meta.dir, "..");
+const CLIENT_COMPONENT_DIRECTIVE = '"use client";';
 const packageJson = JSON.parse(await readFile(resolve(repository, "package.json"), "utf8")) as {
   exports?: Record<string, string | Record<string, string>>;
   files?: string[];
@@ -102,8 +103,22 @@ if (typeof react.HranessSiteFooter !== "function") {
 }
 
 const reactArtifact = await readFile(resolve(repository, "dist/react.js"), "utf8");
-if (!reactArtifact.startsWith('"use client";')) {
-  throw new Error("The built React adapter lost its client-component directive.");
+const reactArtifactLines = reactArtifact.split("\n");
+const clientDirectiveLines = reactArtifactLines.flatMap((line, index) =>
+  line.trim() === CLIENT_COMPONENT_DIRECTIVE ? [index] : []
+);
+const firstImportLine = reactArtifactLines.findIndex((line) =>
+  /^import(?:[\s{'"*]|$)/u.test(line.trim())
+);
+if (
+  reactArtifactLines[0] !== CLIENT_COMPONENT_DIRECTIVE
+  || clientDirectiveLines.length !== 1
+  || clientDirectiveLines[0] !== 0
+  || (firstImportLine >= 0 && clientDirectiveLines.some((line) => line > firstImportLine))
+) {
+  throw new Error(
+    "The built React adapter must expose one client-component directive before every import.",
+  );
 }
 if (reactArtifact.includes("jsxDEV") || reactArtifact.includes("jsx-dev-runtime")) {
   throw new Error("The built React adapter depends on development-only JSX helpers.");
