@@ -85,10 +85,16 @@ test("social links keep their canonical mobile subset and reveal later around si
     /\.hraness-site-footer__socials > li:first-child,[\s\S]*?nth-child\(3\),[\s\S]*?nth-child\(6\) \{[\s\S]*?display: block;/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer \(min-width: 60rem\)[\s\S]*?data-mailing-list="signup"[\s\S]*?nth-child\(-n \+ 6\)/u,
+    /\.hraness-site-footer__links \{[\s\S]*?container-name: hraness-footer-links;[\s\S]*?container-type: inline-size;[\s\S]*?inline-size: 100%;/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer \(min-width: 80rem\)[\s\S]*?data-mailing-list="signup"[\s\S]*?\.hraness-site-footer__socials > li/u,
+    /@container hraness-footer-links \(min-width: 252px\)[\s\S]*?nth-child\(-n \+ 6\)/u,
+  );
+  expect(css).toMatch(
+    /@container hraness-footer-links \(min-width: 336px\)[\s\S]*?nth-child\(-n \+ 8\)/u,
+  );
+  expect(css).toMatch(
+    /@container hraness-footer-links \(min-width: 420px\)[\s\S]*?\.hraness-site-footer__socials > li/u,
   );
   expect(css).not.toMatch(/min-width: (?:704|760|768|832|960|1120|1280)px/u);
 });
