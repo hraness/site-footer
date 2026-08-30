@@ -11,21 +11,69 @@ test("the stylesheet keeps responsive, coarse-pointer, focus, and forced-color c
   expect(css).toContain("env(safe-area-inset-left)");
   expect(css).toContain("var(--foreground, currentColor)");
   expect(css).toMatch(
-    /@media \(pointer: coarse\)[\s\S]*?\.hraness-site-footer__brand,[\s\S]*?\.hraness-site-footer__newsletter/u,
+    /@media \(pointer: coarse\)[\s\S]*?--hraness-site-footer-social-target: 44px;[\s\S]*?--hraness-site-footer-control-block-size:/u,
   );
 });
 
-test("the footer is a full-width persistent bar with a matching flow reservation", () => {
+test("the fixed bar reserves one row without signup and responsive space with signup", () => {
   expect(css).toContain("position: fixed");
   expect(css).toContain("inset-block-end: 0");
   expect(css).toContain("max-inline-size: none");
   expect(css).toContain("block-size: var(--hraness-site-footer-bar-block-size)");
-  expect(css).toContain("--hraness-site-footer-control-block-size: max(var(--hraness-site-footer-social-target), 2.25rem)");
   expect(css).toContain("background: var(--hraness-site-footer-background)");
   expect(css).toContain("env(safe-area-inset-bottom)");
+  expect(css).toMatch(
+    /\.hraness-site-footer\[data-mailing-list="signup"\] \{[\s\S]*?--hraness-site-footer-content-block-size: calc\([\s\S]*?--hraness-site-footer-form-block-size/u,
+  );
+  expect(css).toMatch(
+    /@media \(min-width: 760px\)[\s\S]*?--hraness-site-footer-content-block-size: max\([\s\S]*?grid-template-areas: "brand mailing links"/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer\[data-mailing-list="none"\] \.hraness-site-footer__inner \{[\s\S]*?grid-template-areas: "brand links";/u,
+  );
 });
 
-test("mobile shows X, LinkedIn, and GitHub while wider containers progressively reveal one social row", () => {
+test("the package owns a compact email field, adjacent action, and bounded status row", () => {
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing-controls \{[\s\S]*?display: flex;/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing-input \{[\s\S]*?inline-size: 100%;[\s\S]*?border-radius: 0\.375rem 0 0 0\.375rem;/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing-submit \{[\s\S]*?margin-inline-start: -1px;[\s\S]*?border-radius: 0 0\.375rem 0\.375rem 0;/u,
+  );
+  expect(css).toContain(
+    "--hraness-site-footer-action-background: var(--plain-foreground, var(--foreground, CanvasText))",
+  );
+  expect(css).toContain(
+    "--hraness-site-footer-action-foreground: var(--plain-background, var(--background, Canvas))",
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing-status \{[\s\S]*?block-size: var\(--hraness-site-footer-status-block-size\);[\s\S]*?text-overflow: ellipsis;/u,
+  );
+  expect(css).toContain(".hraness-site-footer__visually-hidden");
+  expect(css).toMatch(
+    /\.hraness-site-footer__turnstile \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\(100% \+ 0\.5rem\);[\s\S]*?max-inline-size: 30rem;/u,
+  );
+  expect(css).toContain(
+    '.hraness-site-footer__mailing[data-state="verification-error"] .hraness-site-footer__mailing-status',
+  );
+});
+
+test("the accepted state stays inside the narrow mailing-list geometry", () => {
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing,[\s\S]*?\.hraness-site-footer__mailing-confirmation,[\s\S]*?\.hraness-site-footer__mailing-status,[\s\S]*?\.hraness-site-footer__turnstile \{[\s\S]*?box-sizing: border-box;/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing,\n\.hraness-site-footer__mailing-confirmation \{[\s\S]*?inline-size: min\(100%, 30rem\);[\s\S]*?min-inline-size: 0;/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing-confirmation \{[\s\S]*?border: 1px solid[\s\S]*?padding-inline: 0\.75rem;/u,
+  );
+});
+
+test("social links keep their canonical mobile subset and reveal later around signup", () => {
   expect(css).toContain("--hraness-site-footer-social-target: 40px");
   expect(css).toMatch(
     /\.hraness-site-footer__wordmark \{[\s\S]*?display: none;/u,
@@ -36,22 +84,14 @@ test("mobile shows X, LinkedIn, and GitHub while wider containers progressively 
   expect(css).toMatch(
     /\.hraness-site-footer__socials > li:first-child,[\s\S]*?nth-child\(3\),[\s\S]*?nth-child\(6\) \{[\s\S]*?display: block;/u,
   );
-  expect(css).toContain("margin-inline-start: auto");
   expect(css).toMatch(
-    /@container hraness-footer \(min-width: 704px\)[\s\S]*?\.hraness-site-footer__wordmark \{[\s\S]*?display: inline;[\s\S]*?nth-child\(-n \+ 6\)/u,
+    /@container hraness-footer \(min-width: 960px\)[\s\S]*?data-mailing-list="signup"[\s\S]*?nth-child\(-n \+ 6\)/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer \(min-width: 768px\)[\s\S]*?nth-child\(-n \+ 8\)/u,
+    /@container hraness-footer \(min-width: 1280px\)[\s\S]*?data-mailing-list="signup"[\s\S]*?\.hraness-site-footer__socials > li/u,
   );
-  expect(css).toMatch(
-    /@container hraness-footer \(min-width: 832px\)[\s\S]*?\.hraness-site-footer__socials > li/u,
-  );
-  expect(css).toMatch(
-    /@media \(pointer: coarse\)[\s\S]*?\.hraness-site-footer \{[\s\S]*?--hraness-site-footer-social-target: 44px;/u,
-  );
-  expect(css).not.toContain("grid-template-rows");
 });
 
 test("all rules remain scoped to the package footer", () => {
-  expect(css).not.toMatch(/(^|\n)\s*(footer|a|nav|ul|li|svg)\s*\{/u);
+  expect(css).not.toMatch(/(^|\n)\s*(footer|form|a|button|input|nav|ul|li|svg)\s*\{/u);
 });

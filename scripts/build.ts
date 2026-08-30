@@ -6,20 +6,29 @@ const outputDirectory = resolve(repository, "dist");
 
 await rm(outputDirectory, { force: true, recursive: true });
 
-const build = await Bun.build({
-  entrypoints: [
-    resolve(repository, "src/index.ts"),
-    resolve(repository, "src/react.tsx"),
-  ],
-  external: ["react", "react/jsx-runtime"],
-  format: "esm",
-  minify: false,
-  outdir: outputDirectory,
-  sourcemap: "external",
-  target: "browser",
-});
+const builds = await Promise.all([
+  Bun.build({
+    entrypoints: [resolve(repository, "src/index.ts")],
+    format: "esm",
+    minify: false,
+    outdir: outputDirectory,
+    sourcemap: "external",
+    target: "browser",
+  }),
+  Bun.build({
+    banner: '"use client";',
+    entrypoints: [resolve(repository, "src/react.tsx")],
+    external: ["react", "react/jsx-runtime"],
+    format: "esm",
+    minify: false,
+    outdir: outputDirectory,
+    sourcemap: "external",
+    target: "browser",
+  }),
+]);
 
-if (!build.success) {
+for (const build of builds) {
+  if (build.success) continue;
   for (const log of build.logs) {
     console.error(log);
   }
@@ -39,4 +48,3 @@ const tsc = Bun.spawnSync([
 if (tsc.exitCode !== 0) {
   process.exit(tsc.exitCode);
 }
-
