@@ -1,85 +1,124 @@
 # @hraness/site-footer
 
-The canonical Hraness network footer for every hosted Hraness website. It keeps the Ra mark, product-scoped mailing-list signup, social destinations, semantics, and responsive behavior in one organization-owned package.
+Add the same Hraness identity, accessible network links, and optional
+product-scoped email signup to a React or static website. One package owns the
+markup, link order, mailing action, response states, and responsive layout.
+Each product chooses its mailing audience, theme bindings, and security policy.
 
-Every consumer must choose its mailing-list behavior explicitly. The package never subscribes a product visitor to the general Hraness audience by default.
+The framework-neutral renderer and React adapter produce the same footer
+contract. A product visitor is never assigned to the general Hraness mailing
+audience by default.
 
-## React
+## Install and first render
+
+Pin the current immutable release:
+
+```sh
+bun add github:hraness/site-footer#v0.4.4
+```
+
+Start with the network footer and no mailing form:
 
 ```tsx
 import { HranessSiteFooter } from "@hraness/site-footer/react";
 import "@hraness/site-footer/styles.css";
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function ProductLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
       <main>{children}</main>
-      <HranessSiteFooter
-        mailingList={{
-          audience: "soundfish",
-          kind: "signup",
-          turnstileSitekey: "<public Turnstile site key>",
-        }}
-      />
+      <HranessSiteFooter mailingList={{ kind: "none" }} />
     </>
   );
 }
 ```
 
-On hraness.com itself, select the umbrella audience and omit the duplicate network brand:
+That render has the stable `id="hraness-site-footer"`, one Hraness home link
+and 10 specifically named social links, and no form, Turnstile script, request,
+cookie, or local storage. The links and inline decorative vectors work without
+client-side JavaScript.
+
+## Choose an interface
+
+| Import | Use it for | Runtime boundary |
+| --- | --- | --- |
+| `@hraness/site-footer` | Render complete HTML into a static template or server response | Framework-neutral ESM with no React import |
+| `@hraness/site-footer/react` | Render the same contract in React and progressively enhance signup states | React client component for React 18 and 19 |
+| `@hraness/site-footer/styles.css` | Apply the fixed responsive bar, theme fallbacks, focus states, and layout reservation | Plain CSS, imported once by the consumer |
+
+The static interface is one function call:
+
+```ts
+import { renderHranessSiteFooter } from "@hraness/site-footer";
+
+const footerHtml = renderHranessSiteFooter({
+  mailingList: { kind: "none" },
+});
+```
+
+Both renderers require `mailingList`. Both accept `showBrand: false` when the
+host page already supplies the Hraness identity and an optional
+`turnstileScriptNonce` when signup runs under a nonce-based Content Security
+Policy.
+
+Static generators can resolve the checked stylesheet without assuming a
+`node_modules` path:
+
+```ts
+import { fileURLToPath } from "node:url";
+
+const footerStylesPath = fileURLToPath(
+  import.meta.resolve("@hraness/site-footer/styles.css"),
+);
+```
+
+## Configure one mailing-list mode
+
+Every consumer chooses one explicit mode.
+
+Use `{ kind: "none" }` when the product has no mailing list. To enable signup,
+provide a stable lowercase product audience and a public Turnstile site key:
+
+```tsx
+<HranessSiteFooter
+  mailingList={{
+    audience: "soundfish",
+    kind: "signup",
+    // Cloudflare's public test site key. Replace it before production.
+    turnstileSitekey: "1x00000000000000000000AA",
+  }}
+/>
+```
+
+Use the umbrella audience only on hraness.com, where the page already carries
+the organization identity:
 
 ```tsx
 <HranessSiteFooter
   mailingList={{
     audience: "hraness",
     kind: "signup",
-    turnstileSitekey: "<public Turnstile site key>",
+    turnstileSitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
   }}
   showBrand={false}
 />
 ```
 
-Products without a mailing list must opt out explicitly:
+The configured signup follows one checked state path:
 
-```tsx
-<HranessSiteFooter mailingList={{ kind: "none" }} />
-```
+1. The footer renders a required email field, a product audience, the fixed
+   package source, and an interaction-only Turnstile widget.
+2. Turnstile binds its proof to `mailing_<audience>`. An expired or failed
+   proof resets before another request.
+3. The enhanced React form sends one multipart `POST` with
+   `credentials: "omit"` only after it has a bounded proof.
+4. The button and live status move through pending, accepted, retryable request
+   error, or verification error. A failed request keeps the address and returns
+   keyboard focus to the email field.
 
-The React adapter loads the exact Cloudflare Turnstile script once and renders a
-managed, interaction-only challenge bound to `mailing_<audience>`. It does not
-submit until the widget returns a short-lived proof. It shows pending state
-during the request, replaces an accepted form with `Check your email to
-confirm`, and retains the address with bounded retry copy after an error. The
-error remains a live-region announcement while keyboard focus returns to the
-email field. Any successful HTTP status is treated as accepted; provider and
-validation details remain private to Accounts.
-
-Treat the site key as an opaque public provider value. The package accepts
-bounded URL-safe keys that cover Cloudflare's current production and official
-test formats; it does not expose or accept the corresponding secret key.
-
-## Static HTML
-
-```ts
-import { renderHranessSiteFooter } from "@hraness/site-footer";
-
-const html = template.replace(
-  "{{HRANESS_SITE_FOOTER}}",
-  renderHranessSiteFooter({
-    mailingList: {
-      audience: "hra",
-      kind: "signup",
-      turnstileSitekey: "<public Turnstile site key>",
-    },
-  }),
-);
-```
-
-Static Hraness pages select the `hraness` audience, provide the same public
-site key, and pass `showBrand: false` for the unbranded variant. Static products
-without a list pass `mailingList: { kind: "none" }`.
-
-The native form posts to the package-owned Accounts action:
+The static form uses the same fields and package-owned Accounts action:
 
 ```text
 POST https://account.hraness.com/api/mailing/subscribe
@@ -89,26 +128,88 @@ source=hraness-site-footer
 cf-turnstile-response=<short-lived widget proof>
 ```
 
-The static renderer emits Cloudflare's exact Turnstile script and an implicit
-widget inside the form. Enhanced React requests render the widget explicitly,
-send the same multipart form with `Accept: application/json`, and omit
-credentials. Signup requires JavaScript because Accounts rejects every request
-without a server-verified Turnstile proof. The footer, brand, and social links
-remain meaningful without JavaScript.
+Static HTML uses Turnstile's implicit widget. React uses explicit rendering and
+sends `Accept: application/json`. A successful 2xx response replaces the form
+with `Check your email to confirm`. Provider validation details remain private
+to Accounts.
+
+## Ownership boundary
+
+| Package-owned | Consumer-owned |
+| --- | --- |
+| Ra mark, Hraness home destination, 10 social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
+| Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
+| Static and React markup, Turnstile action derivation, proof handling, and fixed script origins | The public site key, production hostname policy, and private Turnstile secret |
+| Responsive CSS, coarse-pointer targets, focus treatment, forced-color handling, and flow reservation | Product theme variables, CSP allowlist or nonce, and optional `--hraness-site-footer-z-index` |
+| Configuration parsing for audience, site-key, and nonce bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
+
+Consumers must not fork the package action, source, copy, social links, vector
+mark, order, semantics, or interaction behavior. A product can choose its
+audience and visual variables without creating another footer contract.
+
+## Trust and privacy boundary
+
+With `mailingList: { kind: "none" }`, the package renders no form or external
+script and initiates no request. It does not create cookies or persistent
+browser storage in either mode.
+
+Signup changes that boundary in visible, bounded ways:
+
+- The visitor's `email`, the consumer's `audience`,
+  `source=hraness-site-footer`, and `cf-turnstile-response` are transmitted to
+  `https://account.hraness.com/api/mailing/subscribe`.
+- The React request uses `credentials: "omit"`. The static form performs a
+  normal cross-origin form submission after Turnstile supplies the required
+  field.
+- The browser loads
+  `https://challenges.cloudflare.com/turnstile/v0/api.js` and the provider's
+  challenge frame only when signup is configured.
+- The Turnstile site key is a public identifier. The package does not accept,
+  expose, or validate the private Turnstile secret. Accounts owns server-side
+  proof validation.
+- Without JavaScript, the Hraness identity and network links still work, but
+  signup fails closed because no server-verified Turnstile proof can be
+  generated.
+
+The package does not store subscriber data, deliver confirmation email,
+configure consent, decide provider retention, or verify the consumer's live
+hostname policy. Those responsibilities remain outside the browser package.
+
+## Compatibility and layout
+
+The repository uses Bun 1.3.14 and publishes ESM. The root renderer has no
+framework runtime. The React adapter declares `React >=18 <20` and begins with
+the required client-component directive.
+
+The stylesheet follows `--plain-*` or common product theme variables when
+present and falls back to system colors. The footer reserves the same amount of
+document flow that its fixed bar occupies. A narrow signup footer uses one row
+for identity and essential links plus one row for the form; at `47.5rem` it
+moves to one aligned row. X, LinkedIn, and GitHub stay visible in the smallest
+layout, with the remaining social links revealed as room becomes available.
+
+The CSS includes safe-area padding, visible focus outlines, 44-pixel
+coarse-pointer targets, forced-color rules, and transitions only when the user
+has not requested reduced motion. Container-query fallbacks keep the core
+footer usable, but the repository does not claim a browser-version matrix.
 
 ## Content Security Policy
 
-Consumers that enable signup must add `https://account.hraness.com` to their
-existing `form-action` directive. Consumers using the React adapter must also
-add `https://account.hraness.com` to `connect-src` for the enhanced request.
-Every signup consumer must permit `https://challenges.cloudflare.com` in both
-`script-src` and `frame-src`. Load the Turnstile script only from that exact
-origin and do not proxy, cache, or add Subresource Integrity to it. Preserve any
-other origins each site already requires when updating these directives.
+Signup consumers must merge these origins into their existing policy:
 
-Cloudflare recommends a CSP3 nonce with `strict-dynamic` when the host already
-uses nonce-based script admission. Pass the request-scoped base64 or base64url
-nonce through `turnstileScriptNonce` in either renderer:
+| Directive | Required origin |
+| --- | --- |
+| `form-action` | `https://account.hraness.com` |
+| `connect-src` | `https://account.hraness.com` for the enhanced React request |
+| `script-src` | `https://challenges.cloudflare.com` |
+| `frame-src` | `https://challenges.cloudflare.com` |
+
+Preserve every other origin the product already needs. Load Turnstile only from
+its exact script URL. Do not proxy or cache it.
+
+Cloudflare's current CSP guidance recommends a request-scoped nonce with CSP3
+`strict-dynamic` when the host already uses nonce-based script admission. Pass
+the base64 or base64url nonce through either renderer:
 
 ```tsx
 <HranessSiteFooter
@@ -121,25 +222,107 @@ nonce through `turnstileScriptNonce` in either renderer:
 />
 ```
 
-The static renderer writes the nonce onto its `api.js` tag. The React adapter
-writes it when inserting that tag and reuses an already-present matching
-Turnstile script instead of replacing a host-owned nonce-bearing tag. Use the
-origin allowlist above when a static deployment has no request-scoped nonce.
+The static renderer writes the nonce on its implicit Turnstile script. The
+React adapter uses it when inserting the explicit script and reuses an existing
+matching host script without replacing a host-owned nonce.
 
-The Turnstile site key is intentionally public. Use the one managed widget
-whose checked hostname policy covers the six production roots. Never put its
-private secret in a browser environment or footer configuration.
+Review the current primary guidance before changing a production policy:
+[Cloudflare Turnstile CSP](https://developers.cloudflare.com/turnstile/reference/content-security-policy/)
+and
+[client-side rendering](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/).
 
-Include `@hraness/site-footer/styles.css` in the generated site stylesheet. Static consumers can resolve the exact installed file without assuming a `node_modules` path:
+## Evidence
 
-```ts
-import { fileURLToPath } from "node:url";
+| Contract | Checked evidence |
+| --- | --- |
+| Static markup, explicit mailing mode, social order, config rejection, CSP nonce, and no-signup boundary | `bun test ./tests/footer.test.ts ./tests/readme.test.ts` |
+| React and static parity, Turnstile gating, request fields, focus recovery, and accepted/error states | `bun test ./tests/react.test.tsx` |
+| Responsive geometry, focus, coarse pointer, reduced motion, forced colors, and scoped selectors | `bun test ./tests/styles.test.ts` |
+| ESM artifacts and declaration output | `bun run build` |
+| Published files, public exports, server-safe root, React client directive, and packed smoke render | `bun run test:package` |
+| TypeScript, generated artifacts, all tests, and package boundary | `bun run check` |
 
-const footerStylesPath = fileURLToPath(
-  import.meta.resolve("@hraness/site-footer/styles.css"),
-);
+These deterministic checks do not prove a consumer's CSP, live Turnstile
+hostname policy, Accounts delivery, or provider retention. Verify those facts
+in the deployed consumer and provider consoles.
+
+Generated files in `dist/` come only from `bun run build`; do not edit them by
+hand. Reviewed HugeIcons vectors retain their attribution in
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The package is available
+under the [MIT License](LICENSE).
+
+## Questions
+
+<details>
+<summary>Do I need to enable email signup?</summary>
+
+No. Pass `mailingList={{ kind: "none" }}`. This renders the organization
+identity and social links without a form, Turnstile, or network request.
+
+</details>
+
+<details>
+<summary>Which renderer should I use?</summary>
+
+Use `renderHranessSiteFooter` for a static generator or framework-neutral
+server template. Use `HranessSiteFooter` when a React application should
+enhance pending, error, focus, and confirmation states without navigation.
+
+</details>
+
+<details>
+<summary>Can a product change the links or subscribe copy?</summary>
+
+No. Those values are the organization-owned contract. Configure the product
+audience, brand visibility, theme variables, CSP, and z-index instead.
+
+</details>
+
+<details>
+<summary>Why does signup require JavaScript?</summary>
+
+Accounts accepts a signup only after server-side Turnstile verification. The
+browser widget creates the short-lived proof, so a form without JavaScript
+cannot satisfy that requirement.
+
+</details>
+
+<details>
+<summary>Is the Turnstile site key a secret?</summary>
+
+No. It is an opaque public provider value placed in rendered markup. Keep the
+matching private secret in the server-side provider integration, never in a
+browser environment or footer prop.
+
+</details>
+
+<details>
+<summary>When should I hide the Hraness brand?</summary>
+
+Use `showBrand={false}` only when the host page already supplies the same
+Hraness identity. Mailing configuration and network links remain unchanged.
+
+</details>
+
+<details>
+<summary>Where do I report a problem?</summary>
+
+Open an issue in the
+[`hraness/site-footer` repository](https://github.com/hraness/site-footer/issues)
+with the package release, renderer, mailing mode, and reproducible output.
+
+</details>
+
+## Verify a checkout
+
+To add the footer now, install the pinned release and begin with
+`mailingList={{ kind: "none" }}`. Enable signup only after the product audience,
+public site key, hostname policy, Accounts route, and CSP are ready.
+
+For a source checkout, install the frozen dependency graph and run the complete
+repository gate:
+
+```sh
+bun install --frozen-lockfile
+bun run check
 ```
-
-## Layout variables
-
-The footer follows each site's theme variables when present. It is a persistent, full-width bottom bar with an equal flow reservation. Every rendered root has the stable `id="hraness-site-footer"` so an earlier in-page prompt can link to the canonical footer instead of duplicating signup. Signup uses a compact email-and-button row below the brand and essential social links on narrow screens, then moves into one vertically centered row on wider screens. Pending and error feedback appears above the bar without changing its height. Mobile keeps X, LinkedIn, and the Hraness organization GitHub link visible; wider containers progressively reveal six, eight, and then all ten social links. Products may set `--hraness-site-footer-z-index` when coordinating layered surfaces. The form action, source, copy, social links, vectors, order, markup, and behavior stay package-owned.
