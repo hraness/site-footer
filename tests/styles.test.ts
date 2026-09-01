@@ -33,7 +33,10 @@ test("the fixed bar reserves one row without signup and responsive space with si
   );
 });
 
-test("the package owns a compact email field, adjacent action, and bounded status row", () => {
+test("the package owns compact centered controls and a non-reserving status surface", () => {
+  expect(css).toMatch(
+    /--hraness-site-footer-mailing-overlay-clearance: calc\([\s\S]*?var\(--hraness-site-footer-control-block-size\)[\s\S]*?\+ var\(--hraness-site-footer-row-gap\)[\s\S]*?\);/u,
+  );
   expect(css).toMatch(
     /\.hraness-site-footer__mailing-controls \{[\s\S]*?display: flex;/u,
   );
@@ -41,7 +44,7 @@ test("the package owns a compact email field, adjacent action, and bounded statu
     /\.hraness-site-footer__mailing-input \{[\s\S]*?inline-size: 100%;[\s\S]*?border-radius: 0\.375rem 0 0 0\.375rem;/u,
   );
   expect(css).toMatch(
-    /\.hraness-site-footer__mailing-submit \{[\s\S]*?margin-inline-start: -1px;[\s\S]*?border-radius: 0 0\.375rem 0\.375rem 0;/u,
+    /\.hraness-site-footer__mailing-submit \{[\s\S]*?align-items: center;[\s\S]*?display: inline-flex;[\s\S]*?justify-content: center;[\s\S]*?line-height: 1;[\s\S]*?margin-inline-start: -1px;[\s\S]*?border-radius: 0 0\.375rem 0\.375rem 0;/u,
   );
   expect(css).toContain(
     "--hraness-site-footer-action-background: var(--plain-foreground, var(--foreground, CanvasText))",
@@ -50,11 +53,17 @@ test("the package owns a compact email field, adjacent action, and bounded statu
     "--hraness-site-footer-action-foreground: var(--plain-background, var(--background, Canvas))",
   );
   expect(css).toMatch(
-    /\.hraness-site-footer__mailing-status \{[\s\S]*?block-size: var\(--hraness-site-footer-status-block-size\);[\s\S]*?text-overflow: ellipsis;/u,
+    /\.hraness-site-footer__mailing-status \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\([\s\S]*?100% \+ var\(--hraness-site-footer-mailing-overlay-clearance\) \+ 0\.375rem[\s\S]*?\);[\s\S]*?background: var\(--hraness-site-footer-background\);[\s\S]*?opacity: 0;[\s\S]*?visibility: hidden;/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer__mailing:not\(\[data-state="idle"\]\)[\s\S]*?\.hraness-site-footer__mailing-status \{[\s\S]*?opacity: 1;[\s\S]*?visibility: visible;/u,
   );
   expect(css).toContain(".hraness-site-footer__visually-hidden");
   expect(css).toMatch(
-    /\.hraness-site-footer__turnstile \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\(100% \+ 0\.5rem\);[\s\S]*?max-inline-size: 30rem;/u,
+    /\.hraness-site-footer__turnstile \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\([\s\S]*?100% \+ var\(--hraness-site-footer-mailing-overlay-clearance\)[\s\S]*?\+ var\(--hraness-site-footer-status-block-size\) \+ 0\.75rem[\s\S]*?\);[\s\S]*?max-inline-size: 26rem;/u,
+  );
+  expect(css).toMatch(
+    /@media \(min-width: 47\.5rem\)[\s\S]*?\.hraness-site-footer\[data-mailing-list="signup"\] \{[\s\S]*?--hraness-site-footer-mailing-overlay-clearance: 0rem;/u,
   );
   expect(css).toContain(
     '.hraness-site-footer__mailing[data-state="verification-error"] .hraness-site-footer__mailing-status',
@@ -66,7 +75,7 @@ test("the accepted state stays inside the narrow mailing-list geometry", () => {
     /\.hraness-site-footer__mailing,[\s\S]*?\.hraness-site-footer__mailing-confirmation,[\s\S]*?\.hraness-site-footer__mailing-status,[\s\S]*?\.hraness-site-footer__turnstile \{[\s\S]*?box-sizing: border-box;/u,
   );
   expect(css).toMatch(
-    /\.hraness-site-footer__mailing,\n\.hraness-site-footer__mailing-confirmation \{[\s\S]*?inline-size: min\(100%, 30rem\);[\s\S]*?min-inline-size: 0;/u,
+    /\.hraness-site-footer__mailing,\n\.hraness-site-footer__mailing-confirmation \{[\s\S]*?inline-size: min\(100%, 26rem\);[\s\S]*?min-inline-size: 0;/u,
   );
   expect(css).toMatch(
     /\.hraness-site-footer__mailing-confirmation \{[\s\S]*?border: 1px solid[\s\S]*?padding-inline: 0\.75rem;/u,
