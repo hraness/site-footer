@@ -238,9 +238,15 @@ and
 | Static markup, explicit mailing mode, social order, config rejection, CSP nonce, and no-signup boundary | `bun test ./tests/footer.test.ts ./tests/readme.test.ts` |
 | React and static parity, Turnstile gating, request fields, focus recovery, and accepted/error states | `bun test ./tests/react.test.tsx` |
 | Responsive geometry, focus, coarse pointer, reduced motion, forced colors, and scoped selectors | `bun test ./tests/styles.test.ts` |
+| Real React idle, pending, accepted, request-error, and Turnstile-error states at wide and compact viewports; named alignment, containment, minimum-size, overflow, stability, browser diagnostics, exact source identity, and retained screenshots | `bun run verify:browser` after `bun run verify:browser:doctor` |
 | ESM artifacts and declaration output | `bun run build` |
 | Published files, public exports, server-safe root, React client directive, and packed smoke render | `bun run test:package` |
 | TypeScript, generated artifacts, all tests, and package boundary | `bun run check` |
+
+The browser verifier uses the real React adapter with synthetic Turnstile and
+Accounts boundaries on loopback. It proves the package state path and declared
+geometry, but not either live provider or overall visual quality. Inspect its
+wide and compact screenshots before making a design judgment.
 
 These deterministic checks do not prove a consumer's CSP, live Turnstile
 hostname policy, Accounts delivery, or provider retention. Verify those facts

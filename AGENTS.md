@@ -6,6 +6,7 @@
 - `scripts/` builds checked JavaScript and declaration artifacts and verifies the packed boundary.
 - `dist/` contains generated package artifacts committed for immutable Git consumers.
 - `.agents/skills/` contains the portable five-skill phased planning and execution pack.
+- `.agents/skills/verify-site-footer/` owns the isolated real-browser footer verifier and feature map.
 
 # Guidelines
 
@@ -18,4 +19,5 @@
 - Require one explicit public Turnstile site key for signup. Bind its managed interaction-only widget to the audience-derived action, load only Cloudflare's exact script origin, reset expired or failed proofs, and never expose the private secret.
 - Bundle the reviewed HugeIcons vectors and retain their attribution so consumers do not inherit an icon-library runtime dependency.
 - Commit generated `dist/` artifacts only through the checked build. Never edit them by hand.
+- Keep browser verification local, synthetic, loopback-only, and development-only. It may replace Turnstile and Accounts at their browser boundaries, but it must drive the real React footer and retain screenshots outside disposable runtime state.
 - Deliver changes through a current-head pull request after the initial repository bootstrap. Never force-push.
