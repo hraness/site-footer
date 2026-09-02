@@ -35,7 +35,7 @@ export type HranessMailingListRenderState = Readonly<{
     email: string;
     kind: "verification-error";
 }>;
-export type HranessSocialPlatform = "x" | "instagram" | "linkedin" | "bluesky" | "threads" | "github" | "tiktok" | "reddit" | "twitch" | "youtube";
+export type HranessSocialPlatform = "substack" | "x" | "instagram" | "linkedin" | "bluesky" | "threads" | "github" | "tiktok" | "reddit" | "twitch" | "youtube";
 export interface HranessSocialLink {
     readonly platform: HranessSocialPlatform;
     readonly label: string;
@@ -43,6 +43,11 @@ export interface HranessSocialLink {
     readonly href: string;
 }
 export declare const HRANESS_SOCIAL_LINKS: readonly [{
+    readonly platform: "substack";
+    readonly label: "Hraness on Substack";
+    readonly title: "Substack";
+    readonly href: "https://substack.com/@hraness";
+}, {
     readonly platform: "x";
     readonly label: "Hraness on X";
     readonly title: "X";

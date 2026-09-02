@@ -40,7 +40,7 @@ interface TurnstileRenderOptions {
   readonly appearance: "interaction-only";
   readonly callback: (token: string) => void;
   readonly execution: "render";
-  readonly "error-callback": () => void;
+  readonly "error-callback": (errorCode?: string) => void;
   readonly "expired-callback": () => void;
   readonly "refresh-expired": "auto";
   readonly "refresh-timeout": "auto";
@@ -207,8 +207,44 @@ export function HranessSiteFooter({
     let cancelled = false;
     let ownedWidget: TurnstileWidgetId | null = null;
 
-    const resetWidget = () => {
+    const setVerificationPending = () => {
       turnstileToken.current = null;
+      const button = footer.current?.querySelector<HTMLButtonElement>(
+        `button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`,
+      );
+      if (button === null || button === undefined) return;
+      button.disabled = true;
+      button.setAttribute("aria-disabled", "true");
+      button.textContent = "Verifying…";
+    };
+    const setVerificationReady = (token: string) => {
+      turnstileToken.current = token;
+      const form = footer.current?.querySelector<HTMLFormElement>(
+        `form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`,
+      );
+      const button = form?.querySelector<HTMLButtonElement>(
+        `button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`,
+      );
+      if (button !== null && button !== undefined) {
+        button.disabled = false;
+        button.removeAttribute("aria-disabled");
+        button.textContent = "Subscribe";
+      }
+      if (form?.dataset.state === "verification-error") {
+        form.dataset.state = "idle";
+        const status = form.querySelector<HTMLElement>(
+          `[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`,
+        );
+        if (status !== null) {
+          status.setAttribute("aria-live", "polite");
+          status.setAttribute("role", "status");
+          status.textContent = "";
+        }
+      }
+    };
+
+    const resetWidget = () => {
+      setVerificationPending();
       if (cancelled || ownedWidget === null) return;
       try {
         turnstileApi.current?.reset(ownedWidget);
@@ -216,17 +252,32 @@ export function HranessSiteFooter({
         setWidgetRevision((revision) => revision + 1);
       }
     };
-    const reportChallengeError = () => {
+    const reportChallengeError = (_errorCode?: string) => {
       if (cancelled) return;
-      const email = footer.current
-        ?.querySelector<HTMLInputElement>('input[name="email"]')
-        ?.value ?? "";
-      resetWidget();
-      setState({
-        audience: mailingList.audience,
-        email,
-        kind: "verification-error",
-      });
+      setVerificationPending();
+      const form = footer.current?.querySelector<HTMLFormElement>(
+        `form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`,
+      );
+      if (form === null || form === undefined) return;
+      form.dataset.state = "verification-error";
+      const status = form.querySelector<HTMLElement>(
+        `[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`,
+      );
+      if (status !== null) {
+        status.setAttribute("aria-live", "assertive");
+        status.setAttribute("role", "alert");
+        status.textContent = "Security check failed. Try again.";
+      }
+      const button = form.querySelector<HTMLButtonElement>(
+        `button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`,
+      );
+      if (button !== null) {
+        button.disabled = false;
+        button.removeAttribute("aria-disabled");
+        button.textContent = "Retry security check";
+      }
+      form.querySelector<HTMLInputElement>('input[name="email"]')
+        ?.focus({ preventScroll: true });
     };
 
     void loadTurnstile(turnstileScriptNonce).then((api) => {
@@ -246,7 +297,7 @@ export function HranessSiteFooter({
             reportChallengeError();
             return;
           }
-          turnstileToken.current = token;
+          setVerificationReady(token);
         },
         execution: "render",
         "error-callback": reportChallengeError,
@@ -281,7 +332,7 @@ export function HranessSiteFooter({
         turnstileWidget.current = null;
       }
     };
-  }, [mailingListKey, renderState.kind, turnstileScriptNonce, widgetRevision]);
+  }, [mailingListKey, renderState.kind, showBrand, turnstileScriptNonce, widgetRevision]);
 
   useEffect(() => {
     if (renderState.kind === "idle") return;
@@ -323,12 +374,26 @@ export function HranessSiteFooter({
     const email = emailControl.value;
     const token = turnstileToken.current;
     if (!isTurnstileToken(token)) {
-      setState({
-        audience: mailingList.audience,
-        email,
-        kind: "verification-error",
-      });
-      setWidgetRevision((revision) => revision + 1);
+      if (target.dataset.state === "verification-error") {
+        target.dataset.state = "idle";
+        const status = target.querySelector<HTMLElement>(
+          `[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`,
+        );
+        if (status !== null) {
+          status.setAttribute("aria-live", "polite");
+          status.setAttribute("role", "status");
+          status.textContent = "";
+        }
+        const button = target.querySelector<HTMLButtonElement>(
+          `button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`,
+        );
+        if (button !== null) {
+          button.disabled = true;
+          button.setAttribute("aria-disabled", "true");
+          button.textContent = "Verifying…";
+        }
+        setWidgetRevision((revision) => revision + 1);
+      }
       return;
     }
     const body = new FormData();
@@ -368,8 +433,9 @@ export function HranessSiteFooter({
       renderState,
       "explicit",
     ),
-    [mailingList, renderState, showBrand],
+    [mailingListKey, renderState, showBrand],
   );
+  const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
 
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
@@ -379,7 +445,7 @@ export function HranessSiteFooter({
     "data-slot": HRANESS_FOOTER_SLOT,
     id: HRANESS_FOOTER_SLOT,
     // The HTML is composed only from validated package-owned constants and state.
-    dangerouslySetInnerHTML: { __html: innerHtml },
+    dangerouslySetInnerHTML: innerHtmlProp,
     onSubmit: handleSubmit,
     ref: footer,
   });

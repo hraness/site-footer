@@ -24,7 +24,7 @@ interface TurnstileOptions {
   readonly appearance: string;
   readonly callback: (token: string) => void;
   readonly execution: string;
-  readonly "error-callback": () => void;
+  readonly "error-callback": (errorCode?: string) => void;
   readonly "expired-callback": () => void;
   readonly "refresh-expired": string;
   readonly "refresh-timeout": string;
@@ -129,8 +129,8 @@ window.turnstile = Object.freeze({
     marker.textContent = "Synthetic Turnstile boundary ready";
     container.replaceChildren(marker);
     queueMicrotask(() => {
-      if (selectedState === "verification-error") options["error-callback"]();
-      else options.callback(`fixture-token-${String(renderCount)}`);
+      if (selectedState === "verification-error") options["error-callback"]("110200");
+      else if (selectedState !== "idle") options.callback(`fixture-token-${String(renderCount)}`);
     });
     return `fixture-widget-${String(renderCount)}`;
   },

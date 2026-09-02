@@ -83,7 +83,9 @@ if (
   || !html.includes('data-response-field-name="cf-turnstile-response"')
   || !html.includes(`src="${root.HRANESS_TURNSTILE_SCRIPT_URL}"`)
   || !html.includes('nonce="cGFja2FnZS1zbW9rZS0x"')
-  || html.includes("substack.com")
+  || !html.includes('href="https://substack.com/@hraness"')
+  || html.indexOf('href="https://substack.com/@hraness"')
+    > html.indexOf('href="https://x.com/hraness"')
 ) {
   throw new Error("The built root export lost its closed mailing-list contract.");
 }

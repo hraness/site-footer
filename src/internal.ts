@@ -55,6 +55,7 @@ export type HranessMailingListRenderState =
   | Readonly<{ audience: string; email: string; kind: "verification-error" }>;
 
 export type HranessSocialPlatform =
+  | "substack"
   | "x"
   | "instagram"
   | "linkedin"
@@ -74,6 +75,12 @@ export interface HranessSocialLink {
 }
 
 export const HRANESS_SOCIAL_LINKS = [
+  {
+    platform: "substack",
+    label: "Hraness on Substack",
+    title: "Substack",
+    href: "https://substack.com/@hraness",
+  },
   {
     platform: "x",
     label: "Hraness on X",
@@ -136,7 +143,13 @@ export const HRANESS_SOCIAL_LINKS = [
   },
 ] as const satisfies ReadonlyArray<HranessSocialLink>;
 
+const SUBSTACK_ICON = [["path", {
+  d: "M22.539 8.242H1.46V5.406h21.08v2.836ZM1.46 10.812v2.836h21.08v-2.836H1.46ZM22.54 16.218V24L12 18.11 1.46 24v-7.782h21.08ZM1.46 0v2.836h21.08V0H1.46Z",
+  fill: "currentColor",
+}]] as const satisfies IconDefinition;
+
 const ICONS: Readonly<Record<HranessSocialPlatform, IconDefinition>> = {
+  substack: SUBSTACK_ICON,
   x: NewTwitterIcon as unknown as IconDefinition,
   instagram: InstagramIcon as unknown as IconDefinition,
   linkedin: Linkedin01Icon as unknown as IconDefinition,
@@ -278,10 +291,21 @@ function renderMailingList(
   const pendingAttributes = state.kind === "pending"
     ? ' aria-busy="true"'
     : "";
-  const buttonAttributes = state.kind === "pending"
+  const verificationRetry = turnstileMode === "explicit"
+    && state.kind === "verification-error";
+  const verificationPending = turnstileMode === "explicit"
+    && state.kind !== "pending"
+    && !verificationRetry;
+  const buttonAttributes = state.kind === "pending" || verificationPending
     ? ' aria-disabled="true" disabled=""'
     : "";
-  const buttonLabel = state.kind === "pending" ? "Subscribing…" : "Subscribe";
+  const buttonLabel = state.kind === "pending"
+    ? "Subscribing…"
+    : verificationRetry
+    ? "Retry security check"
+    : verificationPending
+    ? "Verifying…"
+    : "Subscribe";
   const statusAttributes = state.kind === "error" || state.kind === "verification-error"
     ? ' aria-live="assertive" role="alert"'
     : ' aria-live="polite" role="status"';
@@ -296,7 +320,7 @@ function renderMailingList(
   const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
   const turnstile = `<div class="hraness-site-footer__turnstile${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
 
-  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
+  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
 }
 
 export function renderHranessSiteFooterInnerHtml(

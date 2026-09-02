@@ -76,6 +76,12 @@ var TURNSTILE_SITEKEY_PATTERN = /^[A-Za-z0-9_-]+$/u;
 var TURNSTILE_SCRIPT_NONCE_PATTERN = /^[A-Za-z0-9+/_-]+={0,2}$/u;
 var HRANESS_SOCIAL_LINKS = [
   {
+    platform: "substack",
+    label: "Hraness on Substack",
+    title: "Substack",
+    href: "https://substack.com/@hraness"
+  },
+  {
     platform: "x",
     label: "Hraness on X",
     title: "X",
@@ -136,7 +142,12 @@ var HRANESS_SOCIAL_LINKS = [
     href: "https://www.youtube.com/@hraness"
   }
 ];
+var SUBSTACK_ICON = [["path", {
+  d: "M22.539 8.242H1.46V5.406h21.08v2.836ZM1.46 10.812v2.836h21.08v-2.836H1.46ZM22.54 16.218V24L12 18.11 1.46 24v-7.782h21.08ZM1.46 0v2.836h21.08V0H1.46Z",
+  fill: "currentColor"
+}]];
 var ICONS = {
+  substack: SUBSTACK_ICON,
   x: NewTwitterIcon,
   instagram: InstagramIcon,
   linkedin: Linkedin01Icon,
@@ -221,14 +232,16 @@ function renderMailingList(mailingList, state, turnstileMode) {
   const stateKind = state.kind;
   const email = state.kind === "pending" || state.kind === "error" || state.kind === "verification-error" ? ` value="${escapeAttribute(state.email)}"` : "";
   const pendingAttributes = state.kind === "pending" ? ' aria-busy="true"' : "";
-  const buttonAttributes = state.kind === "pending" ? ' aria-disabled="true" disabled=""' : "";
-  const buttonLabel = state.kind === "pending" ? "Subscribing…" : "Subscribe";
+  const verificationRetry = turnstileMode === "explicit" && state.kind === "verification-error";
+  const verificationPending = turnstileMode === "explicit" && state.kind !== "pending" && !verificationRetry;
+  const buttonAttributes = state.kind === "pending" || verificationPending ? ' aria-disabled="true" disabled=""' : "";
+  const buttonLabel = state.kind === "pending" ? "Subscribing…" : verificationRetry ? "Retry security check" : verificationPending ? "Verifying…" : "Subscribe";
   const statusAttributes = state.kind === "error" || state.kind === "verification-error" ? ' aria-live="assertive" role="alert"' : ' aria-live="polite" role="status"';
   const statusCopy = state.kind === "pending" ? "Submitting your email…" : state.kind === "error" ? "Couldn't subscribe. Try again." : state.kind === "verification-error" ? "Security check failed. Try again." : "";
   const turnstileAction = getHranessMailingTurnstileAction(mailingList.audience);
   const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
   const turnstile = `<div class="hraness-site-footer__turnstile${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
-  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
+  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
 }
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, turnstileMode = "implicit", turnstileScriptNonce) {
   const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, turnstileMode);
@@ -357,8 +370,36 @@ function HranessSiteFooter({
     }
     let cancelled = false;
     let ownedWidget = null;
-    const resetWidget = () => {
+    const setVerificationPending = () => {
       turnstileToken.current = null;
+      const button = footer.current?.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
+      if (button === null || button === undefined)
+        return;
+      button.disabled = true;
+      button.setAttribute("aria-disabled", "true");
+      button.textContent = "Verifying…";
+    };
+    const setVerificationReady = (token) => {
+      turnstileToken.current = token;
+      const form = footer.current?.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
+      const button = form?.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
+      if (button !== null && button !== undefined) {
+        button.disabled = false;
+        button.removeAttribute("aria-disabled");
+        button.textContent = "Subscribe";
+      }
+      if (form?.dataset.state === "verification-error") {
+        form.dataset.state = "idle";
+        const status = form.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
+        if (status !== null) {
+          status.setAttribute("aria-live", "polite");
+          status.setAttribute("role", "status");
+          status.textContent = "";
+        }
+      }
+    };
+    const resetWidget = () => {
+      setVerificationPending();
       if (cancelled || ownedWidget === null)
         return;
       try {
@@ -367,16 +408,27 @@ function HranessSiteFooter({
         setWidgetRevision((revision) => revision + 1);
       }
     };
-    const reportChallengeError = () => {
+    const reportChallengeError = (_errorCode) => {
       if (cancelled)
         return;
-      const email = footer.current?.querySelector('input[name="email"]')?.value ?? "";
-      resetWidget();
-      setState({
-        audience: mailingList.audience,
-        email,
-        kind: "verification-error"
-      });
+      setVerificationPending();
+      const form = footer.current?.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
+      if (form === null || form === undefined)
+        return;
+      form.dataset.state = "verification-error";
+      const status = form.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
+      if (status !== null) {
+        status.setAttribute("aria-live", "assertive");
+        status.setAttribute("role", "alert");
+        status.textContent = "Security check failed. Try again.";
+      }
+      const button = form.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
+      if (button !== null) {
+        button.disabled = false;
+        button.removeAttribute("aria-disabled");
+        button.textContent = "Retry security check";
+      }
+      form.querySelector('input[name="email"]')?.focus({ preventScroll: true });
     };
     loadTurnstile(turnstileScriptNonce).then((api) => {
       if (cancelled)
@@ -395,7 +447,7 @@ function HranessSiteFooter({
             reportChallengeError();
             return;
           }
-          turnstileToken.current = token;
+          setVerificationReady(token);
         },
         execution: "render",
         "error-callback": reportChallengeError,
@@ -427,7 +479,7 @@ function HranessSiteFooter({
         turnstileWidget.current = null;
       }
     };
-  }, [mailingListKey, renderState.kind, turnstileScriptNonce, widgetRevision]);
+  }, [mailingListKey, renderState.kind, showBrand, turnstileScriptNonce, widgetRevision]);
   useEffect(() => {
     if (renderState.kind === "idle")
       return;
@@ -453,12 +505,22 @@ function HranessSiteFooter({
     const email = emailControl.value;
     const token = turnstileToken.current;
     if (!isTurnstileToken(token)) {
-      setState({
-        audience: mailingList.audience,
-        email,
-        kind: "verification-error"
-      });
-      setWidgetRevision((revision) => revision + 1);
+      if (target.dataset.state === "verification-error") {
+        target.dataset.state = "idle";
+        const status = target.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
+        if (status !== null) {
+          status.setAttribute("aria-live", "polite");
+          status.setAttribute("role", "status");
+          status.textContent = "";
+        }
+        const button = target.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
+        if (button !== null) {
+          button.disabled = true;
+          button.setAttribute("aria-disabled", "true");
+          button.textContent = "Verifying…";
+        }
+        setWidgetRevision((revision) => revision + 1);
+      }
       return;
     }
     const body = new FormData;
@@ -489,7 +551,8 @@ function HranessSiteFooter({
       setState({ audience: mailingList.audience, email, kind: "error" });
     });
   }, [mailingListKey, renderState.kind]);
-  const innerHtml = useMemo(() => renderHranessSiteFooterInnerHtml(showBrand, mailingList, renderState, "explicit"), [mailingList, renderState, showBrand]);
+  const innerHtml = useMemo(() => renderHranessSiteFooterInnerHtml(showBrand, mailingList, renderState, "explicit"), [mailingListKey, renderState, showBrand]);
+  const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
     className: HRANESS_FOOTER_CLASS_NAME,
@@ -497,7 +560,7 @@ function HranessSiteFooter({
     "data-mailing-list": mailingList.kind,
     "data-slot": HRANESS_FOOTER_SLOT,
     id: HRANESS_FOOTER_SLOT,
-    dangerouslySetInnerHTML: { __html: innerHtml },
+    dangerouslySetInnerHTML: innerHtmlProp,
     onSubmit: handleSubmit,
     ref: footer
   });
@@ -506,4 +569,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=8108DB0EFF636C2E64756E2164756E21
+//# debugId=BFEFBA43F35045DD64756E2164756E21

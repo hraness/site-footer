@@ -50,6 +50,8 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - wide brand, mailing, and social centerlines within 1 CSS pixel;
 - equal input and submit heights;
 - an absolute hidden idle status that does not enlarge its form row;
+- a first-position Substack target visible at wide and compact widths;
+- visible status surfaces that clear the fixed bar's top edge;
 - no compact horizontal overflow;
 - declared minimum target sizes; and
 - two-sample Direct stability with no named-layout violations.

@@ -85,6 +85,22 @@ describe("site-footer browser verifier", () => {
     ]);
   });
 
+  test("keeps visible status overlays clear of the fixed bar", () => {
+    const contract = parseDirectNamedLayoutContract(
+      createLayoutContract("wide", [...boxes.map(({ name }) => name), "status"]),
+    );
+    expect(contract.ok).toBeTrue();
+    if (!contract.ok) return;
+
+    expect(contract.value.rules).toContainEqual({
+      first: "status",
+      id: "wide.status-inner.clear",
+      kind: "no-overlap",
+      second: "inner",
+      tolerance: 0,
+    });
+  });
+
   test("requires the complete interrupted-server command before cleanup", () => {
     const expected = [
       "/opt/bun",

@@ -38,6 +38,9 @@ test("the package owns compact centered controls and a non-reserving status surf
     /--hraness-site-footer-mailing-overlay-clearance: calc\([\s\S]*?var\(--hraness-site-footer-control-block-size\)[\s\S]*?\+ var\(--hraness-site-footer-row-gap\)[\s\S]*?\);/u,
   );
   expect(css).toMatch(
+    /--hraness-site-footer-mailing-overlay-offset: calc\([\s\S]*?var\(--hraness-site-footer-mailing-overlay-clearance\)[\s\S]*?\+ var\(--hraness-site-footer-padding-block\)[\s\S]*?\+ 1px/u,
+  );
+  expect(css).toMatch(
     /\.hraness-site-footer__mailing-controls \{[\s\S]*?display: flex;/u,
   );
   expect(css).toMatch(
@@ -53,14 +56,14 @@ test("the package owns compact centered controls and a non-reserving status surf
     "--hraness-site-footer-action-foreground: var(--plain-background, var(--background, Canvas))",
   );
   expect(css).toMatch(
-    /\.hraness-site-footer__mailing-status \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\([\s\S]*?100% \+ var\(--hraness-site-footer-mailing-overlay-clearance\) \+ 0\.375rem[\s\S]*?\);[\s\S]*?background: var\(--hraness-site-footer-background\);[\s\S]*?opacity: 0;[\s\S]*?visibility: hidden;/u,
+    /\.hraness-site-footer__mailing-status \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\([\s\S]*?100% \+ var\(--hraness-site-footer-mailing-overlay-offset\)[\s\S]*?\+ var\(--hraness-site-footer-row-gap\)[\s\S]*?\);[\s\S]*?background: var\(--hraness-site-footer-background\);[\s\S]*?opacity: 0;[\s\S]*?visibility: hidden;/u,
   );
   expect(css).toMatch(
     /\.hraness-site-footer__mailing:not\(\[data-state="idle"\]\)[\s\S]*?\.hraness-site-footer__mailing-status \{[\s\S]*?opacity: 1;[\s\S]*?visibility: visible;/u,
   );
   expect(css).toContain(".hraness-site-footer__visually-hidden");
   expect(css).toMatch(
-    /\.hraness-site-footer__turnstile \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\([\s\S]*?100% \+ var\(--hraness-site-footer-mailing-overlay-clearance\)[\s\S]*?\+ var\(--hraness-site-footer-status-block-size\) \+ 0\.75rem[\s\S]*?\);[\s\S]*?max-inline-size: 26rem;/u,
+    /\.hraness-site-footer__turnstile \{[\s\S]*?position: absolute;[\s\S]*?inset-block-end: calc\([\s\S]*?100% \+ var\(--hraness-site-footer-mailing-overlay-offset\)[\s\S]*?\+ var\(--hraness-site-footer-status-block-size\)[\s\S]*?\+ var\(--hraness-site-footer-row-gap\)[\s\S]*?\+ var\(--hraness-site-footer-row-gap\)[\s\S]*?\);[\s\S]*?max-inline-size: 26rem;/u,
   );
   expect(css).toMatch(
     /@media \(min-width: 47\.5rem\)[\s\S]*?\.hraness-site-footer\[data-mailing-list="signup"\] \{[\s\S]*?--hraness-site-footer-mailing-overlay-clearance: 0rem;/u,
@@ -91,19 +94,22 @@ test("social links keep their canonical mobile subset and reveal later around si
     /\.hraness-site-footer__socials > li \{[\s\S]*?display: none;[\s\S]*?flex: 0 0 var\(--hraness-site-footer-social-target\);/u,
   );
   expect(css).toMatch(
-    /\.hraness-site-footer__socials > li:first-child,[\s\S]*?nth-child\(3\),[\s\S]*?nth-child\(6\) \{[\s\S]*?display: block;/u,
+    /\.hraness-site-footer__socials > li:first-child,[\s\S]*?nth-child\(2\),[\s\S]*?nth-child\(4\),[\s\S]*?nth-child\(7\) \{[\s\S]*?display: block;/u,
   );
   expect(css).toMatch(
     /\.hraness-site-footer__links \{[\s\S]*?container-name: hraness-footer-links;[\s\S]*?container-type: inline-size;[\s\S]*?inline-size: 100%;/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer-links \(min-width: 252px\)[\s\S]*?nth-child\(-n \+ 6\)/u,
+    /@container hraness-footer-links \(min-width: 274px\)[\s\S]*?nth-child\(-n \+ 5\)/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer-links \(min-width: 336px\)[\s\S]*?nth-child\(-n \+ 8\)/u,
+    /@container hraness-footer-links \(min-width: 366px\)[\s\S]*?nth-child\(-n \+ 8\)/u,
   );
   expect(css).toMatch(
-    /@container hraness-footer-links \(min-width: 420px\)[\s\S]*?\.hraness-site-footer__socials > li/u,
+    /@container hraness-footer-links \(min-width: 458px\)[\s\S]*?nth-child\(-n \+ 10\)/u,
+  );
+  expect(css).toMatch(
+    /@container hraness-footer-links \(min-width: 504px\)[\s\S]*?\.hraness-site-footer__socials > li/u,
   );
   expect(css).not.toMatch(/min-width: (?:704|760|768|832|960|1120|1280)px/u);
 });
