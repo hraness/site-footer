@@ -92,19 +92,19 @@ provide a stable lowercase product audience and a public Turnstile site key:
 />
 ```
 
-Use the umbrella audience only on hraness.com, where the page already carries
-the organization identity:
+Hraness.com is the exception: its page owns the canonical Hraness Substack
+signup, so keep the shared footer social-only there:
 
 ```tsx
 <HranessSiteFooter
-  mailingList={{
-    audience: "hraness",
-    kind: "signup",
-    turnstileSitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
-  }}
+  mailingList={{ kind: "none" }}
   showBrand={false}
 />
 ```
+
+Do not configure the Accounts `hraness` audience on Hraness.com. Product sites
+may use an explicit product audience as shown above; the organization homepage
+uses its page-owned Substack embed instead.
 
 The configured signup follows one checked state path:
 

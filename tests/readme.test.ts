@@ -74,6 +74,14 @@ describe("README product contract", () => {
     expect(document.querySelectorAll("a")).toHaveLength(11);
   });
 
+  test("keeps Hraness.com on its page-owned Substack signup", () => {
+    expect(normalizedReadme).toContain(
+      "Hraness.com is the exception: its page owns the canonical Hraness Substack signup",
+    );
+    expect(readme).toContain("mailingList={{ kind: \"none\" }}");
+    expect(readme).not.toContain('audience: "hraness"');
+  });
+
   test("states the mailing transport and product-versus-package authority", () => {
     for (const value of [
       HRANESS_MAILING_SUBSCRIBE_URL,
