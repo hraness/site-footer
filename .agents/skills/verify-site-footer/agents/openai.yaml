@@ -1,0 +1,6 @@
+interface:
+  display_name: "Verify Hraness Site Footer"
+  short_description: "Prove shared footer states and layout"
+  default_prompt: "Use $verify-site-footer to run the isolated package browser verifier and summarize its retained evidence."
+policy:
+  allow_implicit_invocation: true

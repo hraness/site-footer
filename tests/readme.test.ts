@@ -94,7 +94,7 @@ describe("README product contract", () => {
 
   test("documents only checked repository commands and explicit evidence limits", () => {
     const documentedScripts = [...readme.matchAll(/bun run ([\w:-]+)/gu)]
-      .map((match) => match[1]);
+      .flatMap((match) => match[1] === undefined ? [] : [match[1]]);
 
     expect(documentedScripts.length).toBeGreaterThan(0);
     for (const script of documentedScripts) {
