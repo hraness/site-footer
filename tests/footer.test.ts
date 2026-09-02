@@ -24,6 +24,7 @@ const productMailingList = {
 } as const satisfies HranessMailingListConfig;
 
 const expectedSocialLinks = [
+  ["substack", "https://substack.com/@hraness"],
   ["x", "https://x.com/hraness"],
   ["instagram", "https://www.instagram.com/hraness/"],
   ["linkedin", "https://www.linkedin.com/in/hraness"],
@@ -105,7 +106,7 @@ describe("Hraness site footer", () => {
     expect(links.map((link) => link.getAttribute("href"))).toEqual(
       expectedSocialLinks.map(([, href]) => href),
     );
-    expect(html).not.toContain("substack.com");
+    expect(links[0]?.getAttribute("aria-label")).toBe("Hraness on Substack");
 
     for (const link of links) {
       expect(link.getAttribute("aria-label")).toBeTruthy();
@@ -174,7 +175,7 @@ describe("Hraness site footer", () => {
     expect(html.indexOf('data-slot="hraness-mailing-list-signup"')).toBeLessThan(
       html.indexOf('aria-label="Hraness links"'),
     );
-    expect(html).not.toContain("substack.com");
+    expect(socialLinks[0]?.getAttribute("aria-label")).toBe("Hraness on Substack");
   });
 
   test("supports strict CSP nonces without weakening the exact Turnstile URL", () => {
@@ -231,7 +232,7 @@ describe("Hraness site footer", () => {
     expect(footer?.querySelector('[data-slot="hraness-mark"]')).toBeNull();
     expect(footer?.querySelector('input[name="audience"]')?.getAttribute("value"))
       .toBe("soundfish");
-    expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(10);
+    expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(11);
   });
 
   test("uses the exact raw Ra mark without image or mask dependencies", () => {

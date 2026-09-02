@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.4.4
+bun add github:hraness/site-footer#v0.4.5
 ```
 
 Start with the network footer and no mailing form:
@@ -36,7 +36,7 @@ export function ProductLayout({
 ```
 
 That render has the stable `id="hraness-site-footer"`, one Hraness home link
-and 10 specifically named social links, and no form, Turnstile script, request,
+and 11 specifically named social links, and no form, Turnstile script, request,
 cookie, or local storage. The links and inline decorative vectors work without
 client-side JavaScript.
 
@@ -110,8 +110,10 @@ The configured signup follows one checked state path:
 
 1. The footer renders a required email field, a product audience, the fixed
    package source, and an interaction-only Turnstile widget.
-2. Turnstile binds its proof to `mailing_<audience>`. An expired or failed
-   proof resets before another request.
+2. Turnstile binds its proof to `mailing_<audience>`. The React submit control
+   stays disabled while verification is pending. An expired proof resets
+   automatically; a genuine verification failure exposes a bounded retry that
+   resets the widget before another request.
 3. The enhanced React form sends one multipart `POST` with
    `credentials: "omit"` only after it has a bounded proof.
 4. The button and live status move through pending, accepted, retryable request
@@ -137,7 +139,7 @@ to Accounts.
 
 | Package-owned | Consumer-owned |
 | --- | --- |
-| Ra mark, Hraness home destination, 10 social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
+| Ra mark, Hraness home destination, 11 social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
 | Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
 | Static and React markup, Turnstile action derivation, proof handling, and fixed script origins | The public site key, production hostname policy, and private Turnstile secret |
 | Responsive CSS, coarse-pointer targets, focus treatment, forced-color handling, and flow reservation | Product theme variables, CSP allowlist or nonce, and optional `--hraness-site-footer-z-index` |
@@ -185,8 +187,9 @@ The stylesheet follows `--plain-*` or common product theme variables when
 present and falls back to system colors. The footer reserves the same amount of
 document flow that its fixed bar occupies. A narrow signup footer uses one row
 for identity and essential links plus one row for the form; at `47.5rem` it
-moves to one aligned row. X, LinkedIn, and GitHub stay visible in the smallest
-layout, with the remaining social links revealed as room becomes available.
+moves to one aligned row. Substack is always the first social link; Substack,
+X, LinkedIn, and GitHub stay visible in the smallest layout, with the remaining
+social links revealed as room becomes available.
 
 The CSS includes safe-area padding, visible focus outlines, 44-pixel
 coarse-pointer targets, forced-color rules, and transitions only when the user

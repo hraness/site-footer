@@ -346,6 +346,15 @@ export function createLayoutContract(
       });
     }
   }
+  if (names.has("status")) {
+    add({
+      first: "status",
+      id: `${viewport}.status-inner.clear`,
+      kind: "no-overlap",
+      second: "inner",
+      tolerance: 0,
+    });
+  }
   if (names.has("controls")) {
     add({
       id: `${viewport}.controls.inside`,
@@ -1064,6 +1073,15 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   const mailing = document.querySelector(".hraness-site-footer__mailing")
     ?? required(".hraness-site-footer__mailing-confirmation", "Footer mailing surface");
   const socials = required(".hraness-site-footer__socials", "Footer social group");
+  const socialLinks = [...document.querySelectorAll(".hraness-site-footer__social-link")];
+  const substack = socialLinks[0];
+  if (
+    !(substack instanceof HTMLAnchorElement)
+    || substack.href !== "https://substack.com/@hraness"
+    || substack.getBoundingClientRect().width <= 0
+  ) {
+    throw new Error("Substack is not the first visible social link.");
+  }
   const boxes = [
     rect("footer", footer),
     rect("inner", inner),
@@ -1082,7 +1100,7 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     status instanceof HTMLElement
     && getComputedStyle(status).visibility !== "hidden"
   ) boxes.push(rect("status", status));
-  [...document.querySelectorAll(".hraness-site-footer__social-link")]
+  socialLinks
     .filter((element) => {
       const box = element.getBoundingClientRect();
       return box.width > 0 && box.height > 0;
@@ -1197,8 +1215,8 @@ function assertManualGeometry(
   if (Math.abs(geometry.footerHeight - geometry.innerHeight) > 0.5) {
     throw new Error(`${state}/${viewport} fixed and reserved footer heights diverge.`);
   }
-  if (geometry.visibleSocialTargets.length < 3) {
-    throw new Error(`${state}/${viewport} exposes fewer than three essential social targets.`);
+  if (geometry.visibleSocialTargets.length < 4) {
+    throw new Error(`${state}/${viewport} exposes fewer than four essential social targets.`);
   }
   if (geometry.visibleSocialTargets.some(({ height, width }) => height < 40 || width < 40)) {
     throw new Error(`${state}/${viewport} has a visible social target smaller than 40 CSS pixels.`);
@@ -1388,6 +1406,17 @@ async function driveState(options: {
     options.state,
   );
   assertFixtureState(fixture, options.state);
+  if (options.state === "idle") {
+    const gated = await options.browser.evaluate(
+      `(() => {
+        const button = document.querySelector('button[type="submit"]');
+        return button instanceof HTMLButtonElement
+          && button.disabled
+          && button.textContent === "Verifying…";
+      })()`,
+    );
+    if (gated !== true) throw new Error("Idle signup is not gated on Turnstile readiness.");
+  }
   if (options.state === "pending" || options.state === "accepted") {
     const focused = await options.browser.evaluate(
       "document.activeElement?.matches('[data-slot=\"hraness-mailing-list-status\"]') === true",

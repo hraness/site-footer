@@ -36,6 +36,10 @@ test("the idle React adapter preserves content while selecting explicit Turnstil
   })
     .replace("hraness-site-footer__turnstile cf-turnstile", "hraness-site-footer__turnstile")
     .replace(
+      'data-slot="hraness-mailing-list-signup-submit" type="submit">Subscribe</button>',
+      'data-slot="hraness-mailing-list-signup-submit" type="submit" aria-disabled="true" disabled="">Verifying…</button>',
+    )
+    .replace(
       `<script async="" data-slot="hraness-turnstile-script" defer="" src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>`,
       "",
     );
@@ -46,10 +50,20 @@ test("the idle React adapter preserves content while selecting explicit Turnstil
   );
   expect(signupHtml).not.toContain("challenges.cloudflare.com/turnstile/v0/api.js");
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
+  expect(signupHtml).toContain('disabled="">Verifying…</button>');
   expect(signupHtml).not.toContain('data-slot="hraness-mark"');
 });
 
 test("the shared renderer bounds pending, accepted, and error states", () => {
+  const verifying = renderHranessSiteFooterInnerHtml(
+    true,
+    mailingList,
+    { kind: "idle" },
+    "explicit",
+  );
+  expect(verifying).toContain('aria-disabled="true" disabled=""');
+  expect(verifying).toContain(">Verifying…</button>");
+
   const pending = renderHranessSiteFooterInnerHtml(true, mailingList, {
     audience: "soundfish",
     email: "reader@example.com",
@@ -91,6 +105,21 @@ test("the shared renderer bounds pending, accepted, and error states", () => {
   expect(verificationError).toContain('data-state="verification-error"');
   expect(verificationError).toContain('aria-live="assertive"');
   expect(verificationError).toContain("Security check failed. Try again.");
+
+  const explicitVerificationError = renderHranessSiteFooterInnerHtml(
+    true,
+    mailingList,
+    {
+      audience: "soundfish",
+      email: "reader@example.com",
+      kind: "verification-error",
+    },
+    "explicit",
+  );
+  expect(explicitVerificationError).toContain(">Retry security check</button>");
+  expect(explicitVerificationError).not.toContain(
+    'type="submit" aria-disabled="true" disabled="">Retry security check',
+  );
 });
 
 test("a stale response state cannot leak across audience changes", () => {
@@ -175,7 +204,7 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     action: string;
     appearance: string;
     callback: (token: string) => void;
-    "error-callback": () => void;
+    "error-callback": (errorCode?: string) => void;
     "expired-callback": () => void;
     "refresh-expired": string;
     execution: string;
@@ -195,7 +224,6 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
       latestTurnstileOptions = options;
       const widget = `widget-${renderedWidgets.length + 1}`;
       renderedWidgets.push(widget);
-      options.callback(`token-${widget}`);
       return widget;
     },
     reset(widget: string) {
@@ -223,6 +251,10 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     const input = form?.querySelector<HTMLInputElement>('input[name="email"]');
     expect(form).not.toBeNull();
     expect(input).not.toBeNull();
+    expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeTrue();
+    expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
+      .toBe("Verifying…");
     input!.value = "reader@example.com";
 
     await act(async () => {
@@ -235,8 +267,8 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
 
     expect(request).toBeUndefined();
     expect(container?.querySelector("form")?.getAttribute("data-state"))
-      .toBe("verification-error");
-    expect(container?.textContent).toContain("Security check failed. Try again.");
+      .toBe("idle");
+    expect(container?.textContent).not.toContain("Security check failed. Try again.");
     const scripts = window.document.querySelectorAll<HTMLScriptElement>(
       `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
     );
@@ -266,17 +298,88 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect(latestTurnstileOptions?.retry).toBe("auto");
     expect(latestTurnstileOptions?.["response-field-name"])
       .toBe("cf-turnstile-response");
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeTrue();
+    const firstTurnstileOptions = latestTurnstileOptions;
+    expect(firstTurnstileOptions).toBeDefined();
+
+    await act(async () => {
+      root.render(
+        <HranessSiteFooter
+          mailingList={mailingList}
+          showBrand={false}
+          turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
+        />,
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(renderedWidgets).toHaveLength(2);
+    expect(removedWidgets).toContain("widget-1");
+    expect(container?.querySelector('[data-slot="hraness-mark"]')).toBeNull();
+    await act(async () => {
+      firstTurnstileOptions?.callback("stale-widget-1-token");
+      await Promise.resolve();
+    });
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeTrue();
+    const toggledInput = container?.querySelector<HTMLInputElement>('input[name="email"]');
+    expect(toggledInput).not.toBeNull();
+    toggledInput!.value = "reader@example.com";
+
+    await act(async () => {
+      latestTurnstileOptions?.["error-callback"]("110200");
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(request).toBeUndefined();
+    expect(container?.querySelector("form")?.getAttribute("data-state"))
+      .toBe("verification-error");
+    expect(container?.textContent).toContain("Security check failed. Try again.");
+    expect(renderedWidgets).toHaveLength(2);
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeFalse();
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
+      .toBe("Retry security check");
+
+    await act(async () => {
+      container?.querySelector("form")?.dispatchEvent(new window.Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(request).toBeUndefined();
+    expect(container?.querySelector("form")?.getAttribute("data-state")).toBe("idle");
+    expect(container?.textContent).not.toContain("Security check failed. Try again.");
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeTrue();
+    expect(renderedWidgets).toHaveLength(3);
+    expect(removedWidgets).toContain("widget-2");
+
+    await act(async () => {
+      latestTurnstileOptions?.callback("token-widget-3");
+      await Promise.resolve();
+    });
+    expect(container?.querySelector("form")?.getAttribute("data-state")).toBe("idle");
+    expect(container?.textContent).not.toContain("Security check failed. Try again.");
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeFalse();
+    expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
+      .toBe("Subscribe");
 
     await act(async () => {
       root.render(
         <HranessSiteFooter
           mailingList={{ ...mailingList }}
+          showBrand={false}
           turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
         />,
       );
       await Promise.resolve();
     });
-    expect(renderedWidgets).toHaveLength(1);
+    expect(renderedWidgets).toHaveLength(3);
 
     const verifiedForm = container?.querySelector<HTMLFormElement>("form");
     expect(verifiedForm).not.toBeNull();
@@ -298,7 +401,7 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect((body as FormData).get("audience")).toBe("soundfish");
     expect((body as FormData).get("email")).toBe("reader@example.com");
     expect((body as FormData).get("source")).toBe("hraness-site-footer");
-    expect((body as FormData).get("cf-turnstile-response")).toBe("token-widget-1");
+    expect((body as FormData).get("cf-turnstile-response")).toBe("token-widget-3");
     expect(container?.querySelector("form")?.getAttribute("data-state")).toBe("pending");
     expect(container?.textContent).toContain("Submitting your email…");
 
