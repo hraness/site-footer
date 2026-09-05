@@ -31,7 +31,6 @@
   );
 
   inline-size: 100%;
-  block-size: var(--hraness-site-footer-bar-block-size);
   color: var(--hraness-site-footer-foreground);
   font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   font-size: 0.875rem;
@@ -49,10 +48,7 @@
   box-sizing: border-box;
   container-name: hraness-footer;
   container-type: inline-size;
-  position: fixed;
-  z-index: var(--hraness-site-footer-z-index, 50);
-  inset-inline: 0;
-  inset-block-end: 0;
+  position: relative;
   display: grid;
   grid-template-areas:
     "brand links"

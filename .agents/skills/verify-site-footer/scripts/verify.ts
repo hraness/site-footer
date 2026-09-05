@@ -144,8 +144,12 @@ interface ManualGeometry {
   readonly controlsHeight: number | null;
   readonly documentScrollWidth: number;
   readonly footerHeight: number;
+  readonly footerPosition: string;
+  readonly footerTop: number;
   readonly formHeight: number | null;
   readonly innerHeight: number;
+  readonly innerPosition: string;
+  readonly innerTop: number;
   readonly inputHeight: number | null;
   readonly mailingHeight: number;
   readonly statusOpacity: number | null;
@@ -557,8 +561,12 @@ function parseManualGeometry(input: unknown): ManualGeometry {
     "controlsHeight",
     "documentScrollWidth",
     "footerHeight",
+    "footerPosition",
+    "footerTop",
     "formHeight",
     "innerHeight",
+    "innerPosition",
+    "innerTop",
     "inputHeight",
     "mailingHeight",
     "statusOpacity",
@@ -585,8 +593,12 @@ function parseManualGeometry(input: unknown): ManualGeometry {
     controlsHeight: optionalNumber(record.controlsHeight, "Controls height"),
     documentScrollWidth: finiteNumber(record.documentScrollWidth, "Document scroll width"),
     footerHeight: finiteNumber(record.footerHeight, "Footer height"),
+    footerPosition: requiredString(record.footerPosition, "Footer position"),
+    footerTop: finiteNumber(record.footerTop, "Footer top"),
     formHeight: optionalNumber(record.formHeight, "Form height"),
     innerHeight: finiteNumber(record.innerHeight, "Inner height"),
+    innerPosition: requiredString(record.innerPosition, "Inner position"),
+    innerTop: finiteNumber(record.innerTop, "Inner top"),
     inputHeight: optionalNumber(record.inputHeight, "Input height"),
     mailingHeight: finiteNumber(record.mailingHeight, "Mailing height"),
     statusOpacity: optionalNumber(record.statusOpacity, "Status opacity"),
@@ -1137,8 +1149,12 @@ const MANUAL_GEOMETRY_EXPRESSION = `(() => {
     controlsHeight: rect(controls)?.height ?? null,
     documentScrollWidth: document.documentElement.scrollWidth,
     footerHeight: footerBox.height,
+    footerPosition: getComputedStyle(footer).position,
+    footerTop: footerBox.top,
     formHeight: rect(document.querySelector(".hraness-site-footer__mailing"))?.height ?? null,
     innerHeight: innerBox.height,
+    innerPosition: getComputedStyle(inner).position,
+    innerTop: innerBox.top,
     inputHeight: rect(input)?.height ?? null,
     mailingHeight: mailingBox.height,
     statusOpacity: statusStyle === null ? null : Number(statusStyle.opacity),
@@ -1213,7 +1229,14 @@ function assertManualGeometry(
     throw new Error(`${state}/${viewport} has horizontal overflow.`);
   }
   if (Math.abs(geometry.footerHeight - geometry.innerHeight) > 0.5) {
-    throw new Error(`${state}/${viewport} fixed and reserved footer heights diverge.`);
+    throw new Error(`${state}/${viewport} footer and inner heights diverge.`);
+  }
+  if (
+    geometry.footerPosition !== "static"
+    || geometry.innerPosition !== "relative"
+    || Math.abs(geometry.footerTop - geometry.innerTop) > 0.5
+  ) {
+    throw new Error(`${state}/${viewport} footer is not in normal document flow.`);
   }
   if (geometry.visibleSocialTargets.length < 4) {
     throw new Error(`${state}/${viewport} exposes fewer than four essential social targets.`);
@@ -1499,7 +1522,7 @@ function assertCrossStateGeometry(evidence: readonly ScenarioEvidence[]): void {
       const found = scenario[viewport].geometry.innerHeight;
       if (Math.abs(found - baseline) > 0.5) {
         throw new Error(
-          `${scenario.state}/${viewport} changes the fixed footer height from idle.`,
+          `${scenario.state}/${viewport} changes the footer height from idle.`,
         );
       }
     }
