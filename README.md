@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.4.5
+bun add github:hraness/site-footer#v0.4.6
 ```
 
 Start with the network footer and no mailing form:
@@ -46,7 +46,7 @@ client-side JavaScript.
 | --- | --- | --- |
 | `@hraness/site-footer` | Render complete HTML into a static template or server response | Framework-neutral ESM with no React import |
 | `@hraness/site-footer/react` | Render the same contract in React and progressively enhance signup states | React client component for React 18 and 19 |
-| `@hraness/site-footer/styles.css` | Apply the fixed responsive bar, theme fallbacks, focus states, and layout reservation | Plain CSS, imported once by the consumer |
+| `@hraness/site-footer/styles.css` | Apply the in-flow responsive footer, theme fallbacks, and focus states | Plain CSS, imported once by the consumer |
 
 The static interface is one function call:
 
@@ -142,7 +142,7 @@ to Accounts.
 | Ra mark, Hraness home destination, 11 social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
 | Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
 | Static and React markup, Turnstile action derivation, proof handling, and fixed script origins | The public site key, production hostname policy, and private Turnstile secret |
-| Responsive CSS, coarse-pointer targets, focus treatment, forced-color handling, and flow reservation | Product theme variables, CSP allowlist or nonce, and optional `--hraness-site-footer-z-index` |
+| Responsive CSS, document-flow placement, coarse-pointer targets, focus treatment, and forced-color handling | Product theme variables and CSP allowlist or nonce |
 | Configuration parsing for audience, site-key, and nonce bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
 
 Consumers must not fork the package action, source, copy, social links, vector
@@ -184,12 +184,15 @@ framework runtime. The React adapter declares `React >=18 <20` and begins with
 the required client-component directive.
 
 The stylesheet follows `--plain-*` or common product theme variables when
-present and falls back to system colors. The footer reserves the same amount of
-document flow that its fixed bar occupies. A narrow signup footer uses one row
-for identity and essential links plus one row for the form; at `47.5rem` it
-moves to one aligned row. Substack is always the first social link; Substack,
-X, LinkedIn, and GitHub stay visible in the smallest layout, with the remaining
-social links revealed as room becomes available.
+present and falls back to system colors. The footer follows the page content in
+normal document flow and requires no viewport overlay or matching space
+reservation. Place it after the page's main content. A host that wants the
+footer at the bottom of a short page can use its own full-height flex or grid
+shell. A narrow signup footer uses one row for identity and essential links
+plus one row for the form; at `47.5rem` it moves to one aligned row. Substack is
+always the first social link; Substack, X, LinkedIn, and GitHub stay visible in
+the smallest layout, with the remaining social links revealed as room becomes
+available.
 
 The CSS includes safe-area padding, visible focus outlines, 44-pixel
 coarse-pointer targets, forced-color rules, and transitions only when the user
@@ -283,7 +286,7 @@ enhance pending, error, focus, and confirmation states without navigation.
 <summary>Can a product change the links or subscribe copy?</summary>
 
 No. Those values are the organization-owned contract. Configure the product
-audience, brand visibility, theme variables, CSP, and z-index instead.
+audience, brand visibility, theme variables, and CSP instead.
 
 </details>
 

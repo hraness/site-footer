@@ -15,13 +15,22 @@ test("the stylesheet keeps responsive, coarse-pointer, focus, and forced-color c
   );
 });
 
-test("the fixed bar reserves one row without signup and responsive space with signup", () => {
-  expect(css).toContain("position: fixed");
-  expect(css).toContain("inset-block-end: 0");
+test("the in-flow footer owns one row without signup and responsive space with signup", () => {
+  expect(css).not.toContain("position: fixed");
+  expect(css).not.toContain("--hraness-site-footer-z-index");
+  const footerRule = /\.hraness-site-footer \{([^}]*)\}/u.exec(css)?.[1];
+  expect(footerRule).toBeDefined();
+  expect(footerRule).not.toMatch(/(?:^|\n)\s*block-size\s*:/u);
   expect(css).toContain("max-inline-size: none");
   expect(css).toContain("block-size: var(--hraness-site-footer-bar-block-size)");
   expect(css).toContain("background: var(--hraness-site-footer-background)");
   expect(css).toContain("env(safe-area-inset-bottom)");
+  expect(css).toMatch(
+    /\.hraness-site-footer__inner \{[\s\S]*?position: relative;[\s\S]*?display: grid;/u,
+  );
+  expect(css).toMatch(
+    /\.hraness-site-footer \{[\s\S]*?inline-size: 100%;[\s\S]*?color:/u,
+  );
   expect(css).toMatch(
     /\.hraness-site-footer\[data-mailing-list="signup"\] \{[\s\S]*?--hraness-site-footer-content-block-size: calc\([\s\S]*?--hraness-site-footer-form-block-size/u,
   );
