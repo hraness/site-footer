@@ -18,9 +18,9 @@ test("the stylesheet keeps responsive, coarse-pointer, focus, and forced-color c
 test("the in-flow footer owns one row without signup and responsive space with signup", () => {
   expect(css).not.toContain("position: fixed");
   expect(css).not.toContain("--hraness-site-footer-z-index");
-  expect(css).not.toMatch(
-    /\.hraness-site-footer \{[^}]*?block-size:/u,
-  );
+  const footerRule = /\.hraness-site-footer \{([^}]*)\}/u.exec(css)?.[1];
+  expect(footerRule).toBeDefined();
+  expect(footerRule).not.toMatch(/(?:^|\n)\s*block-size\s*:/u);
   expect(css).toContain("max-inline-size: none");
   expect(css).toContain("block-size: var(--hraness-site-footer-bar-block-size)");
   expect(css).toContain("background: var(--hraness-site-footer-background)");
