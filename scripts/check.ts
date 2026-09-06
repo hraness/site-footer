@@ -5,6 +5,8 @@ const repository = resolve(import.meta.dir, "..");
 for (const command of [
   [resolve(repository, "node_modules/.bin/tsc"), "--noEmit", "--project", resolve(repository, "tsconfig.json")],
   ["bun", "run", "build"],
+  ["bun", "run", "check:stylex-artifacts"],
+  ["bun", "run", "check:stylex-determinism"],
   ["bun", "run", "test"],
   ["bun", "run", "test:package"],
 ] as const) {

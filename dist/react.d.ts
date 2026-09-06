@@ -13,7 +13,7 @@ export declare function HranessSiteFooter({ mailingList: mailingListInput, showB
     "aria-label": string;
     className: string;
     "data-brand": string;
-    "data-mailing-list": "signup" | "none";
+    "data-mailing-list": "none" | "signup";
     "data-slot": string;
     id: string;
     dangerouslySetInnerHTML: {

@@ -1,7 +1,10 @@
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import assert from "node:assert/strict";
+import { mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { readStylexPackageManifest } from "@hraness/ui/stylex-build";
 
 const repository = resolve(import.meta.dir, "..");
 const CLIENT_COMPONENT_DIRECTIVE = '"use client";';
@@ -12,10 +15,15 @@ const packageJson = JSON.parse(await readFile(resolve(repository, "package.json"
 
 const requiredFiles = [
   "dist/index.js",
+  "dist/index.js.map",
   "dist/index.d.ts",
   "dist/react.js",
+  "dist/react.js.map",
   "dist/react.d.ts",
   "styles.css",
+  "compiler-foundation.css",
+  "dist/stylex.css",
+  "dist/stylex-manifest.json",
   "README.md",
   "LICENSE",
   "THIRD_PARTY_NOTICES.md",
@@ -124,4 +132,38 @@ if (
 }
 if (reactArtifact.includes("jsxDEV") || reactArtifact.includes("jsx-dev-runtime")) {
   throw new Error("The built React adapter depends on development-only JSX helpers.");
+}
+
+// Exercise the actual packed boundary without any consumer dependencies. The
+// static root must render with neither React nor the compiler installed beside it.
+const temporary = await realpath(await mkdtemp(resolve(tmpdir(), "hraness-site-footer-package-")));
+function run(command: string[], cwd: string): void {
+  const result = Bun.spawnSync(command, { cwd, stderr: "pipe", stdout: "pipe" });
+  assert.equal(result.exitCode, 0, `${command[1] ?? command[0]} failed: ${result.stderr.toString()}`);
+}
+try {
+  const archive = resolve(temporary, "package.tgz");
+  const consumer = resolve(temporary, "consumer");
+  await mkdir(consumer);
+  run([process.execPath, "pm", "pack", "--filename", archive, "--ignore-scripts", "--quiet"], repository);
+  run(["tar", "-xzf", archive, "-C", consumer], repository);
+  const packed = resolve(consumer, "package");
+  for (const file of requiredFiles) assert.ok(existsSync(resolve(packed, file)), `Packed artifact is missing: ${file}`);
+  assert.ok(!existsSync(resolve(packed, "node_modules")));
+  assert.ok(!existsSync(resolve(packed, ".agents")));
+  const packedManifest = await readStylexPackageManifest(resolve(packed, "dist/stylex-manifest.json"), packed);
+  run([process.execPath, "-e", `
+    const { renderHranessSiteFooter } = await import(${JSON.stringify(pathToFileURL(resolve(packed, "dist/index.js")).href)});
+    const html = renderHranessSiteFooter({mailingList:{kind:"none"}});
+    if (!html.includes('class="hraness-site-footer x') || !html.includes('Hraness on Substack')) throw new Error("Detached root render failed");
+  `], consumer);
+  const cssBuild = await Bun.build({ entrypoints: [resolve(packed, "styles.css")], target: "browser" });
+  assert.ok(cssBuild.success, cssBuild.logs.map(String).join("\n"));
+  const packedCss = (await Promise.all(cssBuild.outputs.map((output) => output.text()))).join("\n");
+  for (const [key, rule] of packedManifest.rules) {
+    if (rule.constKey === undefined) assert.ok(packedCss.includes(`.${key}`), `Packed CSS omits atomic class ${key}`);
+  }
+  console.log("Packed SiteFooter renders without React or compiler dependencies and resolves every CSS rule");
+} finally {
+  await rm(temporary, { force: true, recursive: true });
 }

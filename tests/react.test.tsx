@@ -4,6 +4,7 @@ import { act } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { renderHranessSiteFooter } from "../src/index.js";
+import { mailingStatusClassName } from "../src/footer.stylex.js";
 import {
   HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL,
   HRANESS_TURNSTILE_SCRIPT_URL,
@@ -34,7 +35,7 @@ test("the idle React adapter preserves content while selecting explicit Turnstil
     mailingList,
     showBrand: false,
   })
-    .replace("hraness-site-footer__turnstile cf-turnstile", "hraness-site-footer__turnstile")
+    .replace(' cf-turnstile"', '"')
     .replace(
       'data-slot="hraness-mailing-list-signup-submit" type="submit">Subscribe</button>',
       'data-slot="hraness-mailing-list-signup-submit" type="submit" aria-disabled="true" disabled="">Verifying…</button>',
@@ -45,9 +46,7 @@ test("the idle React adapter preserves content while selecting explicit Turnstil
     );
   expect(signupHtml).toBe(normalizedStaticHtml);
   expect(signupHtml).toContain('data-slot="hraness-turnstile-widget"');
-  expect(signupHtml).not.toContain(
-    'class="hraness-site-footer__turnstile cf-turnstile"',
-  );
+  expect(signupHtml).not.toContain(' cf-turnstile"');
   expect(signupHtml).not.toContain("challenges.cloudflare.com/turnstile/v0/api.js");
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
   expect(signupHtml).toContain('disabled="">Verifying…</button>');
@@ -336,6 +335,8 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect(container?.querySelector("form")?.getAttribute("data-state"))
       .toBe("verification-error");
     expect(container?.textContent).toContain("Security check failed. Try again.");
+    expect(container?.querySelector('[data-slot="hraness-mailing-list-status"]')?.getAttribute("class"))
+      .toBe(mailingStatusClassName("verification-error"));
     expect(renderedWidgets).toHaveLength(2);
     expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
       .toBeFalse();
@@ -357,6 +358,8 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
       .toBeTrue();
     expect(renderedWidgets).toHaveLength(3);
     expect(removedWidgets).toContain("widget-2");
+    expect(container?.querySelector('[data-slot="hraness-mailing-list-status"]')?.getAttribute("class"))
+      .toBe(mailingStatusClassName("idle"));
 
     await act(async () => {
       latestTurnstileOptions?.callback("token-widget-3");
@@ -404,6 +407,8 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect((body as FormData).get("cf-turnstile-response")).toBe("token-widget-3");
     expect(container?.querySelector("form")?.getAttribute("data-state")).toBe("pending");
     expect(container?.textContent).toContain("Submitting your email…");
+    expect(container?.querySelector('[data-slot="hraness-mailing-list-status"]')?.getAttribute("class"))
+      .toBe(mailingStatusClassName("pending"));
 
     await act(async () => {
       resolveRequest?.({ ok: false } as Response);

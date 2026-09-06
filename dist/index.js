@@ -1,3 +1,540 @@
+// node_modules/@stylexjs/stylex/lib/es/stylex.mjs
+var styleq = {};
+var hasRequiredStyleq;
+function requireStyleq() {
+  if (hasRequiredStyleq)
+    return styleq;
+  hasRequiredStyleq = 1;
+  Object.defineProperty(styleq, "__esModule", {
+    value: true
+  });
+  styleq.styleq = undefined;
+  var cache = new WeakMap;
+  var compiledKey = "$$css";
+  function createStyleq(options) {
+    var disableCache;
+    var disableMix;
+    var transform;
+    if (options != null) {
+      disableCache = options.disableCache === true;
+      disableMix = options.disableMix === true;
+      transform = options.transform;
+    }
+    return function styleq2() {
+      var definedProperties = [];
+      var className = "";
+      var inlineStyle = null;
+      var debugString = "";
+      var nextCache = disableCache ? null : cache;
+      var styles = new Array(arguments.length);
+      for (var i = 0;i < arguments.length; i++) {
+        styles[i] = arguments[i];
+      }
+      while (styles.length > 0) {
+        var possibleStyle = styles.pop();
+        if (possibleStyle == null || possibleStyle === false) {
+          continue;
+        }
+        if (Array.isArray(possibleStyle)) {
+          for (var _i = 0;_i < possibleStyle.length; _i++) {
+            styles.push(possibleStyle[_i]);
+          }
+          continue;
+        }
+        var style = transform != null ? transform(possibleStyle) : possibleStyle;
+        if (style.$$css != null) {
+          var classNameChunk = "";
+          if (nextCache != null && nextCache.has(style)) {
+            var cacheEntry = nextCache.get(style);
+            if (cacheEntry != null) {
+              classNameChunk = cacheEntry[0];
+              debugString = cacheEntry[2];
+              definedProperties.push.apply(definedProperties, cacheEntry[1]);
+              nextCache = cacheEntry[3];
+            }
+          } else {
+            var definedPropertiesChunk = [];
+            for (var prop in style) {
+              var value = style[prop];
+              if (prop === compiledKey) {
+                var compiledKeyValue = style[prop];
+                if (compiledKeyValue !== true) {
+                  debugString = debugString ? compiledKeyValue + "; " + debugString : compiledKeyValue;
+                }
+                continue;
+              }
+              if (typeof value === "string" || value === null) {
+                if (!definedProperties.includes(prop)) {
+                  definedProperties.push(prop);
+                  if (nextCache != null) {
+                    definedPropertiesChunk.push(prop);
+                  }
+                  if (typeof value === "string") {
+                    classNameChunk += classNameChunk ? " " + value : value;
+                  }
+                }
+              } else {
+                console.error("styleq: ".concat(prop, " typeof ").concat(String(value), ' is not "string" or "null".'));
+              }
+            }
+            if (nextCache != null) {
+              var weakMap = new WeakMap;
+              nextCache.set(style, [classNameChunk, definedPropertiesChunk, debugString, weakMap]);
+              nextCache = weakMap;
+            }
+          }
+          if (classNameChunk) {
+            className = className ? classNameChunk + " " + className : classNameChunk;
+          }
+        } else {
+          if (disableMix) {
+            if (inlineStyle == null) {
+              inlineStyle = {};
+            }
+            inlineStyle = Object.assign({}, style, inlineStyle);
+          } else {
+            var subStyle = null;
+            for (var _prop in style) {
+              var _value = style[_prop];
+              if (_value !== undefined) {
+                if (!definedProperties.includes(_prop)) {
+                  if (_value != null) {
+                    if (inlineStyle == null) {
+                      inlineStyle = {};
+                    }
+                    if (subStyle == null) {
+                      subStyle = {};
+                    }
+                    subStyle[_prop] = _value;
+                  }
+                  definedProperties.push(_prop);
+                  nextCache = null;
+                }
+              }
+            }
+            if (subStyle != null) {
+              inlineStyle = Object.assign(subStyle, inlineStyle);
+            }
+          }
+        }
+      }
+      var styleProps = [className, inlineStyle, debugString];
+      return styleProps;
+    };
+  }
+  var styleq$1 = styleq.styleq = createStyleq();
+  styleq$1.factory = createStyleq;
+  return styleq;
+}
+var styleqExports = /* @__PURE__ */ requireStyleq();
+function props(...styles) {
+  const [className, style, dataStyleSrc] = styleqExports.styleq(styles);
+  const result = {};
+  if (className != null && className !== "") {
+    result.className = className;
+  }
+  if (style != null && Object.keys(style).length > 0) {
+    result.style = style;
+  }
+  if (dataStyleSrc != null && dataStyleSrc !== "") {
+    result["data-style-src"] = dataStyleSrc;
+  }
+  return result;
+}
+var env = Object.freeze({});
+
+// src/footer.stylex.ts
+var styles = {
+  root: {
+    "--hraness-site-footer-foreground": "x1ktp55a",
+    "--hraness-site-footer-muted": "x8d9m59",
+    "--hraness-site-footer-line": "x96ybla",
+    "--hraness-site-footer-focus": "x14z8vex",
+    "--hraness-site-footer-background": "x8c10za",
+    "--hraness-site-footer-action-background": "xdg0xw2",
+    "--hraness-site-footer-action-foreground": "x1munjs5",
+    "--hraness-site-footer-field-background": "xsctza4",
+    "--hraness-site-footer-social-target": "xms9e4r x1w6jg7m",
+    "--hraness-site-footer-control-block-size": "x1g1m258 xywhp07",
+    "--hraness-site-footer-status-block-size": "x4sry57",
+    "--hraness-site-footer-form-block-size": "xys6ka6",
+    "--hraness-site-footer-row-gap": "x1mokxn7",
+    "--hraness-site-footer-mailing-overlay-clearance": "x1sphz0r",
+    "--hraness-site-footer-padding-block": "xz6zgvz",
+    "--hraness-site-footer-mailing-overlay-offset": "x1h47zgc",
+    "--hraness-site-footer-content-block-size": "x1ghcxmq",
+    "--hraness-site-footer-bar-block-size": "x1dajjqq",
+    kULEZF: "xiuoait",
+    kMwMTN: "x1g4142m",
+    kMv6JI: "xprmc4t",
+    kGuDYH: "xkpwil5",
+    $$css: true
+  },
+  signup: {
+    "--hraness-site-footer-content-block-size": "x1nw7rvg xa3x8f1",
+    "--hraness-site-footer-mailing-overlay-clearance": "x1sphz0r x46h5on",
+    $$css: true
+  },
+  box: {
+    kB7OPa: "x9f619",
+    $$css: true
+  },
+  backgroundReset: {
+    kKwaWg: "x18o3ruo",
+    k1YJky: "x1y4qj14",
+    kgSjnq: "x1cwfr1t",
+    kz484i: "x182nak8",
+    kl9DO0: "x12koezg",
+    kHypHr: "x1u7o2vf",
+    ku1ltF: "x1fdtg7e",
+    $$css: true
+  },
+  border: {
+    kMzoRj: "xmkeg23",
+    ksu8eU: "x1y0btm7",
+    kVAM5u: "x11ngh50 x1ylmb6m",
+    kawU7v: "x18sabzy",
+    k5BUTg: "x1jleocg",
+    kqOd84: "x1pjjote",
+    kzPi7L: "x1e53mt7",
+    kEz803: "xgkqhyc",
+    $$css: true
+  },
+  focus: {
+    kMeerF: "x784prv",
+    k3XXqK: "x9v5kkp",
+    kjBf7l: "xxuwnm0 xz4eswf",
+    kInvED: "xj3ae5l",
+    $$css: true
+  },
+  motion: {
+    k1ekBW: "x105zyf9",
+    kIyJzY: "x1ntgrh1",
+    kAMwcw: "xma2t0n",
+    kIr0Dl: "x7ctuma",
+    $$css: true
+  },
+  inner: {
+    kanfag: "x12e8u3k",
+    k9g6sI: "x12h1iku",
+    kVAEAm: "x1n2onr6",
+    k1xSpc: "xrvj5dj",
+    kC13JO: "x182hbjg",
+    kumcoG: "x1rkzygb",
+    k9llMU: "xv7uhgh",
+    kULEZF: "xiuoait",
+    kLWsYc: "x1c419km",
+    k2kXS: "x1tec7hu",
+    kdYMnH: "xesnm00",
+    kfiyM8: "xc26acl",
+    kGNEyG: "x6s0dn4",
+    k1C7PZ: "x1n78d84",
+    khm7nJ: "x1lfezxm",
+    kT8eP4: "x1b1eqt9",
+    kmc9e2: "x3so8kt",
+    kpvK8V: "x1hdm9tg x1np48w9",
+    kWkggS: "x1hhhz6w x9yvj25",
+    kS5dFF: "x1bhgv95",
+    kgDt7k: "x14zw6mm",
+    kzfwIZ: "x1i0wikq",
+    kO8tuG: "xs8f16d",
+    $$css: true
+  },
+  innerSignup: {
+    kC13JO: "x11x5zdy xdhck01",
+    kumcoG: "x1rkzygb x19w0u1r",
+    k9llMU: "x173071e x1pjq3sz",
+    $$css: true
+  },
+  flexCenter: {
+    k1xSpc: "x78zum5",
+    kGNEyG: "x6s0dn4",
+    $$css: true
+  },
+  fixedFlex: {
+    kzQI83: "x1c4vz4f",
+    kmuXW: "x2lah0s",
+    kCS8Yb: "xdl72j9",
+    $$css: true
+  },
+  brand: {
+    kJuA4N: "x1pmbb8p",
+    kSGwAc: "xamitd3",
+    kOIVth: "xb6y1gh",
+    kVQ08L: "xeuuy2l",
+    kaIpWk: "x6i6fhv",
+    kMwMTN: "x1heor9g xxeg0yr",
+    k63SB2: "x19s9jnd",
+    kb6lSQ: "x130jcwj",
+    kLWn49: "xo5v014",
+    kybGjl: "x1hl2dhg",
+    $$css: true
+  },
+  mark: {
+    kULEZF: "x1mgeycz",
+    kLWsYc: "x18i7o63",
+    $$css: true
+  },
+  wordmark: {
+    k1xSpc: "x1s85apg x1ya9vzd xnw0r4b",
+    kGuDYH: "x1jchvi3",
+    $$css: true
+  },
+  links: {
+    kanfag: "x167hcw2",
+    k9g6sI: "x12h1iku",
+    kJuA4N: "xt33hwp",
+    kULEZF: "xiuoait",
+    kdYMnH: "xesnm00",
+    kjj79g: "x13a6bvl",
+    kImiAN: "xvc5jky",
+    $$css: true
+  },
+  socials: {
+    k1xSpc: "x78zum5",
+    kdYMnH: "xesnm00",
+    kjj79g: "x13a6bvl",
+    kOIVth: "x1enigpx",
+    kogj98: "x1ghz6dp",
+    kmVPX3: "x1717udv",
+    kH6xsr: "x3ct3a4",
+    kpqbRz: "x43c9pm",
+    khnUzm: "xnbnhf8",
+    $$css: true
+  },
+  socialItem: {
+    kULEZF: "x175cv4s",
+    kLWsYc: "x1bxml6c",
+    kzQI83: "x1c4vz4f",
+    kmuXW: "x2lah0s",
+    kCS8Yb: "x4hbtdw",
+    kdYMnH: "xesnm00",
+    kVQ08L: "x159srwy",
+    $$css: true
+  },
+  socialAlways: {
+    k1xSpc: "x1lliihq",
+    $$css: true
+  },
+  socialFirstFive: {
+    k1xSpc: "x1s85apg xyn3s6c",
+    $$css: true
+  },
+  socialFirstEight: {
+    k1xSpc: "x1s85apg xeg3leq",
+    $$css: true
+  },
+  socialFirstTen: {
+    k1xSpc: "x1s85apg xim779e",
+    $$css: true
+  },
+  socialAll: {
+    k1xSpc: "x1s85apg xc5g234",
+    $$css: true
+  },
+  socialLink: {
+    kULEZF: "xiuoait",
+    kLWsYc: "xuxy95z",
+    kjj79g: "xl56j7k",
+    kaIpWk: "x1e6avla",
+    kMwMTN: "xj5idha xxeg0yr",
+    kWkggS: "x1voprv7",
+    kKwaWg: "x8o3jvd",
+    k1YJky: "xwt2121",
+    kgSjnq: "x1f6hyc3",
+    kz484i: "x1x226zn",
+    kl9DO0: "xsq4hlx",
+    kHypHr: "x156efcn",
+    ku1ltF: "xlkrsup",
+    kVAM5u: "x1ylmb6m",
+    kybGjl: "x1hl2dhg",
+    $$css: true
+  },
+  socialIcon: {
+    kULEZF: "x1ri1nt6",
+    kLWsYc: "xf7zn63",
+    $$css: true
+  },
+  mailingGeometry: {
+    kJuA4N: "x1qaspin",
+    kULEZF: "x1gx0lkv",
+    kdYMnH: "xesnm00",
+    kLWsYc: "x1dmgvpn",
+    kogj98: "x1ghz6dp",
+    $$css: true
+  },
+  mailing: {
+    kVAEAm: "x1n2onr6",
+    k1xSpc: "xrvj5dj",
+    k9llMU: "xv7uhgh",
+    $$css: true
+  },
+  turnstile: {
+    kVAEAm: "x10l6tqk",
+    kY2c9j: "x1vjfegm",
+    ka7YqC: "x1o0tod",
+    kctUWg: "x1g6sbnd",
+    kULEZF: "xiuoait",
+    k2kXS: "x1sbvpkc",
+    kdYMnH: "xesnm00",
+    $$css: true
+  },
+  mailingControls: {
+    k1xSpc: "x78zum5",
+    kdYMnH: "xesnm00",
+    $$css: true
+  },
+  mailingLabel: {
+    k1xSpc: "x1lliihq",
+    kdYMnH: "xesnm00",
+    kzQI83: "x1iyjqo2",
+    kmuXW: "xs83m0k",
+    kCS8Yb: "xdl72j9",
+    $$css: true
+  },
+  control: {
+    kLWsYc: "xlashs9",
+    kMv6JI: "xjb2p0i",
+    kGuDYH: "x1qlqyl8",
+    kKX8nH: "x1t35e8",
+    kjAs5C: "x1aazh3f",
+    k63SB2: "x1pd3egz",
+    kQqvRs: "x1xh6y1q",
+    kLWn49: "x15bjb6t",
+    kC21eY: "xd4aj15",
+    krGR0G: "xvmqkbn",
+    kV0H8L: "x10rt0pk",
+    kqBzK6: "x1rcybi7",
+    kHiXq7: "x61gc8y",
+    kOifbf: "xntve1h",
+    ka26j: "xkyhvkk",
+    $$css: true
+  },
+  mailingInput: {
+    kULEZF: "xiuoait",
+    kdYMnH: "xesnm00",
+    kIxVMA: "x1ul7exa",
+    ksF3WI: "x1a2w583",
+    kYm2EN: "xjppbhk",
+    kqGeR4: "xbrzj0f",
+    kWkggS: "xo5clpu",
+    kMwMTN: "x1g4142m xook0zr",
+    kSiTet: "x7xwk5j",
+    kJVvJu: "xvpgqt4",
+    $$css: true
+  },
+  mailingSubmit: {
+    kGNEyG: "x6s0dn4",
+    k1xSpc: "x3nfvp2",
+    kjj79g: "xl56j7k",
+    kLWn49: "xo5v014",
+    kImiAN: "x1hb08if",
+    kIxVMA: "x1ia1hqs",
+    ksF3WI: "x13be78j",
+    kYm2EN: "x1earptq",
+    kqGeR4: "xfrllxf",
+    kWkggS: "x1ujht2g x1tt9vl1",
+    kMwMTN: "xaazplj x1q5838n",
+    kkrTdU: "x1ypdohk xjb0foi",
+    kSiTet: "xo3u330 x7sp37k",
+    k63SB2: "x19s9jnd",
+    kJVvJu: "x1icpxkm",
+    $$css: true
+  },
+  mailingStatus: {
+    kVAEAm: "x10l6tqk",
+    kY2c9j: "xhtitgo",
+    kctUWg: "x3ppr4w",
+    khdm6U: "x17y0mx6",
+    kVQacm: "xb3r6kr",
+    kdYMnH: "xesnm00",
+    kVQ08L: "x3c45ou",
+    kogj98: "x1ghz6dp",
+    kaIpWk: "x6i6fhv",
+    kWkggS: "x1hhhz6w x9yvj25",
+    kMwMTN: "xj5idha",
+    kGuDYH: "xboafo0",
+    kLWn49: "xo5v014",
+    kSiTet: "xg01cxk",
+    kF3gjK: "x1267ecw",
+    kJVvJu: "x97vtpp",
+    kfzvcC: "x47corl",
+    kg5iWk: "xlyipyv",
+    k33iCy: "xlshs6z",
+    khDVqt: "xuxw1ft",
+    $$css: true
+  },
+  statusVisible: {
+    kSiTet: "x1hc1fzr",
+    k33iCy: "xnpuxes",
+    $$css: true
+  },
+  statusError: {
+    kMwMTN: "x1g4142m",
+    $$css: true
+  },
+  mailingConfirmation: {
+    kaIpWk: "x6i6fhv",
+    kWkggS: "xo5clpu",
+    kMwMTN: "x1g4142m",
+    k63SB2: "xh88oxj",
+    kJVvJu: "x1ryrjj2",
+    $$css: true
+  },
+  visuallyHidden: {
+    kVAEAm: "x10l6tqk",
+    kVQacm: "xb3r6kr",
+    kULEZF: "xi8173g",
+    kLWsYc: "xpoyz9m",
+    kogj98: "xkdpibf",
+    kmVPX3: "x1717udv",
+    kMzoRj: "xc342km",
+    ksu8eU: "xng3xce",
+    kVAM5u: "x1r7ld26",
+    kawU7v: "x18sabzy",
+    k5BUTg: "x1jleocg",
+    kqOd84: "x1pjjote",
+    kzPi7L: "x1e53mt7",
+    kEz803: "xgkqhyc",
+    kMcinP: "xeh89do",
+    kz4h6p: "x1hyvwdk",
+    khDVqt: "xuxw1ft",
+    $$css: true
+  }
+};
+function className(hook, ...recipes) {
+  return `${hook} ${props(...recipes).className ?? ""}`.trim();
+}
+var footerClasses = {
+  brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
+  mark: className("hraness-site-footer__mark", styles.fixedFlex, styles.mark),
+  wordmark: className("hraness-site-footer__wordmark", styles.wordmark),
+  links: className("hraness-site-footer__links", styles.flexCenter, styles.links),
+  socials: className("hraness-site-footer__socials", styles.socials),
+  socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
+  socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
+  mailing: className("hraness-site-footer__mailing", styles.box, styles.mailingGeometry, styles.mailing),
+  turnstile: className("hraness-site-footer__turnstile", styles.box, styles.turnstile),
+  mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
+  mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.focus),
+  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.focus, styles.motion),
+  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.focus),
+  visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden)
+};
+function footerClassName(signup) {
+  return className("hraness-site-footer", styles.root, signup && styles.signup);
+}
+function footerInnerClassName(signup) {
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup);
+}
+function socialItemClassName(index) {
+  const visibility = index === 0 || index === 1 || index === 3 || index === 6 ? styles.socialAlways : index < 5 ? styles.socialFirstFive : index < 8 ? styles.socialFirstEight : index < 10 ? styles.socialFirstTen : styles.socialAll;
+  return className("hraness-site-footer__social-item", styles.socialItem, visibility);
+}
+function mailingStatusClassName(state) {
+  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus, state !== "idle" && styles.statusVisible, (state === "error" || state === "verification-error") && styles.statusError);
+}
 // node_modules/@hugeicons/core-free-icons/dist/esm/BlueskyIcon.js
 var BlueskyIcon = [
   ["path", { d: "M12 11.4963C11.8936 11.2963 7.45492 3 3.50417 3C1.33647 3 2.00456 8 2.50443 10.5C2.70653 11.5108 3.50417 14.5 8.003 14C8.003 14 4.00404 14.5 4.00404 17C4.00404 18.5 6.50339 21 8.50287 21C10.4606 21 11.9391 16.6859 12 16.5058C12.0609 16.6859 13.5394 21 15.4971 21C17.4966 21 19.996 18.5 19.996 17C19.996 14.5 15.997 14 15.997 14C20.4958 14.5 21.2935 11.5108 21.4956 10.5C21.9954 8 22.6635 3 20.4958 3C16.5451 3 12.1064 11.2963 12 11.4963Z", stroke: "currentColor", strokeLinejoin: "round", strokeWidth: "1.5", key: "0" }]
@@ -54,7 +591,6 @@ var YoutubeIcon = [
 ];
 // src/internal.ts
 var HRANESS_FOOTER_LABEL = "Hraness network";
-var HRANESS_FOOTER_CLASS_NAME = "hraness-site-footer";
 var HRANESS_FOOTER_SLOT = "hraness-site-footer";
 var HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 var HRANESS_MAILING_SOURCE = "hraness-site-footer";
@@ -73,74 +609,62 @@ var MAX_TURNSTILE_SCRIPT_NONCE_LENGTH = 256;
 var AUDIENCE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 var TURNSTILE_SITEKEY_PATTERN = /^[A-Za-z0-9_-]+$/u;
 var TURNSTILE_SCRIPT_NONCE_PATTERN = /^[A-Za-z0-9+/_-]+={0,2}$/u;
-var HRANESS_SOCIAL_LINKS = [
-  {
-    platform: "substack",
-    label: "Hraness on Substack",
-    title: "Substack",
-    href: "https://substack.com/@hraness"
-  },
-  {
-    platform: "x",
-    label: "Hraness on X",
-    title: "X",
-    href: "https://x.com/hraness"
-  },
-  {
-    platform: "instagram",
-    label: "Hraness on Instagram",
-    title: "Instagram",
-    href: "https://www.instagram.com/hraness/"
-  },
-  {
-    platform: "linkedin",
-    label: "Ben Guo on LinkedIn",
-    title: "LinkedIn",
-    href: "https://www.linkedin.com/in/hraness"
-  },
-  {
-    platform: "bluesky",
-    label: "Hraness on Bluesky",
-    title: "Bluesky",
-    href: "https://bsky.app/profile/hraness.bsky.social"
-  },
-  {
-    platform: "threads",
-    label: "Hraness on Threads",
-    title: "Threads",
-    href: "https://www.threads.com/@hraness"
-  },
-  {
-    platform: "github",
-    label: "Hraness on GitHub",
-    title: "GitHub",
-    href: "https://github.com/hraness"
-  },
-  {
-    platform: "tiktok",
-    label: "Hraness on TikTok",
-    title: "TikTok",
-    href: "https://www.tiktok.com/@hraness"
-  },
-  {
-    platform: "reddit",
-    label: "Ben Guo on Reddit",
-    title: "Reddit",
-    href: "https://www.reddit.com/user/bgdotjpg/"
-  },
-  {
-    platform: "twitch",
-    label: "Hraness on Twitch",
-    title: "Twitch",
-    href: "https://www.twitch.tv/hranessdotcom"
-  },
-  {
-    platform: "youtube",
-    label: "Hraness on YouTube",
-    title: "YouTube",
-    href: "https://www.youtube.com/@hraness"
-  }
-];
+var HRANESS_SOCIAL_LINKS = [{
+  platform: "substack",
+  label: "Hraness on Substack",
+  title: "Substack",
+  href: "https://substack.com/@hraness"
+}, {
+  platform: "x",
+  label: "Hraness on X",
+  title: "X",
+  href: "https://x.com/hraness"
+}, {
+  platform: "instagram",
+  label: "Hraness on Instagram",
+  title: "Instagram",
+  href: "https://www.instagram.com/hraness/"
+}, {
+  platform: "linkedin",
+  label: "Ben Guo on LinkedIn",
+  title: "LinkedIn",
+  href: "https://www.linkedin.com/in/hraness"
+}, {
+  platform: "bluesky",
+  label: "Hraness on Bluesky",
+  title: "Bluesky",
+  href: "https://bsky.app/profile/hraness.bsky.social"
+}, {
+  platform: "threads",
+  label: "Hraness on Threads",
+  title: "Threads",
+  href: "https://www.threads.com/@hraness"
+}, {
+  platform: "github",
+  label: "Hraness on GitHub",
+  title: "GitHub",
+  href: "https://github.com/hraness"
+}, {
+  platform: "tiktok",
+  label: "Hraness on TikTok",
+  title: "TikTok",
+  href: "https://www.tiktok.com/@hraness"
+}, {
+  platform: "reddit",
+  label: "Ben Guo on Reddit",
+  title: "Reddit",
+  href: "https://www.reddit.com/user/bgdotjpg/"
+}, {
+  platform: "twitch",
+  label: "Hraness on Twitch",
+  title: "Twitch",
+  href: "https://www.twitch.tv/hranessdotcom"
+}, {
+  platform: "youtube",
+  label: "Hraness on YouTube",
+  title: "YouTube",
+  href: "https://www.youtube.com/@hraness"
+}];
 var SUBSTACK_ICON = [["path", {
   d: "M22.539 8.242H1.46V5.406h21.08v2.836ZM1.46 10.812v2.836h21.08v-2.836H1.46ZM22.54 16.218V24L12 18.11 1.46 24v-7.782h21.08ZM1.46 0v2.836h21.08V0H1.46Z",
   fill: "currentColor"
@@ -218,15 +742,17 @@ function renderIconPaths(icon) {
   }).join("");
 }
 function renderSocialIcon(platform) {
-  return `<svg aria-hidden="true" class="hraness-site-footer__social-icon" data-slot="social-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(ICONS[platform])}</svg>`;
+  return `<svg aria-hidden="true" class="${footerClasses.socialIcon}" data-slot="social-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(ICONS[platform])}</svg>`;
 }
-var RA_MARK = '<svg aria-hidden="true" class="hraness-site-footer__mark" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle></svg>';
-var HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="hraness-site-footer__brand" href="https://hraness.com/">${RA_MARK}<span class="hraness-site-footer__wordmark">hraness</span></a>`;
-var HRANESS_SITE_FOOTER_LINKS_HTML = `<nav aria-label="Hraness links" class="hraness-site-footer__links"><ul class="hraness-site-footer__socials">${HRANESS_SOCIAL_LINKS.map((link) => `<li><a aria-label="${escapeAttribute(link.label)}" class="hraness-site-footer__social-link" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
-var MAILING_IDLE_STATE = { kind: "idle" };
+var RA_MARK = `<svg aria-hidden="true" class="${footerClasses.mark}" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle></svg>`;
+var HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/">${RA_MARK}<span class="${footerClasses.wordmark}">hraness</span></a>`;
+var HRANESS_SITE_FOOTER_LINKS_HTML = `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${HRANESS_SOCIAL_LINKS.map((link, index) => `<li class="${socialItemClassName(index)}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
+var MAILING_IDLE_STATE = {
+  kind: "idle"
+};
 function renderMailingList(mailingList, state, turnstileMode) {
   if (state.kind === "accepted") {
-    return `<div aria-atomic="true" aria-live="polite" class="hraness-site-footer__mailing-confirmation" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1">Check your email to confirm</div>`;
+    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1">Check your email to confirm</div>`;
   }
   const stateKind = state.kind;
   const email = state.kind === "pending" || state.kind === "error" || state.kind === "verification-error" ? ` value="${escapeAttribute(state.email)}"` : "";
@@ -239,13 +765,13 @@ function renderMailingList(mailingList, state, turnstileMode) {
   const statusCopy = state.kind === "pending" ? "Submitting your email…" : state.kind === "error" ? "Couldn't subscribe. Try again." : state.kind === "verification-error" ? "Security check failed. Try again." : "";
   const turnstileAction = getHranessMailingTurnstileAction(mailingList.audience);
   const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
-  const turnstile = `<div class="hraness-site-footer__turnstile${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
-  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="hraness-site-footer__mailing" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="hraness-site-footer__mailing-controls"><label class="hraness-site-footer__mailing-label"><span class="hraness-site-footer__visually-hidden">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="hraness-site-footer__mailing-input" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="hraness-site-footer__mailing-submit" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="hraness-site-footer__mailing-status" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
+  const turnstile = `<div class="${footerClasses.turnstile}${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
+  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
 }
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, turnstileMode = "implicit", turnstileScriptNonce) {
   const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, turnstileMode);
   const turnstileScript = mailingList.kind === "signup" && turnstileMode === "implicit" ? `<script async="" data-slot="${HRANESS_TURNSTILE_SCRIPT_SLOT}" defer=""${turnstileScriptNonce === undefined ? "" : ` nonce="${escapeAttribute(turnstileScriptNonce)}"`} src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>` : "";
-  return `<div class="hraness-site-footer__inner">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_SITE_FOOTER_LINKS_HTML}</div>${turnstileScript}`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_SITE_FOOTER_LINKS_HTML}</div>${turnstileScript}`;
 }
 
 // src/index.ts
@@ -258,7 +784,7 @@ function renderHranessSiteFooter({
 }) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
   const turnstileScriptNonce = parseHranessTurnstileScriptNonce(turnstileScriptNonceInput);
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${HRANESS_FOOTER_CLASS_NAME}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce)}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce)}</footer>`;
 }
 export {
   renderHranessSiteFooter,
@@ -271,4 +797,4 @@ export {
   HRANESS_HOME_URL
 };
 
-//# debugId=715FA69C75B44B2764756E2164756E21
+//# debugId=5942BC48E86FFC4364756E2164756E21

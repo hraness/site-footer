@@ -1,7 +1,8 @@
 "use client";
 
+import { footerClassName, mailingStatusClassName } from "./footer.stylex.js";
+
 import {
-  HRANESS_FOOTER_CLASS_NAME,
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_FORM_SLOT,
@@ -236,6 +237,7 @@ export function HranessSiteFooter({
           `[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`,
         );
         if (status !== null) {
+          status.className = mailingStatusClassName("idle");
           status.setAttribute("aria-live", "polite");
           status.setAttribute("role", "status");
           status.textContent = "";
@@ -264,6 +266,7 @@ export function HranessSiteFooter({
         `[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`,
       );
       if (status !== null) {
+        status.className = mailingStatusClassName("verification-error");
         status.setAttribute("aria-live", "assertive");
         status.setAttribute("role", "alert");
         status.textContent = "Security check failed. Try again.";
@@ -380,6 +383,7 @@ export function HranessSiteFooter({
           `[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`,
         );
         if (status !== null) {
+          status.className = mailingStatusClassName("idle");
           status.setAttribute("aria-live", "polite");
           status.setAttribute("role", "status");
           status.textContent = "";
@@ -439,7 +443,7 @@ export function HranessSiteFooter({
 
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
-    className: HRANESS_FOOTER_CLASS_NAME,
+    className: footerClassName(mailingList.kind === "signup"),
     "data-brand": showBrand ? "visible" : "hidden",
     "data-mailing-list": mailingList.kind,
     "data-slot": HRANESS_FOOTER_SLOT,
