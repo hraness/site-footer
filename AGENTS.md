@@ -1,7 +1,8 @@
 # Contents
 
 - `src/` owns the canonical Hraness network footer contract, static renderer, and React adapter.
-- `styles.css` owns the framework-neutral responsive presentation used by every consumer.
+- `src/footer.stylex.ts` owns all component presentation shared by both renderers.
+- `styles.css` imports generated atomic CSS; `compiler-foundation.css` is the empty compiler foundation.
 - `tests/` verifies link order, accessibility, renderer parity, and stylesheet behavior.
 - `scripts/` builds checked JavaScript and declaration artifacts and verifies the packed boundary.
 - `dist/` contains generated package artifacts committed for immutable Git consumers.
@@ -13,6 +14,8 @@
 - Use Bun 1.3.14 and run `bun run check` before handing off a change.
 - Keep the footer organization-owned and product-independent. Products may select one explicit stable mailing-list audience or no mailing list and may set documented CSS custom properties, but must not fork the action, source, copy, social links, vector mark, order, semantics, or interaction behavior.
 - Keep the root export framework-neutral. React runtime belongs only behind `@hraness/site-footer/react`.
+- Compile all owned presentation through the public `@hraness/ui/stylex-build` collector. Keep stable BEM hooks, explicit slot and state variants, custom-property overrides, and native pseudo-class behavior. Do not restore handwritten component selectors or runtime CSS injection.
+- Collect the static and React entry graphs serially into one verified manifest. Require artifact, source-boundary, absolute-root determinism, package, and real-source browser checks before release.
 - Preserve exact social-link order: Substack, X, Instagram, LinkedIn, Bluesky, Threads, GitHub, TikTok, Reddit, Twitch, YouTube. Keep Substack visible at every supported width.
 - Require every consumer to configure `mailingList` explicitly. Never infer the Hraness umbrella audience for a product site.
 - Keep every meaningful link and the footer identity functional without JavaScript. Mailing signup must fail closed without JavaScript because the required Turnstile proof is generated client-side and verified by Accounts. Inline vectors remain decorative, and controls and links retain specific accessible names.

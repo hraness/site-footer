@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.4.6
+bun add github:hraness/site-footer#v0.5.0
 ```
 
 Start with the network footer and no mailing form:
@@ -46,7 +46,10 @@ client-side JavaScript.
 | --- | --- | --- |
 | `@hraness/site-footer` | Render complete HTML into a static template or server response | Framework-neutral ESM with no React import |
 | `@hraness/site-footer/react` | Render the same contract in React and progressively enhance signup states | React client component for React 18 and 19 |
-| `@hraness/site-footer/styles.css` | Apply the in-flow responsive footer, theme fallbacks, and focus states | Plain CSS, imported once by the consumer |
+| `@hraness/site-footer/styles.css` | Apply the in-flow responsive footer, theme fallbacks, and focus states | Compatibility import of checked atomic CSS, imported once by the consumer |
+| `@hraness/site-footer/stylex.css` | Resolve or copy the complete standalone stylesheet | Generated CSS with finite package priority layers |
+| `@hraness/site-footer/stylex-manifest.json` | Admit the package to the shared StyleX build pipeline | Verified rules, compiler identity, and runtime and stylesheet hashes |
+| `@hraness/site-footer/compiler-foundation.css` | Supply the foundation when a consumer combines package rules | Empty foundation; all footer presentation comes from the manifest |
 
 The static interface is one function call:
 
@@ -70,9 +73,14 @@ Static generators can resolve the checked stylesheet without assuming a
 import { fileURLToPath } from "node:url";
 
 const footerStylesPath = fileURLToPath(
-  import.meta.resolve("@hraness/site-footer/styles.css"),
+  import.meta.resolve("@hraness/site-footer/stylex.css"),
 );
 ```
+
+Use the standalone path when reading or copying the complete CSS into a static
+site. A bundler resolves the compatibility stylesheet's relative import. If you
+copy that compatibility file itself, retain its sibling `dist/stylex.css` path.
+No consumer compiler or React runtime is required by the static renderer.
 
 ## Configure one mailing-list mode
 
@@ -199,6 +207,25 @@ coarse-pointer targets, forced-color rules, and transitions only when the user
 has not requested reduced motion. Container-query fallbacks keep the core
 footer usable, but the repository does not claim a browser-version matrix.
 
+Both renderers apply the same checked StyleX recipes from `src/footer.stylex.ts`.
+Stable `hraness-site-footer` and `hraness-site-footer__*` classes remain DOM hooks;
+the generated `x*` classes are private build output. Products can override
+`--hraness-site-footer-foreground`, `--hraness-site-footer-muted`,
+`--hraness-site-footer-line`, `--hraness-site-footer-focus`,
+`--hraness-site-footer-background`, `--hraness-site-footer-field-background`,
+`--hraness-site-footer-action-background`, and
+`--hraness-site-footer-action-foreground` on the footer hook in their own CSS.
+Existing `--plain-*`, common theme variables, and footer sizing properties retain
+their meanings. Keep values compatible with their original color or length type.
+
+Package builds use the published `@hraness/ui/stylex-build` compiler at v0.5.3
+with StyleX 0.19.0, collect static and React entrypoints serially, and seal their
+combined rules once. Standard consumers import the standalone CSS once. A
+consumer using the shared compiler admits the manifest and foundation and
+serializes the admitted package rules together with its application rules.
+The compiler foundation does not import standalone CSS, so that path does not
+duplicate independently serialized recipe layers.
+
 ## Content Security Policy
 
 Signup consumers must merge these origins into their existing policy:
@@ -241,9 +268,11 @@ and
 
 | Contract | Checked evidence |
 | --- | --- |
-| Static markup, explicit mailing mode, social order, config rejection, CSP nonce, and no-signup boundary | `bun test ./tests/footer.test.ts ./tests/readme.test.ts` |
-| React and static parity, Turnstile gating, request fields, focus recovery, and accepted/error states | `bun test ./tests/react.test.tsx` |
-| Responsive geometry, focus, coarse pointer, reduced motion, forced colors, and scoped selectors | `bun test ./tests/styles.test.ts` |
+| Static markup, explicit mailing mode, social order, config rejection, CSP nonce, and no-signup boundary | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/footer.test.ts ./tests/readme.test.ts` |
+| React and static parity, Turnstile gating, request fields, focus recovery, and accepted/error states | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/react.test.tsx` |
+| Responsive geometry, focus, coarse pointer, reduced motion, forced colors, exact CSS boundaries, and mutation rejection | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/styles.test.ts` after the checked build |
+| Complete compiler manifest, source recipes, runtime boundaries, CSS exports, and absence of handwritten presentation | `bun run check:stylex-artifacts` |
+| Identical generated artifacts across two absolute package roots | `bun run check:stylex-determinism` |
 | Real React idle, pending, accepted, request-error, and Turnstile-error states at wide and compact viewports; named alignment, containment, minimum-size, overflow, stability, browser diagnostics, exact source identity, and retained screenshots | `bun run verify:browser` after `bun run verify:browser:doctor` |
 | ESM artifacts and declaration output | `bun run build` |
 | Published files, public exports, server-safe root, React client directive, and packed smoke render | `bun run test:package` |
@@ -253,6 +282,8 @@ The browser verifier uses the real React adapter with synthetic Turnstile and
 Accounts boundaries on loopback. It proves the package state path and declared
 geometry, but not either live provider or overall visual quality. Inspect its
 wide and compact screenshots before making a design judgment.
+It compiles the real source with the same public collector and checks every
+extracted rule against the verified package manifest before launching a browser.
 
 These deterministic checks do not prove a consumer's CSP, live Turnstile
 hostname policy, Accounts delivery, or provider retention. Verify those facts

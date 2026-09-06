@@ -1,5 +1,5 @@
+import { footerClassName } from "./footer.stylex.js";
 import {
-  HRANESS_FOOTER_CLASS_NAME,
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
@@ -49,5 +49,5 @@ export function renderHranessSiteFooter({
   const turnstileScriptNonce = parseHranessTurnstileScriptNonce(
     turnstileScriptNonceInput,
   );
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${HRANESS_FOOTER_CLASS_NAME}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce)}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce)}</footer>`;
 }

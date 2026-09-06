@@ -24,6 +24,8 @@ import {
   sep,
 } from "node:path";
 import { fileURLToPath } from "node:url";
+import { canonicalJson, readStylexPackageManifest } from "@hraness/ui/stylex-build";
+import { packageStylexTransform } from "../../../../scripts/stylex-transform.js";
 
 import {
   DIRECT_NAMED_LAYOUT_CONTRACT_SCHEMA,
@@ -640,6 +642,13 @@ function sourceIdentity(): SourceIdentity {
   };
   update("git-status", status);
   update("git-diff-head", diff);
+  for (const path of [
+    "src/footer.stylex.ts", "scripts/build.ts", "scripts/stylex-transform.ts",
+    "styles.css", "compiler-foundation.css", "dist/stylex.css", "dist/stylex-manifest.json",
+    "package.json", "bun.lock",
+  ]) {
+    update(`compiler-input:${path}`, readFileSync(join(REPOSITORY_ROOT, path)));
+  }
   for (const path of untracked) {
     const absolute = resolve(REPOSITORY_ROOT, path);
     if (!isWithin(REPOSITORY_ROOT, absolute)) {
@@ -722,7 +731,10 @@ async function doctor(): Promise<Readonly<Record<string, unknown>>> {
   if (browserSpecifier !== BROWSER_VERSION || browserInstalled !== BROWSER_VERSION) {
     throw new Error(`agent-browser must be pinned and installed at ${BROWSER_VERSION}.`);
   }
-  for (const path of [FIXTURE_ENTRY, SERVER_ENTRY, join(REPOSITORY_ROOT, "src/react.tsx")]) {
+  for (const path of [FIXTURE_ENTRY, SERVER_ENTRY, ...[
+    "src/react.tsx", "src/footer.stylex.ts", "scripts/stylex-transform.ts",
+    "dist/stylex.css", "dist/stylex-manifest.json", "compiler-foundation.css",
+  ].map((file) => join(REPOSITORY_ROOT, file))]) {
     if (!existsSync(path)) throw new Error(`Required verifier source is missing: ${path}`);
   }
   await mkdir(ARTIFACT_ROOT, { recursive: true });
@@ -742,11 +754,16 @@ async function doctor(): Promise<Readonly<Record<string, unknown>>> {
 async function buildFixture(runtimeDirectory: string): Promise<string> {
   const bundleDirectory = join(runtimeDirectory, "bundle");
   await mkdir(bundleDirectory, { recursive: true });
+  const manifest = await readStylexPackageManifest(
+    join(REPOSITORY_ROOT, "dist/stylex-manifest.json"), REPOSITORY_ROOT,
+  );
+  const { collector, plugin } = packageStylexTransform(REPOSITORY_ROOT);
   const result = await Bun.build({
     entrypoints: [FIXTURE_ENTRY],
     format: "esm",
     minify: false,
     outdir: bundleDirectory,
+    plugins: [plugin],
     sourcemap: "external",
     target: "browser",
   });
@@ -754,6 +771,11 @@ async function buildFixture(runtimeDirectory: string): Promise<string> {
     throw new Error(
       `Footer fixture build failed: ${result.logs.map((log) => log.message).join("; ")}`,
     );
+  }
+  const checkedRules = new Set(manifest.rules.map((rule) => canonicalJson(rule)));
+  const fixtureRules = collector.seal();
+  if (fixtureRules.length === 0 || fixtureRules.some((rule) => !checkedRules.has(canonicalJson(rule)))) {
+    throw new Error("Real-source fixture recipes differ from checked package CSS; run the checked build.");
   }
   for (const file of ["fixture.js", "fixture.css"]) {
     if (!existsSync(join(bundleDirectory, file))) {
