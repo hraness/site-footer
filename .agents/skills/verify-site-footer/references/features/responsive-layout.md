@@ -9,6 +9,7 @@
 - Equal email and submit heights.
 - Non-reserving idle status surface.
 - Minimum visible target sizes, viewport containment, no compact overflow, and settled geometry.
+- Independently cascaded control font palettes and inherited font language.
 
 ## How to get to it (user POV)
 
@@ -17,6 +18,15 @@ Resize the same state from a desktop-sized viewport to a compact phone-sized vie
 ## Driving it with agent-browser
 
 The verifier samples package-named rectangles twice after two animation frames. It validates explicit Direct rules for containment, centerline alignment, selected non-overlap relationships, clipping, minimum sizes, and stability. It also reads computed footer and status positioning plus document scroll width.
+
+Each viewport also records the real controls' computed font cascade. The fixture
+sets the footer to the `dark` palette and `"TRK"` language. A lower-priority
+canary sets both controls to `light` and `"SRB"`. The compiled `font: inherit`
+expansion must preserve the child palette while replacing its language with
+`"TRK"`. CSS Fonts 4 excludes `font-palette` from the shorthand's subproperties;
+`font-language-override` remains a reset-only subproperty. Unsupported properties
+fail the check rather than silently skipping it. Accepted replaces the controls,
+so that state requires both control samples to be absent.
 
 ## Gotchas
 

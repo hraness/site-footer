@@ -165,7 +165,21 @@ interface ManualGeometry {
   }>[];
 }
 
+interface FontCascadeValues {
+  readonly language: string;
+  readonly palette: string;
+}
+
+interface FontCascadeEvidence {
+  readonly input: FontCascadeValues | null;
+  readonly root: FontCascadeValues;
+  readonly submit: FontCascadeValues | null;
+  readonly supportsLanguage: true;
+  readonly supportsPalette: true;
+}
+
 interface ViewportEvidence {
+  readonly fontCascade: FontCascadeEvidence;
   readonly geometry: ManualGeometry;
   readonly layout: Readonly<{
     ok: boolean;
@@ -613,6 +627,47 @@ function parseManualGeometry(input: unknown): ManualGeometry {
     submitHeight: optionalNumber(record.submitHeight, "Submit height"),
     viewportWidth: finiteNumber(record.viewportWidth, "Viewport width"),
     visibleSocialTargets: Object.freeze(visibleSocialTargets),
+  });
+}
+
+export function assertFontCascade(input: unknown, state: FixtureState): FontCascadeEvidence {
+  const record = exactRecord(input, [
+    "input", "root", "submit", "supportsLanguage", "supportsPalette",
+  ], "Footer font cascade");
+  if (record.supportsLanguage !== true || record.supportsPalette !== true) {
+    throw new Error("Footer font cascade requires font-language-override and font-palette support.");
+  }
+  const values = (value: unknown, label: string): FontCascadeValues => {
+    const found = exactRecord(value, ["language", "palette"], label);
+    return Object.freeze({
+      language: requiredString(found.language, `${label} language`),
+      palette: requiredString(found.palette, `${label} palette`),
+    });
+  };
+  const root = values(record.root, "Footer font root");
+  if (root.language !== '"TRK"' || root.palette !== "dark") {
+    throw new Error("Footer font cascade parent canary is missing or overridden.");
+  }
+  const control = (value: unknown, label: string): FontCascadeValues | null => {
+    if (state === "accepted") {
+      if (value !== null) throw new Error(`Accepted footer retains its ${label} font sample.`);
+      return null;
+    }
+    const found = values(value, `Footer ${label} font`);
+    if (found.palette !== "light") {
+      throw new Error(`Footer ${label} font-palette did not preserve the explicit child palette: ${found.palette}.`);
+    }
+    if (found.language !== root.language) {
+      throw new Error(`Footer ${label} font-language-override did not inherit: ${found.language}.`);
+    }
+    return found;
+  };
+  return Object.freeze({
+    input: control(record.input, "input"),
+    root,
+    submit: control(record.submit, "submit"),
+    supportsLanguage: true,
+    supportsPalette: true,
   });
 }
 
@@ -1191,6 +1246,25 @@ const MANUAL_GEOMETRY_EXPRESSION = `(() => {
   };
 })()`;
 
+const FONT_CASCADE_EXPRESSION = `(() => {
+  const values = (selector) => {
+    const element = document.querySelector(selector);
+    if (!(element instanceof HTMLElement)) return null;
+    const computed = getComputedStyle(element);
+    return {
+      language: computed.getPropertyValue("font-language-override"),
+      palette: computed.getPropertyValue("font-palette"),
+    };
+  };
+  return {
+    input: values(".hraness-site-footer__mailing-input"),
+    root: values("#hraness-site-footer"),
+    submit: values(".hraness-site-footer__mailing-submit"),
+    supportsLanguage: CSS.supports("font-language-override", '"TRK"'),
+    supportsPalette: CSS.supports("font-palette", "light"),
+  };
+})()`;
+
 function assertFixtureState(snapshot: FixtureSnapshot, state: FixtureState): void {
   if (snapshot.errors.length > 0) {
     throw new Error(`${state} reported page errors: ${snapshot.errors.join("; ")}`);
@@ -1333,12 +1407,16 @@ async function sampleViewport(options: {
     await options.browser.evaluate(MANUAL_GEOMETRY_EXPRESSION),
   );
   assertManualGeometry(geometry, options.state, options.kind);
+  const fontCascade = assertFontCascade(
+    await options.browser.evaluate(FONT_CASCADE_EXPRESSION), options.state,
+  );
   const screenshotPath = join(
     options.runDirectory,
     `${options.state}-${options.kind}.png`,
   );
   await screenshot(options.browser, screenshotPath);
   return Object.freeze({
+    fontCascade,
     geometry,
     layout: Object.freeze({
       ok: validation.ok,

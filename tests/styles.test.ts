@@ -120,7 +120,9 @@ describe("compiled footer presentation", () => {
       contains(classes, "font-family:inherit");
       contains(classes, "font-style:inherit");
       contains(classes, "font-language-override:inherit");
-      contains(classes, "font-palette:inherit");
+      // CSS Fonts 4 excludes font-palette from font's subproperties. Unlike
+      // font-language-override, a separately cascaded child palette must survive.
+      expect(cssFor(classes)).not.toContain("font-palette:");
       contains(classes, "background-image:none");
       contains(classes, "background-origin:padding-box");
       contains(classes, "border-image-source:none");

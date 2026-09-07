@@ -8,6 +8,7 @@ import {
 
 import {
   assertAgentBrowserSocketBudget,
+  assertFontCascade,
   browserConsoleErrors,
   createLayoutContract,
   isExactServerCommand,
@@ -38,6 +39,41 @@ function parsedSample() {
 }
 
 describe("site-footer browser verifier", () => {
+  test("requires independent child palettes and inherited language on the real control samples", () => {
+    const inherited = { language: '"TRK"', palette: "light" };
+    const sample = {
+      input: inherited,
+      root: { language: '"TRK"', palette: "dark" },
+      submit: inherited,
+      supportsLanguage: true as const,
+      supportsPalette: true as const,
+    };
+    for (const state of ["idle", "pending", "error", "verification-error"] as const) {
+      expect(assertFontCascade(sample, state)).toEqual(sample);
+      for (const control of ["input", "submit"] as const) {
+        expect(() => assertFontCascade({
+          ...sample, [control]: { ...inherited, palette: "dark" },
+        }, state)).toThrow("explicit child palette");
+        expect(() => assertFontCascade({
+          ...sample, [control]: { ...inherited, language: '"SRB"' },
+        }, state)).toThrow("did not inherit");
+        expect(() => assertFontCascade({ ...sample, [control]: null }, state))
+          .toThrow("must be an object");
+      }
+    }
+    const accepted = { ...sample, input: null, submit: null };
+    expect(assertFontCascade(accepted, "accepted")).toEqual(accepted);
+    expect(() => assertFontCascade(sample, "accepted")).toThrow("retains");
+    for (const support of ["supportsLanguage", "supportsPalette"] as const) {
+      expect(() => assertFontCascade({ ...sample, [support]: false }, "idle"))
+        .toThrow("requires");
+    }
+    expect(() => assertFontCascade({ ...sample, root: { ...sample.root, palette: "normal" } }, "idle"))
+      .toThrow("parent canary");
+    expect(() => assertFontCascade({ ...sample, extra: true }, "idle"))
+      .toThrow("must contain exactly");
+  });
+
   test("parses only the documented bounded commands", () => {
     expect(parseArguments([])).toEqual({ kind: "help" });
     expect(parseArguments(["doctor"])).toEqual({ kind: "doctor" });

@@ -149,10 +149,12 @@ const styles = stylex.create({
   mailingLabel: { display: "block", "min-inline-size": 0, flexGrow: 1, flexShrink: 1, flexBasis: "auto" },
   control: {
     "block-size": "var(--hraness-site-footer-control-block-size)",
+    // Expand font: inherit without font-palette, which CSS Fonts 4 cascades
+    // independently. font-language-override remains a reset-only subproperty.
     fontFamily: "inherit", fontSize: "inherit", fontStyle: "inherit", fontVariant: "inherit",
     fontWeight: "inherit", fontStretch: "inherit", lineHeight: "inherit", fontSizeAdjust: "inherit",
     fontKerning: "inherit", fontFeatureSettings: "inherit", fontLanguageOverride: "inherit",
-    fontOpticalSizing: "inherit", fontPalette: "inherit", fontVariationSettings: "inherit",
+    fontOpticalSizing: "inherit", fontVariationSettings: "inherit",
   },
   mailingInput: {
     "inline-size": "100%", "min-inline-size": 0,
