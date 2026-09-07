@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.5.0
+bun add github:hraness/site-footer#v0.5.1
 ```
 
 Start with the network footer and no mailing form:

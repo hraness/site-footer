@@ -94,3 +94,19 @@ body {
     --muted: #aaa69d;
   }
 }
+
+/* Compiled priority layers must override font-language-override, but font:
+   inherit must leave font-palette alone. This predeclared legacy layer stays
+   below every package atom regardless of stylesheet import order. */
+@layer components.hraness-site-footer.legacy {
+  .hraness-site-footer__mailing-input,
+  .hraness-site-footer__mailing-submit {
+    font-language-override: "SRB";
+    font-palette: light;
+  }
+}
+
+.hraness-site-footer {
+  font-language-override: "TRK";
+  font-palette: dark;
+}
