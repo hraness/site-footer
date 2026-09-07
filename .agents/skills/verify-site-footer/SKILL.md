@@ -39,7 +39,7 @@ The five sequential contexts are `idle`, `pending`, `accepted`, `error`, and `ve
 
 Do not add state setters or alternate footer markup to make a run pass. Read [the signup-state map](references/features/signup-states.md) when changing state coverage and [the responsive-layout map](references/features/responsive-layout.md) when changing geometry rules.
 
-A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all six link targets, no mailing UI or provider interaction, zero surplus bottom padding, and visible keyboard focus through the home link and five social links.
+A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all six link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and five social links.
 
 ## Evidence
 
@@ -53,13 +53,17 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - equal input and submit heights;
 - an absolute hidden idle status that does not enlarge its form row;
 - exactly five social targets visible at wide and compact widths, with Substack first;
-- an icon-only home link and zero bottom padding in the fixture without a device safe area;
+- an icon-only home link;
+- positive computed top padding and bottom padding equal to that padding plus an independently measured device safe-area inset;
+- actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;
 - an in-flow footer row whose visible status surfaces clear its top edge;
 - no compact horizontal overflow;
 - declared minimum target sizes; and
 - two-sample Direct stability with no named-layout violations.
 
 Geometry evidence does not judge hierarchy, contrast, typography, or visual quality. Inspect the wide and compact screenshots before reporting a visual conclusion.
+
+The spacing sample temporarily inserts an invisible, out-of-flow measurement box to resolve `env(safe-area-inset-bottom, 0px)` independently, then removes it. It does not alter the footer or its state. The normal Chromium fixture can report a zero inset; that is not physical-device or nonzero-inset emulation evidence.
 
 ## Cleanup
 

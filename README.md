@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.6.0
+bun add github:hraness/site-footer#v0.6.1
 ```
 
 Start with the network footer and no mailing form:
@@ -202,8 +202,9 @@ always the first social link. Substack, X, LinkedIn, Bluesky, and GitHub stay
 visible at every supported width. The home link shows only the Ra icon and
 keeps the accessible name “Hraness home.”
 
-The footer adds no bottom padding beyond a device's safe-area inset. Do not
-add another footer bar, viewport spacer, or blank padding after it in a
+The footer keeps matching top and bottom padding around its controls and adds
+the device's safe-area inset below that spacing. Its computed height includes
+both. Do not add another footer bar, viewport spacer, or blank padding after it in a
 consumer layout. Product navigation belongs with the page navigation.
 
 Version 0.6.0 removes Instagram, Threads, TikTok, Reddit, Twitch, and YouTube

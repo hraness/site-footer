@@ -36,7 +36,8 @@ describe("compiled footer presentation", () => {
     contains(signup, "--hraness-site-footer-mailing-overlay-clearance:0rem");
     contains(signup, "--hraness-site-footer-content-block-size:max(var(--hraness-site-footer-social-target),var(--hraness-site-footer-form-block-size))");
     contains(footerInnerClassName(true), "block-size:var(--hraness-site-footer-bar-block-size)");
-    for (const inset of ["left", "right", "bottom"]) contains(footerInnerClassName(true), `env(safe-area-inset-${inset})`);
+    for (const inset of ["left", "right"]) contains(footerInnerClassName(true), `env(safe-area-inset-${inset})`);
+    contains(footerInnerClassName(true), "env(safe-area-inset-bottom, 0px)");
   });
 
   test("preserves theme fallbacks, coarse targets, and root overrides", () => {
@@ -59,9 +60,12 @@ describe("compiled footer presentation", () => {
     contains(footerClassName(false), "font-size:1rem");
   });
 
-  test("adds no bottom padding beyond the device safe area", () => {
-    contains(footerInnerClassName(false), "padding-block-end:env(safe-area-inset-bottom)");
-    contains(footerClassName(false), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom) + 1px)");
+  test("reserves matching visual padding plus the device safe area in both layouts", () => {
+    for (const signup of [false, true]) {
+      contains(footerInnerClassName(signup), "padding-block-start:var(--hraness-site-footer-padding-block)");
+      contains(footerInnerClassName(signup), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px))");
+      contains(footerClassName(signup), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)");
+    }
   });
 
   test("preserves native focus, hover, disabled, reduced-motion, and forced-color behavior", () => {

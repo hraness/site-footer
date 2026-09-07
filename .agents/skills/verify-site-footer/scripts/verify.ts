@@ -165,6 +165,16 @@ interface ManualGeometry {
   }>[];
 }
 
+interface FooterSpacing {
+  readonly bottomClearance: number;
+  readonly bottomPadding: number;
+  readonly expectedHeight: number;
+  readonly innerHeight: number;
+  readonly safeAreaInset: number;
+  readonly topClearance: number;
+  readonly topPadding: number;
+}
+
 interface FontCascadeValues {
   readonly language: string;
   readonly palette: string;
@@ -181,6 +191,7 @@ interface FontCascadeEvidence {
 interface ViewportEvidence {
   readonly fontCascade: FontCascadeEvidence;
   readonly geometry: ManualGeometry;
+  readonly spacing: FooterSpacing;
   readonly layout: Readonly<{
     ok: boolean;
     ruleCount: number;
@@ -1167,10 +1178,6 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   if (socialLinks.length !== 5 || brand.textContent.trim() !== "") {
     throw new Error("Footer must show the Ra icon without a wordmark and exactly five social links.");
   }
-  const bottomPadding = getComputedStyle(inner).paddingBlockEnd;
-  if (bottomPadding !== "0px") {
-    throw new Error("Loopback footer adds bottom padding without a device safe area: " + bottomPadding);
-  }
   const substack = socialLinks[0];
   if (
     !(substack instanceof HTMLAnchorElement)
@@ -1209,6 +1216,74 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     viewport: { height: window.innerHeight, width: window.innerWidth },
   };
 })()`;
+
+const FOOTER_SPACING_EXPRESSION = `(() => {
+  const inner = document.querySelector(".hraness-site-footer__inner");
+  if (!(inner instanceof HTMLElement)) throw new Error("Footer inner is missing.");
+  const content = [...inner.querySelectorAll([
+    ".hraness-site-footer__brand", ".hraness-site-footer__social-link",
+    ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
+    ".hraness-site-footer__mailing-confirmation",
+  ].join(","))].map(element => element.getBoundingClientRect());
+  if (content.length < 6 || content.some(box => box.width <= 0 || box.height <= 0)) {
+    throw new Error("Footer spacing requires visible content targets.");
+  }
+  // Resolve the device inset independently of the footer's own padding rule.
+  // This hidden measurement box is out of flow and is always removed.
+  const probe = document.createElement("div");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText = "all:initial;position:fixed;top:0;left:0;visibility:hidden;pointer-events:none;width:0;height:0;padding:0;padding-bottom:env(safe-area-inset-bottom, 0px);border:0;";
+  document.body.append(probe);
+  let safeAreaInset;
+  try {
+    safeAreaInset = Number.parseFloat(getComputedStyle(probe).paddingBottom);
+  } finally {
+    probe.remove();
+  }
+  const style = getComputedStyle(inner);
+  const box = inner.getBoundingClientRect();
+  const topPadding = Number.parseFloat(style.paddingBlockStart);
+  const bottomPadding = Number.parseFloat(style.paddingBlockEnd);
+  const borderTop = Number.parseFloat(style.borderTopWidth);
+  const borderBottom = Number.parseFloat(style.borderBottomWidth);
+  const contentTop = Math.min(...content.map(item => item.top));
+  const contentBottom = Math.max(...content.map(item => item.bottom));
+  return {
+    bottomClearance: box.bottom - borderBottom - contentBottom,
+    bottomPadding,
+    expectedHeight: contentBottom - contentTop + topPadding + bottomPadding + borderTop + borderBottom,
+    innerHeight: box.height,
+    safeAreaInset,
+    topClearance: contentTop - box.top - borderTop,
+    topPadding,
+  };
+})()`;
+
+function assertFooterSpacing(input: unknown, label: string): FooterSpacing {
+  const record = exactRecord(input, [
+    "bottomClearance", "bottomPadding", "expectedHeight", "innerHeight",
+    "safeAreaInset", "topClearance", "topPadding",
+  ], `${label} footer spacing`);
+  const spacing = Object.freeze({
+    bottomClearance: finiteNumber(record.bottomClearance, "Footer bottom clearance"),
+    bottomPadding: finiteNumber(record.bottomPadding, "Footer bottom padding"),
+    expectedHeight: finiteNumber(record.expectedHeight, "Footer expected height"),
+    innerHeight: finiteNumber(record.innerHeight, "Footer inner height"),
+    safeAreaInset: finiteNumber(record.safeAreaInset, "Footer safe-area inset"),
+    topClearance: finiteNumber(record.topClearance, "Footer top clearance"),
+    topPadding: finiteNumber(record.topPadding, "Footer top padding"),
+  });
+  if (spacing.topPadding <= 0 || spacing.safeAreaInset < 0
+    || Math.abs(spacing.bottomPadding - spacing.topPadding - spacing.safeAreaInset) > 0.5) {
+    throw new Error(`${label} must retain matching visual padding above the device safe area.`);
+  }
+  if (Math.abs(spacing.topClearance - spacing.topPadding) > 0.5
+    || Math.abs(spacing.bottomClearance - spacing.bottomPadding) > 0.5
+    || Math.abs(spacing.innerHeight - spacing.expectedHeight) > 0.5) {
+    throw new Error(`${label} rendered content does not clear the footer edges by its declared padding.`);
+  }
+  return spacing;
+}
 
 const MANUAL_GEOMETRY_EXPRESSION = `(() => {
   const rect = (element) => element instanceof HTMLElement
@@ -1415,6 +1490,9 @@ async function sampleViewport(options: {
     await options.browser.evaluate(MANUAL_GEOMETRY_EXPRESSION),
   );
   assertManualGeometry(geometry, options.state, options.kind);
+  const spacing = assertFooterSpacing(
+    await options.browser.evaluate(FOOTER_SPACING_EXPRESSION), `${options.state}/${options.kind}`,
+  );
   const fontCascade = assertFontCascade(
     await options.browser.evaluate(FONT_CASCADE_EXPRESSION), options.state,
   );
@@ -1426,6 +1504,7 @@ async function sampleViewport(options: {
   return Object.freeze({
     fontCascade,
     geometry,
+    spacing,
     layout: Object.freeze({
       ok: validation.ok,
       ruleCount: contract.value.rules.length,
@@ -1644,7 +1723,6 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       if (footer.querySelector('form, script, .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();
       if (state.requests.length || state.turnstile.renderCount || state.errors.length) throw new Error('No-signup footer used a provider boundary.');
-      if (getComputedStyle(inner).paddingBlockEnd !== '0px') throw new Error('Unexpected bottom padding.');
       if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('No-signup footer overflows.');
       const boxes = links.map(link => {
         const rect = link.getBoundingClientRect();
@@ -1653,9 +1731,12 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       });
       return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes };
     })()`);
+    const spacing = assertFooterSpacing(
+      await browser.evaluate(FOOTER_SPACING_EXPRESSION), `no-signup/${String(width)}`,
+    );
     const screenshotPath = join(runDirectory, `no-signup-${String(width)}.png`);
     await screenshot(browser, screenshotPath);
-    evidence.push({ geometry, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
+    evidence.push({ geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   await browser.run(["press", "Tab"]);
   for (const name of ["Hraness home", "Hraness on Substack", "Hraness on X", "Ben Guo on LinkedIn", "Hraness on Bluesky", "Hraness on GitHub"]) {
@@ -1835,6 +1916,7 @@ async function runVerifier(): Promise<string> {
     limitations: [
       "Synthetic Turnstile and Accounts boundaries do not prove either live provider.",
       "Named rectangles do not judge typography, contrast, hierarchy, rhythm, or overall visual quality.",
+      "Measured safe-area insets may be zero; this fixture does not force a nonzero inset or prove physical-device behavior.",
       "The fixture does not prove a consuming site's CSP, theme integration, or deployed footer release.",
     ],
     readiness,

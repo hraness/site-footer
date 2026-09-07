@@ -13,8 +13,8 @@
     --hraness-site-footer-background: var(--plain-background, var(--background, Canvas));
   }
 
-  .x8m0i9r {
-    --hraness-site-footer-bar-block-size: calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom) + 1px);
+  .xe0js8b {
+    --hraness-site-footer-bar-block-size: calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px);
   }
 
   .x1nw7rvg {
@@ -622,8 +622,8 @@
     opacity: 1;
   }
 
-  .x1prmn2g {
-    padding-block-end: env(safe-area-inset-bottom);
+  .xpcvst1 {
+    padding-block-end: calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px));
   }
 
   .x1bhgv95 {
