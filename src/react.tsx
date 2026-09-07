@@ -277,7 +277,7 @@ export function HranessSiteFooter({
       if (button !== null) {
         button.disabled = false;
         button.removeAttribute("aria-disabled");
-        button.textContent = "Retry security check";
+        button.textContent = "Retry check";
       }
       form.querySelector<HTMLInputElement>('input[name="email"]')
         ?.focus({ preventScroll: true });

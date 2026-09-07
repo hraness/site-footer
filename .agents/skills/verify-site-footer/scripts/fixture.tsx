@@ -102,6 +102,7 @@ function boundedError(value: unknown): string {
 }
 
 const selectedState = selectedFixtureState();
+const signupEnabled = new URL(window.location.href).searchParams.get("mailing") !== "none";
 const errors: string[] = [];
 const requests: RecordedRequest[] = [];
 let latestTurnstileOptions: TurnstileOptions | null = null;
@@ -227,11 +228,11 @@ function Fixture() {
         </article>
       </main>
       <HranessSiteFooter
-        mailingList={{
+        mailingList={signupEnabled ? {
           audience: "footer-fixture",
           kind: "signup",
           turnstileSitekey: TURNSTILE_TEST_SITEKEY,
-        }}
+        } : { kind: "none" }}
       />
     </>
   );

@@ -35,7 +35,7 @@ export type HranessMailingListRenderState = Readonly<{
     email: string;
     kind: "verification-error";
 }>;
-export type HranessSocialPlatform = "substack" | "x" | "instagram" | "linkedin" | "bluesky" | "threads" | "github" | "tiktok" | "reddit" | "twitch" | "youtube";
+export type HranessSocialPlatform = "substack" | "x" | "linkedin" | "bluesky" | "github";
 export interface HranessSocialLink {
     readonly platform: HranessSocialPlatform;
     readonly label: string;
@@ -53,11 +53,6 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
     readonly title: "X";
     readonly href: "https://x.com/hraness";
 }, {
-    readonly platform: "instagram";
-    readonly label: "Hraness on Instagram";
-    readonly title: "Instagram";
-    readonly href: "https://www.instagram.com/hraness/";
-}, {
     readonly platform: "linkedin";
     readonly label: "Ben Guo on LinkedIn";
     readonly title: "LinkedIn";
@@ -68,35 +63,10 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
     readonly title: "Bluesky";
     readonly href: "https://bsky.app/profile/hraness.bsky.social";
 }, {
-    readonly platform: "threads";
-    readonly label: "Hraness on Threads";
-    readonly title: "Threads";
-    readonly href: "https://www.threads.com/@hraness";
-}, {
     readonly platform: "github";
     readonly label: "Hraness on GitHub";
     readonly title: "GitHub";
     readonly href: "https://github.com/hraness";
-}, {
-    readonly platform: "tiktok";
-    readonly label: "Hraness on TikTok";
-    readonly title: "TikTok";
-    readonly href: "https://www.tiktok.com/@hraness";
-}, {
-    readonly platform: "reddit";
-    readonly label: "Ben Guo on Reddit";
-    readonly title: "Reddit";
-    readonly href: "https://www.reddit.com/user/bgdotjpg/";
-}, {
-    readonly platform: "twitch";
-    readonly label: "Hraness on Twitch";
-    readonly title: "Twitch";
-    readonly href: "https://www.twitch.tv/hranessdotcom";
-}, {
-    readonly platform: "youtube";
-    readonly label: "Hraness on YouTube";
-    readonly title: "YouTube";
-    readonly href: "https://www.youtube.com/@hraness";
 }];
 export declare function parseHranessMailingListConfig(value: HranessMailingListConfig): HranessMailingListConfig;
 export declare function parseHranessTurnstileScriptNonce(value: string | undefined): string | undefined;

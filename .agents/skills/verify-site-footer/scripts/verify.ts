@@ -191,6 +191,7 @@ interface ViewportEvidence {
 }
 
 interface ScenarioEvidence {
+  readonly additionalWidths: readonly ViewportEvidence[];
   readonly browserConsole: unknown;
   readonly browserErrors: unknown;
   readonly closeAttempt: unknown;
@@ -1163,6 +1164,13 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     ?? required(".hraness-site-footer__mailing-confirmation", "Footer mailing surface");
   const socials = required(".hraness-site-footer__socials", "Footer social group");
   const socialLinks = [...document.querySelectorAll(".hraness-site-footer__social-link")];
+  if (socialLinks.length !== 5 || brand.textContent.trim() !== "") {
+    throw new Error("Footer must show the Ra icon without a wordmark and exactly five social links.");
+  }
+  const bottomPadding = getComputedStyle(inner).paddingBlockEnd;
+  if (bottomPadding !== "0px") {
+    throw new Error("Loopback footer adds bottom padding without a device safe area: " + bottomPadding);
+  }
   const substack = socialLinks[0];
   if (
     !(substack instanceof HTMLAnchorElement)
@@ -1334,8 +1342,8 @@ function assertManualGeometry(
   ) {
     throw new Error(`${state}/${viewport} footer is not in normal document flow.`);
   }
-  if (geometry.visibleSocialTargets.length < 4) {
-    throw new Error(`${state}/${viewport} exposes fewer than four essential social targets.`);
+  if (geometry.visibleSocialTargets.length !== 5) {
+    throw new Error(`${state}/${viewport} must expose exactly five social targets.`);
   }
   if (geometry.visibleSocialTargets.some(({ height, width }) => height < 40 || width < 40)) {
     throw new Error(`${state}/${viewport} has a visible social target smaller than 40 CSS pixels.`);
@@ -1412,7 +1420,7 @@ async function sampleViewport(options: {
   );
   const screenshotPath = join(
     options.runDirectory,
-    `${options.state}-${options.kind}.png`,
+    `${options.state}-${options.kind}-${String(first.value.viewport.width)}.png`,
   );
   await screenshot(options.browser, screenshotPath);
   return Object.freeze({
@@ -1555,6 +1563,11 @@ async function driveState(options: {
   const wide = await sampleViewport({ ...options, kind: "wide" });
   await options.browser.run(["set", "viewport", "390", "844"]);
   const compact = await sampleViewport({ ...options, kind: "compact" });
+  const additionalWidths: ViewportEvidence[] = [];
+  for (const width of [320, 760]) {
+    await options.browser.run(["set", "viewport", String(width), "844"]);
+    additionalWidths.push(await sampleViewport({ ...options, kind: width < 760 ? "compact" : "wide" }));
+  }
   const browserErrors = await options.browser.run(["errors"]);
   const pageErrors = browserPageErrors(browserErrors);
   if (pageErrors.length > 0) {
@@ -1594,6 +1607,7 @@ async function driveState(options: {
     throw new Error(`${options.state} scenario tab did not close back to the bootstrap tab.`);
   }
   const evidence = Object.freeze({
+    additionalWidths,
     browserConsole,
     browserErrors,
     closeAttempt,
@@ -1610,6 +1624,64 @@ async function driveState(options: {
     join(options.runDirectory, `${options.state}.json`),
     evidence,
   );
+  return evidence;
+}
+
+async function driveNoSignup(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
+  await browser.run(["tab", "new"]);
+  await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=none`]);
+  await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
+  const evidence: unknown[] = [];
+  for (const width of [320, 390, 760, 1280]) {
+    await browser.run(["set", "viewport", String(width), "844"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const geometry = await browser.evaluate(`(() => {
+      const footer = document.querySelector('#hraness-site-footer');
+      const inner = footer.querySelector('.hraness-site-footer__inner');
+      const brand = footer.querySelector('.hraness-site-footer__brand');
+      const links = [...footer.querySelectorAll('a')];
+      if (links.length !== 6 || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
+      if (footer.querySelector('form, script, .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
+      const state = window.__siteFooterFixture.snapshot();
+      if (state.requests.length || state.turnstile.renderCount || state.errors.length) throw new Error('No-signup footer used a provider boundary.');
+      if (getComputedStyle(inner).paddingBlockEnd !== '0px') throw new Error('Unexpected bottom padding.');
+      if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('No-signup footer overflows.');
+      const boxes = links.map(link => {
+        const rect = link.getBoundingClientRect();
+        if (rect.width < 40 || rect.height < 40 || rect.left < 0 || rect.right > innerWidth + 0.5) throw new Error('Footer target is clipped or too small.');
+        return { name: link.getAttribute('aria-label'), x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      });
+      return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes };
+    })()`);
+    const screenshotPath = join(runDirectory, `no-signup-${String(width)}.png`);
+    await screenshot(browser, screenshotPath);
+    evidence.push({ geometry, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
+  }
+  await browser.run(["press", "Tab"]);
+  for (const name of ["Hraness home", "Hraness on Substack", "Hraness on X", "Ben Guo on LinkedIn", "Hraness on Bluesky", "Hraness on GitHub"]) {
+    const focused = await browser.evaluate(`(() => {
+      const element = document.activeElement;
+      return { name: element?.getAttribute('aria-label'), outline: element ? getComputedStyle(element).outlineStyle : null };
+    })()`);
+    if (!isRecord(focused) || focused.name !== name || focused.outline !== "solid") {
+      throw new Error(`Keyboard focus did not visibly reach ${name}.`);
+    }
+    await browser.run(["press", "Tab"]);
+  }
+  const errors = browserPageErrors(await browser.run(["errors"]));
+  const consoleErrors = browserConsoleErrors(await browser.run(["console"]));
+  if (errors.length || consoleErrors.length) throw new Error("No-signup footer produced browser errors.");
+  const tabId = activeTabId(await browser.run(["tab"]));
+  await browser.run(["tab", bootstrapTabId]);
+  try {
+    await browser.run(["tab", "close", tabId]);
+  } catch (error) {
+    if (!isRecoverableTabCloseRace(error)) throw error;
+  }
+  const inventory = await browser.run(["tab"]);
+  if (activeTabId(inventory) !== bootstrapTabId || tabIds(inventory).includes(tabId)) {
+    throw new Error("No-signup tab did not close back to the bootstrap tab.");
+  }
   return evidence;
 }
 
@@ -1671,6 +1743,7 @@ async function runVerifier(): Promise<string> {
   let finalClose: "failed" | "passed" = "failed";
   let serverCleanup: "failed" | "passed" = "failed";
   const evidence: ScenarioEvidence[] = [];
+  let noSignupEvidence: readonly unknown[] = [];
   let bootstrapInventory: unknown = null;
   let finalInventory: unknown = null;
   let postDriveSource: SourceIdentity | null = null;
@@ -1716,6 +1789,7 @@ async function runVerifier(): Promise<string> {
       }));
     }
     assertCrossStateGeometry(evidence);
+    noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     finalInventory = await browser.run(["tab"]);
     postDriveSource = sourceIdentity();
     assertSameSourceIdentity(initialSource, postDriveSource);
@@ -1765,6 +1839,7 @@ async function runVerifier(): Promise<string> {
     ],
     readiness,
     scenarios: evidence,
+    noSignup: noSignupEvidence,
     schema: "hraness.site-footer.browser-verification/v1",
     source: {
       afterCleanup: finalSource,

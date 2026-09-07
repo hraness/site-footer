@@ -115,9 +115,9 @@ test("the shared renderer bounds pending, accepted, and error states", () => {
     },
     "explicit",
   );
-  expect(explicitVerificationError).toContain(">Retry security check</button>");
+  expect(explicitVerificationError).toContain(">Retry check</button>");
   expect(explicitVerificationError).not.toContain(
-    'type="submit" aria-disabled="true" disabled="">Retry security check',
+    'type="submit" aria-disabled="true" disabled="">Retry check',
   );
 });
 
@@ -341,7 +341,7 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
       .toBeFalse();
     expect(container?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
-      .toBe("Retry security check");
+      .toBe("Retry check");
 
     await act(async () => {
       container?.querySelector("form")?.dispatchEvent(new window.Event("submit", {

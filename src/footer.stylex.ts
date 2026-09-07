@@ -24,11 +24,11 @@ const styles = stylex.create({
     "--hraness-site-footer-padding-block": "clamp(0.375rem, 1vw, 0.5rem)",
     "--hraness-site-footer-mailing-overlay-offset": "calc(var(--hraness-site-footer-mailing-overlay-clearance) + var(--hraness-site-footer-padding-block) + 1px)",
     "--hraness-site-footer-content-block-size": "var(--hraness-site-footer-control-block-size)",
-    "--hraness-site-footer-bar-block-size": "calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + max(var(--hraness-site-footer-padding-block), env(safe-area-inset-bottom)) + 1px)",
+    "--hraness-site-footer-bar-block-size": "calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom) + 1px)",
     "inline-size": "100%",
     color: "var(--hraness-site-footer-foreground)",
     fontFamily: 'var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
-    fontSize: "0.875rem",
+    fontSize: "1rem",
   },
   signup: {
     "--hraness-site-footer-content-block-size": {
@@ -79,33 +79,27 @@ const styles = stylex.create({
     "border-block-start-color": { default: "var(--hraness-site-footer-line)", "@media (forced-colors: active)": "ButtonText" },
     backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
     "padding-block-start": "var(--hraness-site-footer-padding-block)",
-    "padding-block-end": "max(var(--hraness-site-footer-padding-block), env(safe-area-inset-bottom))",
+    "padding-block-end": "env(safe-area-inset-bottom)",
     "padding-inline-start": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left))",
     "padding-inline-end": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right))",
   },
   innerSignup: {
     gridTemplateAreas: { default: '"brand links" "mailing mailing"', "@media (min-width: 47.5rem)": '"brand mailing links"' },
-    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(14rem, 26rem) minmax(0, 1fr)" },
+    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(12rem, 26rem) minmax(max-content, 1fr)" },
     gridTemplateRows: { default: "var(--hraness-site-footer-control-block-size) var(--hraness-site-footer-form-block-size)", "@media (min-width: 47.5rem)": "var(--hraness-site-footer-content-block-size)" },
   },
   flexCenter: { display: "flex", alignItems: "center" },
   fixedFlex: { flexGrow: 0, flexShrink: 0, flexBasis: "auto" },
   brand: {
-    gridArea: "brand", alignSelf: "center", gap: "0.625rem",
+    gridArea: "brand", alignSelf: "center", justifyContent: "center",
+    "min-inline-size": "var(--hraness-site-footer-control-block-size)",
     "min-block-size": "var(--hraness-site-footer-control-block-size)", borderRadius: "0.375rem",
     color: { default: "inherit", "@media (hover: hover)": { ":hover": "var(--hraness-site-footer-foreground)" } },
     fontWeight: 650, letterSpacing: "-0.018em", lineHeight: 1, textDecoration: "none",
   },
   mark: { "inline-size": "1.75rem", "block-size": "1.75rem" },
-  wordmark: {
-    display: {
-      default: "none", "@container hraness-footer (min-width: 44rem)": "inline",
-      "@supports not (container-type: inline-size)": { "@media (min-width: 44rem)": "inline" },
-    },
-    fontSize: "1rem",
-  },
   links: {
-    containerName: "hraness-footer-links", containerType: "inline-size", gridArea: "links",
+    gridArea: "links",
     "inline-size": "100%", "min-inline-size": 0, justifyContent: "flex-end", "margin-inline-start": "auto",
   },
   socials: {
@@ -117,10 +111,6 @@ const styles = stylex.create({
     flexGrow: 0, flexShrink: 0, flexBasis: "var(--hraness-site-footer-social-target)", "min-inline-size": 0, "min-block-size": 0,
   },
   socialAlways: { display: "block" },
-  socialFirstFive: { display: { default: "none", "@container hraness-footer-links (min-width: 274px)": "block" } },
-  socialFirstEight: { display: { default: "none", "@container hraness-footer-links (min-width: 366px)": "block" } },
-  socialFirstTen: { display: { default: "none", "@container hraness-footer-links (min-width: 458px)": "block" } },
-  socialAll: { display: { default: "none", "@container hraness-footer-links (min-width: 504px)": "block" } },
   socialLink: {
     "inline-size": "100%", "block-size": "100%", justifyContent: "center", borderRadius: "999px",
     color: { default: "var(--hraness-site-footer-muted)", "@media (hover: hover)": { ":hover": "var(--hraness-site-footer-foreground)" } },
@@ -178,7 +168,7 @@ const styles = stylex.create({
     "inset-inline": 0, overflow: "hidden", "min-inline-size": 0, "min-block-size": "var(--hraness-site-footer-status-block-size)",
     margin: 0, borderRadius: "0.375rem",
     backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
-    color: "var(--hraness-site-footer-muted)", fontSize: "0.75rem", lineHeight: 1, opacity: 0,
+    color: "var(--hraness-site-footer-muted)", fontSize: "0.875rem", lineHeight: 1.25, opacity: 0,
     "padding-block": "0.35rem", "padding-inline": "0.5rem", pointerEvents: "none", textOverflow: "ellipsis", visibility: "hidden", whiteSpace: "nowrap",
   },
   statusVisible: { opacity: 1, visibility: "visible" },
@@ -202,7 +192,6 @@ function className(hook: string, ...recipes: Array<(typeof styles)[keyof typeof 
 export const footerClasses = {
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
   mark: className("hraness-site-footer__mark", styles.fixedFlex, styles.mark),
-  wordmark: className("hraness-site-footer__wordmark", styles.wordmark),
   links: className("hraness-site-footer__links", styles.flexCenter, styles.links),
   socials: className("hraness-site-footer__socials", styles.socials),
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
@@ -225,11 +214,8 @@ export function footerInnerClassName(signup: boolean): string {
   return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup);
 }
 
-export function socialItemClassName(index: number): string {
-  const visibility = index === 0 || index === 1 || index === 3 || index === 6
-    ? styles.socialAlways : index < 5 ? styles.socialFirstFive
-    : index < 8 ? styles.socialFirstEight : index < 10 ? styles.socialFirstTen : styles.socialAll;
-  return className("hraness-site-footer__social-item", styles.socialItem, visibility);
+export function socialItemClassName(): string {
+  return className("hraness-site-footer__social-item", styles.socialItem, styles.socialAlways);
 }
 
 export function mailingStatusClassName(state: string): string {
