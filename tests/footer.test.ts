@@ -26,15 +26,9 @@ const productMailingList = {
 const expectedSocialLinks = [
   ["substack", "https://substack.com/@hraness"],
   ["x", "https://x.com/hraness"],
-  ["instagram", "https://www.instagram.com/hraness/"],
   ["linkedin", "https://www.linkedin.com/in/hraness"],
   ["bluesky", "https://bsky.app/profile/hraness.bsky.social"],
-  ["threads", "https://www.threads.com/@hraness"],
   ["github", "https://github.com/hraness"],
-  ["tiktok", "https://www.tiktok.com/@hraness"],
-  ["reddit", "https://www.reddit.com/user/bgdotjpg/"],
-  ["twitch", "https://www.twitch.tv/hranessdotcom"],
-  ["youtube", "https://www.youtube.com/@hraness"],
 ] as const;
 
 describe("Hraness site footer", () => {
@@ -232,14 +226,19 @@ describe("Hraness site footer", () => {
     expect(footer?.querySelector('[data-slot="hraness-mark"]')).toBeNull();
     expect(footer?.querySelector('input[name="audience"]')?.getAttribute("value"))
       .toBe("soundfish");
-    expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(11);
+    expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(5);
   });
 
   test("uses the exact raw Ra mark without image or mask dependencies", () => {
     const html = renderHranessSiteFooter({ mailingList: noMailingList });
     const { document } = parseHTML(html);
     const mark = document.querySelector('svg[data-slot="hraness-mark"]');
+    const brand = document.querySelector('.hraness-site-footer__brand');
 
+    expect(brand?.getAttribute("aria-label")).toBe("Hraness home");
+    expect(brand?.getAttribute("href")).toBe("https://hraness.com/");
+    expect(brand?.textContent).toBe("");
+    expect(document.querySelector('.hraness-site-footer__wordmark')).toBeNull();
     expect(mark?.getAttribute("viewBox")).toBe("0 0 512 512");
     expect(mark?.querySelectorAll("path")).toHaveLength(4);
     expect(mark?.querySelectorAll("circle")).toHaveLength(1);

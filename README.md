@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.5.1
+bun add github:hraness/site-footer#v0.6.0
 ```
 
 Start with the network footer and no mailing form:
@@ -36,7 +36,7 @@ export function ProductLayout({
 ```
 
 That render has the stable `id="hraness-site-footer"`, one Hraness home link
-and 11 specifically named social links, and no form, Turnstile script, request,
+and five specifically named social links, and no form, Turnstile script, request,
 cookie, or local storage. The links and inline decorative vectors work without
 client-side JavaScript.
 
@@ -147,7 +147,7 @@ to Accounts.
 
 | Package-owned | Consumer-owned |
 | --- | --- |
-| Ra mark, Hraness home destination, 11 social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
+| Ra mark, Hraness home destination, five social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
 | Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
 | Static and React markup, Turnstile action derivation, proof handling, and fixed script origins | The public site key, production hostname policy, and private Turnstile secret |
 | Responsive CSS, document-flow placement, coarse-pointer targets, focus treatment, and forced-color handling | Product theme variables and CSP allowlist or nonce |
@@ -198,9 +198,19 @@ reservation. Place it after the page's main content. A host that wants the
 footer at the bottom of a short page can use its own full-height flex or grid
 shell. A narrow signup footer uses one row for identity and essential links
 plus one row for the form; at `47.5rem` it moves to one aligned row. Substack is
-always the first social link; Substack, X, LinkedIn, and GitHub stay visible in
-the smallest layout, with the remaining social links revealed as room becomes
-available.
+always the first social link. Substack, X, LinkedIn, Bluesky, and GitHub stay
+visible at every supported width. The home link shows only the Ra icon and
+keeps the accessible name “Hraness home.”
+
+The footer adds no bottom padding beyond a device's safe-area inset. Do not
+add another footer bar, viewport spacer, or blank padding after it in a
+consumer layout. Product navigation belongs with the page navigation.
+
+Version 0.6.0 removes Instagram, Threads, TikTok, Reddit, Twitch, and YouTube
+from the shared contract, including the exported `HranessSocialPlatform` type.
+Update each consumer's immutable Git pin and lockfile, run its required checks,
+and deploy it to apply this change. Existing deployments do not change when a
+new package tag is published.
 
 The CSS includes safe-area padding, visible focus outlines, 44-pixel
 coarse-pointer targets, forced-color rules, and transitions only when the user

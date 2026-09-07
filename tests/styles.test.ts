@@ -49,26 +49,19 @@ describe("compiled footer presentation", () => {
     expect(footerClassName(false).split(" ")[0]).toBe("hraness-site-footer");
   });
 
-  test("keeps mobile social order and reveals each remaining owned item at its original threshold", () => {
-    for (const index of [0, 1, 3, 6]) {
-      const css = cssFor(socialItemClassName(index));
-      expect(css).toContain("display:block");
-      expect(css).not.toContain("display:none");
-      expect(css).not.toContain("@container");
-    }
-    for (const [indexes, threshold] of [
-      [[2, 4], 274], [[5, 7], 366], [[8, 9], 458], [[10], 504],
-    ] as const) {
-      for (const index of indexes) {
-        contains(socialItemClassName(index), "display:none");
-        contains(socialItemClassName(index), `@container hraness-footer-links (min-width:${threshold}px)`);
-        contains(socialItemClassName(index), "display:block");
-      }
-    }
-    contains(footerClasses.wordmark, "@container hraness-footer (min-width:44rem)");
-    contains(footerClasses.wordmark, "@supports not (container-type:inline-size)");
-    contains(footerClasses.links, "container-name:hraness-footer-links");
-    contains(footerClasses.links, "container-type:inline-size");
+  test("keeps every social target visible and the icon home link fully clickable", () => {
+    const css = cssFor(socialItemClassName());
+    expect(css).toContain("display:block");
+    expect(css).not.toContain("display:none");
+    expect(css).not.toContain("@container");
+    contains(footerClasses.brand, "min-inline-size:var(--hraness-site-footer-control-block-size)");
+    contains(footerClasses.brand, "min-block-size:var(--hraness-site-footer-control-block-size)");
+    contains(footerClassName(false), "font-size:1rem");
+  });
+
+  test("adds no bottom padding beyond the device safe area", () => {
+    contains(footerInnerClassName(false), "padding-block-end:env(safe-area-inset-bottom)");
+    contains(footerClassName(false), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom) + 1px)");
   });
 
   test("preserves native focus, hover, disabled, reduced-motion, and forced-color behavior", () => {

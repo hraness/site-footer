@@ -64,14 +64,14 @@ describe("README product contract", () => {
 
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
     expect(normalizedReadme).toContain(
-      "one Hraness home link and 11 specifically named social links",
+      "one Hraness home link and five specifically named social links",
     );
     expect(normalizedReadme).toContain(
       "no form, Turnstile script, request, cookie, or local storage",
     );
     expect(document.querySelector("form")).toBeNull();
     expect(document.querySelector("script")).toBeNull();
-    expect(document.querySelectorAll("a")).toHaveLength(12);
+    expect(document.querySelectorAll("a")).toHaveLength(6);
   });
 
   test("keeps Hraness.com on its page-owned Substack signup", () => {

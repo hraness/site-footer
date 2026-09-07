@@ -34,10 +34,12 @@ The five sequential contexts are `idle`, `pending`, `accepted`, `error`, and `ve
 1. starts with `tab new` beside the inert bootstrap tab, with the `127.0.0.1` browser allowlist already active;
 2. drives the visible email field and Subscribe button when submission is part of the state;
 3. observes the deterministic Turnstile adapter and exact Accounts request at the external boundary;
-4. captures two settled named-layout samples at 1280 by 900 and then 390 by 844 in the same context; and
+4. captures two settled named-layout samples at widths 1280, 390, 320, and 760 in the same context; and
 5. inventories the scenario, returns to the inert bootstrap tab, closes the inactive scenario tab by stable ID, and verifies the post-close inventory.
 
 Do not add state setters or alternate footer markup to make a run pass. Read [the signup-state map](references/features/signup-states.md) when changing state coverage and [the responsive-layout map](references/features/responsive-layout.md) when changing geometry rules.
+
+A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all six link targets, no mailing UI or provider interaction, zero surplus bottom padding, and visible keyboard focus through the home link and five social links.
 
 ## Evidence
 
@@ -50,7 +52,8 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - wide brand, mailing, and social centerlines within 1 CSS pixel;
 - equal input and submit heights;
 - an absolute hidden idle status that does not enlarge its form row;
-- a first-position Substack target visible at wide and compact widths;
+- exactly five social targets visible at wide and compact widths, with Substack first;
+- an icon-only home link and zero bottom padding in the fixture without a device safe area;
 - an in-flow footer row whose visible status surfaces clear its top edge;
 - no compact horizontal overflow;
 - declared minimum target sizes; and

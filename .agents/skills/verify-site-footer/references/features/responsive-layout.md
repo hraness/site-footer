@@ -4,12 +4,16 @@
 
 - One aligned wide row at 1280 by 900.
 - Two-row compact composition at 390 by 844.
+- Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
-- First-position Substack target visible at both widths.
+- All five social targets visible at both widths, with Substack first.
+- Icon-only home link with an accessible name and a full control-sized target.
+- No bottom padding beyond a device safe-area inset.
 - Equal email and submit heights.
 - Non-reserving idle status surface.
 - Minimum visible target sizes, viewport containment, no compact overflow, and settled geometry.
 - Independently cascaded control font palettes and inherited font language.
+- Signup-disabled footer at all four widths, including visible keyboard focus through its six links and no provider interactions.
 
 ## How to get to it (user POV)
 
