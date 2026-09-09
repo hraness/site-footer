@@ -1633,11 +1633,22 @@ async function driveState(options: {
     );
     if (focused !== true) throw new Error(`${options.state} did not focus its status.`);
   }
-  if (options.state === "error" || options.state === "verification-error") {
+  if (options.state === "error") {
     const focused = await options.browser.evaluate(
       "document.activeElement?.matches('input[name=\"email\"]') === true",
     );
     if (focused !== true) throw new Error(`${options.state} did not restore email focus.`);
+  }
+  if (options.state === "verification-error") {
+    const preserved = await options.browser.evaluate(
+      "document.activeElement === document.body",
+    );
+    if (preserved !== true) throw new Error("Background verification failure moved initial page focus.");
+    await options.browser.run(["press", "Tab"]);
+    const firstTab = await options.browser.evaluate(
+      "document.activeElement?.getAttribute('aria-label') === 'Hraness home'",
+    );
+    if (firstTab !== true) throw new Error("Background verification failure interrupted normal first-Tab order.");
   }
   const wide = await sampleViewport({ ...options, kind: "wide" });
   await options.browser.run(["set", "viewport", "390", "844"]);

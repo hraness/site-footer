@@ -136,8 +136,8 @@ test("a stale response state cannot leak across audience changes", () => {
   expect(html).not.toContain("Check your email to confirm");
 });
 
-test("the React adapter loads Turnstile once, gates posts, resets, restores focus, and confirms", async () => {
-  const { window } = parseHTML('<div id="root"></div>');
+test("the React adapter preserves background focus, retries Turnstile, gates posts, restores request focus, and confirms", async () => {
+  const { window } = parseHTML('<a id="host-link" href="#content">Skip to content</a><main id="content"></main><div id="root"></div>');
   const overrides = {
     Comment: window.Comment,
     document: window.document,
@@ -237,6 +237,9 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
   const root = createRoot(container!);
 
   try {
+    const hostLink = window.document.querySelector<HTMLElement>("#host-link");
+    expect(hostLink).not.toBeNull();
+    hostLink!.focus();
     await act(async () => {
       root.render(
         <HranessSiteFooter
@@ -268,7 +271,48 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     expect(container?.querySelector("form")?.getAttribute("data-state"))
       .toBe("idle");
     expect(container?.textContent).not.toContain("Security check failed. Try again.");
-    const scripts = window.document.querySelectorAll<HTMLScriptElement>(
+    let scripts = window.document.querySelectorAll<HTMLScriptElement>(
+      `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
+    );
+    expect(scripts).toHaveLength(1);
+    expect(scripts[0]?.getAttribute("nonce")).toBe(TURNSTILE_SCRIPT_NONCE);
+
+    // A blocked initial script is a background failure, not an invitation to
+    // redirect keyboard navigation away from the containing page.
+    await act(async () => {
+      scripts[0]?.dispatchEvent(new window.Event("error"));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(window.document.activeElement).toBe(hostLink);
+    expect(request).toBeUndefined();
+    expect(input?.value).toBe("reader@example.com");
+    expect(form?.getAttribute("data-state")).toBe("verification-error");
+    expect(container?.textContent).toContain("Security check failed. Try again.");
+    expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeFalse();
+    expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
+      .toBe("Retry check");
+    expect(window.document.querySelectorAll(
+      `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
+    )).toHaveLength(0);
+
+    await act(async () => {
+      form!.dispatchEvent(new window.Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(request).toBeUndefined();
+    expect(window.document.activeElement).toBe(hostLink);
+    expect(form?.getAttribute("data-state")).toBe("idle");
+    expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
+      .toBeTrue();
+    expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
+      .toBe("Verifying…");
+    scripts = window.document.querySelectorAll<HTMLScriptElement>(
       `script[src="${HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL}"]`,
     );
     expect(scripts).toHaveLength(1);
@@ -325,6 +369,7 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
     const toggledInput = container?.querySelector<HTMLInputElement>('input[name="email"]');
     expect(toggledInput).not.toBeNull();
     toggledInput!.value = "reader@example.com";
+    hostLink!.focus();
 
     await act(async () => {
       latestTurnstileOptions?.["error-callback"]("110200");
@@ -332,6 +377,8 @@ test("the React adapter loads Turnstile once, gates posts, resets, restores focu
       await Promise.resolve();
     });
     expect(request).toBeUndefined();
+    expect(window.document.activeElement).toBe(hostLink);
+    expect(toggledInput?.value).toBe("reader@example.com");
     expect(container?.querySelector("form")?.getAttribute("data-state"))
       .toBe("verification-error");
     expect(container?.textContent).toContain("Security check failed. Try again.");

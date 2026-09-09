@@ -279,8 +279,8 @@ export function HranessSiteFooter({
         button.removeAttribute("aria-disabled");
         button.textContent = "Retry check";
       }
-      form.querySelector<HTMLInputElement>('input[name="email"]')
-        ?.focus({ preventScroll: true });
+      // Turnstile can fail before the visitor interacts with the footer. Keep
+      // their current focus; submitted request outcomes recover focus below.
     };
 
     void loadTurnstile(turnstileScriptNonce).then((api) => {
