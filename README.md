@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.6.1
+bun add github:hraness/site-footer#v0.6.2
 ```
 
 Start with the network footer and no mailing form:
@@ -127,6 +127,11 @@ The configured signup follows one checked state path:
 4. The button and live status move through pending, accepted, retryable request
    error, or verification error. A failed request keeps the address and returns
    keyboard focus to the email field.
+
+Background Turnstile failures, including script-loading and challenge errors,
+announce the verification error and expose Retry check without moving focus
+away from the visitor's current place on the page. Focus recovery applies to
+the result of a submitted subscription request, not a background security check.
 
 The static form uses the same fields and package-owned Accounts action:
 
