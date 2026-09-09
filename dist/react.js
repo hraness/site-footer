@@ -861,9 +861,6 @@ function HranessSiteFooter({
         button.removeAttribute("aria-disabled");
         button.textContent = "Retry check";
       }
-      form.querySelector('input[name="email"]')?.focus({
-        preventScroll: true
-      });
     };
     loadTurnstile(turnstileScriptNonce).then((api) => {
       if (cancelled)
@@ -1028,4 +1025,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=4D2B951831EAD45664756E2164756E21
+//# debugId=06B26790CCB8C8FB64756E2164756E21
