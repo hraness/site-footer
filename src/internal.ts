@@ -109,7 +109,7 @@ export const HRANESS_SOCIAL_LINKS = [
     platform: "linkedin",
     label: "Hraness on LinkedIn",
     title: "LinkedIn",
-    href: "https://www.linkedin.com/in/hraness",
+    href: "https://www.linkedin.com/company/hraness",
   },
   {
     platform: "github",

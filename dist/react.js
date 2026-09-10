@@ -578,7 +578,7 @@ var HRANESS_SOCIAL_LINKS = [{
   platform: "linkedin",
   label: "Hraness on LinkedIn",
   title: "LinkedIn",
-  href: "https://www.linkedin.com/in/hraness"
+  href: "https://www.linkedin.com/company/hraness"
 }, {
   platform: "github",
   label: "Hraness on GitHub",
@@ -1111,4 +1111,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=157EB51974D2F1EB64756E2164756E21
+//# debugId=E2C3A46E33EFD66B64756E2164756E21

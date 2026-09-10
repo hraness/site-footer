@@ -90,6 +90,8 @@ describe("README product contract", () => {
     expect(readme).not.toContain("Hraness on Bluesky");
     expect(normalizedReadme).not.toContain("Ben Guo on LinkedIn");
     expect(normalizedReadme).toContain("Hraness on LinkedIn");
+    expect(readme).toContain("https://www.linkedin.com/company/hraness");
+    expect(readme).not.toContain("https://www.linkedin.com/in/hraness");
   });
 
   test("states the mailing transport and product-versus-package authority", () => {

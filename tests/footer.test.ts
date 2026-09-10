@@ -26,7 +26,7 @@ const productMailingList = {
 const expectedSocialLinks = [
   ["substack", "https://substack.com/@hraness"],
   ["x", "https://x.com/hraness"],
-  ["linkedin", "https://www.linkedin.com/in/hraness"],
+  ["linkedin", "https://www.linkedin.com/company/hraness"],
   ["github", "https://github.com/hraness"],
 ] as const;
 
@@ -261,7 +261,7 @@ describe("Hraness site footer", () => {
     ])).toEqual([
       ["Hraness on Substack", "https://substack.com/@hraness"],
       ["AI Charts on X", "https://x.com/aichartsio"],
-      ["Hraness on LinkedIn", "https://www.linkedin.com/in/hraness"],
+      ["Hraness on LinkedIn", "https://www.linkedin.com/company/hraness"],
       ["AI Charts on GitHub", "https://github.com/hraness/aicharts"],
     ]);
     expect(html).not.toContain("bluesky");

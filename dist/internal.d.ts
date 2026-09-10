@@ -62,7 +62,7 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
     readonly platform: "linkedin";
     readonly label: "Hraness on LinkedIn";
     readonly title: "LinkedIn";
-    readonly href: "https://www.linkedin.com/in/hraness";
+    readonly href: "https://www.linkedin.com/company/hraness";
 }, {
     readonly platform: "github";
     readonly label: "Hraness on GitHub";

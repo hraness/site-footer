@@ -175,9 +175,9 @@ retargets X and GitHub:
 ```
 
 Other products omit `social` and keep `https://x.com/hraness` and
-`https://github.com/hraness`. The default LinkedIn destination remains
-`https://www.linkedin.com/in/hraness` because no Hraness company page could be
-verified; the accessible name is “Hraness on LinkedIn.”
+`https://github.com/hraness`. The default LinkedIn destination is the Hraness
+company page, `https://www.linkedin.com/company/hraness`, with the accessible
+name “Hraness on LinkedIn.”
 
 ## Ownership boundary
 
@@ -245,8 +245,9 @@ both. Do not add another footer bar, viewport spacer, or blank padding after it 
 consumer layout. Product navigation belongs with the page navigation.
 
 Version 0.7.0 removes Bluesky from the shared contract, including the exported
-`HranessSocialPlatform` type, and adds the optional `social` override. Version
-0.6.0 removed Instagram, Threads, TikTok, Reddit, Twitch, and YouTube.
+`HranessSocialPlatform` type, adds the optional `social` override, and points
+LinkedIn at `https://www.linkedin.com/company/hraness`. Version 0.6.0 removed
+Instagram, Threads, TikTok, Reddit, Twitch, and YouTube.
 Update each consumer's immutable Git pin and lockfile, run its required checks,
 and deploy it to apply this change. Existing deployments do not change when a
 new package tag is published.
