@@ -26,10 +26,20 @@ const productMailingList = {
 const expectedSocialLinks = [
   ["substack", "https://substack.com/@hraness"],
   ["x", "https://x.com/hraness"],
-  ["linkedin", "https://www.linkedin.com/in/hraness"],
-  ["bluesky", "https://bsky.app/profile/hraness.bsky.social"],
+  ["linkedin", "https://www.linkedin.com/company/hraness"],
   ["github", "https://github.com/hraness"],
 ] as const;
+
+const aichartsSocial = {
+  github: {
+    href: "https://github.com/hraness/aicharts",
+    label: "AI Charts on GitHub",
+  },
+  x: {
+    href: "https://x.com/aichartsio",
+    label: "AI Charts on X",
+  },
+} as const;
 
 describe("Hraness site footer", () => {
   test("freezes the organization-owned home and social-link order", () => {
@@ -101,6 +111,14 @@ describe("Hraness site footer", () => {
       expectedSocialLinks.map(([, href]) => href),
     );
     expect(links[0]?.getAttribute("aria-label")).toBe("Hraness on Substack");
+    expect(links.map((link) => link.getAttribute("aria-label"))).toEqual([
+      "Hraness on Substack",
+      "Hraness on X",
+      "Hraness on LinkedIn",
+      "Hraness on GitHub",
+    ]);
+    expect(html).not.toContain("Ben Guo on LinkedIn");
+    expect(html).not.toContain("bluesky");
 
     for (const link of links) {
       expect(link.getAttribute("aria-label")).toBeTruthy();
@@ -226,7 +244,59 @@ describe("Hraness site footer", () => {
     expect(footer?.querySelector('[data-slot="hraness-mark"]')).toBeNull();
     expect(footer?.querySelector('input[name="audience"]')?.getAttribute("value"))
       .toBe("soundfish");
-    expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(5);
+    expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(4);
+  });
+
+  test("lets a product retarget owned X and GitHub destinations without adding platforms", () => {
+    const html = renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: aichartsSocial,
+    });
+    const { document } = parseHTML(html);
+    const links = [...document.querySelectorAll(".hraness-site-footer__social-link")];
+
+    expect(links.map((link) => [
+      link.getAttribute("aria-label"),
+      link.getAttribute("href"),
+    ])).toEqual([
+      ["Hraness on Substack", "https://substack.com/@hraness"],
+      ["AI Charts on X", "https://x.com/aichartsio"],
+      ["Hraness on LinkedIn", "https://www.linkedin.com/company/hraness"],
+      ["AI Charts on GitHub", "https://github.com/hraness/aicharts"],
+    ]);
+    expect(html).not.toContain("bluesky");
+    expect(html).not.toContain("bsky.app");
+    expect(html).not.toContain("https://x.com/hraness");
+    expect(html).not.toContain("https://github.com/hraness\"");
+  });
+
+  test("rejects invented platforms, invalid destinations, and extra override fields", () => {
+    expect(() => renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: {
+        bluesky: { href: "https://bsky.app/profile/hraness.bsky.social" },
+      } as unknown as typeof aichartsSocial,
+    })).toThrow("may only retarget substack, x, linkedin, or github");
+    expect(() => renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: { x: { href: "https://x.com/hraness", title: "X" } } as unknown as typeof aichartsSocial,
+    })).toThrow("may only set href and label");
+    expect(() => renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: { x: { href: "https://twitter.com/aichartsio" } },
+    })).toThrow("canonical https profile URLs");
+    expect(() => renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: { github: { href: "http://github.com/hraness/aicharts" } },
+    })).toThrow("canonical https profile URLs");
+    expect(() => renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: { x: { href: "javascript:alert(1)" } },
+    })).toThrow("canonical https profile URLs");
+    expect(() => renderHranessSiteFooter({
+      mailingList: noMailingList,
+      social: { x: { href: "https://x.com/aichartsio", label: " <script>" } },
+    })).toThrow("specific accessible names");
   });
 
   test("uses the exact raw Ra mark without image or mask dependencies", () => {

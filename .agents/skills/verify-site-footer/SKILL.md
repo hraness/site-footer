@@ -39,7 +39,7 @@ The five sequential contexts are `idle`, `pending`, `accepted`, `error`, and `ve
 
 Do not add state setters or alternate footer markup to make a run pass. Read [the signup-state map](references/features/signup-states.md) when changing state coverage and [the responsive-layout map](references/features/responsive-layout.md) when changing geometry rules.
 
-A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all six link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and five social links.
+A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all five link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and four social links.
 
 ## Evidence
 
@@ -52,7 +52,7 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - wide brand, mailing, and social centerlines within 1 CSS pixel;
 - equal input and submit heights;
 - an absolute hidden idle status that does not enlarge its form row;
-- exactly five social targets visible at wide and compact widths, with Substack first;
+- exactly four social targets visible at wide and compact widths, with Substack first;
 - an icon-only home link;
 - positive computed top padding and bottom padding equal to that padding plus an independently measured device safe-area inset;
 - actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;

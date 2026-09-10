@@ -1175,8 +1175,8 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     ?? required(".hraness-site-footer__mailing-confirmation", "Footer mailing surface");
   const socials = required(".hraness-site-footer__socials", "Footer social group");
   const socialLinks = [...document.querySelectorAll(".hraness-site-footer__social-link")];
-  if (socialLinks.length !== 5 || brand.textContent.trim() !== "") {
-    throw new Error("Footer must show the Ra icon without a wordmark and exactly five social links.");
+  if (socialLinks.length !== 4 || brand.textContent.trim() !== "") {
+    throw new Error("Footer must show the Ra icon without a wordmark and exactly four social links.");
   }
   const substack = socialLinks[0];
   if (
@@ -1225,7 +1225,7 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
     ".hraness-site-footer__mailing-confirmation",
   ].join(","))].map(element => element.getBoundingClientRect());
-  if (content.length < 6 || content.some(box => box.width <= 0 || box.height <= 0)) {
+  if (content.length < 5 || content.some(box => box.width <= 0 || box.height <= 0)) {
     throw new Error("Footer spacing requires visible content targets.");
   }
   // Resolve the device inset independently of the footer's own padding rule.
@@ -1417,8 +1417,8 @@ function assertManualGeometry(
   ) {
     throw new Error(`${state}/${viewport} footer is not in normal document flow.`);
   }
-  if (geometry.visibleSocialTargets.length !== 5) {
-    throw new Error(`${state}/${viewport} must expose exactly five social targets.`);
+  if (geometry.visibleSocialTargets.length !== 4) {
+    throw new Error(`${state}/${viewport} must expose exactly four social targets.`);
   }
   if (geometry.visibleSocialTargets.some(({ height, width }) => height < 40 || width < 40)) {
     throw new Error(`${state}/${viewport} has a visible social target smaller than 40 CSS pixels.`);
@@ -1730,7 +1730,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       const inner = footer.querySelector('.hraness-site-footer__inner');
       const brand = footer.querySelector('.hraness-site-footer__brand');
       const links = [...footer.querySelectorAll('a')];
-      if (links.length !== 6 || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
+      if (links.length !== 5 || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
       if (footer.querySelector('form, script, .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();
       if (state.requests.length || state.turnstile.renderCount || state.errors.length) throw new Error('No-signup footer used a provider boundary.');
@@ -1750,7 +1750,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
     evidence.push({ geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   await browser.run(["press", "Tab"]);
-  for (const name of ["Hraness home", "Hraness on Substack", "Hraness on X", "Ben Guo on LinkedIn", "Hraness on Bluesky", "Hraness on GitHub"]) {
+  for (const name of ["Hraness home", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
     const focused = await browser.evaluate(`(() => {
       const element = document.activeElement;
       return { name: element?.getAttribute('aria-label'), outline: element ? getComputedStyle(element).outlineStyle : null };

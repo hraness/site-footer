@@ -29,6 +29,7 @@ describe("README product contract", () => {
       "Install and first render",
       "Choose an interface",
       "Configure one mailing-list mode",
+      "Retarget owned social destinations",
       "Ownership boundary",
       "Trust and privacy boundary",
       "Compatibility and layout",
@@ -64,14 +65,14 @@ describe("README product contract", () => {
 
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
     expect(normalizedReadme).toContain(
-      "one Hraness home link and five specifically named social links",
+      "one Hraness home link and four specifically named social links",
     );
     expect(normalizedReadme).toContain(
       "no form, Turnstile script, request, cookie, or local storage",
     );
     expect(document.querySelector("form")).toBeNull();
     expect(document.querySelector("script")).toBeNull();
-    expect(document.querySelectorAll("a")).toHaveLength(6);
+    expect(document.querySelectorAll("a")).toHaveLength(5);
   });
 
   test("keeps Hraness.com on its page-owned Substack signup", () => {
@@ -80,6 +81,17 @@ describe("README product contract", () => {
     );
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
     expect(readme).not.toContain('audience: "hraness"');
+  });
+
+  test("documents owned social overrides for AI Charts without restoring Bluesky", () => {
+    expect(readme).toContain('href: "https://x.com/aichartsio"');
+    expect(readme).toContain('href: "https://github.com/hraness/aicharts"');
+    expect(readme).not.toContain("bsky.app");
+    expect(readme).not.toContain("Hraness on Bluesky");
+    expect(normalizedReadme).not.toContain("Ben Guo on LinkedIn");
+    expect(normalizedReadme).toContain("Hraness on LinkedIn");
+    expect(readme).toContain("https://www.linkedin.com/company/hraness");
+    expect(readme).not.toContain("https://www.linkedin.com/in/hraness");
   });
 
   test("states the mailing transport and product-versus-package authority", () => {

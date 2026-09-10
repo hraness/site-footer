@@ -11,8 +11,11 @@ import {
   parseHranessMailingListConfig,
   parseHranessTurnstileScriptNonce,
   renderHranessSiteFooterInnerHtml,
+  resolveHranessSocialLinks,
   type HranessMailingListConfig,
+  type HranessSocialConfig,
   type HranessSocialLink,
+  type HranessSocialLinkOverride,
   type HranessSocialPlatform,
 } from "./internal.js";
 
@@ -28,13 +31,24 @@ export {
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export const hranessSocialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS;
 
-export type { HranessMailingListConfig, HranessSocialLink, HranessSocialPlatform };
+export type {
+  HranessMailingListConfig,
+  HranessSocialConfig,
+  HranessSocialLink,
+  HranessSocialLinkOverride,
+  HranessSocialPlatform,
+};
 
 export interface HranessSiteFooterOptions {
   /** Explicitly select one mailing-list audience or omit mailing-list UI. */
   readonly mailingList: HranessMailingListConfig;
   /** Omit the Hraness home link when the containing site already supplies that identity. */
   readonly showBrand?: boolean;
+  /**
+   * Retarget owned social destinations without adding platforms or changing
+   * order. Defaults remain the shared Hraness profiles.
+   */
+  readonly social?: HranessSocialConfig;
   /** Optional per-response CSP nonce for the static Turnstile script. */
   readonly turnstileScriptNonce?: string;
 }
@@ -43,11 +57,13 @@ export interface HranessSiteFooterOptions {
 export function renderHranessSiteFooter({
   mailingList: mailingListInput,
   showBrand = true,
+  social: socialInput,
   turnstileScriptNonce: turnstileScriptNonceInput,
 }: HranessSiteFooterOptions): string {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const socialLinks = resolveHranessSocialLinks(socialInput);
   const turnstileScriptNonce = parseHranessTurnstileScriptNonce(
     turnstileScriptNonceInput,
   );
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce)}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce, socialLinks)}</footer>`;
 }

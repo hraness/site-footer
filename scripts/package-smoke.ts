@@ -60,6 +60,10 @@ const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).hr
       | { audience: string; kind: "signup"; turnstileSitekey: string }
       | { kind: "none" };
     showBrand?: boolean;
+    social?: Readonly<Partial<Record<"github" | "linkedin" | "substack" | "x", {
+      href: string;
+      label?: string;
+    }>>>;
     turnstileScriptNonce?: string;
   }) => string;
 };
@@ -94,8 +98,34 @@ if (
   || !html.includes('href="https://substack.com/@hraness"')
   || html.indexOf('href="https://substack.com/@hraness"')
     > html.indexOf('href="https://x.com/hraness"')
+  || html.includes("bsky.app")
+  || html.includes("bluesky")
+  || (html.match(/class="[^"]*hraness-site-footer__social-link/gu) ?? []).length !== 4
 ) {
   throw new Error("The built root export lost its closed mailing-list contract.");
+}
+const aichartsHtml = root.renderHranessSiteFooter?.({
+  mailingList: { kind: "none" },
+  social: {
+    github: {
+      href: "https://github.com/hraness/aicharts",
+      label: "AI Charts on GitHub",
+    },
+    x: {
+      href: "https://x.com/aichartsio",
+      label: "AI Charts on X",
+    },
+  },
+});
+if (
+  aichartsHtml === undefined
+  || !aichartsHtml.includes('href="https://x.com/aichartsio"')
+  || !aichartsHtml.includes('href="https://github.com/hraness/aicharts"')
+  || !aichartsHtml.includes('aria-label="AI Charts on X"')
+  || aichartsHtml.includes('href="https://x.com/hraness"')
+  || (aichartsHtml.match(/class="[^"]*hraness-site-footer__social-link/gu) ?? []).length !== 4
+) {
+  throw new Error("The built root export cannot retarget owned social destinations.");
 }
 const unbrandedHtml = root.renderHranessSiteFooter?.({
   mailingList: { kind: "none" },

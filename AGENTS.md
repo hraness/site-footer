@@ -12,11 +12,11 @@
 # Guidelines
 
 - Use Bun 1.3.14 and run `bun run check` before handing off a change.
-- Keep the footer organization-owned and product-independent. Products may select one explicit stable mailing-list audience or no mailing list and may set documented CSS custom properties, but must not fork the action, source, copy, social links, vector mark, order, semantics, or interaction behavior.
+- Keep the footer organization-owned and product-independent. Products may select one explicit stable mailing-list audience or no mailing list, retarget owned social destinations through the package `social` prop, and set documented CSS custom properties, but must not fork the action, source, copy, social platforms, vector mark, order, semantics, or interaction behavior.
 - Keep the root export framework-neutral. React runtime belongs only behind `@hraness/site-footer/react`.
 - Compile all owned presentation through the public `@hraness/ui/stylex-build` collector. Keep stable BEM hooks, explicit slot and state variants, custom-property overrides, and native pseudo-class behavior. Do not restore handwritten component selectors or runtime CSS injection.
 - Collect the static and React entry graphs serially into one verified manifest. Require artifact, source-boundary, absolute-root determinism, package, and real-source browser checks before release.
-- Preserve exact social-link order: Substack, X, LinkedIn, Bluesky, GitHub. Keep all five visible at every supported width. The home link shows only the Ra icon and retains its accessible name.
+- Preserve exact social-link order: Substack, X, LinkedIn, GitHub. Keep all four visible at every supported width. The home link shows only the Ra icon and retains its accessible name.
 - Keep matching top and bottom control padding inside the footer, with the device safe-area inset added below that spacing. Include the same inset in the computed bar height. Consumers must not reserve a second footer bar or add a separate spacer below the shared footer.
 - Require every consumer to configure `mailingList` explicitly. Never infer the Hraness umbrella audience for a product site.
 - Keep every meaningful link and the footer identity functional without JavaScript. Mailing signup must fail closed without JavaScript because the required Turnstile proof is generated client-side and verified by Accounts. Inline vectors remain decorative, and controls and links retain specific accessible names.
