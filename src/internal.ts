@@ -1,6 +1,5 @@
 import { footerClasses, footerInnerClassName, mailingStatusClassName, socialItemClassName } from "./footer.stylex.js";
 import {
-  BlueskyIcon,
   GithubIcon,
   Linkedin01Icon,
   NewTwitterIcon,
@@ -28,9 +27,24 @@ const MIN_TURNSTILE_SITEKEY_LENGTH = 20;
 const MAX_TURNSTILE_SITEKEY_LENGTH = 100;
 const MIN_TURNSTILE_SCRIPT_NONCE_LENGTH = 16;
 const MAX_TURNSTILE_SCRIPT_NONCE_LENGTH = 256;
+const MAX_SOCIAL_HREF_LENGTH = 200;
+const MAX_SOCIAL_LABEL_LENGTH = 64;
 const AUDIENCE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const TURNSTILE_SITEKEY_PATTERN = /^[A-Za-z0-9_-]+$/u;
 const TURNSTILE_SCRIPT_NONCE_PATTERN = /^[A-Za-z0-9+/_-]+={0,2}$/u;
+const SOCIAL_LABEL_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} .'+/-]{0,62}$/u;
+const SOCIAL_HREF_HOSTS: Readonly<Record<HranessSocialPlatform, string>> = {
+  github: "github.com",
+  linkedin: "www.linkedin.com",
+  substack: "substack.com",
+  x: "x.com",
+};
+const SOCIAL_HREF_PATHS: Readonly<Record<HranessSocialPlatform, RegExp>> = {
+  github: /^\/[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)?$/u,
+  linkedin: /^\/(?:company|in)\/[A-Za-z0-9_-]+$/u,
+  substack: /^\/@[A-Za-z0-9_-]+$/u,
+  x: /^\/[A-Za-z0-9_]{1,15}$/u,
+};
 
 export type HranessMailingListConfig =
   | Readonly<{
@@ -53,8 +67,14 @@ export type HranessSocialPlatform =
   | "substack"
   | "x"
   | "linkedin"
-  | "bluesky"
   | "github";
+
+export const HRANESS_SOCIAL_PLATFORMS = [
+  "substack",
+  "x",
+  "linkedin",
+  "github",
+] as const satisfies ReadonlyArray<HranessSocialPlatform>;
 
 export interface HranessSocialLink {
   readonly platform: HranessSocialPlatform;
@@ -62,6 +82,15 @@ export interface HranessSocialLink {
   readonly title: string;
   readonly href: string;
 }
+
+export interface HranessSocialLinkOverride {
+  readonly href: string;
+  readonly label?: string;
+}
+
+export type HranessSocialConfig = Readonly<
+  Partial<Record<HranessSocialPlatform, HranessSocialLinkOverride>>
+>;
 
 export const HRANESS_SOCIAL_LINKS = [
   {
@@ -78,15 +107,9 @@ export const HRANESS_SOCIAL_LINKS = [
   },
   {
     platform: "linkedin",
-    label: "Ben Guo on LinkedIn",
+    label: "Hraness on LinkedIn",
     title: "LinkedIn",
     href: "https://www.linkedin.com/in/hraness",
-  },
-  {
-    platform: "bluesky",
-    label: "Hraness on Bluesky",
-    title: "Bluesky",
-    href: "https://bsky.app/profile/hraness.bsky.social",
   },
   {
     platform: "github",
@@ -105,7 +128,6 @@ const ICONS: Readonly<Record<HranessSocialPlatform, IconDefinition>> = {
   substack: SUBSTACK_ICON,
   x: NewTwitterIcon as unknown as IconDefinition,
   linkedin: Linkedin01Icon as unknown as IconDefinition,
-  bluesky: BlueskyIcon as unknown as IconDefinition,
   github: GithubIcon as unknown as IconDefinition,
 };
 
@@ -164,6 +186,127 @@ export function parseHranessMailingListConfig(
   return value;
 }
 
+function isHranessSocialPlatform(value: string): value is HranessSocialPlatform {
+  return (HRANESS_SOCIAL_PLATFORMS as readonly string[]).includes(value);
+}
+
+function parseHranessSocialHref(
+  platform: HranessSocialPlatform,
+  href: string,
+): string {
+  if (href.length === 0 || href.length > MAX_SOCIAL_HREF_LENGTH) {
+    throw new TypeError(
+      "Hraness site footer social hrefs must be canonical https profile URLs.",
+    );
+  }
+
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    throw new TypeError(
+      "Hraness site footer social hrefs must be canonical https profile URLs.",
+    );
+  }
+
+  if (
+    url.protocol !== "https:"
+    || url.username !== ""
+    || url.password !== ""
+    || url.port !== ""
+    || url.search !== ""
+    || url.hash !== ""
+    || url.hostname !== SOCIAL_HREF_HOSTS[platform]
+    || !SOCIAL_HREF_PATHS[platform].test(url.pathname)
+    || url.href !== href
+  ) {
+    throw new TypeError(
+      "Hraness site footer social hrefs must be canonical https profile URLs.",
+    );
+  }
+
+  return href;
+}
+
+function parseHranessSocialOverride(
+  platform: HranessSocialPlatform,
+  value: unknown,
+): HranessSocialLinkOverride {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError("Hraness site footer social configuration is invalid.");
+  }
+
+  const keys = Object.keys(value);
+  if (keys.some((key) => key !== "href" && key !== "label")) {
+    throw new TypeError(
+      "Hraness site footer social overrides may only set href and label.",
+    );
+  }
+  if (!("href" in value) || typeof value.href !== "string") {
+    throw new TypeError("Hraness site footer social configuration is invalid.");
+  }
+
+  const href = parseHranessSocialHref(platform, value.href);
+  if (!("label" in value) || value.label === undefined) {
+    return { href };
+  }
+  if (typeof value.label !== "string") {
+    throw new TypeError(
+      "Hraness site footer social labels must be specific accessible names.",
+    );
+  }
+  if (
+    value.label.length === 0
+    || value.label.length > MAX_SOCIAL_LABEL_LENGTH
+    || value.label.trim() !== value.label
+    || !SOCIAL_LABEL_PATTERN.test(value.label)
+  ) {
+    throw new TypeError(
+      `Hraness site footer social labels must be specific accessible names of at most ${MAX_SOCIAL_LABEL_LENGTH} characters.`,
+    );
+  }
+
+  return { href, label: value.label };
+}
+
+export function parseHranessSocialConfig(
+  value: HranessSocialConfig | undefined,
+): HranessSocialConfig {
+  if (value === undefined) return {};
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new TypeError("Hraness site footer social configuration is invalid.");
+  }
+
+  const parsed: {
+    -readonly [K in HranessSocialPlatform]?: HranessSocialLinkOverride;
+  } = {};
+  for (const [platform, override] of Object.entries(value)) {
+    if (!isHranessSocialPlatform(platform) || override === undefined) {
+      throw new TypeError(
+        "Hraness site footer social overrides may only retarget substack, x, linkedin, or github.",
+      );
+    }
+    parsed[platform] = parseHranessSocialOverride(platform, override);
+  }
+  return parsed;
+}
+
+export function resolveHranessSocialLinks(
+  value: HranessSocialConfig | undefined,
+): ReadonlyArray<HranessSocialLink> {
+  const overrides = parseHranessSocialConfig(value);
+  return HRANESS_SOCIAL_LINKS.map((link) => {
+    const override = overrides[link.platform];
+    if (override === undefined) return link;
+    return {
+      href: override.href,
+      label: override.label ?? link.label,
+      platform: link.platform,
+      title: link.title,
+    };
+  });
+}
+
 export function parseHranessTurnstileScriptNonce(
   value: string | undefined,
 ): string | undefined {
@@ -216,7 +359,12 @@ function renderSocialIcon(platform: HranessSocialPlatform): string {
 const RA_MARK = `<svg aria-hidden="true" class="${footerClasses.mark}" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle></svg>`;
 
 const HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/">${RA_MARK}</a>`;
-const HRANESS_SITE_FOOTER_LINKS_HTML = `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${HRANESS_SOCIAL_LINKS.map((link) => `<li class="${socialItemClassName()}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
+
+function renderHranessSocialLinksHtml(
+  socialLinks: ReadonlyArray<HranessSocialLink>,
+): string {
+  return `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${socialLinks.map((link) => `<li class="${socialItemClassName()}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
+}
 
 const MAILING_IDLE_STATE = { kind: "idle" } as const satisfies HranessMailingListRenderState;
 
@@ -276,6 +424,7 @@ export function renderHranessSiteFooterInnerHtml(
   state: HranessMailingListRenderState = MAILING_IDLE_STATE,
   turnstileMode: "explicit" | "implicit" = "implicit",
   turnstileScriptNonce?: string,
+  socialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS,
 ): string {
   const mailingHtml = mailingList.kind === "none"
     ? ""
@@ -289,5 +438,5 @@ export function renderHranessSiteFooterInnerHtml(
   const turnstileScript = mailingList.kind === "signup" && turnstileMode === "implicit"
     ? `<script async="" data-slot="${HRANESS_TURNSTILE_SCRIPT_SLOT}" defer=""${turnstileScriptNonce === undefined ? "" : ` nonce="${escapeAttribute(turnstileScriptNonce)}"`} src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>`
     : "";
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_SITE_FOOTER_LINKS_HTML}</div>${turnstileScript}`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>${turnstileScript}`;
 }

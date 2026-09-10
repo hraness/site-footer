@@ -51,6 +51,26 @@ test("the idle React adapter preserves content while selecting explicit Turnstil
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
   expect(signupHtml).toContain('disabled="">Verifying…</button>');
   expect(signupHtml).not.toContain('data-slot="hraness-mark"');
+  const social = {
+    github: {
+      href: "https://github.com/hraness/aicharts",
+      label: "AI Charts on GitHub",
+    },
+    x: {
+      href: "https://x.com/aichartsio",
+      label: "AI Charts on X",
+    },
+  } as const;
+  const reactSocialHtml = renderToStaticMarkup(
+    <HranessSiteFooter mailingList={noMailingList} social={social} />,
+  );
+  expect(reactSocialHtml).toBe(renderHranessSiteFooter({
+    mailingList: noMailingList,
+    social,
+  }));
+  expect(reactSocialHtml).toContain('href="https://x.com/aichartsio"');
+  expect(reactSocialHtml).toContain('aria-label="AI Charts on GitHub"');
+  expect(reactSocialHtml).not.toContain("bsky.app");
 });
 
 test("the shared renderer bounds pending, accepted, and error states", () => {

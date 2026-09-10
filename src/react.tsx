@@ -18,8 +18,10 @@ import {
   parseHranessMailingListConfig,
   parseHranessTurnstileScriptNonce,
   renderHranessSiteFooterInnerHtml,
+  resolveHranessSocialLinks,
   type HranessMailingListConfig,
   type HranessMailingListRenderState,
+  type HranessSocialConfig,
 } from "./internal.js";
 import {
   createElement,
@@ -149,6 +151,11 @@ export interface HranessSiteFooterProps {
   readonly mailingList: HranessMailingListConfig;
   /** Omit the Hraness home link when the containing site already supplies that identity. */
   readonly showBrand?: boolean;
+  /**
+   * Retarget owned social destinations without adding platforms or changing
+   * order. Defaults remain the shared Hraness profiles.
+   */
+  readonly social?: HranessSocialConfig;
   /** Optional per-response CSP nonce used only when this component inserts Turnstile. */
   readonly turnstileScriptNonce?: string;
 }
@@ -167,9 +174,11 @@ function activeStateFor(
 export function HranessSiteFooter({
   mailingList: mailingListInput,
   showBrand = true,
+  social: socialInput,
   turnstileScriptNonce: turnstileScriptNonceInput,
 }: HranessSiteFooterProps) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const socialLinks = resolveHranessSocialLinks(socialInput);
   const turnstileScriptNonce = parseHranessTurnstileScriptNonce(
     turnstileScriptNonceInput,
   );
@@ -183,6 +192,9 @@ export function HranessSiteFooter({
   const mailingListKey = mailingList.kind === "signup"
     ? `signup:${mailingList.audience}:${mailingList.turnstileSitekey}`
     : "none";
+  const socialKey = socialLinks
+    .map((link) => `${link.platform}:${link.href}:${link.label}`)
+    .join("|");
   const renderState = activeStateFor(mailingList, state);
 
   useEffect(() => {
@@ -335,7 +347,7 @@ export function HranessSiteFooter({
         turnstileWidget.current = null;
       }
     };
-  }, [mailingListKey, renderState.kind, showBrand, turnstileScriptNonce, widgetRevision]);
+  }, [mailingListKey, renderState.kind, showBrand, socialKey, turnstileScriptNonce, widgetRevision]);
 
   useEffect(() => {
     if (renderState.kind === "idle") return;
@@ -436,8 +448,10 @@ export function HranessSiteFooter({
       mailingList,
       renderState,
       "explicit",
+      undefined,
+      socialLinks,
     ),
-    [mailingListKey, renderState, showBrand],
+    [mailingListKey, renderState, showBrand, socialKey],
   );
   const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
 

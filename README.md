@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.6.3
+bun add github:hraness/site-footer#v0.7.0
 ```
 
 Start with the network footer and no mailing form:
@@ -36,7 +36,7 @@ export function ProductLayout({
 ```
 
 That render has the stable `id="hraness-site-footer"`, one Hraness home link
-and five specifically named social links, and no form, Turnstile script, request,
+and four specifically named social links, and no form, Turnstile script, request,
 cookie, or local storage. The links and inline decorative vectors work without
 client-side JavaScript.
 
@@ -62,9 +62,9 @@ const footerHtml = renderHranessSiteFooter({
 ```
 
 Both renderers require `mailingList`. Both accept `showBrand: false` when the
-host page already supplies the Hraness identity and an optional
-`turnstileScriptNonce` when signup runs under a nonce-based Content Security
-Policy.
+host page already supplies the Hraness identity, an optional `social` object
+that retargets owned destinations, and an optional `turnstileScriptNonce` when
+signup runs under a nonce-based Content Security Policy.
 
 Static generators can resolve the checked stylesheet without assuming a
 `node_modules` path:
@@ -148,19 +148,51 @@ sends `Accept: application/json`. A successful 2xx response replaces the form
 with `Check your email to confirm`. Provider validation details remain private
 to Accounts.
 
+## Retarget owned social destinations
+
+The package owns the platform set and order: Substack, X, LinkedIn, and
+GitHub. Defaults stay the shared Hraness destinations. A product may override
+`href` and the matching accessible `label` for those platforms only. It cannot
+add platforms, hide one, reorder icons, or change markup or CSS.
+
+AI Charts keeps Substack and LinkedIn on the shared Hraness profiles and
+retargets X and GitHub:
+
+```tsx
+<HranessSiteFooter
+  mailingList={{ kind: "none" }}
+  social={{
+    x: {
+      href: "https://x.com/aichartsio",
+      label: "AI Charts on X",
+    },
+    github: {
+      href: "https://github.com/hraness/aicharts",
+      label: "AI Charts on GitHub",
+    },
+  }}
+/>
+```
+
+Other products omit `social` and keep `https://x.com/hraness` and
+`https://github.com/hraness`. The default LinkedIn destination remains
+`https://www.linkedin.com/in/hraness` because no Hraness company page could be
+verified; the accessible name is “Hraness on LinkedIn.”
+
 ## Ownership boundary
 
 | Package-owned | Consumer-owned |
 | --- | --- |
-| Ra mark, Hraness home destination, five social destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand` |
+| Ra mark, Hraness home destination, four social platforms, default destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand`; optional `href` and `label` overrides for owned platforms |
 | Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
 | Static and React markup, Turnstile action derivation, proof handling, and fixed script origins | The public site key, production hostname policy, and private Turnstile secret |
 | Responsive CSS, document-flow placement, coarse-pointer targets, focus treatment, and forced-color handling | Product theme variables and CSP allowlist or nonce |
-| Configuration parsing for audience, site-key, and nonce bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
+| Configuration parsing for audience, site-key, nonce, and social-override bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
 
-Consumers must not fork the package action, source, copy, social links, vector
-mark, order, semantics, or interaction behavior. A product can choose its
-audience and visual variables without creating another footer contract.
+Consumers must not fork the package action, source, copy, social platforms,
+vector mark, order, semantics, or interaction behavior. A product can choose
+its audience, retarget owned social destinations, and set visual variables
+without creating another footer contract.
 
 ## Trust and privacy boundary
 
@@ -203,7 +235,7 @@ reservation. Place it after the page's main content. A host that wants the
 footer at the bottom of a short page can use its own full-height flex or grid
 shell. A narrow signup footer uses one row for identity and essential links
 plus one row for the form; at `47.5rem` it moves to one aligned row. Substack is
-always the first social link. Substack, X, LinkedIn, Bluesky, and GitHub stay
+always the first social link. Substack, X, LinkedIn, and GitHub stay
 visible at every supported width. The home link shows only the Ra icon and
 keeps the accessible name “Hraness home.”
 
@@ -212,8 +244,9 @@ the device's safe-area inset below that spacing. Its computed height includes
 both. Do not add another footer bar, viewport spacer, or blank padding after it in a
 consumer layout. Product navigation belongs with the page navigation.
 
-Version 0.6.0 removes Instagram, Threads, TikTok, Reddit, Twitch, and YouTube
-from the shared contract, including the exported `HranessSocialPlatform` type.
+Version 0.7.0 removes Bluesky from the shared contract, including the exported
+`HranessSocialPlatform` type, and adds the optional `social` override. Version
+0.6.0 removed Instagram, Threads, TikTok, Reddit, Twitch, and YouTube.
 Update each consumer's immutable Git pin and lockfile, run its required checks,
 and deploy it to apply this change. Existing deployments do not change when a
 new package tag is published.
@@ -340,8 +373,10 @@ enhance pending, error, focus, and confirmation states without navigation.
 <details>
 <summary>Can a product change the links or subscribe copy?</summary>
 
-No. Those values are the organization-owned contract. Configure the product
-audience, brand visibility, theme variables, and CSP instead.
+Subscribe copy, platform set, icon order, and markup stay package-owned. A
+product may retarget `href` and `label` for Substack, X, LinkedIn, or GitHub
+through `social`. Configure the product audience, brand visibility, theme
+variables, and CSP for everything else.
 
 </details>
 
