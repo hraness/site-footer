@@ -81,6 +81,8 @@ export async function checkStylexArtifacts(repository: string): Promise<void> {
   };
   assert.deepEqual(manifest.package, { name: pkg.name, version: pkg.version });
   assert.equal(manifest.compilerSha256, compilerSha256);
+  assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
+  assert.equal(compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   assert.deepEqual(manifest.standaloneSerializer, STANDALONE_SERIALIZER);
   assert.deepEqual(manifest.runtime.map(({ path }) => path), ["dist/index.js", "dist/react.js"]);
   assert.deepEqual(manifest.stylesheets.map(({ path }) => path), ["compiler-foundation.css", "styles.css"]);
