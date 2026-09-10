@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { readStylexPackageManifest } from "@hraness/ui/stylex-build";
+import { createStylexTransformCollector, readStylexPackageManifest } from "@hraness/ui/stylex-build";
 import { resolve } from "node:path";
 import {
   footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, socialItemClassName,
@@ -22,6 +22,26 @@ function contains(classes: string, declaration: string): void {
 }
 
 describe("compiled footer presentation", () => {
+  test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
+    const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
+    expect(pkg.version).toBe("0.6.3");
+    expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
+    expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
+    expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
+    expect(pkg.dependencies).toBeUndefined();
+    expect(manifest.compiler.transform.propertyValidationMode).toBe("throw");
+    expect(manifest.compilerSha256).toBe("9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
+  });
+
+  test("rejects an unsupported logical shorthand before admitting any recipe rules", async () => {
+    const collector = createStylexTransformCollector(repository);
+    await expect(collector.transform(`import * as stylex from "@stylexjs/stylex";
+      export const styles = stylex.create({ footer: {
+        color: "red", borderBlockStart: "1px solid currentColor",
+      } });`, resolve(repository, "src/footer-validation-fixture.stylex.ts"))).rejects.toThrow(/not supported/u);
+    expect(collector.seal()).toEqual([]);
+  });
+
   test("owns an in-flow responsive row and separate signup geometry", () => {
     const root = footerClassName(false);
     const signup = footerClassName(true);

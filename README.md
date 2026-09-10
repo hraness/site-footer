@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.6.2
+bun add github:hraness/site-footer#v0.6.3
 ```
 
 Start with the network footer and no mailing form:
@@ -234,13 +234,21 @@ the generated `x*` classes are private build output. Products can override
 Existing `--plain-*`, common theme variables, and footer sizing properties retain
 their meanings. Keep values compatible with their original color or length type.
 
-Package builds use the published `@hraness/ui/stylex-build` compiler at v0.5.3
+Package builds use the published `@hraness/ui/stylex-build` compiler at v0.5.12
 with StyleX 0.19.0, collect static and React entrypoints serially, and seal their
 combined rules once. Standard consumers import the standalone CSS once. A
 consumer using the shared compiler admits the manifest and foundation and
 serializes the admitted package rules together with its application rules.
 The compiler foundation does not import standalone CSS, so that path does not
 duplicate independently serialized recipe layers.
+
+Version 0.6.3 rebuilds the existing recipes with the compiler's fail-fast
+property-validation contract. Unsupported properties fail compilation rather
+than silently losing declarations. Compiler consumers must register compatible
+package manifests and start a fresh generation after changing compiler identity.
+The prior rollback pair is Footer v0.6.2 with UI v0.5.3. Standalone static
+consumers still need neither React nor the compiler at runtime; this update adds
+no runtime or peer dependency.
 
 ## Content Security Policy
 
