@@ -1,6 +1,8 @@
 "use client";
 
 import { footerClassName, mailingStatusClassName } from "./footer.stylex.js";
+import { resolveFooterLocale } from "./locales.js";
+import { DEFAULT_FOOTER_VARIANT, exposeFooterEnrollment, requestFooterEnrollment, type FooterEnrollment } from "./experiment.js";
 
 import {
   HRANESS_FOOTER_LABEL,
@@ -147,6 +149,12 @@ function loadTurnstile(scriptNonce?: string): Promise<TurnstileApi> {
 }
 
 export interface HranessSiteFooterProps {
+  /** Localize only the signup controls; defaults to browser language preferences after hydration. */
+  readonly locale?: string | readonly string[];
+  /** Accounts owns assignment and confirmed-subscription analytics. Disable for fixtures or an intentional holdback. */
+  readonly experiment?: boolean;
+  /** Sticky includes its own document footprint. Flow leaves placement to the host. */
+  readonly placement?: "sticky" | "flow";
   /** Explicitly select one mailing-list audience or omit mailing-list UI. */
   readonly mailingList: HranessMailingListConfig;
   /** Omit the Hraness home link when the containing site already supplies that identity. */
@@ -172,6 +180,9 @@ function activeStateFor(
 
 /** Progressively enhance the canonical native mailing-list form when JavaScript is available. */
 export function HranessSiteFooter({
+  locale: localeInput,
+  experiment = true,
+  placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
   social: socialInput,
@@ -184,6 +195,14 @@ export function HranessSiteFooter({
   );
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
   const [widgetRevision, setWidgetRevision] = useState(0);
+  const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
+  const [enrollment, setEnrollment] = useState<FooterEnrollment | null>(null);
+  const interacted = useRef(false);
+  const exposedEnrollment = useRef<string | null>(null);
+  const enrollmentRequest = useRef<AbortController | null>(null);
+  const variant = enrollment?.assignment ?? DEFAULT_FOOTER_VARIANT;
+  const copy = locale.styles[variant.copyStyle];
+  const presentationKey = `${locale.locale}:${variant.layout}:${variant.copyStyle}:${variant.color}:${variant.shimmer}:${placement}`;
   const activeRequest = useRef<AbortController | null>(null);
   const footer = useRef<HTMLElement | null>(null);
   const turnstileApi = useRef<TurnstileApi | null>(null);
@@ -196,6 +215,60 @@ export function HranessSiteFooter({
     .map((link) => `${link.platform}:${link.href}:${link.label}`)
     .join("|");
   const renderState = activeStateFor(mailingList, state);
+  const markExposure = useCallback((token: string) => {
+    if (exposedEnrollment.current === token) return;
+    exposedEnrollment.current = token;
+    void exposeFooterEnrollment(token, new AbortController().signal);
+  }, []);
+
+  useEffect(() => {
+    interacted.current = false;
+    exposedEnrollment.current = null;
+    setEnrollment(null);
+    const selectedLocale = resolveFooterLocale(localeInput ?? navigator.languages);
+    setLocale(selectedLocale);
+    if (mailingList.kind !== "signup" || !experiment) return;
+    const controller = new AbortController();
+    enrollmentRequest.current = controller;
+    const timeout = setTimeout(() => controller.abort(), 1_500);
+    void requestFooterEnrollment(mailingList.audience, selectedLocale.locale, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted && !interacted.current && result !== null
+          && result.assignment.locale === selectedLocale.locale) setEnrollment(result);
+      }).finally(() => clearTimeout(timeout));
+    return () => { clearTimeout(timeout); controller.abort(); };
+  }, [mailingListKey, experiment, typeof localeInput === "string" ? localeInput : localeInput?.join(",")]);
+
+  useEffect(() => {
+    if (enrollment === null || footer.current === null || typeof IntersectionObserver !== "function") return;
+    const target = footer.current.querySelector('[data-slot="hraness-mailing-disclosure"] > summary')
+      ?? footer.current.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
+    if (target === null) return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let visible = false;
+    let sent = false;
+    const update = () => {
+      if (timer !== undefined) clearTimeout(timer);
+      if (visible && document.visibilityState === "visible" && !sent) {
+        timer = setTimeout(() => {
+          sent = true;
+          markExposure(enrollment.token);
+        }, 400);
+      }
+    };
+    const observer = new IntersectionObserver((entries) => {
+      visible = entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.5);
+      update();
+    }, { threshold: 0.5 });
+    observer.observe(target);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      observer.disconnect(); controller.abort();
+      if (timer !== undefined) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [enrollment, markExposure]);
 
   useEffect(() => {
     activeRequest.current?.abort();
@@ -228,7 +301,7 @@ export function HranessSiteFooter({
       if (button === null || button === undefined) return;
       button.disabled = true;
       button.setAttribute("aria-disabled", "true");
-      button.textContent = "Verifying…";
+      (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.verifying;
     };
     const setVerificationReady = (token: string) => {
       turnstileToken.current = token;
@@ -241,7 +314,7 @@ export function HranessSiteFooter({
       if (button !== null && button !== undefined) {
         button.disabled = false;
         button.removeAttribute("aria-disabled");
-        button.textContent = "Subscribe";
+        (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.button;
       }
       if (form?.dataset.state === "verification-error") {
         form.dataset.state = "idle";
@@ -281,7 +354,7 @@ export function HranessSiteFooter({
         status.className = mailingStatusClassName("verification-error");
         status.setAttribute("aria-live", "assertive");
         status.setAttribute("role", "alert");
-        status.textContent = "Security check failed. Try again.";
+        status.textContent = copy.verificationError;
       }
       const button = form.querySelector<HTMLButtonElement>(
         `button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`,
@@ -289,7 +362,7 @@ export function HranessSiteFooter({
       if (button !== null) {
         button.disabled = false;
         button.removeAttribute("aria-disabled");
-        button.textContent = "Retry check";
+        (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.retryVerification;
       }
       // Turnstile can fail before the visitor interacts with the footer. Keep
       // their current focus; submitted request outcomes recover focus below.
@@ -347,7 +420,7 @@ export function HranessSiteFooter({
         turnstileWidget.current = null;
       }
     };
-  }, [mailingListKey, renderState.kind, showBrand, socialKey, turnstileScriptNonce, widgetRevision]);
+  }, [mailingListKey, renderState.kind, showBrand, socialKey, turnstileScriptNonce, widgetRevision, presentationKey]);
 
   useEffect(() => {
     if (renderState.kind === "idle") return;
@@ -384,7 +457,7 @@ export function HranessSiteFooter({
     if (!(emailControl instanceof HTMLInputElement)) return;
 
     event.preventDefault();
-    if (renderState.kind === "pending" || renderState.kind === "accepted") return;
+    if (activeRequest.current !== null || renderState.kind === "pending" || renderState.kind === "accepted") return;
 
     const email = emailControl.value;
     const token = turnstileToken.current;
@@ -406,7 +479,7 @@ export function HranessSiteFooter({
         if (button !== null) {
           button.disabled = true;
           button.setAttribute("aria-disabled", "true");
-          button.textContent = "Verifying…";
+          (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.verifying;
         }
         setWidgetRevision((revision) => revision + 1);
       }
@@ -417,8 +490,11 @@ export function HranessSiteFooter({
     body.set("email", email);
     body.set("source", HRANESS_MAILING_SOURCE);
     body.set(HRANESS_TURNSTILE_RESPONSE_FIELD, token);
+    if (enrollment !== null) {
+      markExposure(enrollment.token);
+      body.set("experimentToken", enrollment.token);
+    }
     const request = new AbortController();
-    activeRequest.current?.abort();
     activeRequest.current = request;
     turnstileToken.current = null;
     setState({ audience: mailingList.audience, email, kind: "pending" });
@@ -440,7 +516,7 @@ export function HranessSiteFooter({
       activeRequest.current = null;
       setState({ audience: mailingList.audience, email, kind: "error" });
     });
-  }, [mailingListKey, renderState.kind]);
+  }, [mailingListKey, renderState.kind, enrollment, presentationKey, markExposure]);
 
   const innerHtml = useMemo(
     () => renderHranessSiteFooterInnerHtml(
@@ -450,14 +526,15 @@ export function HranessSiteFooter({
       "explicit",
       undefined,
       socialLinks,
+      { locale, variant, sticky: placement === "sticky" },
     ),
-    [mailingListKey, renderState, showBrand, socialKey],
+    [mailingListKey, renderState, showBrand, socialKey, presentationKey],
   );
   const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
 
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
-    className: footerClassName(mailingList.kind === "signup"),
+    className: footerClassName(mailingList.kind === "signup", placement === "sticky"),
     "data-brand": showBrand ? "visible" : "hidden",
     "data-mailing-list": mailingList.kind,
     "data-slot": HRANESS_FOOTER_SLOT,
@@ -465,6 +542,15 @@ export function HranessSiteFooter({
     // The HTML is composed only from validated package-owned constants and state.
     dangerouslySetInnerHTML: innerHtmlProp,
     onSubmit: handleSubmit,
+    onPointerDownCapture: () => { interacted.current = true; enrollmentRequest.current?.abort(); },
+    onFocusCapture: () => { interacted.current = true; enrollmentRequest.current?.abort(); },
+    onKeyDown: (event: { key: string; preventDefault: () => void }) => {
+      if (event.key !== "Escape") return;
+      const disclosure = footer.current?.querySelector("details");
+      if (disclosure?.open) {
+        event.preventDefault(); disclosure.open = false; disclosure.querySelector("summary")?.focus();
+      }
+    },
     ref: footer,
   });
 }

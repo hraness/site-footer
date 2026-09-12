@@ -1,4 +1,11 @@
 import * as stylex from "@stylexjs/stylex";
+import type { FooterVariant } from "./experiment.js";
+
+// Same direction, spread, and timing as Hraness.com's token support control.
+const textShimmer = stylex.keyframes({
+  from: { backgroundPosition: "100% center" },
+  to: { backgroundPosition: "0 center" },
+});
 
 // Owned slots share these recipes in both renderers. Product overrides remain
 // ordinary custom properties on the stable footer hook.
@@ -39,6 +46,48 @@ const styles = stylex.create({
       default: "calc(var(--hraness-site-footer-control-block-size) + var(--hraness-site-footer-row-gap))",
       "@media (min-width: 47.5rem)": "0rem",
     },
+  },
+  stickyFootprint: { "min-block-size": "var(--hraness-site-footer-bar-block-size)" },
+  stickyBar: { position: "fixed", "inset-inline": 0, "inset-block-end": 0, zIndex: 40 },
+  green: {
+    "--hraness-site-footer-action-background": "light-dark(#166534, #86efac)",
+    "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #052e16)",
+    "--hraness-site-footer-field-line": "light-dark(#166534, #86efac)",
+  },
+  orange: {
+    "--hraness-site-footer-action-background": "light-dark(#9a3412, #fdba74)",
+    "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #431407)",
+    "--hraness-site-footer-field-line": "light-dark(#9a3412, #fdba74)",
+  },
+  blue: {
+    "--hraness-site-footer-action-background": "light-dark(#1e40af, #93c5fd)",
+    "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #172554)",
+    "--hraness-site-footer-field-line": "light-dark(#1e40af, #93c5fd)",
+  },
+  experimentBorder: {
+    borderColor: { default: "var(--hraness-site-footer-field-line, var(--hraness-site-footer-line))", "@media (forced-colors: active)": "ButtonText" },
+  },
+  disclosure: { position: "relative", gridArea: "mailing", "min-inline-size": 0 },
+  disclosureTrigger: {
+    listStyleType: "none", "inline-size": "fit-content", "max-inline-size": "100%",
+    borderRadius: "0.375rem", "margin-inline-start": 0,
+    display: { default: "inline-flex", "::-webkit-details-marker": "none" },
+  },
+  disclosurePanel: {
+    position: "absolute", "inset-block-end": "calc(100% + 0.75rem)", "inset-inline-start": 0,
+    "inline-size": "min(26rem, calc(100vw - 2rem))", "max-inline-size": "calc(100vw - 2rem)",
+    "padding-block": "0.75rem", "padding-inline": "0.75rem", borderRadius: "0.5rem",
+    backgroundColor: "var(--hraness-site-footer-background)",
+  },
+  shimmer: {
+    "--hraness-site-footer-shimmer-spread": "calc(3ch + 40px)",
+    animationName: { default: null, "@media (prefers-reduced-motion: no-preference)": textShimmer, "@media (forced-colors: active)": "none" },
+    animationDuration: "2s", animationTimingFunction: "linear", animationIterationCount: "infinite",
+    backgroundImage: { default: null, "@media (prefers-reduced-motion: no-preference)": "linear-gradient(110deg, currentColor calc(50% - var(--hraness-site-footer-shimmer-spread)), color-mix(in srgb, currentColor 20%, transparent) 50%, currentColor calc(50% + var(--hraness-site-footer-shimmer-spread)))", "@media (forced-colors: active)": "none" },
+    backgroundPosition: "100% center", backgroundRepeat: "no-repeat",
+    backgroundSize: "calc(200% + var(--hraness-site-footer-shimmer-spread) * 2) 100%",
+    backgroundClip: "text",
+    WebkitTextFillColor: { default: "currentColor", "@media (prefers-reduced-motion: no-preference)": "transparent", "@media (forced-colors: active)": "currentColor" },
   },
   box: { boxSizing: "border-box" },
   backgroundReset: {
@@ -148,19 +197,19 @@ const styles = stylex.create({
   },
   mailingInput: {
     "inline-size": "100%", "min-inline-size": 0,
-    borderTopLeftRadius: "0.375rem", borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: "0.375rem",
+    borderStartStartRadius: "0.375rem", borderStartEndRadius: 0, borderEndEndRadius: 0, borderEndStartRadius: "0.375rem",
     backgroundColor: "var(--hraness-site-footer-field-background)",
     color: { default: "var(--hraness-site-footer-foreground)", "::placeholder": "var(--hraness-site-footer-muted)" },
     opacity: { default: null, "::placeholder": 1 }, "padding-inline": "0.625rem",
   },
   mailingSubmit: {
     alignItems: "center", display: "inline-flex", justifyContent: "center", lineHeight: 1, "margin-inline-start": "-1px",
-    borderTopLeftRadius: 0, borderTopRightRadius: "0.375rem", borderBottomRightRadius: "0.375rem", borderBottomLeftRadius: 0,
+    borderStartStartRadius: 0, borderStartEndRadius: "0.375rem", borderEndEndRadius: "0.375rem", borderEndStartRadius: 0,
     backgroundColor: { default: "var(--hraness-site-footer-action-background)", "@media (forced-colors: active)": "ButtonText" },
     color: { default: "var(--hraness-site-footer-action-foreground)", "@media (forced-colors: active)": "ButtonFace" },
     cursor: { default: "pointer", ":disabled": "wait" },
     opacity: { default: null, ":disabled": 0.62, "@media (hover: hover)": { ":hover:not(:disabled)": 0.82 } },
-    fontWeight: 650, "padding-inline": "clamp(0.625rem, 1.5vw, 0.875rem)",
+    fontWeight: 650, "padding-inline": "clamp(0.625rem, 1.5vw, 0.875rem)", "max-inline-size": "60%", textAlign: "center",
   },
   mailingStatus: {
     position: "absolute", zIndex: 2,
@@ -169,7 +218,7 @@ const styles = stylex.create({
     margin: 0, borderRadius: "0.375rem",
     backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
     color: "var(--hraness-site-footer-muted)", fontSize: "0.875rem", lineHeight: 1.25, opacity: 0,
-    "padding-block": "0.35rem", "padding-inline": "0.5rem", pointerEvents: "none", textOverflow: "ellipsis", visibility: "hidden", whiteSpace: "nowrap",
+    "padding-block": "0.35rem", "padding-inline": "0.5rem", pointerEvents: "none", visibility: "hidden", whiteSpace: "normal", overflowWrap: "anywhere",
   },
   statusVisible: { opacity: 1, visibility: "visible" },
   statusError: { color: "var(--hraness-site-footer-foreground)" },
@@ -190,6 +239,10 @@ function className(hook: string, ...recipes: Array<(typeof styles)[keyof typeof 
 }
 
 export const footerClasses = {
+  disclosure: className("hraness-site-footer__disclosure", styles.disclosure),
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.experimentBorder, styles.disclosureTrigger, styles.focus, styles.motion),
+  disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
+  shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
   mark: className("hraness-site-footer__mark", styles.fixedFlex, styles.mark),
   links: className("hraness-site-footer__links", styles.flexCenter, styles.links),
@@ -200,18 +253,19 @@ export const footerClasses = {
   turnstile: className("hraness-site-footer__turnstile", styles.box, styles.turnstile),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
-  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.focus),
-  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.focus, styles.motion),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
+  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.focus, styles.motion),
   mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.focus),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden),
 };
 
-export function footerClassName(signup: boolean): string {
-  return className("hraness-site-footer", styles.root, signup && styles.signup);
+export function footerClassName(signup: boolean, sticky = true): string {
+  return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
 }
 
-export function footerInnerClassName(signup: boolean): string {
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup);
+export function footerInnerClassName(signup: boolean, sticky = true, color: FooterVariant["color"] = "green"): string {
+  const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, sticky && styles.stickyBar, signup && colorStyle);
 }
 
 export function socialItemClassName(): string {

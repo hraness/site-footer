@@ -1,3 +1,11 @@
+import { type FooterVariant } from "./experiment.js";
+import { type FooterLocale } from "./locales.js";
+export interface FooterPresentation {
+    readonly locale: FooterLocale;
+    readonly variant: FooterVariant;
+    readonly sticky: boolean;
+}
+export declare const DEFAULT_FOOTER_PRESENTATION: FooterPresentation;
 export declare const HRANESS_FOOTER_LABEL = "Hraness network";
 export declare const HRANESS_FOOTER_CLASS_NAME = "hraness-site-footer";
 export declare const HRANESS_FOOTER_SLOT = "hraness-site-footer";
@@ -74,5 +82,5 @@ export declare function parseHranessSocialConfig(value: HranessSocialConfig | un
 export declare function resolveHranessSocialLinks(value: HranessSocialConfig | undefined): ReadonlyArray<HranessSocialLink>;
 export declare function parseHranessTurnstileScriptNonce(value: string | undefined): string | undefined;
 export declare function getHranessMailingTurnstileAction(audience: string): string;
-export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean, mailingList: HranessMailingListConfig, state?: HranessMailingListRenderState, turnstileMode?: "explicit" | "implicit", turnstileScriptNonce?: string, socialLinks?: ReadonlyArray<HranessSocialLink>): string;
+export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean, mailingList: HranessMailingListConfig, state?: HranessMailingListRenderState, turnstileMode?: "explicit" | "implicit", turnstileScriptNonce?: string, socialLinks?: ReadonlyArray<HranessSocialLink>, presentation?: FooterPresentation): string;
 //# sourceMappingURL=internal.d.ts.map

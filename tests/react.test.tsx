@@ -264,6 +264,7 @@ test("the React adapter preserves background focus, retries Turnstile, gates pos
       root.render(
         <HranessSiteFooter
           mailingList={mailingList}
+          experiment={false}
           turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
         />,
       );
@@ -370,6 +371,7 @@ test("the React adapter preserves background focus, retries Turnstile, gates pos
       root.render(
         <HranessSiteFooter
           mailingList={mailingList}
+          experiment={false}
           showBrand={false}
           turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
         />,
@@ -443,6 +445,7 @@ test("the React adapter preserves background focus, retries Turnstile, gates pos
       root.render(
         <HranessSiteFooter
           mailingList={{ ...mailingList }}
+          experiment={false}
           showBrand={false}
           turnstileScriptNonce={TURNSTILE_SCRIPT_NONCE}
         />,

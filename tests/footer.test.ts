@@ -215,6 +215,27 @@ describe("Hraness site footer", () => {
     })).toThrow("script nonces must be 16-256 character");
   });
 
+  test("renders localized button and inline experiment recipes", () => {
+    const html = renderHranessSiteFooter({
+      mailingList: productMailingList,
+      locale: "es-AR",
+      variant: { layout: "button", copyStyle: "inviting", color: "orange", shimmer: true },
+    });
+    const { document } = parseHTML(html);
+    const form = document.querySelector('form[data-slot="hraness-mailing-list-signup"]');
+    const details = document.querySelector("details");
+    const summary = details?.querySelector("summary");
+    expect(form?.getAttribute("lang")).toBe("es-AR");
+    expect(form?.getAttribute("dir")).toBe("ltr");
+    expect(form?.getAttribute("data-layout")).toBe("button");
+    expect(form?.getAttribute("data-copy-variant")).toBe("inviting");
+    expect(form?.getAttribute("data-color")).toBe("orange");
+    expect(form?.getAttribute("data-shimmer")).toBe("true");
+    expect(summary?.textContent).toContain("Avisame");
+    expect(form?.querySelector('input[name="email"]')?.getAttribute("placeholder")).toContain("mail");
+    expect(form?.querySelector(".hraness-site-footer__shimmer")).not.toBeNull();
+  });
+
   test("fails closed when an audience cannot produce the bounded Turnstile action", () => {
     expect(() => renderHranessSiteFooter({
       mailingList: {

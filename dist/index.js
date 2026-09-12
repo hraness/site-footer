@@ -175,6 +175,80 @@ var styles = {
     "--hraness-site-footer-mailing-overlay-clearance": "x1sphz0r x46h5on",
     $$css: true
   },
+  stickyFootprint: {
+    kVQ08L: "x5vl0wm",
+    $$css: true
+  },
+  stickyBar: {
+    kVAEAm: "xixxii4",
+    khdm6U: "x17y0mx6",
+    kctUWg: "xuufnwz",
+    kY2c9j: "xf5e64p",
+    $$css: true
+  },
+  green: {
+    "--hraness-site-footer-action-background": "x3l4yik",
+    "--hraness-site-footer-action-foreground": "x1izjwho",
+    "--hraness-site-footer-field-line": "x5yw2eo",
+    $$css: true
+  },
+  orange: {
+    "--hraness-site-footer-action-background": "x1mq49gw",
+    "--hraness-site-footer-action-foreground": "x1lf6uaq",
+    "--hraness-site-footer-field-line": "x1phg1r4",
+    $$css: true
+  },
+  blue: {
+    "--hraness-site-footer-action-background": "x18vkaze",
+    "--hraness-site-footer-action-foreground": "x1e6emja",
+    "--hraness-site-footer-field-line": "x14kbr3y",
+    $$css: true
+  },
+  experimentBorder: {
+    kVAM5u: "xveg7hp x1ylmb6m",
+    $$css: true
+  },
+  disclosure: {
+    kVAEAm: "x1n2onr6",
+    kJuA4N: "x1qaspin",
+    kdYMnH: "xesnm00",
+    $$css: true
+  },
+  disclosureTrigger: {
+    kH6xsr: "x3ct3a4",
+    kULEZF: "x6n8wx1",
+    k2kXS: "xgyk9h7",
+    kaIpWk: "x6i6fhv",
+    kImiAN: "x1lziwak",
+    k1xSpc: "x3nfvp2 x1i5lizr",
+    $$css: true
+  },
+  disclosurePanel: {
+    kVAEAm: "x10l6tqk",
+    kctUWg: "x1byf6of",
+    ka7YqC: "x1o0tod",
+    kULEZF: "x1487r7q",
+    k2kXS: "x1ljtl1n",
+    kF3gjK: "xo0yzjp",
+    kJVvJu: "x1ryrjj2",
+    kaIpWk: "x116uinm",
+    kWkggS: "x1hhhz6w",
+    $$css: true
+  },
+  shimmer: {
+    "--hraness-site-footer-shimmer-spread": "x94vt28",
+    kKVMdj: "x1n2piig xal2be3",
+    k44tkh: "x1c74tu6",
+    kyAemX: "x1esw782",
+    ko0y90: "xa4qsjk",
+    kKwaWg: "x1hhrnal xhobzj1",
+    k1YJky: "x1eror2x",
+    kz484i: "xiy17q3",
+    kgSjnq: "x18g1bdp",
+    kHypHr: "x1ta4xzc",
+    kUisrP: "x1urst0s x1wouot0 x1g58opa",
+    $$css: true
+  },
   box: {
     kB7OPa: "x9f619",
     $$css: true
@@ -390,10 +464,10 @@ var styles = {
   mailingInput: {
     kULEZF: "xiuoait",
     kdYMnH: "xesnm00",
-    kIxVMA: "x1ul7exa",
-    ksF3WI: "x1a2w583",
-    kYm2EN: "xjppbhk",
-    kqGeR4: "xbrzj0f",
+    krdFHd: "x1olvaoz",
+    kfmiAY: "x1ga7v0g",
+    kT0f0o: "x16uus16",
+    kVL7Gh: "xxahmv3",
     kWkggS: "xo5clpu",
     kMwMTN: "x1g4142m xook0zr",
     kSiTet: "x7xwk5j",
@@ -406,16 +480,18 @@ var styles = {
     kjj79g: "xl56j7k",
     kLWn49: "xo5v014",
     kImiAN: "x1hb08if",
-    kIxVMA: "x1ia1hqs",
-    ksF3WI: "x13be78j",
-    kYm2EN: "x1earptq",
-    kqGeR4: "xfrllxf",
+    krdFHd: "x15mokao",
+    kfmiAY: "xjp8vmc",
+    kT0f0o: "x5g0mfp",
+    kVL7Gh: "xbiv7yw",
     kWkggS: "x1ujht2g x1tt9vl1",
     kMwMTN: "xaazplj x1q5838n",
     kkrTdU: "x1ypdohk xjb0foi",
     kSiTet: "xo3u330 x7sp37k",
     k63SB2: "x19s9jnd",
     kJVvJu: "x1icpxkm",
+    k2kXS: "x1hwo6zt",
+    k9WMMc: "x2b8uid",
     $$css: true
   },
   mailingStatus: {
@@ -436,9 +512,9 @@ var styles = {
     kF3gjK: "x1267ecw",
     kJVvJu: "x97vtpp",
     kfzvcC: "x47corl",
-    kg5iWk: "xlyipyv",
     k33iCy: "xlshs6z",
-    khDVqt: "xuxw1ft",
+    khDVqt: "xeaf4i8",
+    kHjlTd: "xj0a0fe",
     $$css: true
   },
   statusVisible: {
@@ -483,6 +559,10 @@ function className(hook, ...recipes) {
   return `${hook} ${props(...recipes).className ?? ""}`.trim();
 }
 var footerClasses = {
+  disclosure: className("hraness-site-footer__disclosure", styles.disclosure),
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.experimentBorder, styles.disclosureTrigger, styles.focus, styles.motion),
+  disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
+  shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
   mark: className("hraness-site-footer__mark", styles.fixedFlex, styles.mark),
   links: className("hraness-site-footer__links", styles.flexCenter, styles.links),
@@ -493,22 +573,877 @@ var footerClasses = {
   turnstile: className("hraness-site-footer__turnstile", styles.box, styles.turnstile),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
-  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.focus),
-  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.focus, styles.motion),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
+  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.focus, styles.motion),
   mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.focus),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden)
 };
-function footerClassName(signup) {
-  return className("hraness-site-footer", styles.root, signup && styles.signup);
+function footerClassName(signup, sticky = true) {
+  return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
 }
-function footerInnerClassName(signup) {
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup);
+function footerInnerClassName(signup, sticky = true, color = "green") {
+  const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, sticky && styles.stickyBar, signup && colorStyle);
 }
 function socialItemClassName() {
   return className("hraness-site-footer__social-item", styles.socialItem, styles.socialAlways);
 }
 function mailingStatusClassName(state) {
   return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus, state !== "idle" && styles.statusVisible, (state === "error" || state === "verification-error") && styles.statusError);
+}
+
+// src/locales.ts
+var sharedMessages = {
+  en: {
+    formLabel: "Subscribe by email",
+    verifying: "Verifying…",
+    retryVerification: "Retry check",
+    verificationError: "Security check failed. Try again.",
+    pending: "Subscribing…",
+    submitting: "Submitting your email…",
+    requestError: "Couldn't subscribe. Try again.",
+    accepted: "Check your email to confirm",
+    openLabel: "Subscribe by email",
+    closeLabel: "Close email signup",
+    invalidEmail: "Enter a valid email address."
+  },
+  es: {
+    formLabel: "Recibir novedades por correo",
+    verifying: "Verificando…",
+    retryVerification: "Reintentar verificación",
+    verificationError: "Falló la verificación de seguridad. Inténtalo de nuevo.",
+    pending: "Enviando…",
+    submitting: "Enviando…",
+    requestError: "Algo salió mal. Inténtalo de nuevo.",
+    accepted: "Solicitud recibida. Revisa tu correo para continuar.",
+    openLabel: "Recibir novedades por correo",
+    closeLabel: "Cerrar",
+    invalidEmail: "Escribe un correo electrónico válido."
+  },
+  "es-AR": {
+    formLabel: "Recibir novedades por correo",
+    verifying: "Verificando…",
+    retryVerification: "Reintentar verificación",
+    verificationError: "Falló la verificación de seguridad. Intentá de nuevo.",
+    pending: "Enviando…",
+    submitting: "Enviando…",
+    requestError: "Algo salió mal. Intentá de nuevo.",
+    accepted: "Recibimos tu solicitud. Revisá tu correo para continuar.",
+    openLabel: "Recibir novedades por correo",
+    closeLabel: "Cerrar",
+    invalidEmail: "Escribí un correo electrónico válido."
+  },
+  fr: {
+    formLabel: "Recevoir les nouveautés par e-mail",
+    verifying: "Vérification…",
+    retryVerification: "Relancer la vérification",
+    verificationError: "La vérification de sécurité a échoué. Réessayez.",
+    pending: "Envoi…",
+    submitting: "Envoi…",
+    requestError: "Un problème est survenu. Réessayez.",
+    accepted: "Demande reçue. Consultez votre e-mail pour la suite.",
+    openLabel: "Recevoir les nouveautés par e-mail",
+    closeLabel: "Fermer",
+    invalidEmail: "Saisissez une adresse e-mail valide."
+  },
+  "fr-CA": {
+    formLabel: "Recevoir les nouvelles par courriel",
+    verifying: "Vérification…",
+    retryVerification: "Relancer la vérification",
+    verificationError: "La vérification de sécurité a échoué. Réessayez.",
+    pending: "Envoi…",
+    submitting: "Envoi…",
+    requestError: "Un problème est survenu. Réessayez.",
+    accepted: "Demande reçue. Consultez votre courriel pour la suite.",
+    openLabel: "Recevoir les nouvelles par courriel",
+    closeLabel: "Fermer",
+    invalidEmail: "Saisissez une adresse courriel valide."
+  },
+  "pt-BR": {
+    formLabel: "Receber novidades por e-mail",
+    verifying: "Verificando…",
+    retryVerification: "Tentar verificação de novo",
+    verificationError: "A verificação de segurança falhou. Tente novamente.",
+    pending: "Enviando…",
+    submitting: "Enviando…",
+    requestError: "Algo deu errado. Tente novamente.",
+    accepted: "Recebemos seu pedido. Confira seu e-mail para continuar.",
+    openLabel: "Receber novidades por e-mail",
+    closeLabel: "Fechar",
+    invalidEmail: "Digite um e-mail válido."
+  },
+  "pt-PT": {
+    formLabel: "Receber novidades por e-mail",
+    verifying: "A verificar…",
+    retryVerification: "Repetir verificação",
+    verificationError: "A verificação de segurança falhou. Tente novamente.",
+    pending: "A enviar…",
+    submitting: "A enviar…",
+    requestError: "Ocorreu um erro. Tente novamente.",
+    accepted: "Pedido recebido. Consulte o seu e-mail para continuar.",
+    openLabel: "Receber novidades por e-mail",
+    closeLabel: "Fechar",
+    invalidEmail: "Introduza um e-mail válido."
+  },
+  de: {
+    formLabel: "Neuigkeiten per E-Mail abonnieren",
+    verifying: "Wird überprüft…",
+    retryVerification: "Prüfung wiederholen",
+    verificationError: "Die Sicherheitsprüfung ist fehlgeschlagen. Versuch es noch einmal.",
+    pending: "Wird gesendet…",
+    submitting: "Wird gesendet…",
+    requestError: "Etwas ist schiefgelaufen. Versuch es noch einmal.",
+    accepted: "Anfrage erhalten. Schau für den nächsten Schritt in deine E-Mails.",
+    openLabel: "Neuigkeiten per E-Mail abonnieren",
+    closeLabel: "Schließen",
+    invalidEmail: "Gib eine gültige E-Mail-Adresse ein."
+  },
+  nl: {
+    formLabel: "Nieuws ontvangen per e-mail",
+    verifying: "Controleren…",
+    retryVerification: "Controle opnieuw proberen",
+    verificationError: "De veiligheidscontrole is mislukt. Probeer het opnieuw.",
+    pending: "Verzenden…",
+    submitting: "Verzenden…",
+    requestError: "Er ging iets mis. Probeer het opnieuw.",
+    accepted: "Aanvraag ontvangen. Bekijk je e-mail voor de volgende stap.",
+    openLabel: "Nieuws ontvangen per e-mail",
+    closeLabel: "Sluiten",
+    invalidEmail: "Vul een geldig e-mailadres in."
+  },
+  it: {
+    formLabel: "Ricevere le novità via email",
+    verifying: "Verifica…",
+    retryVerification: "Ripeti la verifica",
+    verificationError: "La verifica di sicurezza non è riuscita. Riprova.",
+    pending: "Invio…",
+    submitting: "Invio…",
+    requestError: "Qualcosa è andato storto. Riprova.",
+    accepted: "Richiesta ricevuta. Controlla la tua email per continuare.",
+    openLabel: "Ricevere le novità via email",
+    closeLabel: "Chiudi",
+    invalidEmail: "Inserisci un indirizzo email valido."
+  },
+  ca: {
+    formLabel: "Rebre novetats per correu",
+    verifying: "Verificant…",
+    retryVerification: "Torna a verificar",
+    verificationError: "La verificació de seguretat ha fallat. Torna-ho a provar.",
+    pending: "Enviant…",
+    submitting: "Enviant…",
+    requestError: "Hi ha hagut un problema. Torna-ho a provar.",
+    accepted: "Hem rebut la sol·licitud. Revisa el correu per continuar.",
+    openLabel: "Rebre novetats per correu",
+    closeLabel: "Tanca",
+    invalidEmail: "Introdueix un correu electrònic vàlid."
+  },
+  sv: {
+    formLabel: "Prenumerera på nyheter via e-post",
+    verifying: "Verifierar…",
+    retryVerification: "Försök verifiera igen",
+    verificationError: "Säkerhetskontrollen misslyckades. Försök igen.",
+    pending: "Skickar…",
+    submitting: "Skickar…",
+    requestError: "Något gick fel. Försök igen.",
+    accepted: "Förfrågan mottagen. Kolla din e-post för nästa steg.",
+    openLabel: "Prenumerera på nyheter via e-post",
+    closeLabel: "Stäng",
+    invalidEmail: "Ange en giltig e-postadress."
+  },
+  da: {
+    formLabel: "Tilmeld dig nyheder via e-mail",
+    verifying: "Bekræfter…",
+    retryVerification: "Prøv kontrollen igen",
+    verificationError: "Sikkerhedskontrollen mislykkedes. Prøv igen.",
+    pending: "Sender…",
+    submitting: "Sender…",
+    requestError: "Noget gik galt. Prøv igen.",
+    accepted: "Anmodning modtaget. Tjek din e-mail for næste trin.",
+    openLabel: "Tilmeld dig nyheder via e-mail",
+    closeLabel: "Luk",
+    invalidEmail: "Indtast en gyldig e-mailadresse."
+  },
+  nb: {
+    formLabel: "Abonner på nyheter via e-post",
+    verifying: "Bekrefter…",
+    retryVerification: "Prøv kontrollen igjen",
+    verificationError: "Sikkerhetskontrollen mislyktes. Prøv igjen.",
+    pending: "Sender…",
+    submitting: "Sender…",
+    requestError: "Noe gikk galt. Prøv igjen.",
+    accepted: "Forespørselen er mottatt. Sjekk e-posten din for neste steg.",
+    openLabel: "Abonner på nyheter via e-post",
+    closeLabel: "Lukk",
+    invalidEmail: "Skriv inn en gyldig e-postadresse."
+  },
+  fi: {
+    formLabel: "Tilaa uutiset sähköpostitse",
+    verifying: "Vahvistetaan…",
+    retryVerification: "Yritä tarkistusta uudelleen",
+    verificationError: "Turvatarkistus epäonnistui. Yritä uudelleen.",
+    pending: "Lähetetään…",
+    submitting: "Lähetetään…",
+    requestError: "Jokin meni pieleen. Yritä uudelleen.",
+    accepted: "Pyyntö vastaanotettu. Tarkista sähköpostistasi seuraava vaihe.",
+    openLabel: "Tilaa uutiset sähköpostitse",
+    closeLabel: "Sulje",
+    invalidEmail: "Anna kelvollinen sähköpostiosoite."
+  },
+  pl: {
+    formLabel: "Otrzymuj nowości e-mailem",
+    verifying: "Weryfikacja…",
+    retryVerification: "Ponów weryfikację",
+    verificationError: "Weryfikacja bezpieczeństwa nie powiodła się. Spróbuj ponownie.",
+    pending: "Wysyłanie…",
+    submitting: "Wysyłanie…",
+    requestError: "Coś poszło nie tak. Spróbuj ponownie.",
+    accepted: "Zgłoszenie otrzymane. Sprawdź e-mail, aby kontynuować.",
+    openLabel: "Otrzymuj nowości e-mailem",
+    closeLabel: "Zamknij",
+    invalidEmail: "Wpisz poprawny adres e-mail."
+  },
+  cs: {
+    formLabel: "Odebírat novinky e-mailem",
+    verifying: "Ověřování…",
+    retryVerification: "Zopakovat ověření",
+    verificationError: "Bezpečnostní ověření selhalo. Zkus to znovu.",
+    pending: "Odesílání…",
+    submitting: "Odesílání…",
+    requestError: "Něco se nepovedlo. Zkus to znovu.",
+    accepted: "Požadavek přijat. Další krok najdeš v e-mailu.",
+    openLabel: "Odebírat novinky e-mailem",
+    closeLabel: "Zavřít",
+    invalidEmail: "Zadej platnou e-mailovou adresu."
+  },
+  sk: {
+    formLabel: "Odoberať novinky e-mailom",
+    verifying: "Overovanie…",
+    retryVerification: "Zopakovať overenie",
+    verificationError: "Bezpečnostné overenie zlyhalo. Skús to znova.",
+    pending: "Odosielanie…",
+    submitting: "Odosielanie…",
+    requestError: "Niečo sa nepodarilo. Skús to znova.",
+    accepted: "Žiadosť prijatá. Ďalší krok nájdeš v e-maile.",
+    openLabel: "Odoberať novinky e-mailom",
+    closeLabel: "Zavrieť",
+    invalidEmail: "Zadaj platnú e-mailovú adresu."
+  },
+  hu: {
+    formLabel: "Feliratkozás e-mailes hírekre",
+    verifying: "Ellenőrzés…",
+    retryVerification: "Ellenőrzés újra",
+    verificationError: "A biztonsági ellenőrzés sikertelen. Próbáld újra.",
+    pending: "Küldés…",
+    submitting: "Küldés…",
+    requestError: "Valami hiba történt. Próbáld újra.",
+    accepted: "Kérés fogadva. A következő lépésért nézd meg az e-mailjeidet.",
+    openLabel: "Feliratkozás e-mailes hírekre",
+    closeLabel: "Bezárás",
+    invalidEmail: "Adj meg egy érvényes e-mail-címet."
+  },
+  ro: {
+    formLabel: "Primește noutăți prin e-mail",
+    verifying: "Se verifică…",
+    retryVerification: "Repetă verificarea",
+    verificationError: "Verificarea de securitate a eșuat. Încearcă din nou.",
+    pending: "Se trimite…",
+    submitting: "Se trimite…",
+    requestError: "Ceva nu a mers bine. Încearcă din nou.",
+    accepted: "Cerere primită. Verifică e-mailul pentru a continua.",
+    openLabel: "Primește noutăți prin e-mail",
+    closeLabel: "Închide",
+    invalidEmail: "Introdu o adresă de e-mail validă."
+  },
+  el: {
+    formLabel: "Εγγραφή για νέα μέσω email",
+    verifying: "Επαλήθευση…",
+    retryVerification: "Επανάληψη ελέγχου",
+    verificationError: "Ο έλεγχος ασφαλείας απέτυχε. Δοκίμασε ξανά.",
+    pending: "Αποστολή…",
+    submitting: "Αποστολή…",
+    requestError: "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
+    accepted: "Το αίτημα ελήφθη. Έλεγξε το email σου για το επόμενο βήμα.",
+    openLabel: "Εγγραφή για νέα μέσω email",
+    closeLabel: "Κλείσιμο",
+    invalidEmail: "Συμπλήρωσε μια έγκυρη διεύθυνση email."
+  },
+  bg: {
+    formLabel: "Абониране за новини по имейл",
+    verifying: "Проверка…",
+    retryVerification: "Повтори проверката",
+    verificationError: "Проверката за сигурност е неуспешна. Опитай отново.",
+    pending: "Изпращане…",
+    submitting: "Изпращане…",
+    requestError: "Възникна проблем. Опитай отново.",
+    accepted: "Заявката е получена. Провери имейла си за следващата стъпка.",
+    openLabel: "Абониране за новини по имейл",
+    closeLabel: "Затвори",
+    invalidEmail: "Въведи валиден имейл адрес."
+  },
+  hr: {
+    formLabel: "Primaj novosti e-poštom",
+    verifying: "Provjera…",
+    retryVerification: "Ponovi provjeru",
+    verificationError: "Sigurnosna provjera nije uspjela. Pokušaj ponovno.",
+    pending: "Slanje…",
+    submitting: "Slanje…",
+    requestError: "Nešto je pošlo po zlu. Pokušaj ponovno.",
+    accepted: "Zahtjev je primljen. Provjeri e-poštu za sljedeći korak.",
+    openLabel: "Primaj novosti e-poštom",
+    closeLabel: "Zatvori",
+    invalidEmail: "Unesi valjanu e-adresu."
+  },
+  sl: {
+    formLabel: "Prejemaj novosti po e-pošti",
+    verifying: "Preverjanje…",
+    retryVerification: "Ponovi preverjanje",
+    verificationError: "Varnostno preverjanje ni uspelo. Poskusi znova.",
+    pending: "Pošiljanje…",
+    submitting: "Pošiljanje…",
+    requestError: "Prišlo je do napake. Poskusi znova.",
+    accepted: "Zahteva je prejeta. Preveri e-pošto za naslednji korak.",
+    openLabel: "Prejemaj novosti po e-pošti",
+    closeLabel: "Zapri",
+    invalidEmail: "Vnesi veljaven e-naslov."
+  },
+  "sr-Latn": {
+    formLabel: "Primaj novosti imejlom",
+    verifying: "Provera…",
+    retryVerification: "Ponovi proveru",
+    verificationError: "Bezbednosna provera nije uspela. Pokušaj ponovo.",
+    pending: "Slanje…",
+    submitting: "Slanje…",
+    requestError: "Nešto nije u redu. Pokušaj ponovo.",
+    accepted: "Zahtev je primljen. Proveri imejl za sledeći korak.",
+    openLabel: "Primaj novosti imejlom",
+    closeLabel: "Zatvori",
+    invalidEmail: "Unesi važeću imejl adresu."
+  },
+  "sr-Cyrl": {
+    formLabel: "Примај новости имејлом",
+    verifying: "Провера…",
+    retryVerification: "Понови проверу",
+    verificationError: "Безбедносна провера није успела. Покушај поново.",
+    pending: "Слање…",
+    submitting: "Слање…",
+    requestError: "Нешто није у реду. Покушај поново.",
+    accepted: "Захтев је примљен. Провери имејл за следећи корак.",
+    openLabel: "Примај новости имејлом",
+    closeLabel: "Затвори",
+    invalidEmail: "Унеси важећу имејл адресу."
+  },
+  uk: {
+    formLabel: "Підписатися на новини електронною поштою",
+    verifying: "Перевірка…",
+    retryVerification: "Повторити перевірку",
+    verificationError: "Перевірка безпеки не вдалася. Спробуй ще раз.",
+    pending: "Надсилання…",
+    submitting: "Надсилання…",
+    requestError: "Щось пішло не так. Спробуй ще раз.",
+    accepted: "Запит отримано. Перевір пошту для наступного кроку.",
+    openLabel: "Підписатися на новини електронною поштою",
+    closeLabel: "Закрити",
+    invalidEmail: "Введи дійсну електронну адресу."
+  },
+  ru: {
+    formLabel: "Подписаться на новости по электронной почте",
+    verifying: "Проверка…",
+    retryVerification: "Повторить проверку",
+    verificationError: "Проверка безопасности не пройдена. Попробуй ещё раз.",
+    pending: "Отправка…",
+    submitting: "Отправка…",
+    requestError: "Что-то пошло не так. Попробуй ещё раз.",
+    accepted: "Запрос получен. Проверь почту для следующего шага.",
+    openLabel: "Подписаться на новости по электронной почте",
+    closeLabel: "Закрыть",
+    invalidEmail: "Введи корректный адрес электронной почты."
+  },
+  tr: {
+    formLabel: "E-postayla haberlere abone ol",
+    verifying: "Doğrulanıyor…",
+    retryVerification: "Kontrolü yeniden dene",
+    verificationError: "Güvenlik kontrolü başarısız oldu. Tekrar dene.",
+    pending: "Gönderiliyor…",
+    submitting: "Gönderiliyor…",
+    requestError: "Bir sorun oluştu. Lütfen tekrar dene.",
+    accepted: "İsteğin alındı. Sonraki adım için e-postanı kontrol et.",
+    openLabel: "E-postayla haberlere abone ol",
+    closeLabel: "Kapat",
+    invalidEmail: "Geçerli bir e-posta adresi gir."
+  },
+  ar: {
+    formLabel: "الاشتراك في الأخبار بالبريد الإلكتروني",
+    verifying: "جارٍ التحقق…",
+    retryVerification: "إعادة التحقق",
+    verificationError: "فشل التحقق الأمني. حاول مرة أخرى.",
+    pending: "جارٍ الإرسال…",
+    submitting: "جارٍ الإرسال…",
+    requestError: "حدث خطأ. حاول مرة أخرى.",
+    accepted: "تم استلام الطلب. راجع بريدك الإلكتروني للخطوة التالية.",
+    openLabel: "الاشتراك في الأخبار بالبريد الإلكتروني",
+    closeLabel: "إغلاق",
+    invalidEmail: "أدخل عنوان بريد إلكتروني صالحًا."
+  },
+  he: {
+    formLabel: "הרשמה לעדכונים באימייל",
+    verifying: "מתבצע אימות…",
+    retryVerification: "ניסיון אימות נוסף",
+    verificationError: "בדיקת האבטחה נכשלה. כדאי לנסות שוב.",
+    pending: "שולח…",
+    submitting: "שולח…",
+    requestError: "משהו השתבש. כדאי לנסות שוב.",
+    accepted: "הבקשה התקבלה. השלב הבא נמצא באימייל שלך.",
+    openLabel: "הרשמה לעדכונים באימייל",
+    closeLabel: "סגירה",
+    invalidEmail: "יש להזין כתובת אימייל תקינה."
+  },
+  fa: {
+    formLabel: "دریافت خبرها با ایمیل",
+    verifying: "در حال بررسی…",
+    retryVerification: "بررسی دوباره",
+    verificationError: "بررسی امنیتی ناموفق بود. دوباره تلاش کنید.",
+    pending: "در حال ارسال…",
+    submitting: "در حال ارسال…",
+    requestError: "مشکلی پیش آمد. دوباره تلاش کنید.",
+    accepted: "درخواست دریافت شد. برای مرحله بعد ایمیل خود را بررسی کنید.",
+    openLabel: "دریافت خبرها با ایمیل",
+    closeLabel: "بستن",
+    invalidEmail: "یک نشانی ایمیل معتبر وارد کنید."
+  },
+  hi: {
+    formLabel: "ईमेल पर खबरें पाएँ",
+    verifying: "जाँच हो रही है…",
+    retryVerification: "फिर जाँच करें",
+    verificationError: "सुरक्षा जाँच पूरी नहीं हुई। फिर कोशिश करें।",
+    pending: "भेज रहे हैं…",
+    submitting: "भेज रहे हैं…",
+    requestError: "कुछ गड़बड़ हुई। फिर कोशिश करें।",
+    accepted: "अनुरोध मिल गया। अगले कदम के लिए अपना ईमेल देखें।",
+    openLabel: "ईमेल पर खबरें पाएँ",
+    closeLabel: "बंद करें",
+    invalidEmail: "सही ईमेल पता दर्ज करें।"
+  },
+  bn: {
+    formLabel: "ইমেইলে খবর পেতে নিবন্ধন করুন",
+    verifying: "যাচাই হচ্ছে…",
+    retryVerification: "আবার যাচাই করুন",
+    verificationError: "নিরাপত্তা যাচাই ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    pending: "পাঠানো হচ্ছে…",
+    submitting: "পাঠানো হচ্ছে…",
+    requestError: "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    accepted: "অনুরোধ পেয়েছি। পরের ধাপের জন্য ইমেইল দেখুন।",
+    openLabel: "ইমেইলে খবর পেতে নিবন্ধন করুন",
+    closeLabel: "বন্ধ করুন",
+    invalidEmail: "একটি সঠিক ইমেইল ঠিকানা লিখুন।"
+  },
+  ta: {
+    formLabel: "மின்னஞ்சலில் புதிய தகவல்களைப் பெற",
+    verifying: "சரிபார்க்கப்படுகிறது…",
+    retryVerification: "மீண்டும் சரிபார்க்கவும்",
+    verificationError: "பாதுகாப்புச் சரிபார்ப்பு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
+    pending: "அனுப்பப்படுகிறது…",
+    submitting: "அனுப்பப்படுகிறது…",
+    requestError: "பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
+    accepted: "கோரிக்கை பெறப்பட்டது. அடுத்த படிக்கு உங்கள் மின்னஞ்சலைப் பாருங்கள்.",
+    openLabel: "மின்னஞ்சலில் புதிய தகவல்களைப் பெற",
+    closeLabel: "மூடு",
+    invalidEmail: "சரியான மின்னஞ்சல் முகவரியை உள்ளிடுங்கள்."
+  },
+  ur: {
+    formLabel: "ای میل پر خبروں کے لیے اندراج کریں",
+    verifying: "تصدیق ہو رہی ہے…",
+    retryVerification: "دوبارہ تصدیق کریں",
+    verificationError: "سیکیورٹی کی تصدیق ناکام رہی۔ دوبارہ کوشش کریں۔",
+    pending: "بھیجا جا رہا ہے…",
+    submitting: "بھیجا جا رہا ہے…",
+    requestError: "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
+    accepted: "درخواست موصول ہو گئی۔ اگلے مرحلے کے لیے اپنا ای میل دیکھیں۔",
+    openLabel: "ای میل پر خبروں کے لیے اندراج کریں",
+    closeLabel: "بند کریں",
+    invalidEmail: "درست ای میل پتہ درج کریں۔"
+  },
+  id: {
+    formLabel: "Berlangganan kabar lewat email",
+    verifying: "Memverifikasi…",
+    retryVerification: "Ulangi pemeriksaan",
+    verificationError: "Pemeriksaan keamanan gagal. Coba lagi.",
+    pending: "Mengirim…",
+    submitting: "Mengirim…",
+    requestError: "Ada masalah. Coba lagi.",
+    accepted: "Permintaan diterima. Cek emailmu untuk langkah berikutnya.",
+    openLabel: "Berlangganan kabar lewat email",
+    closeLabel: "Tutup",
+    invalidEmail: "Masukkan alamat email yang valid."
+  },
+  ms: {
+    formLabel: "Langgan berita melalui e-mel",
+    verifying: "Mengesahkan…",
+    retryVerification: "Cuba semakan lagi",
+    verificationError: "Semakan keselamatan gagal. Cuba lagi.",
+    pending: "Menghantar…",
+    submitting: "Menghantar…",
+    requestError: "Ada masalah. Cuba lagi.",
+    accepted: "Permintaan diterima. Semak e-mel anda untuk langkah seterusnya.",
+    openLabel: "Langgan berita melalui e-mel",
+    closeLabel: "Tutup",
+    invalidEmail: "Masukkan alamat e-mel yang sah."
+  },
+  vi: {
+    formLabel: "Đăng ký nhận tin qua email",
+    verifying: "Đang xác minh…",
+    retryVerification: "Xác minh lại",
+    verificationError: "Xác minh bảo mật không thành công. Hãy thử lại.",
+    pending: "Đang gửi…",
+    submitting: "Đang gửi…",
+    requestError: "Đã xảy ra lỗi. Hãy thử lại.",
+    accepted: "Đã nhận yêu cầu. Kiểm tra email để xem bước tiếp theo.",
+    openLabel: "Đăng ký nhận tin qua email",
+    closeLabel: "Đóng",
+    invalidEmail: "Nhập địa chỉ email hợp lệ."
+  },
+  th: {
+    formLabel: "สมัครรับข่าวสารทางอีเมล",
+    verifying: "กำลังตรวจสอบ…",
+    retryVerification: "ตรวจสอบอีกครั้ง",
+    verificationError: "การตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาลองอีกครั้ง",
+    pending: "กำลังส่ง…",
+    submitting: "กำลังส่ง…",
+    requestError: "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
+    accepted: "ได้รับคำขอแล้ว เช็กอีเมลเพื่อดูขั้นตอนถัดไป",
+    openLabel: "สมัครรับข่าวสารทางอีเมล",
+    closeLabel: "ปิด",
+    invalidEmail: "กรุณากรอกอีเมลให้ถูกต้อง"
+  },
+  fil: {
+    formLabel: "Tumanggap ng mga balita sa email",
+    verifying: "Bineberipika…",
+    retryVerification: "Ulitin ang pagsusuri",
+    verificationError: "Hindi nagtagumpay ang pagsusuri sa seguridad. Subukan ulit.",
+    pending: "Ipinapadala…",
+    submitting: "Ipinapadala…",
+    requestError: "May nagkaproblema. Subukan ulit.",
+    accepted: "Natanggap ang request. Tingnan ang email para sa susunod na hakbang.",
+    openLabel: "Tumanggap ng mga balita sa email",
+    closeLabel: "Isara",
+    invalidEmail: "Maglagay ng wastong email address."
+  },
+  ja: {
+    formLabel: "メールでニュースを受け取る",
+    verifying: "確認中…",
+    retryVerification: "もう一度確認",
+    verificationError: "セキュリティ確認に失敗しました。もう一度お試しください。",
+    pending: "送信中…",
+    submitting: "送信中…",
+    requestError: "エラーが発生しました。もう一度お試しください。",
+    accepted: "リクエストを受け付けました。次の手順をメールでご確認ください。",
+    openLabel: "メールでニュースを受け取る",
+    closeLabel: "閉じる",
+    invalidEmail: "有効なメールアドレスを入力してください。"
+  },
+  ko: {
+    formLabel: "이메일로 소식 구독하기",
+    verifying: "확인 중…",
+    retryVerification: "다시 확인하기",
+    verificationError: "보안 확인에 실패했어요. 다시 시도해 주세요.",
+    pending: "보내는 중…",
+    submitting: "보내는 중…",
+    requestError: "문제가 생겼어요. 다시 시도해 주세요.",
+    accepted: "요청을 받았어요. 다음 단계는 이메일을 확인해 주세요.",
+    openLabel: "이메일로 소식 구독하기",
+    closeLabel: "닫기",
+    invalidEmail: "올바른 이메일 주소를 입력해 주세요."
+  },
+  "zh-Hans": {
+    formLabel: "通过邮件订阅新消息",
+    verifying: "验证中…",
+    retryVerification: "重新验证",
+    verificationError: "安全验证失败，请重试。",
+    pending: "发送中…",
+    submitting: "发送中…",
+    requestError: "出了点问题，请重试。",
+    accepted: "已收到请求。请查看邮件，了解下一步。",
+    openLabel: "通过邮件订阅新消息",
+    closeLabel: "关闭",
+    invalidEmail: "请输入有效的邮箱地址。"
+  },
+  "zh-Hant-TW": {
+    formLabel: "訂閱電子報",
+    verifying: "驗證中…",
+    retryVerification: "重新驗證",
+    verificationError: "安全驗證失敗，請再試一次。",
+    pending: "傳送中…",
+    submitting: "傳送中…",
+    requestError: "出了點問題，請再試一次。",
+    accepted: "已收到申請。請查看信箱，了解下一步。",
+    openLabel: "訂閱電子報",
+    closeLabel: "關閉",
+    invalidEmail: "請輸入有效的電子信箱。"
+  },
+  "zh-Hant-HK": {
+    formLabel: "透過電郵訂閱最新消息",
+    verifying: "驗證中…",
+    retryVerification: "重新驗證",
+    verificationError: "安全驗證失敗，請再試一次。",
+    pending: "傳送中…",
+    submitting: "傳送中…",
+    requestError: "出現問題，請再試一次。",
+    accepted: "已收到申請。請查看電郵，了解下一步。",
+    openLabel: "透過電郵訂閱最新消息",
+    closeLabel: "關閉",
+    invalidEmail: "請輸入有效的電郵地址。"
+  },
+  sw: {
+    formLabel: "Jiandikishe kupokea habari kwa barua pepe",
+    verifying: "Inathibitisha…",
+    retryVerification: "Rudia uthibitishaji",
+    verificationError: "Ukaguzi wa usalama umeshindwa. Jaribu tena.",
+    pending: "Inatuma…",
+    submitting: "Inatuma…",
+    requestError: "Hitilafu imetokea. Jaribu tena.",
+    accepted: "Ombi limepokelewa. Angalia barua pepe yako kwa hatua inayofuata.",
+    openLabel: "Jiandikishe kupokea habari kwa barua pepe",
+    closeLabel: "Funga",
+    invalidEmail: "Weka anwani sahihi ya barua pepe."
+  },
+  af: {
+    formLabel: "Teken in vir nuus per e-pos",
+    verifying: "Verifieer tans…",
+    retryVerification: "Probeer die kontrole weer",
+    verificationError: "Die sekuriteitskontrole het misluk. Probeer weer.",
+    pending: "Stuur tans…",
+    submitting: "Stuur tans…",
+    requestError: "Iets het skeefgeloop. Probeer weer.",
+    accepted: "Versoek ontvang. Kyk in jou e-pos vir die volgende stap.",
+    openLabel: "Teken in vir nuus per e-pos",
+    closeLabel: "Sluit",
+    invalidEmail: "Voer ’n geldige e-posadres in."
+  }
+};
+function defineLocale(locale, messageKey, directButton, directPlaceholder, invitingButton, invitingPlaceholder, dir = "ltr") {
+  const shared = sharedMessages[messageKey];
+  return Object.freeze({
+    locale,
+    dir,
+    styles: Object.freeze({
+      direct: Object.freeze({
+        ...shared,
+        button: directButton,
+        placeholder: directPlaceholder,
+        emailLabel: directPlaceholder
+      }),
+      inviting: Object.freeze({
+        ...shared,
+        button: invitingButton,
+        placeholder: invitingPlaceholder,
+        emailLabel: directPlaceholder
+      })
+    })
+  });
+}
+var FOOTER_LOCALES = Object.freeze({
+  en: defineLocale("en", "en", "Subscribe", "Email address", "Sign me up", "Where should updates land?"),
+  "en-US": defineLocale("en-US", "en", "Subscribe", "Your email address", "Sign me up", "Where should updates land?"),
+  "en-GB": defineLocale("en-GB", "en", "Subscribe", "Your email address", "Keep me in the loop", "Email for the latest"),
+  "en-AU": defineLocale("en-AU", "en", "Get updates", "Your email address", "Keep me posted", "Send the latest to this email"),
+  "en-IN": defineLocale("en-IN", "en", "Subscribe", "Email address", "Send me updates", "Your email for what’s new"),
+  "en-SG": defineLocale("en-SG", "en", "Get updates", "Email address", "Keep me in the loop", "Email for new things"),
+  "es-ES": defineLocale("es-ES", "es", "Suscribirme", "Tu correo electrónico", "Quiero enterarme", "Tu correo para las novedades"),
+  "es-MX": defineLocale("es-MX", "es", "Suscribirme", "Tu correo electrónico", "Quiero las novedades", "¿A qué correo te escribimos?"),
+  "es-AR": defineLocale("es-AR", "es-AR", "Suscribite", "Tu correo electrónico", "Avisame qué viene", "Dejanos tu mail"),
+  "es-CL": defineLocale("es-CL", "es", "Suscribirme", "Tu correo electrónico", "Avísenme las novedades", "Tu correo para estar al día"),
+  "es-CO": defineLocale("es-CO", "es", "Recibir novedades", "Tu correo electrónico", "Quiero estar al día", "¿Dónde te enviamos lo nuevo?"),
+  "es-PR": defineLocale("es-PR", "es", "Suscribirme", "Tu email", "Quiero enterarme", "Tu email para lo nuevo"),
+  "fr-FR": defineLocale("fr-FR", "fr", "S’abonner", "Votre adresse e-mail", "Je m’inscris", "Les nouveautés, à quelle adresse ?"),
+  "fr-CA": defineLocale("fr-CA", "fr-CA", "M’abonner", "Votre adresse courriel", "Je veux des nouvelles", "Votre courriel pour la suite"),
+  "pt-BR": defineLocale("pt-BR", "pt-BR", "Inscreva-se", "Seu e-mail", "Quero novidades", "Qual e-mail recebe as novidades?"),
+  "pt-PT": defineLocale("pt-PT", "pt-PT", "Subscrever", "O seu e-mail", "Quero ficar a par", "O seu e-mail para as novidades"),
+  "de-DE": defineLocale("de-DE", "de", "Abonnieren", "Deine E-Mail-Adresse", "Halt mich auf dem Laufenden", "Wohin dürfen die Neuigkeiten?"),
+  "de-CH": defineLocale("de-CH", "de", "Abonnieren", "Deine E-Mail-Adresse", "Ich will Neues erfahren", "Deine E-Mail für Neuigkeiten"),
+  "nl-NL": defineLocale("nl-NL", "nl", "Aanmelden", "Je e-mailadres", "Houd me op de hoogte", "Waar mogen de nieuwtjes heen?"),
+  "nl-BE": defineLocale("nl-BE", "nl", "Inschrijven", "Je e-mailadres", "Hou me op de hoogte", "Je e-mail voor het laatste nieuws"),
+  "it-IT": defineLocale("it-IT", "it", "Iscrivimi", "La tua email", "Tienimi al corrente", "Dove ti mandiamo le novità?"),
+  "ca-ES": defineLocale("ca-ES", "ca", "Subscriu-m’hi", "El teu correu electrònic", "Vull estar al dia", "On t’enviem les novetats?"),
+  "sv-SE": defineLocale("sv-SE", "sv", "Prenumerera", "Din e-postadress", "Håll mig uppdaterad", "Vart ska vi skicka nyheterna?"),
+  "da-DK": defineLocale("da-DK", "da", "Tilmeld mig", "Din e-mailadresse", "Hold mig opdateret", "Hvor skal vi sende nyt hen?"),
+  "nb-NO": defineLocale("nb-NO", "nb", "Abonner", "E-postadressen din", "Hold meg oppdatert", "Hvor skal vi sende nytt?"),
+  "fi-FI": defineLocale("fi-FI", "fi", "Tilaa uutiset", "Sähköpostiosoitteesi", "Pidä minut ajan tasalla", "Mihin lähetämme uutiset?"),
+  "pl-PL": defineLocale("pl-PL", "pl", "Zapisz mnie", "Twój adres e-mail", "Chcę być na bieżąco", "Gdzie wysyłać nowości?"),
+  "cs-CZ": defineLocale("cs-CZ", "cs", "Odebírat novinky", "Tvůj e-mail", "Chci vědět, co je nového", "Kam ti pošleme novinky?"),
+  "sk-SK": defineLocale("sk-SK", "sk", "Odoberať novinky", "Tvoj e-mail", "Chcem vedieť, čo je nové", "Kam ti pošleme novinky?"),
+  "hu-HU": defineLocale("hu-HU", "hu", "Feliratkozom", "Az e-mail-címed", "Kérem az újdonságokat", "Hová küldhetjük a híreket?"),
+  "ro-RO": defineLocale("ro-RO", "ro", "Abonează-mă", "Adresa ta de e-mail", "Vreau noutăți", "Unde îți trimitem noutățile?"),
+  "el-GR": defineLocale("el-GR", "el", "Εγγραφή", "Το email σου", "Θέλω να μαθαίνω τα νέα", "Πού να στέλνουμε τα νέα;"),
+  "bg-BG": defineLocale("bg-BG", "bg", "Абонирай ме", "Твоят имейл", "Искам да научавам новостите", "Къде да изпращаме новините?"),
+  "hr-HR": defineLocale("hr-HR", "hr", "Pretplati me", "Tvoja e-adresa", "Želim čuti novosti", "Kamo šaljemo novosti?"),
+  "sl-SI": defineLocale("sl-SI", "sl", "Naroči me", "Tvoj e-naslov", "Želim biti na tekočem", "Kam naj pošljemo novosti?"),
+  "sr-Latn-RS": defineLocale("sr-Latn-RS", "sr-Latn", "Prijavi me", "Tvoja imejl adresa", "Želim da čujem novosti", "Gde da šaljemo novosti?"),
+  "sr-Cyrl-RS": defineLocale("sr-Cyrl-RS", "sr-Cyrl", "Пријави ме", "Твоја имејл адреса", "Желим да чујем новости", "Где да шаљемо новости?"),
+  "uk-UA": defineLocale("uk-UA", "uk", "Підписатися", "Твоя електронна адреса", "Хочу знати, що нового", "Куди надсилати новини?"),
+  "ru-RU": defineLocale("ru-RU", "ru", "Подписаться", "Твоя электронная почта", "Хочу быть в курсе", "Куда присылать новости?"),
+  "tr-TR": defineLocale("tr-TR", "tr", "Abone ol", "E-posta adresin", "Yeniliklerden haberim olsun", "Haberleri hangi adrese gönderelim?"),
+  ar: defineLocale("ar", "ar", "اشترك", "بريدك الإلكتروني", "أرسلوا لي الجديد", "أين نرسل لك الأخبار؟", "rtl"),
+  "ar-EG": defineLocale("ar-EG", "ar", "اشترك", "بريدك الإلكتروني", "أرسلوا لي الأخبار", "بريدك لتصلك الأخبار", "rtl"),
+  "ar-SA": defineLocale("ar-SA", "ar", "اشترك", "بريدك الإلكتروني", "أريد معرفة الجديد", "بريدك لآخر المستجدات", "rtl"),
+  "he-IL": defineLocale("he-IL", "he", "הרשמה לעדכונים", "כתובת האימייל שלך", "אשמח להתעדכן", "לאן לשלוח את החדשות?", "rtl"),
+  "fa-IR": defineLocale("fa-IR", "fa", "دریافت خبرها", "نشانی ایمیل شما", "من را هم باخبر کنید", "خبرها را به کدام ایمیل بفرستیم؟", "rtl"),
+  "hi-IN": defineLocale("hi-IN", "hi", "अपडेट पाएँ", "आपका ईमेल पता", "मुझे भी बताते रहें", "नई खबरें किस ईमेल पर भेजें?"),
+  "bn-BD": defineLocale("bn-BD", "bn", "আপডেট পেতে চাই", "আপনার ইমেইল", "আমাকেও জানাবেন", "নতুন খবর কোন ইমেইলে পাঠাব?"),
+  "ta-IN": defineLocale("ta-IN", "ta", "புதிய தகவல்களைப் பெற", "உங்கள் மின்னஞ்சல்", "எனக்கும் தெரியப்படுத்துங்கள்", "எந்த மின்னஞ்சலுக்கு அனுப்பலாம்?"),
+  "ur-PK": defineLocale("ur-PK", "ur", "اپ ڈیٹس حاصل کریں", "آپ کا ای میل پتہ", "مجھے بھی باخبر رکھیں", "نئی خبریں کس ای میل پر بھیجیں؟", "rtl"),
+  "id-ID": defineLocale("id-ID", "id", "Berlangganan", "Alamat email kamu", "Kabari aku, ya", "Email untuk kabar terbaru"),
+  "ms-MY": defineLocale("ms-MY", "ms", "Langgan", "Alamat e-mel anda", "Saya mahu berita terkini", "E-mel untuk berita terkini"),
+  "vi-VN": defineLocale("vi-VN", "vi", "Đăng ký nhận tin", "Email của bạn", "Cho mình biết nhé", "Gửi tin mới đến email nào?"),
+  "th-TH": defineLocale("th-TH", "th", "รับข่าวสาร", "อีเมลของคุณ", "มีอะไรใหม่ บอกกันด้วย", "ส่งข่าวใหม่ไปที่อีเมลไหน?"),
+  "fil-PH": defineLocale("fil-PH", "fil", "Tumanggap ng updates", "Email mo", "Gusto ko ng balita", "Saan namin ipapadala ang balita?"),
+  "ja-JP": defineLocale("ja-JP", "ja", "ニュースを受け取る", "メールアドレス", "新着情報を届けて", "お届け先のメールアドレス"),
+  "ko-KR": defineLocale("ko-KR", "ko", "구독하기", "이메일 주소", "새 소식 받을래요", "소식 받을 이메일을 알려 주세요"),
+  "zh-Hans-CN": defineLocale("zh-Hans-CN", "zh-Hans", "订阅更新", "你的邮箱地址", "有新消息告诉我", "新消息发到哪个邮箱？"),
+  "zh-Hant-TW": defineLocale("zh-Hant-TW", "zh-Hant-TW", "訂閱電子報", "你的電子信箱", "有新消息，告訴我", "新消息寄到哪個信箱？"),
+  "zh-Hant-HK": defineLocale("zh-Hant-HK", "zh-Hant-HK", "訂閱最新消息", "你的電郵地址", "有新消息，通知我", "接收最新消息的電郵"),
+  "sw-KE": defineLocale("sw-KE", "sw", "Pokea taarifa", "Barua pepe yako", "Nijulishe mapya", "Tutume habari kwenye barua pepe ipi?"),
+  "af-ZA": defineLocale("af-ZA", "af", "Teken in", "Jou e-posadres", "Hou my op hoogte", "Waarheen stuur ons die nuus?")
+});
+var languageDefaults = Object.freeze({
+  en: "en",
+  es: "es-ES",
+  fr: "fr-FR",
+  pt: "pt-BR",
+  de: "de-DE",
+  nl: "nl-NL",
+  it: "it-IT",
+  ca: "ca-ES",
+  sv: "sv-SE",
+  da: "da-DK",
+  nb: "nb-NO",
+  fi: "fi-FI",
+  pl: "pl-PL",
+  cs: "cs-CZ",
+  sk: "sk-SK",
+  hu: "hu-HU",
+  ro: "ro-RO",
+  el: "el-GR",
+  bg: "bg-BG",
+  hr: "hr-HR",
+  sl: "sl-SI",
+  sr: "sr-Cyrl-RS",
+  uk: "uk-UA",
+  ru: "ru-RU",
+  tr: "tr-TR",
+  ar: "ar",
+  he: "he-IL",
+  fa: "fa-IR",
+  hi: "hi-IN",
+  bn: "bn-BD",
+  ta: "ta-IN",
+  ur: "ur-PK",
+  id: "id-ID",
+  ms: "ms-MY",
+  vi: "vi-VN",
+  th: "th-TH",
+  fil: "fil-PH",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  zh: "zh-Hans-CN",
+  sw: "sw-KE",
+  af: "af-ZA"
+});
+function matchLocale(preference) {
+  const value = preference.trim();
+  if (!value || value.length > 100)
+    return;
+  let parsed;
+  try {
+    parsed = new Intl.Locale(value);
+  } catch {
+    return;
+  }
+  const exact = FOOTER_LOCALES[parsed.baseName];
+  if (exact)
+    return exact;
+  const {
+    language,
+    region,
+    script
+  } = parsed;
+  if (language === "zh") {
+    if (script && script !== "Hans" && script !== "Hant")
+      return;
+    if (script === "Hans")
+      return FOOTER_LOCALES["zh-Hans-CN"];
+    if (script === "Hant" || region === "HK" || region === "MO" || region === "TW") {
+      return FOOTER_LOCALES[region === "HK" || region === "MO" ? "zh-Hant-HK" : "zh-Hant-TW"];
+    }
+    return FOOTER_LOCALES["zh-Hans-CN"];
+  }
+  if (language === "sr") {
+    if (script && script !== "Latn" && script !== "Cyrl")
+      return;
+    return FOOTER_LOCALES[script === "Latn" ? "sr-Latn-RS" : "sr-Cyrl-RS"];
+  }
+  const defaultKey = languageDefaults[language];
+  if (!defaultKey)
+    return;
+  if (script) {
+    const defaultScript = new Intl.Locale(defaultKey).maximize().script;
+    if (script !== defaultScript)
+      return;
+  }
+  if (language === "es" && region === "419")
+    return FOOTER_LOCALES["es-MX"];
+  return FOOTER_LOCALES[defaultKey];
+}
+function resolveFooterLocale(preferred) {
+  const preferences = typeof preferred === "string" ? [preferred] : preferred ?? [];
+  for (const preference of preferences) {
+    if (typeof preference !== "string")
+      continue;
+    const locale = matchLocale(preference);
+    if (locale)
+      return locale;
+  }
+  return FOOTER_LOCALES.en;
+}
+
+// src/experiment.ts
+var DEFAULT_FOOTER_VARIANT = Object.freeze({
+  layout: "inline",
+  copyStyle: "direct",
+  color: "green",
+  shimmer: false
+});
+function parseFooterVariant(value) {
+  if (!record(value) || value.layout !== "inline" && value.layout !== "button" || value.copyStyle !== "direct" && value.copyStyle !== "inviting" || value.color !== "green" && value.color !== "orange" && value.color !== "blue" || typeof value.shimmer !== "boolean")
+    throw new TypeError("Invalid Hraness footer experiment variant.");
+  return {
+    layout: value.layout,
+    copyStyle: value.copyStyle,
+    color: value.color,
+    shimmer: value.shimmer
+  };
+}
+function record(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function parseFooterEnrollment(value) {
+  if (!record(value) || value.version !== 1 || typeof value.token !== "string" || !/^[0-9a-f]{64}$/u.test(value.token) || !record(value.assignment))
+    return null;
+  const a = value.assignment;
+  if (typeof a.id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(a.id) || typeof a.locale !== "string" || !/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/u.test(a.locale) || a.layout !== "inline" && a.layout !== "button" || a.copyStyle !== "direct" && a.copyStyle !== "inviting" || a.color !== "green" && a.color !== "orange" && a.color !== "blue" || typeof a.shimmer !== "boolean" || a.cohort !== "explore" && a.cohort !== "exploit" || typeof a.policyVersion !== "string" || !/^[A-Za-z0-9._-]{1,100}$/u.test(a.policyVersion))
+    return null;
+  return {
+    version: 1,
+    token: value.token,
+    assignment: {
+      id: a.id,
+      locale: a.locale,
+      layout: a.layout,
+      copyStyle: a.copyStyle,
+      color: a.color,
+      shimmer: a.shimmer,
+      cohort: a.cohort,
+      policyVersion: a.policyVersion
+    }
+  };
 }
 // node_modules/@hugeicons/core-free-icons/dist/esm/GithubIcon.js
 var GithubIcon = [
@@ -527,6 +1462,11 @@ var NewTwitterIcon = [
   ["path", { d: "M3 21L10.5484 13.4516M21 3L13.4516 10.5484M13.4516 10.5484L8 3H3L10.5484 13.4516M13.4516 10.5484L21 21H16L10.5484 13.4516", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", key: "0" }]
 ];
 // src/internal.ts
+var DEFAULT_FOOTER_PRESENTATION = {
+  locale: resolveFooterLocale(),
+  variant: DEFAULT_FOOTER_VARIANT,
+  sticky: true
+};
 var HRANESS_FOOTER_LABEL = "Hraness network";
 var HRANESS_FOOTER_SLOT = "hraness-site-footer";
 var HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
@@ -738,9 +1678,16 @@ function renderHranessSocialLinksHtml(socialLinks) {
 var MAILING_IDLE_STATE = {
   kind: "idle"
 };
-function renderMailingList(mailingList, state, turnstileMode) {
+function renderMailingList(mailingList, state, turnstileMode, presentation) {
+  const {
+    locale,
+    variant
+  } = presentation;
+  const copy = locale.styles[variant.copyStyle];
+  const localAttributes = ` lang="${escapeAttribute(locale.locale)}" dir="${locale.dir}"`;
+  const variantAttributes = ` data-layout="${variant.layout}" data-copy-variant="${variant.copyStyle}" data-color="${variant.color}" data-shimmer="${variant.shimmer}"`;
   if (state.kind === "accepted") {
-    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1">Check your email to confirm</div>`;
+    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1"${localAttributes}>${escapeAttribute(copy.accepted)}</div>`;
   }
   const stateKind = state.kind;
   const email = state.kind === "pending" || state.kind === "error" || state.kind === "verification-error" ? ` value="${escapeAttribute(state.email)}"` : "";
@@ -748,36 +1695,52 @@ function renderMailingList(mailingList, state, turnstileMode) {
   const verificationRetry = turnstileMode === "explicit" && state.kind === "verification-error";
   const verificationPending = turnstileMode === "explicit" && state.kind !== "pending" && !verificationRetry;
   const buttonAttributes = state.kind === "pending" || verificationPending ? ' aria-disabled="true" disabled=""' : "";
-  const buttonLabel = state.kind === "pending" ? "Subscribing…" : verificationRetry ? "Retry check" : verificationPending ? "Verifying…" : "Subscribe";
+  const buttonLabel = state.kind === "pending" ? copy.pending : verificationRetry ? copy.retryVerification : verificationPending ? copy.verifying : copy.button;
   const statusAttributes = state.kind === "error" || state.kind === "verification-error" ? ' aria-live="assertive" role="alert"' : ' aria-live="polite" role="status"';
-  const statusCopy = state.kind === "pending" ? "Submitting your email…" : state.kind === "error" ? "Couldn't subscribe. Try again." : state.kind === "verification-error" ? "Security check failed. Try again." : "";
+  const statusCopy = state.kind === "pending" ? copy.submitting : state.kind === "error" ? copy.requestError : state.kind === "verification-error" ? copy.verificationError : "";
   const turnstileAction = getHranessMailingTurnstileAction(mailingList.audience);
   const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
   const turnstile = `<div class="${footerClasses.turnstile}${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
-  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
+  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${turnstile}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
+  if (variant.layout === "inline")
+    return form;
+  const open = state.kind === "idle" ? "" : ' open=""';
+  const label = escapeAttribute(copy.button);
+  return `<details class="${footerClasses.disclosure}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary aria-label="${escapeAttribute(copy.openLabel)}" class="${footerClasses.disclosureTrigger}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}</summary><div class="${footerClasses.disclosurePanel}">${form}</div></details>`;
 }
-function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, turnstileMode = "implicit", turnstileScriptNonce, socialLinks = HRANESS_SOCIAL_LINKS) {
-  const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, turnstileMode);
+function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, turnstileMode = "implicit", turnstileScriptNonce, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
+  const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, turnstileMode, presentation);
   const turnstileScript = mailingList.kind === "signup" && turnstileMode === "implicit" ? `<script async="" data-slot="${HRANESS_TURNSTILE_SCRIPT_SLOT}" defer=""${turnstileScriptNonce === undefined ? "" : ` nonce="${escapeAttribute(turnstileScriptNonce)}"`} src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>` : "";
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>${turnstileScript}`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>${turnstileScript}`;
 }
 
 // src/index.ts
 var HRANESS_HOME_URL = "https://hraness.com/";
 var hranessSocialLinks = HRANESS_SOCIAL_LINKS;
 function renderHranessSiteFooter({
+  locale: localeInput,
+  placement = "sticky",
+  variant = DEFAULT_FOOTER_VARIANT,
   mailingList: mailingListInput,
   showBrand = true,
   social: socialInput,
   turnstileScriptNonce: turnstileScriptNonceInput
 }) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  variant = parseFooterVariant(variant);
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const turnstileScriptNonce = parseHranessTurnstileScriptNonce(turnstileScriptNonceInput);
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce, socialLinks)}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce, socialLinks, {
+    locale: resolveFooterLocale(localeInput),
+    variant,
+    sticky: placement === "sticky"
+  })}</footer>`;
 }
 export {
+  resolveFooterLocale,
   renderHranessSiteFooter,
+  parseFooterVariant,
+  parseFooterEnrollment,
   hranessSocialLinks,
   getHranessMailingTurnstileAction,
   HRANESS_TURNSTILE_SCRIPT_URL,
@@ -787,4 +1750,4 @@ export {
   HRANESS_HOME_URL
 };
 
-//# debugId=8D997E3578EB7B7D64756E2164756E21
+//# debugId=ACC4787C9C46EDD264756E2164756E21
