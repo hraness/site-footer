@@ -1,4 +1,9 @@
+import type { FooterVariant } from "./experiment.js";
 export declare const footerClasses: {
+    disclosure: string;
+    disclosureTrigger: string;
+    disclosurePanel: string;
+    shimmer: string;
     brand: string;
     mark: string;
     links: string;
@@ -14,8 +19,8 @@ export declare const footerClasses: {
     mailingConfirmation: string;
     visuallyHidden: string;
 };
-export declare function footerClassName(signup: boolean): string;
-export declare function footerInnerClassName(signup: boolean): string;
+export declare function footerClassName(signup: boolean, sticky?: boolean): string;
+export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"]): string;
 export declare function socialItemClassName(): string;
 export declare function mailingStatusClassName(state: string): string;
 //# sourceMappingURL=footer.stylex.d.ts.map

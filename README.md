@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.7.0
+bun add github:hraness/site-footer#v0.8.0
 ```
 
 Start with the network footer and no mailing form:
@@ -46,7 +46,7 @@ client-side JavaScript.
 | --- | --- | --- |
 | `@hraness/site-footer` | Render complete HTML into a static template or server response | Framework-neutral ESM with no React import |
 | `@hraness/site-footer/react` | Render the same contract in React and progressively enhance signup states | React client component for React 18 and 19 |
-| `@hraness/site-footer/styles.css` | Apply the in-flow responsive footer, theme fallbacks, and focus states | Compatibility import of checked atomic CSS, imported once by the consumer |
+| `@hraness/site-footer/styles.css` | Apply the sticky responsive footer, theme fallbacks, and focus states | Compatibility import of checked atomic CSS, imported once by the consumer |
 | `@hraness/site-footer/stylex.css` | Resolve or copy the complete standalone stylesheet | Generated CSS with finite package priority layers |
 | `@hraness/site-footer/stylex-manifest.json` | Admit the package to the shared StyleX build pipeline | Verified rules, compiler identity, and runtime and stylesheet hashes |
 | `@hraness/site-footer/compiler-foundation.css` | Supply the foundation when a consumer combines package rules | Empty foundation; all footer presentation comes from the manifest |
@@ -100,19 +100,19 @@ provide a stable lowercase product audience and a public Turnstile site key:
 />
 ```
 
-Hraness.com is the exception: its page owns the canonical Hraness Substack
-signup, so keep the shared footer social-only there:
+Hraness.com uses the same shared `hraness` audience and experiment. Pass its
+public Turnstile site key from the site environment:
 
 ```tsx
 <HranessSiteFooter
-  mailingList={{ kind: "none" }}
+  experiment
+  mailingList={{ audience: "hraness", kind: "signup", turnstileSitekey }}
   showBrand={false}
 />
 ```
 
-Do not configure the Accounts `hraness` audience on Hraness.com. Product sites
-may use an explicit product audience as shown above; the organization homepage
-uses its page-owned Substack embed instead.
+Keep the configuration fail-closed until Accounts has a matching `hraness`
+widget key and hostname binding.
 
 The configured signup follows one checked state path:
 
@@ -229,11 +229,9 @@ framework runtime. The React adapter declares `React >=18 <20` and begins with
 the required client-component directive.
 
 The stylesheet follows `--plain-*` or common product theme variables when
-present and falls back to system colors. The footer follows the page content in
-normal document flow and requires no viewport overlay or matching space
-reservation. Place it after the page's main content. A host that wants the
-footer at the bottom of a short page can use its own full-height flex or grid
-shell. A narrow signup footer uses one row for identity and essential links
+present and falls back to system colors. The footer is sticky by default and reserves its own document footprint, so
+content is not obscured. Pass `placement="flow"` for a host that owns a full-height
+layout and wants normal document flow. A narrow signup footer uses one row for identity and essential links
 plus one row for the form; at `47.5rem` it moves to one aligned row. Substack is
 always the first social link. Substack, X, LinkedIn, and GitHub stay
 visible at every supported width. The home link shows only the Ra icon and
@@ -244,7 +242,16 @@ the device's safe-area inset below that spacing. Its computed height includes
 both. Do not add another footer bar, viewport spacer, or blank padding after it in a
 consumer layout. Product navigation belongs with the page navigation.
 
-Version 0.7.0 removes Bluesky from the shared contract, including the exported
+The React adapter requests a short-lived Accounts enrollment and exposes it
+only after the visible footer settles. The four bounded factors are layout, copy
+style, color, and shimmer. Accounts keeps a randomized exploration stream and
+serves an evidence-qualified recipe to the remaining traffic; PostHog receives
+only anonymous enrollment events and confirmed double-opt-in conversions.
+
+Version 0.8.0 adds the sticky, localized signup experiment. React consumers
+request an opaque Accounts assignment, while static consumers can select a
+bounded recipe explicitly; the assignment is fail-closed until the Accounts
+provider binding is enabled. Version 0.7.0 removes Bluesky from the shared contract, including the exported
 `HranessSocialPlatform` type, adds the optional `social` override, and points
 LinkedIn at `https://www.linkedin.com/company/hraness`. Version 0.6.0 removed
 Instagram, Threads, TikTok, Reddit, Twitch, and YouTube.

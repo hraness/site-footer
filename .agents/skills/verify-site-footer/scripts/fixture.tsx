@@ -228,6 +228,10 @@ function Fixture() {
         </article>
       </main>
       <HranessSiteFooter
+        // Keep the verifier's page shell in normal flow; production consumers
+        // use the default sticky placement.
+        placement="flow"
+        experiment={false}
         mailingList={signupEnabled ? {
           audience: "footer-fixture",
           kind: "signup",

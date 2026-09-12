@@ -191,7 +191,10 @@ try {
   assert.ok(cssBuild.success, cssBuild.logs.map(String).join("\n"));
   const packedCss = (await Promise.all(cssBuild.outputs.map((output) => output.text()))).join("\n");
   for (const [key, rule] of packedManifest.rules) {
-    if (rule.constKey === undefined) assert.ok(packedCss.includes(`.${key}`), `Packed CSS omits atomic class ${key}`);
+    if (rule.constKey === undefined) {
+      const selector = rule.ltr.startsWith("@keyframes") ? `@keyframes ${key}` : `.${key}`;
+      assert.ok(packedCss.includes(selector), `Packed CSS omits atomic class ${key}`);
+    }
   }
   console.log("Packed SiteFooter renders without React or compiler dependencies and resolves every CSS rule");
 } finally {

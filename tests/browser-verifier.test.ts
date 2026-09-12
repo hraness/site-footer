@@ -121,7 +121,7 @@ describe("site-footer browser verifier", () => {
     ]);
   });
 
-  test("keeps visible status overlays clear of the in-flow footer row", () => {
+  test("keeps visible status overlays clear of the footer row", () => {
     const contract = parseDirectNamedLayoutContract(
       createLayoutContract("wide", [...boxes.map(({ name }) => name), "status"]),
     );

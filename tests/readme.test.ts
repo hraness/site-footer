@@ -75,12 +75,13 @@ describe("README product contract", () => {
     expect(document.querySelectorAll("a")).toHaveLength(5);
   });
 
-  test("keeps Hraness.com on its page-owned Substack signup", () => {
+  test("documents the shared Hraness.com signup experiment", () => {
     expect(normalizedReadme).toContain(
-      "Hraness.com is the exception: its page owns the canonical Hraness Substack signup",
+      "Hraness.com uses the same shared `hraness` audience and experiment",
     );
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
-    expect(readme).not.toContain('audience: "hraness"');
+    expect(readme).toContain('audience: "hraness"');
+    expect(readme).not.toContain("Do not configure the Accounts `hraness` audience");
   });
 
   test("documents owned social overrides for AI Charts without restoring Bluesky", () => {

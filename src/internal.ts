@@ -5,6 +5,19 @@ import {
   NewTwitterIcon,
 } from "@hugeicons/core-free-icons";
 
+import { DEFAULT_FOOTER_VARIANT, type FooterVariant } from "./experiment.js";
+import { resolveFooterLocale, type FooterLocale } from "./locales.js";
+
+export interface FooterPresentation {
+  readonly locale: FooterLocale;
+  readonly variant: FooterVariant;
+  readonly sticky: boolean;
+}
+
+export const DEFAULT_FOOTER_PRESENTATION: FooterPresentation = {
+  locale: resolveFooterLocale(), variant: DEFAULT_FOOTER_VARIANT, sticky: true,
+};
+
 type IconAttributeValue = boolean | number | string;
 type IconAttributes = Readonly<Record<string, IconAttributeValue>>;
 type IconDefinition = ReadonlyArray<readonly ["path", IconAttributes]>;
@@ -372,9 +385,14 @@ function renderMailingList(
   mailingList: Extract<HranessMailingListConfig, { kind: "signup" }>,
   state: HranessMailingListRenderState,
   turnstileMode: "explicit" | "implicit",
+  presentation: FooterPresentation,
 ): string {
+  const { locale, variant } = presentation;
+  const copy = locale.styles[variant.copyStyle];
+  const localAttributes = ` lang="${escapeAttribute(locale.locale)}" dir="${locale.dir}"`;
+  const variantAttributes = ` data-layout="${variant.layout}" data-copy-variant="${variant.copyStyle}" data-color="${variant.color}" data-shimmer="${variant.shimmer}"`;
   if (state.kind === "accepted") {
-    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1">Check your email to confirm</div>`;
+    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1"${localAttributes}>${escapeAttribute(copy.accepted)}</div>`;
   }
 
   const stateKind = state.kind;
@@ -395,27 +413,31 @@ function renderMailingList(
     ? ' aria-disabled="true" disabled=""'
     : "";
   const buttonLabel = state.kind === "pending"
-    ? "Subscribing…"
+    ? copy.pending
     : verificationRetry
-    ? "Retry check"
+    ? copy.retryVerification
     : verificationPending
-    ? "Verifying…"
-    : "Subscribe";
+    ? copy.verifying
+    : copy.button;
   const statusAttributes = state.kind === "error" || state.kind === "verification-error"
     ? ' aria-live="assertive" role="alert"'
     : ' aria-live="polite" role="status"';
   const statusCopy = state.kind === "pending"
-    ? "Submitting your email…"
+    ? copy.submitting
     : state.kind === "error"
-    ? "Couldn't subscribe. Try again."
+    ? copy.requestError
     : state.kind === "verification-error"
-    ? "Security check failed. Try again."
+    ? copy.verificationError
     : "";
   const turnstileAction = getHranessMailingTurnstileAction(mailingList.audience);
   const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
   const turnstile = `<div class="${footerClasses.turnstile}${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
 
-  return `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="Subscribe by email" class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">Email address</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="Email address" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${buttonLabel}</button></div>${turnstile}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${statusCopy}</p></form>`;
+  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${turnstile}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
+  if (variant.layout === "inline") return form;
+  const open = state.kind === "idle" ? "" : " open=\"\"";
+  const label = escapeAttribute(copy.button);
+  return `<details class="${footerClasses.disclosure}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary aria-label="${escapeAttribute(copy.openLabel)}" class="${footerClasses.disclosureTrigger}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}</summary><div class="${footerClasses.disclosurePanel}">${form}</div></details>`;
 }
 
 export function renderHranessSiteFooterInnerHtml(
@@ -425,6 +447,7 @@ export function renderHranessSiteFooterInnerHtml(
   turnstileMode: "explicit" | "implicit" = "implicit",
   turnstileScriptNonce?: string,
   socialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS,
+  presentation: FooterPresentation = DEFAULT_FOOTER_PRESENTATION,
 ): string {
   const mailingHtml = mailingList.kind === "none"
     ? ""
@@ -434,9 +457,10 @@ export function renderHranessSiteFooterInnerHtml(
         ? state
         : MAILING_IDLE_STATE,
       turnstileMode,
+      presentation,
     );
   const turnstileScript = mailingList.kind === "signup" && turnstileMode === "implicit"
     ? `<script async="" data-slot="${HRANESS_TURNSTILE_SCRIPT_SLOT}" defer=""${turnstileScriptNonce === undefined ? "" : ` nonce="${escapeAttribute(turnstileScriptNonce)}"`} src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>`
     : "";
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>${turnstileScript}`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>${turnstileScript}`;
 }

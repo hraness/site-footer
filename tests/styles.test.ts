@@ -24,7 +24,7 @@ function contains(classes: string, declaration: string): void {
 describe("compiled footer presentation", () => {
   test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.7.0");
+    expect(pkg.version).toBe("0.8.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -42,13 +42,13 @@ describe("compiled footer presentation", () => {
     expect(collector.seal()).toEqual([]);
   });
 
-  test("owns an in-flow responsive row and separate signup geometry", () => {
+  test("owns a sticky responsive row and separate signup geometry", () => {
     const root = footerClassName(false);
     const signup = footerClassName(true);
     contains(root, "inline-size:100%");
-    expect(cssFor(root)).not.toContain("position:fixed");
+    contains(root, "min-block-size:var(--hraness-site-footer-bar-block-size)");
     expect(cssFor(root)).not.toMatch(/[{;]block-size:/u);
-    contains(footerInnerClassName(false), "position:relative");
+    contains(footerInnerClassName(false), "position:fixed");
     contains(footerInnerClassName(false), 'grid-template-areas:"brand links"');
     contains(footerInnerClassName(true), 'grid-template-areas:"brand links" "mailing mailing"');
     contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing links"');
@@ -144,8 +144,8 @@ describe("compiled footer presentation", () => {
       contains(classes, "background-origin:padding-box");
       contains(classes, "border-image-source:none");
     }
-    contains(footerClasses.mailingInput, "border-top-left-radius:.375rem");
-    contains(footerClasses.mailingSubmit, "border-top-right-radius:.375rem");
+    contains(footerClasses.mailingInput, "border-start-start-radius:.375rem");
+    contains(footerClasses.mailingSubmit, "border-start-end-radius:.375rem");
     contains(footerClasses.mailingSubmit, "margin-inline-start:-1px");
     contains(footerClasses.visuallyHidden, "clip-path:inset(50%)");
   });
