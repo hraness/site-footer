@@ -179,11 +179,6 @@ const styles = stylex.create({
     "block-size": "var(--hraness-site-footer-form-block-size)", margin: 0,
   },
   mailing: { position: "relative", display: "grid", gridTemplateRows: "var(--hraness-site-footer-control-block-size)" },
-  turnstile: {
-    position: "absolute", zIndex: 1, "inset-inline-start": 0,
-    "inset-block-end": "calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-status-block-size) + var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-row-gap))",
-    "inline-size": "100%", "max-inline-size": "26rem", "min-inline-size": 0,
-  },
   mailingControls: { display: "flex", "min-inline-size": 0 },
   mailingLabel: { display: "block", "min-inline-size": 0, flexGrow: 1, flexShrink: 1, flexBasis: "auto" },
   control: {
@@ -250,7 +245,7 @@ export const footerClasses = {
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
   mailing: className("hraness-site-footer__mailing", styles.box, styles.mailingGeometry, styles.mailing),
-  turnstile: className("hraness-site-footer__turnstile", styles.box, styles.turnstile),
+  honeypot: className("hraness-site-footer__honeypot", styles.visuallyHidden),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
   mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
@@ -275,5 +270,5 @@ export function socialItemClassName(): string {
 export function mailingStatusClassName(state: string): string {
   return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus,
     state !== "idle" && styles.statusVisible,
-    (state === "error" || state === "verification-error") && styles.statusError);
+    state === "error" && styles.statusError);
 }

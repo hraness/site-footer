@@ -525,10 +525,6 @@
     inset-block-end: calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-row-gap));
   }
 
-  .x1g6sbnd {
-    inset-block-end: calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-status-block-size) + var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-row-gap));
-  }
-
   .x1o0tod {
     inset-inline-start: 0;
   }
@@ -583,10 +579,6 @@
 
   .xgyk9h7 {
     max-inline-size: 100%;
-  }
-
-  .x1sbvpkc {
-    max-inline-size: 26rem;
   }
 
   .x1hwo6zt {
@@ -691,10 +683,6 @@
 
   .xuxw1ft {
     white-space: nowrap;
-  }
-
-  .x1vjfegm {
-    z-index: 1;
   }
 
   .xhtitgo {

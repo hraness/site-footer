@@ -3,9 +3,9 @@ export { resolveFooterLocale } from "./locales.js";
 export type { FooterLocale, FooterMessages, FooterCopyStyle } from "./locales.js";
 export { parseFooterEnrollment, parseFooterVariant } from "./experiment.js";
 export type { FooterEnrollment, FooterVariant } from "./experiment.js";
-import { HRANESS_MAILING_SUBSCRIBE_URL, HRANESS_TURNSTILE_RESPONSE_FIELD, HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL, HRANESS_TURNSTILE_SCRIPT_URL, getHranessMailingTurnstileAction, type HranessMailingListConfig, type HranessSocialConfig, type HranessSocialLink, type HranessSocialLinkOverride, type HranessSocialPlatform } from "./internal.js";
+import { HRANESS_MAILING_SUBSCRIBE_URL, type HranessMailingListConfig, type HranessSocialConfig, type HranessSocialLink, type HranessSocialLinkOverride, type HranessSocialPlatform } from "./internal.js";
 export declare const HRANESS_HOME_URL = "https://hraness.com/";
-export { HRANESS_MAILING_SUBSCRIBE_URL, HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL, HRANESS_TURNSTILE_RESPONSE_FIELD, HRANESS_TURNSTILE_SCRIPT_URL, getHranessMailingTurnstileAction, };
+export { HRANESS_MAILING_SUBSCRIBE_URL };
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export declare const hranessSocialLinks: ReadonlyArray<HranessSocialLink>;
 export type { HranessMailingListConfig, HranessSocialConfig, HranessSocialLink, HranessSocialLinkOverride, HranessSocialPlatform, };
@@ -23,9 +23,7 @@ export interface HranessSiteFooterOptions {
      * order. Defaults remain the shared Hraness profiles.
      */
     readonly social?: HranessSocialConfig;
-    /** Optional per-response CSP nonce for the static Turnstile script. */
-    readonly turnstileScriptNonce?: string;
 }
 /** Render the complete framework-neutral Hraness network footer. */
-export declare function renderHranessSiteFooter({ locale: localeInput, placement, variant, mailingList: mailingListInput, showBrand, social: socialInput, turnstileScriptNonce: turnstileScriptNonceInput, }: HranessSiteFooterOptions): string;
+export declare function renderHranessSiteFooter({ locale: localeInput, placement, variant, mailingList: mailingListInput, showBrand, social: socialInput, }: HranessSiteFooterOptions): string;
 //# sourceMappingURL=index.d.ts.map

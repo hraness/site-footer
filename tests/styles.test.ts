@@ -24,7 +24,7 @@ function contains(classes: string, declaration: string): void {
 describe("compiled footer presentation", () => {
   test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.8.0");
+    expect(pkg.version).toBe("0.9.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -111,19 +111,20 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(false), "background-color:Canvas");
   });
 
-  test("keeps status and challenge overlays outside the reserved mailing row", () => {
+  test("keeps status overlays outside the reserved mailing row", () => {
     contains(mailingStatusClassName("idle"), "position:absolute");
     contains(mailingStatusClassName("idle"), "opacity:0");
     contains(mailingStatusClassName("idle"), "visibility:hidden");
-    for (const state of ["pending", "error", "verification-error"]) {
+    for (const state of ["pending", "error"]) {
       contains(mailingStatusClassName(state), "opacity:1");
       contains(mailingStatusClassName(state), "visibility:visible");
       expect(cssFor(mailingStatusClassName(state))).not.toContain("visibility:hidden");
     }
-    for (const state of ["error", "verification-error"]) contains(mailingStatusClassName(state), "color:var(--hraness-site-footer-foreground)");
+    contains(mailingStatusClassName("error"), "color:var(--hraness-site-footer-foreground)");
     contains(mailingStatusClassName("pending"), "color:var(--hraness-site-footer-muted)");
     contains(mailingStatusClassName("idle"), "inset-block-end:calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-row-gap))");
-    contains(footerClasses.turnstile, "inset-block-end:calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-status-block-size) + var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-row-gap))");
+    contains(footerClasses.honeypot, "clip-path:inset(50%)");
+    contains(footerClasses.honeypot, "inline-size:1px");
     for (const classes of [footerClasses.mailing, footerClasses.mailingConfirmation]) {
       contains(classes, "box-sizing:border-box");
       contains(classes, "inline-size:min(100%,26rem)");

@@ -4,23 +4,15 @@ import { parseHTML } from "linkedom";
 import {
   HRANESS_HOME_URL,
   HRANESS_MAILING_SUBSCRIBE_URL,
-  HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL,
-  HRANESS_TURNSTILE_RESPONSE_FIELD,
-  HRANESS_TURNSTILE_SCRIPT_URL,
-  getHranessMailingTurnstileAction,
   hranessSocialLinks,
   renderHranessSiteFooter,
   type HranessMailingListConfig,
 } from "../src/index.js";
 
 const noMailingList = { kind: "none" } as const satisfies HranessMailingListConfig;
-const TURNSTILE_TEST_SITEKEY = "1x00000000000000000000AA";
-const TURNSTILE_PRODUCTION_SITEKEY = "0x4AAF00AAAABn0R22HWm-YUc";
-const TURNSTILE_SCRIPT_NONCE = "dGVzdC1ub25jZS0xMjM0";
 const productMailingList = {
   audience: "soundfish",
   kind: "signup",
-  turnstileSitekey: TURNSTILE_TEST_SITEKEY,
 } as const satisfies HranessMailingListConfig;
 
 const expectedSocialLinks = [
@@ -53,45 +45,19 @@ describe("Hraness site footer", () => {
     expect(() => renderHranessSiteFooter({} as { mailingList: HranessMailingListConfig }))
       .toThrow("mailingList must be explicitly configured");
     expect(() => renderHranessSiteFooter({
-      mailingList: { audience: "", kind: "signup" },
-    } as { mailingList: HranessMailingListConfig })).toThrow(
+      mailingList: { audience: 5, kind: "signup" },
+    } as unknown as { mailingList: HranessMailingListConfig })).toThrow(
       "mailingList configuration is invalid",
     );
+    expect(() => renderHranessSiteFooter({
+      mailingList: { audience: "", kind: "signup" },
+    })).toThrow("audience IDs must be canonical lowercase slugs");
     expect(() => renderHranessSiteFooter({
       mailingList: {
         audience: " soundfish",
         kind: "signup",
-        turnstileSitekey: TURNSTILE_TEST_SITEKEY,
       },
     })).toThrow("audience IDs must be canonical lowercase slugs");
-    expect(() => renderHranessSiteFooter({
-      mailingList: {
-        audience: "soundfish",
-        kind: "signup",
-        turnstileSitekey: "",
-      },
-    })).toThrow("Turnstile sitekeys must be 20-100 character");
-    expect(() => renderHranessSiteFooter({
-      mailingList: {
-        audience: "soundfish",
-        kind: "signup",
-        turnstileSitekey: "not a key",
-      },
-    })).toThrow("Turnstile sitekeys must be 20-100 character");
-    expect(() => renderHranessSiteFooter({
-      mailingList: {
-        audience: "soundfish",
-        kind: "signup",
-        turnstileSitekey: "short-placeholder",
-      },
-    })).toThrow("Turnstile sitekeys must be 20-100 character");
-    expect(renderHranessSiteFooter({
-      mailingList: {
-        audience: "soundfish",
-        kind: "signup",
-        turnstileSitekey: TURNSTILE_PRODUCTION_SITEKEY,
-      },
-    })).toContain(`data-sitekey="${TURNSTILE_PRODUCTION_SITEKEY}"`);
   });
 
   test("can explicitly omit mailing-list UI without changing accessible social links", () => {
@@ -136,10 +102,7 @@ describe("Hraness site footer", () => {
     const audience = form?.querySelector('input[name="audience"]');
     const source = form?.querySelector('input[name="source"]');
     const submit = form?.querySelector('button[type="submit"]');
-    const turnstile = form?.querySelector('[data-slot="hraness-turnstile-widget"]');
-    const turnstileScript = footer?.querySelector(
-      'script[data-slot="hraness-turnstile-script"]',
-    );
+    const honeypot = form?.querySelector('input[name="website"]');
     const socialLinks = [...(footer?.querySelectorAll(".hraness-site-footer__social-link") ?? [])];
 
     expect(HRANESS_MAILING_SUBSCRIBE_URL).toBe(
@@ -159,23 +122,13 @@ describe("Hraness site footer", () => {
     expect(email?.closest("label")?.textContent).toContain("Email address");
     expect(audience?.getAttribute("value")).toBe("soundfish");
     expect(source?.getAttribute("value")).toBe("hraness-site-footer");
-    expect(getHranessMailingTurnstileAction("stripe-history")).toBe(
-      "mailing_stripe_history",
-    );
-    expect(turnstile?.classList.contains("cf-turnstile")).toBeTrue();
-    expect(turnstile?.getAttribute("data-sitekey")).toBe(TURNSTILE_TEST_SITEKEY);
-    expect(turnstile?.getAttribute("data-action")).toBe("mailing_soundfish");
-    expect(turnstile?.getAttribute("data-appearance")).toBe("interaction-only");
-    expect(turnstile?.getAttribute("data-execution")).toBe("render");
-    expect(turnstile?.getAttribute("data-refresh-expired")).toBe("auto");
-    expect(turnstile?.getAttribute("data-retry")).toBe("auto");
-    expect(turnstile?.getAttribute("data-response-field")).toBe("true");
-    expect(turnstile?.getAttribute("data-response-field-name")).toBe(
-      HRANESS_TURNSTILE_RESPONSE_FIELD,
-    );
-    expect(turnstileScript?.getAttribute("src")).toBe(HRANESS_TURNSTILE_SCRIPT_URL);
-    expect(turnstileScript?.hasAttribute("async")).toBeTrue();
-    expect(turnstileScript?.hasAttribute("defer")).toBeTrue();
+    expect(honeypot?.getAttribute("aria-hidden")).toBe("true");
+    expect(honeypot?.getAttribute("tabindex")).toBe("-1");
+    expect(honeypot?.getAttribute("autocomplete")).toBe("off");
+    expect(honeypot?.getAttribute("value")).toBe("");
+    expect(footer?.querySelector("script")).toBeNull();
+    expect(html).not.toContain("turnstile");
+    expect(html).not.toContain("challenges.cloudflare.com");
     expect(submit?.textContent).toBe("Subscribe");
     const status = form?.querySelector('[data-slot="hraness-mailing-list-status"]');
     expect(status?.id).toBe("hraness-mailing-list-status");
@@ -188,31 +141,6 @@ describe("Hraness site footer", () => {
       html.indexOf('aria-label="Hraness links"'),
     );
     expect(socialLinks[0]?.getAttribute("aria-label")).toBe("Hraness on Substack");
-  });
-
-  test("supports strict CSP nonces without weakening the exact Turnstile URL", () => {
-    const html = renderHranessSiteFooter({
-      mailingList: productMailingList,
-      turnstileScriptNonce: TURNSTILE_SCRIPT_NONCE,
-    });
-    const { document } = parseHTML(html);
-    const script = document.querySelector<HTMLScriptElement>(
-      'script[data-slot="hraness-turnstile-script"]',
-    );
-
-    expect(HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL).toBe(
-      `${HRANESS_TURNSTILE_SCRIPT_URL}?render=explicit`,
-    );
-    expect(script?.src).toBe(HRANESS_TURNSTILE_SCRIPT_URL);
-    expect(script?.getAttribute("nonce")).toBe(TURNSTILE_SCRIPT_NONCE);
-    expect(() => renderHranessSiteFooter({
-      mailingList: productMailingList,
-      turnstileScriptNonce: "too-short",
-    })).toThrow("script nonces must be 16-256 character");
-    expect(() => renderHranessSiteFooter({
-      mailingList: productMailingList,
-      turnstileScriptNonce: "not valid nonce value",
-    })).toThrow("script nonces must be 16-256 character");
   });
 
   test("renders localized button and inline experiment recipes", () => {
@@ -236,19 +164,17 @@ describe("Hraness site footer", () => {
     expect(form?.querySelector(".hraness-site-footer__shimmer")).not.toBeNull();
   });
 
-  test("fails closed when an audience cannot produce the bounded Turnstile action", () => {
+  test("rejects malformed mailing-list audience IDs", () => {
     expect(() => renderHranessSiteFooter({
       mailingList: {
         audience: "UPPERCASE",
         kind: "signup",
-        turnstileSitekey: TURNSTILE_TEST_SITEKEY,
       },
     })).toThrow("canonical lowercase slugs");
     expect(() => renderHranessSiteFooter({
       mailingList: {
         audience: "audience-name-that-is-too-long",
         kind: "signup",
-        turnstileSitekey: TURNSTILE_TEST_SITEKEY,
       },
     })).toThrow("at most 24 characters");
   });

@@ -12,9 +12,6 @@ export type FooterMessages = Readonly<{
   formLabel: string;
   pending: string;
   submitting: string;
-  verifying: string;
-  retryVerification: string;
-  verificationError: string;
   requestError: string;
   accepted: string;
   openLabel: string;
@@ -33,9 +30,6 @@ type SharedMessages = Omit<FooterMessages, "button" | "placeholder" | "emailLabe
 const sharedMessages = {
   "en": {
     "formLabel": "Subscribe by email",
-    "verifying": "Verifying…",
-    "retryVerification": "Retry check",
-    "verificationError": "Security check failed. Try again.",
     "pending": "Subscribing…",
     "submitting": "Submitting your email…",
     "requestError": "Couldn't subscribe. Try again.",
@@ -46,9 +40,6 @@ const sharedMessages = {
   },
   "es": {
     "formLabel": "Recibir novedades por correo",
-    "verifying": "Verificando…",
-    "retryVerification": "Reintentar verificación",
-    "verificationError": "Falló la verificación de seguridad. Inténtalo de nuevo.",
     "pending": "Enviando…",
     "submitting": "Enviando…",
     "requestError": "Algo salió mal. Inténtalo de nuevo.",
@@ -59,9 +50,6 @@ const sharedMessages = {
   },
   "es-AR": {
     "formLabel": "Recibir novedades por correo",
-    "verifying": "Verificando…",
-    "retryVerification": "Reintentar verificación",
-    "verificationError": "Falló la verificación de seguridad. Intentá de nuevo.",
     "pending": "Enviando…",
     "submitting": "Enviando…",
     "requestError": "Algo salió mal. Intentá de nuevo.",
@@ -72,9 +60,6 @@ const sharedMessages = {
   },
   "fr": {
     "formLabel": "Recevoir les nouveautés par e-mail",
-    "verifying": "Vérification…",
-    "retryVerification": "Relancer la vérification",
-    "verificationError": "La vérification de sécurité a échoué. Réessayez.",
     "pending": "Envoi…",
     "submitting": "Envoi…",
     "requestError": "Un problème est survenu. Réessayez.",
@@ -85,9 +70,6 @@ const sharedMessages = {
   },
   "fr-CA": {
     "formLabel": "Recevoir les nouvelles par courriel",
-    "verifying": "Vérification…",
-    "retryVerification": "Relancer la vérification",
-    "verificationError": "La vérification de sécurité a échoué. Réessayez.",
     "pending": "Envoi…",
     "submitting": "Envoi…",
     "requestError": "Un problème est survenu. Réessayez.",
@@ -98,9 +80,6 @@ const sharedMessages = {
   },
   "pt-BR": {
     "formLabel": "Receber novidades por e-mail",
-    "verifying": "Verificando…",
-    "retryVerification": "Tentar verificação de novo",
-    "verificationError": "A verificação de segurança falhou. Tente novamente.",
     "pending": "Enviando…",
     "submitting": "Enviando…",
     "requestError": "Algo deu errado. Tente novamente.",
@@ -111,9 +90,6 @@ const sharedMessages = {
   },
   "pt-PT": {
     "formLabel": "Receber novidades por e-mail",
-    "verifying": "A verificar…",
-    "retryVerification": "Repetir verificação",
-    "verificationError": "A verificação de segurança falhou. Tente novamente.",
     "pending": "A enviar…",
     "submitting": "A enviar…",
     "requestError": "Ocorreu um erro. Tente novamente.",
@@ -124,9 +100,6 @@ const sharedMessages = {
   },
   "de": {
     "formLabel": "Neuigkeiten per E-Mail abonnieren",
-    "verifying": "Wird überprüft…",
-    "retryVerification": "Prüfung wiederholen",
-    "verificationError": "Die Sicherheitsprüfung ist fehlgeschlagen. Versuch es noch einmal.",
     "pending": "Wird gesendet…",
     "submitting": "Wird gesendet…",
     "requestError": "Etwas ist schiefgelaufen. Versuch es noch einmal.",
@@ -137,9 +110,6 @@ const sharedMessages = {
   },
   "nl": {
     "formLabel": "Nieuws ontvangen per e-mail",
-    "verifying": "Controleren…",
-    "retryVerification": "Controle opnieuw proberen",
-    "verificationError": "De veiligheidscontrole is mislukt. Probeer het opnieuw.",
     "pending": "Verzenden…",
     "submitting": "Verzenden…",
     "requestError": "Er ging iets mis. Probeer het opnieuw.",
@@ -150,9 +120,6 @@ const sharedMessages = {
   },
   "it": {
     "formLabel": "Ricevere le novità via email",
-    "verifying": "Verifica…",
-    "retryVerification": "Ripeti la verifica",
-    "verificationError": "La verifica di sicurezza non è riuscita. Riprova.",
     "pending": "Invio…",
     "submitting": "Invio…",
     "requestError": "Qualcosa è andato storto. Riprova.",
@@ -163,9 +130,6 @@ const sharedMessages = {
   },
   "ca": {
     "formLabel": "Rebre novetats per correu",
-    "verifying": "Verificant…",
-    "retryVerification": "Torna a verificar",
-    "verificationError": "La verificació de seguretat ha fallat. Torna-ho a provar.",
     "pending": "Enviant…",
     "submitting": "Enviant…",
     "requestError": "Hi ha hagut un problema. Torna-ho a provar.",
@@ -176,9 +140,6 @@ const sharedMessages = {
   },
   "sv": {
     "formLabel": "Prenumerera på nyheter via e-post",
-    "verifying": "Verifierar…",
-    "retryVerification": "Försök verifiera igen",
-    "verificationError": "Säkerhetskontrollen misslyckades. Försök igen.",
     "pending": "Skickar…",
     "submitting": "Skickar…",
     "requestError": "Något gick fel. Försök igen.",
@@ -189,9 +150,6 @@ const sharedMessages = {
   },
   "da": {
     "formLabel": "Tilmeld dig nyheder via e-mail",
-    "verifying": "Bekræfter…",
-    "retryVerification": "Prøv kontrollen igen",
-    "verificationError": "Sikkerhedskontrollen mislykkedes. Prøv igen.",
     "pending": "Sender…",
     "submitting": "Sender…",
     "requestError": "Noget gik galt. Prøv igen.",
@@ -202,9 +160,6 @@ const sharedMessages = {
   },
   "nb": {
     "formLabel": "Abonner på nyheter via e-post",
-    "verifying": "Bekrefter…",
-    "retryVerification": "Prøv kontrollen igjen",
-    "verificationError": "Sikkerhetskontrollen mislyktes. Prøv igjen.",
     "pending": "Sender…",
     "submitting": "Sender…",
     "requestError": "Noe gikk galt. Prøv igjen.",
@@ -215,9 +170,6 @@ const sharedMessages = {
   },
   "fi": {
     "formLabel": "Tilaa uutiset sähköpostitse",
-    "verifying": "Vahvistetaan…",
-    "retryVerification": "Yritä tarkistusta uudelleen",
-    "verificationError": "Turvatarkistus epäonnistui. Yritä uudelleen.",
     "pending": "Lähetetään…",
     "submitting": "Lähetetään…",
     "requestError": "Jokin meni pieleen. Yritä uudelleen.",
@@ -228,9 +180,6 @@ const sharedMessages = {
   },
   "pl": {
     "formLabel": "Otrzymuj nowości e-mailem",
-    "verifying": "Weryfikacja…",
-    "retryVerification": "Ponów weryfikację",
-    "verificationError": "Weryfikacja bezpieczeństwa nie powiodła się. Spróbuj ponownie.",
     "pending": "Wysyłanie…",
     "submitting": "Wysyłanie…",
     "requestError": "Coś poszło nie tak. Spróbuj ponownie.",
@@ -241,9 +190,6 @@ const sharedMessages = {
   },
   "cs": {
     "formLabel": "Odebírat novinky e-mailem",
-    "verifying": "Ověřování…",
-    "retryVerification": "Zopakovat ověření",
-    "verificationError": "Bezpečnostní ověření selhalo. Zkus to znovu.",
     "pending": "Odesílání…",
     "submitting": "Odesílání…",
     "requestError": "Něco se nepovedlo. Zkus to znovu.",
@@ -254,9 +200,6 @@ const sharedMessages = {
   },
   "sk": {
     "formLabel": "Odoberať novinky e-mailom",
-    "verifying": "Overovanie…",
-    "retryVerification": "Zopakovať overenie",
-    "verificationError": "Bezpečnostné overenie zlyhalo. Skús to znova.",
     "pending": "Odosielanie…",
     "submitting": "Odosielanie…",
     "requestError": "Niečo sa nepodarilo. Skús to znova.",
@@ -267,9 +210,6 @@ const sharedMessages = {
   },
   "hu": {
     "formLabel": "Feliratkozás e-mailes hírekre",
-    "verifying": "Ellenőrzés…",
-    "retryVerification": "Ellenőrzés újra",
-    "verificationError": "A biztonsági ellenőrzés sikertelen. Próbáld újra.",
     "pending": "Küldés…",
     "submitting": "Küldés…",
     "requestError": "Valami hiba történt. Próbáld újra.",
@@ -280,9 +220,6 @@ const sharedMessages = {
   },
   "ro": {
     "formLabel": "Primește noutăți prin e-mail",
-    "verifying": "Se verifică…",
-    "retryVerification": "Repetă verificarea",
-    "verificationError": "Verificarea de securitate a eșuat. Încearcă din nou.",
     "pending": "Se trimite…",
     "submitting": "Se trimite…",
     "requestError": "Ceva nu a mers bine. Încearcă din nou.",
@@ -293,9 +230,6 @@ const sharedMessages = {
   },
   "el": {
     "formLabel": "Εγγραφή για νέα μέσω email",
-    "verifying": "Επαλήθευση…",
-    "retryVerification": "Επανάληψη ελέγχου",
-    "verificationError": "Ο έλεγχος ασφαλείας απέτυχε. Δοκίμασε ξανά.",
     "pending": "Αποστολή…",
     "submitting": "Αποστολή…",
     "requestError": "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
@@ -306,9 +240,6 @@ const sharedMessages = {
   },
   "bg": {
     "formLabel": "Абониране за новини по имейл",
-    "verifying": "Проверка…",
-    "retryVerification": "Повтори проверката",
-    "verificationError": "Проверката за сигурност е неуспешна. Опитай отново.",
     "pending": "Изпращане…",
     "submitting": "Изпращане…",
     "requestError": "Възникна проблем. Опитай отново.",
@@ -319,9 +250,6 @@ const sharedMessages = {
   },
   "hr": {
     "formLabel": "Primaj novosti e-poštom",
-    "verifying": "Provjera…",
-    "retryVerification": "Ponovi provjeru",
-    "verificationError": "Sigurnosna provjera nije uspjela. Pokušaj ponovno.",
     "pending": "Slanje…",
     "submitting": "Slanje…",
     "requestError": "Nešto je pošlo po zlu. Pokušaj ponovno.",
@@ -332,9 +260,6 @@ const sharedMessages = {
   },
   "sl": {
     "formLabel": "Prejemaj novosti po e-pošti",
-    "verifying": "Preverjanje…",
-    "retryVerification": "Ponovi preverjanje",
-    "verificationError": "Varnostno preverjanje ni uspelo. Poskusi znova.",
     "pending": "Pošiljanje…",
     "submitting": "Pošiljanje…",
     "requestError": "Prišlo je do napake. Poskusi znova.",
@@ -345,9 +270,6 @@ const sharedMessages = {
   },
   "sr-Latn": {
     "formLabel": "Primaj novosti imejlom",
-    "verifying": "Provera…",
-    "retryVerification": "Ponovi proveru",
-    "verificationError": "Bezbednosna provera nije uspela. Pokušaj ponovo.",
     "pending": "Slanje…",
     "submitting": "Slanje…",
     "requestError": "Nešto nije u redu. Pokušaj ponovo.",
@@ -358,9 +280,6 @@ const sharedMessages = {
   },
   "sr-Cyrl": {
     "formLabel": "Примај новости имејлом",
-    "verifying": "Провера…",
-    "retryVerification": "Понови проверу",
-    "verificationError": "Безбедносна провера није успела. Покушај поново.",
     "pending": "Слање…",
     "submitting": "Слање…",
     "requestError": "Нешто није у реду. Покушај поново.",
@@ -371,9 +290,6 @@ const sharedMessages = {
   },
   "uk": {
     "formLabel": "Підписатися на новини електронною поштою",
-    "verifying": "Перевірка…",
-    "retryVerification": "Повторити перевірку",
-    "verificationError": "Перевірка безпеки не вдалася. Спробуй ще раз.",
     "pending": "Надсилання…",
     "submitting": "Надсилання…",
     "requestError": "Щось пішло не так. Спробуй ще раз.",
@@ -384,9 +300,6 @@ const sharedMessages = {
   },
   "ru": {
     "formLabel": "Подписаться на новости по электронной почте",
-    "verifying": "Проверка…",
-    "retryVerification": "Повторить проверку",
-    "verificationError": "Проверка безопасности не пройдена. Попробуй ещё раз.",
     "pending": "Отправка…",
     "submitting": "Отправка…",
     "requestError": "Что-то пошло не так. Попробуй ещё раз.",
@@ -397,9 +310,6 @@ const sharedMessages = {
   },
   "tr": {
     "formLabel": "E-postayla haberlere abone ol",
-    "verifying": "Doğrulanıyor…",
-    "retryVerification": "Kontrolü yeniden dene",
-    "verificationError": "Güvenlik kontrolü başarısız oldu. Tekrar dene.",
     "pending": "Gönderiliyor…",
     "submitting": "Gönderiliyor…",
     "requestError": "Bir sorun oluştu. Lütfen tekrar dene.",
@@ -410,9 +320,6 @@ const sharedMessages = {
   },
   "ar": {
     "formLabel": "الاشتراك في الأخبار بالبريد الإلكتروني",
-    "verifying": "جارٍ التحقق…",
-    "retryVerification": "إعادة التحقق",
-    "verificationError": "فشل التحقق الأمني. حاول مرة أخرى.",
     "pending": "جارٍ الإرسال…",
     "submitting": "جارٍ الإرسال…",
     "requestError": "حدث خطأ. حاول مرة أخرى.",
@@ -423,9 +330,6 @@ const sharedMessages = {
   },
   "he": {
     "formLabel": "הרשמה לעדכונים באימייל",
-    "verifying": "מתבצע אימות…",
-    "retryVerification": "ניסיון אימות נוסף",
-    "verificationError": "בדיקת האבטחה נכשלה. כדאי לנסות שוב.",
     "pending": "שולח…",
     "submitting": "שולח…",
     "requestError": "משהו השתבש. כדאי לנסות שוב.",
@@ -436,9 +340,6 @@ const sharedMessages = {
   },
   "fa": {
     "formLabel": "دریافت خبرها با ایمیل",
-    "verifying": "در حال بررسی…",
-    "retryVerification": "بررسی دوباره",
-    "verificationError": "بررسی امنیتی ناموفق بود. دوباره تلاش کنید.",
     "pending": "در حال ارسال…",
     "submitting": "در حال ارسال…",
     "requestError": "مشکلی پیش آمد. دوباره تلاش کنید.",
@@ -449,9 +350,6 @@ const sharedMessages = {
   },
   "hi": {
     "formLabel": "ईमेल पर खबरें पाएँ",
-    "verifying": "जाँच हो रही है…",
-    "retryVerification": "फिर जाँच करें",
-    "verificationError": "सुरक्षा जाँच पूरी नहीं हुई। फिर कोशिश करें।",
     "pending": "भेज रहे हैं…",
     "submitting": "भेज रहे हैं…",
     "requestError": "कुछ गड़बड़ हुई। फिर कोशिश करें।",
@@ -462,9 +360,6 @@ const sharedMessages = {
   },
   "bn": {
     "formLabel": "ইমেইলে খবর পেতে নিবন্ধন করুন",
-    "verifying": "যাচাই হচ্ছে…",
-    "retryVerification": "আবার যাচাই করুন",
-    "verificationError": "নিরাপত্তা যাচাই ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
     "pending": "পাঠানো হচ্ছে…",
     "submitting": "পাঠানো হচ্ছে…",
     "requestError": "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।",
@@ -475,9 +370,6 @@ const sharedMessages = {
   },
   "ta": {
     "formLabel": "மின்னஞ்சலில் புதிய தகவல்களைப் பெற",
-    "verifying": "சரிபார்க்கப்படுகிறது…",
-    "retryVerification": "மீண்டும் சரிபார்க்கவும்",
-    "verificationError": "பாதுகாப்புச் சரிபார்ப்பு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
     "pending": "அனுப்பப்படுகிறது…",
     "submitting": "அனுப்பப்படுகிறது…",
     "requestError": "பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
@@ -488,9 +380,6 @@ const sharedMessages = {
   },
   "ur": {
     "formLabel": "ای میل پر خبروں کے لیے اندراج کریں",
-    "verifying": "تصدیق ہو رہی ہے…",
-    "retryVerification": "دوبارہ تصدیق کریں",
-    "verificationError": "سیکیورٹی کی تصدیق ناکام رہی۔ دوبارہ کوشش کریں۔",
     "pending": "بھیجا جا رہا ہے…",
     "submitting": "بھیجا جا رہا ہے…",
     "requestError": "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
@@ -501,9 +390,6 @@ const sharedMessages = {
   },
   "id": {
     "formLabel": "Berlangganan kabar lewat email",
-    "verifying": "Memverifikasi…",
-    "retryVerification": "Ulangi pemeriksaan",
-    "verificationError": "Pemeriksaan keamanan gagal. Coba lagi.",
     "pending": "Mengirim…",
     "submitting": "Mengirim…",
     "requestError": "Ada masalah. Coba lagi.",
@@ -514,9 +400,6 @@ const sharedMessages = {
   },
   "ms": {
     "formLabel": "Langgan berita melalui e-mel",
-    "verifying": "Mengesahkan…",
-    "retryVerification": "Cuba semakan lagi",
-    "verificationError": "Semakan keselamatan gagal. Cuba lagi.",
     "pending": "Menghantar…",
     "submitting": "Menghantar…",
     "requestError": "Ada masalah. Cuba lagi.",
@@ -527,9 +410,6 @@ const sharedMessages = {
   },
   "vi": {
     "formLabel": "Đăng ký nhận tin qua email",
-    "verifying": "Đang xác minh…",
-    "retryVerification": "Xác minh lại",
-    "verificationError": "Xác minh bảo mật không thành công. Hãy thử lại.",
     "pending": "Đang gửi…",
     "submitting": "Đang gửi…",
     "requestError": "Đã xảy ra lỗi. Hãy thử lại.",
@@ -540,9 +420,6 @@ const sharedMessages = {
   },
   "th": {
     "formLabel": "สมัครรับข่าวสารทางอีเมล",
-    "verifying": "กำลังตรวจสอบ…",
-    "retryVerification": "ตรวจสอบอีกครั้ง",
-    "verificationError": "การตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาลองอีกครั้ง",
     "pending": "กำลังส่ง…",
     "submitting": "กำลังส่ง…",
     "requestError": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
@@ -553,9 +430,6 @@ const sharedMessages = {
   },
   "fil": {
     "formLabel": "Tumanggap ng mga balita sa email",
-    "verifying": "Bineberipika…",
-    "retryVerification": "Ulitin ang pagsusuri",
-    "verificationError": "Hindi nagtagumpay ang pagsusuri sa seguridad. Subukan ulit.",
     "pending": "Ipinapadala…",
     "submitting": "Ipinapadala…",
     "requestError": "May nagkaproblema. Subukan ulit.",
@@ -566,9 +440,6 @@ const sharedMessages = {
   },
   "ja": {
     "formLabel": "メールでニュースを受け取る",
-    "verifying": "確認中…",
-    "retryVerification": "もう一度確認",
-    "verificationError": "セキュリティ確認に失敗しました。もう一度お試しください。",
     "pending": "送信中…",
     "submitting": "送信中…",
     "requestError": "エラーが発生しました。もう一度お試しください。",
@@ -579,9 +450,6 @@ const sharedMessages = {
   },
   "ko": {
     "formLabel": "이메일로 소식 구독하기",
-    "verifying": "확인 중…",
-    "retryVerification": "다시 확인하기",
-    "verificationError": "보안 확인에 실패했어요. 다시 시도해 주세요.",
     "pending": "보내는 중…",
     "submitting": "보내는 중…",
     "requestError": "문제가 생겼어요. 다시 시도해 주세요.",
@@ -592,9 +460,6 @@ const sharedMessages = {
   },
   "zh-Hans": {
     "formLabel": "通过邮件订阅新消息",
-    "verifying": "验证中…",
-    "retryVerification": "重新验证",
-    "verificationError": "安全验证失败，请重试。",
     "pending": "发送中…",
     "submitting": "发送中…",
     "requestError": "出了点问题，请重试。",
@@ -605,9 +470,6 @@ const sharedMessages = {
   },
   "zh-Hant-TW": {
     "formLabel": "訂閱電子報",
-    "verifying": "驗證中…",
-    "retryVerification": "重新驗證",
-    "verificationError": "安全驗證失敗，請再試一次。",
     "pending": "傳送中…",
     "submitting": "傳送中…",
     "requestError": "出了點問題，請再試一次。",
@@ -618,9 +480,6 @@ const sharedMessages = {
   },
   "zh-Hant-HK": {
     "formLabel": "透過電郵訂閱最新消息",
-    "verifying": "驗證中…",
-    "retryVerification": "重新驗證",
-    "verificationError": "安全驗證失敗，請再試一次。",
     "pending": "傳送中…",
     "submitting": "傳送中…",
     "requestError": "出現問題，請再試一次。",
@@ -631,9 +490,6 @@ const sharedMessages = {
   },
   "sw": {
     "formLabel": "Jiandikishe kupokea habari kwa barua pepe",
-    "verifying": "Inathibitisha…",
-    "retryVerification": "Rudia uthibitishaji",
-    "verificationError": "Ukaguzi wa usalama umeshindwa. Jaribu tena.",
     "pending": "Inatuma…",
     "submitting": "Inatuma…",
     "requestError": "Hitilafu imetokea. Jaribu tena.",
@@ -644,9 +500,6 @@ const sharedMessages = {
   },
   "af": {
     "formLabel": "Teken in vir nuus per e-pos",
-    "verifying": "Verifieer tans…",
-    "retryVerification": "Probeer die kontrole weer",
-    "verificationError": "Die sekuriteitskontrole het misluk. Probeer weer.",
     "pending": "Stuur tans…",
     "submitting": "Stuur tans…",
     "requestError": "Iets het skeefgeloop. Probeer weer.",

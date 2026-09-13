@@ -13,15 +13,10 @@ export declare const HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 export declare const HRANESS_MAILING_SOURCE = "hraness-site-footer";
 export declare const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 export declare const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
-export declare const HRANESS_TURNSTILE_RESPONSE_FIELD = "cf-turnstile-response";
-export declare const HRANESS_TURNSTILE_SCRIPT_SLOT = "hraness-turnstile-script";
-export declare const HRANESS_TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-export declare const HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-export declare const HRANESS_TURNSTILE_WIDGET_SLOT = "hraness-turnstile-widget";
+export declare const HRANESS_MAILING_HONEYPOT_FIELD = "website";
 export type HranessMailingListConfig = Readonly<{
     audience: string;
     kind: "signup";
-    turnstileSitekey: string;
 }> | Readonly<{
     kind: "none";
 }>;
@@ -38,10 +33,6 @@ export type HranessMailingListRenderState = Readonly<{
     audience: string;
     email: string;
     kind: "error";
-}> | Readonly<{
-    audience: string;
-    email: string;
-    kind: "verification-error";
 }>;
 export type HranessSocialPlatform = "substack" | "x" | "linkedin" | "github";
 export declare const HRANESS_SOCIAL_PLATFORMS: readonly ["substack", "x", "linkedin", "github"];
@@ -80,7 +71,5 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
 export declare function parseHranessMailingListConfig(value: HranessMailingListConfig): HranessMailingListConfig;
 export declare function parseHranessSocialConfig(value: HranessSocialConfig | undefined): HranessSocialConfig;
 export declare function resolveHranessSocialLinks(value: HranessSocialConfig | undefined): ReadonlyArray<HranessSocialLink>;
-export declare function parseHranessTurnstileScriptNonce(value: string | undefined): string | undefined;
-export declare function getHranessMailingTurnstileAction(audience: string): string;
-export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean, mailingList: HranessMailingListConfig, state?: HranessMailingListRenderState, turnstileMode?: "explicit" | "implicit", turnstileScriptNonce?: string, socialLinks?: ReadonlyArray<HranessSocialLink>, presentation?: FooterPresentation): string;
+export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean, mailingList: HranessMailingListConfig, state?: HranessMailingListRenderState, socialLinks?: ReadonlyArray<HranessSocialLink>, presentation?: FooterPresentation): string;
 //# sourceMappingURL=internal.d.ts.map

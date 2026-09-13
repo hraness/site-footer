@@ -1,11 +1,11 @@
 ---
 name: verify-site-footer
-description: Drive the real shared Hraness React footer through isolated synthetic signup states, responsive layout checks, and retained browser evidence. Use for package-level footer behavior or geometry verification; do not use against production Accounts, live Turnstile, or a person's browser profile.
+description: Drive the real shared Hraness React footer through isolated synthetic signup states, responsive layout checks, and retained browser evidence. Use for package-level footer behavior or geometry verification; do not use against production Accounts or a person's browser profile.
 ---
 
 # Verify the site footer
 
-Use the package-owned verifier to exercise the real React adapter while replacing only the external Turnstile and Accounts browser ports. Treat this as package and fixture evidence, not proof of either provider or of a consuming website.
+Use the package-owned verifier to exercise the real React adapter while replacing only the external Accounts browser port. Treat this as package and fixture evidence, not proof of Accounts or of a consuming website.
 
 ## Doctor
 
@@ -29,11 +29,11 @@ Resolve `ABSOLUTE_OOMPA_HOST_RUN` with `command -v oompa-host-run` first. The ve
 
 ## Drive
 
-The five sequential contexts are `idle`, `pending`, `accepted`, `error`, and `verification-error`. Each context:
+The four sequential contexts are `idle`, `pending`, `accepted`, and `error`. Each context:
 
 1. starts with `tab new` beside the inert bootstrap tab, with the `127.0.0.1` browser allowlist already active;
 2. drives the visible email field and Subscribe button when submission is part of the state;
-3. observes the deterministic Turnstile adapter and exact Accounts request at the external boundary;
+3. observes the exact Accounts request at the external boundary;
 4. captures two settled named-layout samples at widths 1280, 390, 320, and 760 in the same context; and
 5. inventories the scenario, returns to the inert bootstrap tab, closes the inactive scenario tab by stable ID, and verifies the post-close inventory.
 

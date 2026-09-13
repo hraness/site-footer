@@ -423,16 +423,6 @@ var styles = {
     k9llMU: "xv7uhgh",
     $$css: true
   },
-  turnstile: {
-    kVAEAm: "x10l6tqk",
-    kY2c9j: "x1vjfegm",
-    ka7YqC: "x1o0tod",
-    kctUWg: "x1g6sbnd",
-    kULEZF: "xiuoait",
-    k2kXS: "x1sbvpkc",
-    kdYMnH: "xesnm00",
-    $$css: true
-  },
   mailingControls: {
     k1xSpc: "x78zum5",
     kdYMnH: "xesnm00",
@@ -572,7 +562,7 @@ var footerClasses = {
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
   mailing: className("hraness-site-footer__mailing", styles.box, styles.mailingGeometry, styles.mailing),
-  turnstile: className("hraness-site-footer__turnstile", styles.box, styles.turnstile),
+  honeypot: className("hraness-site-footer__honeypot", styles.visuallyHidden),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
   mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
@@ -591,16 +581,13 @@ function socialItemClassName() {
   return className("hraness-site-footer__social-item", styles.socialItem, styles.socialAlways);
 }
 function mailingStatusClassName(state) {
-  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus, state !== "idle" && styles.statusVisible, (state === "error" || state === "verification-error") && styles.statusError);
+  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus, state !== "idle" && styles.statusVisible, state === "error" && styles.statusError);
 }
 
 // src/locales.ts
 var sharedMessages = {
   en: {
     formLabel: "Subscribe by email",
-    verifying: "Verifying…",
-    retryVerification: "Retry check",
-    verificationError: "Security check failed. Try again.",
     pending: "Subscribing…",
     submitting: "Submitting your email…",
     requestError: "Couldn't subscribe. Try again.",
@@ -611,9 +598,6 @@ var sharedMessages = {
   },
   es: {
     formLabel: "Recibir novedades por correo",
-    verifying: "Verificando…",
-    retryVerification: "Reintentar verificación",
-    verificationError: "Falló la verificación de seguridad. Inténtalo de nuevo.",
     pending: "Enviando…",
     submitting: "Enviando…",
     requestError: "Algo salió mal. Inténtalo de nuevo.",
@@ -624,9 +608,6 @@ var sharedMessages = {
   },
   "es-AR": {
     formLabel: "Recibir novedades por correo",
-    verifying: "Verificando…",
-    retryVerification: "Reintentar verificación",
-    verificationError: "Falló la verificación de seguridad. Intentá de nuevo.",
     pending: "Enviando…",
     submitting: "Enviando…",
     requestError: "Algo salió mal. Intentá de nuevo.",
@@ -637,9 +618,6 @@ var sharedMessages = {
   },
   fr: {
     formLabel: "Recevoir les nouveautés par e-mail",
-    verifying: "Vérification…",
-    retryVerification: "Relancer la vérification",
-    verificationError: "La vérification de sécurité a échoué. Réessayez.",
     pending: "Envoi…",
     submitting: "Envoi…",
     requestError: "Un problème est survenu. Réessayez.",
@@ -650,9 +628,6 @@ var sharedMessages = {
   },
   "fr-CA": {
     formLabel: "Recevoir les nouvelles par courriel",
-    verifying: "Vérification…",
-    retryVerification: "Relancer la vérification",
-    verificationError: "La vérification de sécurité a échoué. Réessayez.",
     pending: "Envoi…",
     submitting: "Envoi…",
     requestError: "Un problème est survenu. Réessayez.",
@@ -663,9 +638,6 @@ var sharedMessages = {
   },
   "pt-BR": {
     formLabel: "Receber novidades por e-mail",
-    verifying: "Verificando…",
-    retryVerification: "Tentar verificação de novo",
-    verificationError: "A verificação de segurança falhou. Tente novamente.",
     pending: "Enviando…",
     submitting: "Enviando…",
     requestError: "Algo deu errado. Tente novamente.",
@@ -676,9 +648,6 @@ var sharedMessages = {
   },
   "pt-PT": {
     formLabel: "Receber novidades por e-mail",
-    verifying: "A verificar…",
-    retryVerification: "Repetir verificação",
-    verificationError: "A verificação de segurança falhou. Tente novamente.",
     pending: "A enviar…",
     submitting: "A enviar…",
     requestError: "Ocorreu um erro. Tente novamente.",
@@ -689,9 +658,6 @@ var sharedMessages = {
   },
   de: {
     formLabel: "Neuigkeiten per E-Mail abonnieren",
-    verifying: "Wird überprüft…",
-    retryVerification: "Prüfung wiederholen",
-    verificationError: "Die Sicherheitsprüfung ist fehlgeschlagen. Versuch es noch einmal.",
     pending: "Wird gesendet…",
     submitting: "Wird gesendet…",
     requestError: "Etwas ist schiefgelaufen. Versuch es noch einmal.",
@@ -702,9 +668,6 @@ var sharedMessages = {
   },
   nl: {
     formLabel: "Nieuws ontvangen per e-mail",
-    verifying: "Controleren…",
-    retryVerification: "Controle opnieuw proberen",
-    verificationError: "De veiligheidscontrole is mislukt. Probeer het opnieuw.",
     pending: "Verzenden…",
     submitting: "Verzenden…",
     requestError: "Er ging iets mis. Probeer het opnieuw.",
@@ -715,9 +678,6 @@ var sharedMessages = {
   },
   it: {
     formLabel: "Ricevere le novità via email",
-    verifying: "Verifica…",
-    retryVerification: "Ripeti la verifica",
-    verificationError: "La verifica di sicurezza non è riuscita. Riprova.",
     pending: "Invio…",
     submitting: "Invio…",
     requestError: "Qualcosa è andato storto. Riprova.",
@@ -728,9 +688,6 @@ var sharedMessages = {
   },
   ca: {
     formLabel: "Rebre novetats per correu",
-    verifying: "Verificant…",
-    retryVerification: "Torna a verificar",
-    verificationError: "La verificació de seguretat ha fallat. Torna-ho a provar.",
     pending: "Enviant…",
     submitting: "Enviant…",
     requestError: "Hi ha hagut un problema. Torna-ho a provar.",
@@ -741,9 +698,6 @@ var sharedMessages = {
   },
   sv: {
     formLabel: "Prenumerera på nyheter via e-post",
-    verifying: "Verifierar…",
-    retryVerification: "Försök verifiera igen",
-    verificationError: "Säkerhetskontrollen misslyckades. Försök igen.",
     pending: "Skickar…",
     submitting: "Skickar…",
     requestError: "Något gick fel. Försök igen.",
@@ -754,9 +708,6 @@ var sharedMessages = {
   },
   da: {
     formLabel: "Tilmeld dig nyheder via e-mail",
-    verifying: "Bekræfter…",
-    retryVerification: "Prøv kontrollen igen",
-    verificationError: "Sikkerhedskontrollen mislykkedes. Prøv igen.",
     pending: "Sender…",
     submitting: "Sender…",
     requestError: "Noget gik galt. Prøv igen.",
@@ -767,9 +718,6 @@ var sharedMessages = {
   },
   nb: {
     formLabel: "Abonner på nyheter via e-post",
-    verifying: "Bekrefter…",
-    retryVerification: "Prøv kontrollen igjen",
-    verificationError: "Sikkerhetskontrollen mislyktes. Prøv igjen.",
     pending: "Sender…",
     submitting: "Sender…",
     requestError: "Noe gikk galt. Prøv igjen.",
@@ -780,9 +728,6 @@ var sharedMessages = {
   },
   fi: {
     formLabel: "Tilaa uutiset sähköpostitse",
-    verifying: "Vahvistetaan…",
-    retryVerification: "Yritä tarkistusta uudelleen",
-    verificationError: "Turvatarkistus epäonnistui. Yritä uudelleen.",
     pending: "Lähetetään…",
     submitting: "Lähetetään…",
     requestError: "Jokin meni pieleen. Yritä uudelleen.",
@@ -793,9 +738,6 @@ var sharedMessages = {
   },
   pl: {
     formLabel: "Otrzymuj nowości e-mailem",
-    verifying: "Weryfikacja…",
-    retryVerification: "Ponów weryfikację",
-    verificationError: "Weryfikacja bezpieczeństwa nie powiodła się. Spróbuj ponownie.",
     pending: "Wysyłanie…",
     submitting: "Wysyłanie…",
     requestError: "Coś poszło nie tak. Spróbuj ponownie.",
@@ -806,9 +748,6 @@ var sharedMessages = {
   },
   cs: {
     formLabel: "Odebírat novinky e-mailem",
-    verifying: "Ověřování…",
-    retryVerification: "Zopakovat ověření",
-    verificationError: "Bezpečnostní ověření selhalo. Zkus to znovu.",
     pending: "Odesílání…",
     submitting: "Odesílání…",
     requestError: "Něco se nepovedlo. Zkus to znovu.",
@@ -819,9 +758,6 @@ var sharedMessages = {
   },
   sk: {
     formLabel: "Odoberať novinky e-mailom",
-    verifying: "Overovanie…",
-    retryVerification: "Zopakovať overenie",
-    verificationError: "Bezpečnostné overenie zlyhalo. Skús to znova.",
     pending: "Odosielanie…",
     submitting: "Odosielanie…",
     requestError: "Niečo sa nepodarilo. Skús to znova.",
@@ -832,9 +768,6 @@ var sharedMessages = {
   },
   hu: {
     formLabel: "Feliratkozás e-mailes hírekre",
-    verifying: "Ellenőrzés…",
-    retryVerification: "Ellenőrzés újra",
-    verificationError: "A biztonsági ellenőrzés sikertelen. Próbáld újra.",
     pending: "Küldés…",
     submitting: "Küldés…",
     requestError: "Valami hiba történt. Próbáld újra.",
@@ -845,9 +778,6 @@ var sharedMessages = {
   },
   ro: {
     formLabel: "Primește noutăți prin e-mail",
-    verifying: "Se verifică…",
-    retryVerification: "Repetă verificarea",
-    verificationError: "Verificarea de securitate a eșuat. Încearcă din nou.",
     pending: "Se trimite…",
     submitting: "Se trimite…",
     requestError: "Ceva nu a mers bine. Încearcă din nou.",
@@ -858,9 +788,6 @@ var sharedMessages = {
   },
   el: {
     formLabel: "Εγγραφή για νέα μέσω email",
-    verifying: "Επαλήθευση…",
-    retryVerification: "Επανάληψη ελέγχου",
-    verificationError: "Ο έλεγχος ασφαλείας απέτυχε. Δοκίμασε ξανά.",
     pending: "Αποστολή…",
     submitting: "Αποστολή…",
     requestError: "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
@@ -871,9 +798,6 @@ var sharedMessages = {
   },
   bg: {
     formLabel: "Абониране за новини по имейл",
-    verifying: "Проверка…",
-    retryVerification: "Повтори проверката",
-    verificationError: "Проверката за сигурност е неуспешна. Опитай отново.",
     pending: "Изпращане…",
     submitting: "Изпращане…",
     requestError: "Възникна проблем. Опитай отново.",
@@ -884,9 +808,6 @@ var sharedMessages = {
   },
   hr: {
     formLabel: "Primaj novosti e-poštom",
-    verifying: "Provjera…",
-    retryVerification: "Ponovi provjeru",
-    verificationError: "Sigurnosna provjera nije uspjela. Pokušaj ponovno.",
     pending: "Slanje…",
     submitting: "Slanje…",
     requestError: "Nešto je pošlo po zlu. Pokušaj ponovno.",
@@ -897,9 +818,6 @@ var sharedMessages = {
   },
   sl: {
     formLabel: "Prejemaj novosti po e-pošti",
-    verifying: "Preverjanje…",
-    retryVerification: "Ponovi preverjanje",
-    verificationError: "Varnostno preverjanje ni uspelo. Poskusi znova.",
     pending: "Pošiljanje…",
     submitting: "Pošiljanje…",
     requestError: "Prišlo je do napake. Poskusi znova.",
@@ -910,9 +828,6 @@ var sharedMessages = {
   },
   "sr-Latn": {
     formLabel: "Primaj novosti imejlom",
-    verifying: "Provera…",
-    retryVerification: "Ponovi proveru",
-    verificationError: "Bezbednosna provera nije uspela. Pokušaj ponovo.",
     pending: "Slanje…",
     submitting: "Slanje…",
     requestError: "Nešto nije u redu. Pokušaj ponovo.",
@@ -923,9 +838,6 @@ var sharedMessages = {
   },
   "sr-Cyrl": {
     formLabel: "Примај новости имејлом",
-    verifying: "Провера…",
-    retryVerification: "Понови проверу",
-    verificationError: "Безбедносна провера није успела. Покушај поново.",
     pending: "Слање…",
     submitting: "Слање…",
     requestError: "Нешто није у реду. Покушај поново.",
@@ -936,9 +848,6 @@ var sharedMessages = {
   },
   uk: {
     formLabel: "Підписатися на новини електронною поштою",
-    verifying: "Перевірка…",
-    retryVerification: "Повторити перевірку",
-    verificationError: "Перевірка безпеки не вдалася. Спробуй ще раз.",
     pending: "Надсилання…",
     submitting: "Надсилання…",
     requestError: "Щось пішло не так. Спробуй ще раз.",
@@ -949,9 +858,6 @@ var sharedMessages = {
   },
   ru: {
     formLabel: "Подписаться на новости по электронной почте",
-    verifying: "Проверка…",
-    retryVerification: "Повторить проверку",
-    verificationError: "Проверка безопасности не пройдена. Попробуй ещё раз.",
     pending: "Отправка…",
     submitting: "Отправка…",
     requestError: "Что-то пошло не так. Попробуй ещё раз.",
@@ -962,9 +868,6 @@ var sharedMessages = {
   },
   tr: {
     formLabel: "E-postayla haberlere abone ol",
-    verifying: "Doğrulanıyor…",
-    retryVerification: "Kontrolü yeniden dene",
-    verificationError: "Güvenlik kontrolü başarısız oldu. Tekrar dene.",
     pending: "Gönderiliyor…",
     submitting: "Gönderiliyor…",
     requestError: "Bir sorun oluştu. Lütfen tekrar dene.",
@@ -975,9 +878,6 @@ var sharedMessages = {
   },
   ar: {
     formLabel: "الاشتراك في الأخبار بالبريد الإلكتروني",
-    verifying: "جارٍ التحقق…",
-    retryVerification: "إعادة التحقق",
-    verificationError: "فشل التحقق الأمني. حاول مرة أخرى.",
     pending: "جارٍ الإرسال…",
     submitting: "جارٍ الإرسال…",
     requestError: "حدث خطأ. حاول مرة أخرى.",
@@ -988,9 +888,6 @@ var sharedMessages = {
   },
   he: {
     formLabel: "הרשמה לעדכונים באימייל",
-    verifying: "מתבצע אימות…",
-    retryVerification: "ניסיון אימות נוסף",
-    verificationError: "בדיקת האבטחה נכשלה. כדאי לנסות שוב.",
     pending: "שולח…",
     submitting: "שולח…",
     requestError: "משהו השתבש. כדאי לנסות שוב.",
@@ -1001,9 +898,6 @@ var sharedMessages = {
   },
   fa: {
     formLabel: "دریافت خبرها با ایمیل",
-    verifying: "در حال بررسی…",
-    retryVerification: "بررسی دوباره",
-    verificationError: "بررسی امنیتی ناموفق بود. دوباره تلاش کنید.",
     pending: "در حال ارسال…",
     submitting: "در حال ارسال…",
     requestError: "مشکلی پیش آمد. دوباره تلاش کنید.",
@@ -1014,9 +908,6 @@ var sharedMessages = {
   },
   hi: {
     formLabel: "ईमेल पर खबरें पाएँ",
-    verifying: "जाँच हो रही है…",
-    retryVerification: "फिर जाँच करें",
-    verificationError: "सुरक्षा जाँच पूरी नहीं हुई। फिर कोशिश करें।",
     pending: "भेज रहे हैं…",
     submitting: "भेज रहे हैं…",
     requestError: "कुछ गड़बड़ हुई। फिर कोशिश करें।",
@@ -1027,9 +918,6 @@ var sharedMessages = {
   },
   bn: {
     formLabel: "ইমেইলে খবর পেতে নিবন্ধন করুন",
-    verifying: "যাচাই হচ্ছে…",
-    retryVerification: "আবার যাচাই করুন",
-    verificationError: "নিরাপত্তা যাচাই ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
     pending: "পাঠানো হচ্ছে…",
     submitting: "পাঠানো হচ্ছে…",
     requestError: "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।",
@@ -1040,9 +928,6 @@ var sharedMessages = {
   },
   ta: {
     formLabel: "மின்னஞ்சலில் புதிய தகவல்களைப் பெற",
-    verifying: "சரிபார்க்கப்படுகிறது…",
-    retryVerification: "மீண்டும் சரிபார்க்கவும்",
-    verificationError: "பாதுகாப்புச் சரிபார்ப்பு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
     pending: "அனுப்பப்படுகிறது…",
     submitting: "அனுப்பப்படுகிறது…",
     requestError: "பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
@@ -1053,9 +938,6 @@ var sharedMessages = {
   },
   ur: {
     formLabel: "ای میل پر خبروں کے لیے اندراج کریں",
-    verifying: "تصدیق ہو رہی ہے…",
-    retryVerification: "دوبارہ تصدیق کریں",
-    verificationError: "سیکیورٹی کی تصدیق ناکام رہی۔ دوبارہ کوشش کریں۔",
     pending: "بھیجا جا رہا ہے…",
     submitting: "بھیجا جا رہا ہے…",
     requestError: "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
@@ -1066,9 +948,6 @@ var sharedMessages = {
   },
   id: {
     formLabel: "Berlangganan kabar lewat email",
-    verifying: "Memverifikasi…",
-    retryVerification: "Ulangi pemeriksaan",
-    verificationError: "Pemeriksaan keamanan gagal. Coba lagi.",
     pending: "Mengirim…",
     submitting: "Mengirim…",
     requestError: "Ada masalah. Coba lagi.",
@@ -1079,9 +958,6 @@ var sharedMessages = {
   },
   ms: {
     formLabel: "Langgan berita melalui e-mel",
-    verifying: "Mengesahkan…",
-    retryVerification: "Cuba semakan lagi",
-    verificationError: "Semakan keselamatan gagal. Cuba lagi.",
     pending: "Menghantar…",
     submitting: "Menghantar…",
     requestError: "Ada masalah. Cuba lagi.",
@@ -1092,9 +968,6 @@ var sharedMessages = {
   },
   vi: {
     formLabel: "Đăng ký nhận tin qua email",
-    verifying: "Đang xác minh…",
-    retryVerification: "Xác minh lại",
-    verificationError: "Xác minh bảo mật không thành công. Hãy thử lại.",
     pending: "Đang gửi…",
     submitting: "Đang gửi…",
     requestError: "Đã xảy ra lỗi. Hãy thử lại.",
@@ -1105,9 +978,6 @@ var sharedMessages = {
   },
   th: {
     formLabel: "สมัครรับข่าวสารทางอีเมล",
-    verifying: "กำลังตรวจสอบ…",
-    retryVerification: "ตรวจสอบอีกครั้ง",
-    verificationError: "การตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาลองอีกครั้ง",
     pending: "กำลังส่ง…",
     submitting: "กำลังส่ง…",
     requestError: "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
@@ -1118,9 +988,6 @@ var sharedMessages = {
   },
   fil: {
     formLabel: "Tumanggap ng mga balita sa email",
-    verifying: "Bineberipika…",
-    retryVerification: "Ulitin ang pagsusuri",
-    verificationError: "Hindi nagtagumpay ang pagsusuri sa seguridad. Subukan ulit.",
     pending: "Ipinapadala…",
     submitting: "Ipinapadala…",
     requestError: "May nagkaproblema. Subukan ulit.",
@@ -1131,9 +998,6 @@ var sharedMessages = {
   },
   ja: {
     formLabel: "メールでニュースを受け取る",
-    verifying: "確認中…",
-    retryVerification: "もう一度確認",
-    verificationError: "セキュリティ確認に失敗しました。もう一度お試しください。",
     pending: "送信中…",
     submitting: "送信中…",
     requestError: "エラーが発生しました。もう一度お試しください。",
@@ -1144,9 +1008,6 @@ var sharedMessages = {
   },
   ko: {
     formLabel: "이메일로 소식 구독하기",
-    verifying: "확인 중…",
-    retryVerification: "다시 확인하기",
-    verificationError: "보안 확인에 실패했어요. 다시 시도해 주세요.",
     pending: "보내는 중…",
     submitting: "보내는 중…",
     requestError: "문제가 생겼어요. 다시 시도해 주세요.",
@@ -1157,9 +1018,6 @@ var sharedMessages = {
   },
   "zh-Hans": {
     formLabel: "通过邮件订阅新消息",
-    verifying: "验证中…",
-    retryVerification: "重新验证",
-    verificationError: "安全验证失败，请重试。",
     pending: "发送中…",
     submitting: "发送中…",
     requestError: "出了点问题，请重试。",
@@ -1170,9 +1028,6 @@ var sharedMessages = {
   },
   "zh-Hant-TW": {
     formLabel: "訂閱電子報",
-    verifying: "驗證中…",
-    retryVerification: "重新驗證",
-    verificationError: "安全驗證失敗，請再試一次。",
     pending: "傳送中…",
     submitting: "傳送中…",
     requestError: "出了點問題，請再試一次。",
@@ -1183,9 +1038,6 @@ var sharedMessages = {
   },
   "zh-Hant-HK": {
     formLabel: "透過電郵訂閱最新消息",
-    verifying: "驗證中…",
-    retryVerification: "重新驗證",
-    verificationError: "安全驗證失敗，請再試一次。",
     pending: "傳送中…",
     submitting: "傳送中…",
     requestError: "出現問題，請再試一次。",
@@ -1196,9 +1048,6 @@ var sharedMessages = {
   },
   sw: {
     formLabel: "Jiandikishe kupokea habari kwa barua pepe",
-    verifying: "Inathibitisha…",
-    retryVerification: "Rudia uthibitishaji",
-    verificationError: "Ukaguzi wa usalama umeshindwa. Jaribu tena.",
     pending: "Inatuma…",
     submitting: "Inatuma…",
     requestError: "Hitilafu imetokea. Jaribu tena.",
@@ -1209,9 +1058,6 @@ var sharedMessages = {
   },
   af: {
     formLabel: "Teken in vir nuus per e-pos",
-    verifying: "Verifieer tans…",
-    retryVerification: "Probeer die kontrole weer",
-    verificationError: "Die sekuriteitskontrole het misluk. Probeer weer.",
     pending: "Stuur tans…",
     submitting: "Stuur tans…",
     requestError: "Iets het skeefgeloop. Probeer weer.",
@@ -1510,21 +1356,11 @@ var HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 var HRANESS_MAILING_SOURCE = "hraness-site-footer";
 var HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 var HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
-var HRANESS_TURNSTILE_RESPONSE_FIELD = "cf-turnstile-response";
-var HRANESS_TURNSTILE_SCRIPT_SLOT = "hraness-turnstile-script";
-var HRANESS_TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-var HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL = `${HRANESS_TURNSTILE_SCRIPT_URL}?render=explicit`;
-var HRANESS_TURNSTILE_WIDGET_SLOT = "hraness-turnstile-widget";
+var HRANESS_MAILING_HONEYPOT_FIELD = "website";
 var MAX_AUDIENCE_LENGTH = 24;
-var MIN_TURNSTILE_SITEKEY_LENGTH = 20;
-var MAX_TURNSTILE_SITEKEY_LENGTH = 100;
-var MIN_TURNSTILE_SCRIPT_NONCE_LENGTH = 16;
-var MAX_TURNSTILE_SCRIPT_NONCE_LENGTH = 256;
 var MAX_SOCIAL_HREF_LENGTH = 200;
 var MAX_SOCIAL_LABEL_LENGTH = 64;
 var AUDIENCE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-var TURNSTILE_SITEKEY_PATTERN = /^[A-Za-z0-9_-]+$/u;
-var TURNSTILE_SCRIPT_NONCE_PATTERN = /^[A-Za-z0-9+/_-]+={0,2}$/u;
 var SOCIAL_LABEL_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} .'+/-]{0,62}$/u;
 var SOCIAL_HREF_HOSTS = {
   github: "github.com",
@@ -1588,14 +1424,11 @@ function parseHranessMailingListConfig(value) {
   }
   if (value.kind === "none")
     return value;
-  if (value.kind !== "signup" || typeof value.audience !== "string" || !("turnstileSitekey" in value) || typeof value.turnstileSitekey !== "string") {
+  if (value.kind !== "signup" || typeof value.audience !== "string") {
     throw new TypeError("Hraness site footer mailingList configuration is invalid.");
   }
   if (value.audience.length === 0 || value.audience.length > MAX_AUDIENCE_LENGTH || value.audience.trim() !== value.audience || !AUDIENCE_PATTERN.test(value.audience)) {
     throw new TypeError(`Hraness mailing-list audience IDs must be canonical lowercase slugs of at most ${MAX_AUDIENCE_LENGTH} characters.`);
-  }
-  if (value.turnstileSitekey.length < MIN_TURNSTILE_SITEKEY_LENGTH || value.turnstileSitekey.length > MAX_TURNSTILE_SITEKEY_LENGTH || !TURNSTILE_SITEKEY_PATTERN.test(value.turnstileSitekey)) {
-    throw new TypeError(`Hraness mailing-list Turnstile sitekeys must be ${MIN_TURNSTILE_SITEKEY_LENGTH}-${MAX_TURNSTILE_SITEKEY_LENGTH} character URL-safe provider values.`);
   }
   return value;
 }
@@ -1674,21 +1507,6 @@ function resolveHranessSocialLinks(value) {
     };
   });
 }
-function parseHranessTurnstileScriptNonce(value) {
-  if (value === undefined)
-    return;
-  if (value.length < MIN_TURNSTILE_SCRIPT_NONCE_LENGTH || value.length > MAX_TURNSTILE_SCRIPT_NONCE_LENGTH || !TURNSTILE_SCRIPT_NONCE_PATTERN.test(value)) {
-    throw new TypeError(`Hraness Turnstile script nonces must be ${MIN_TURNSTILE_SCRIPT_NONCE_LENGTH}-${MAX_TURNSTILE_SCRIPT_NONCE_LENGTH} character base64 or base64url values.`);
-  }
-  return value;
-}
-function getHranessMailingTurnstileAction(audience) {
-  const action = `mailing_${audience.replaceAll("-", "_")}`;
-  if (action.length > 32 || !/^[a-z0-9_]+$/u.test(action)) {
-    throw new TypeError("Hraness mailing-list audience cannot produce a valid Turnstile action.");
-  }
-  return action;
-}
 function renderIconPaths(icon) {
   return icon.map(([tag, attributes]) => {
     if (tag !== "path") {
@@ -1715,7 +1533,7 @@ function renderHranessSocialLinksHtml(socialLinks) {
 var MAILING_IDLE_STATE = {
   kind: "idle"
 };
-function renderMailingList(mailingList, state, turnstileMode, presentation) {
+function renderMailingList(mailingList, state, presentation) {
   const {
     locale,
     variant
@@ -1727,111 +1545,28 @@ function renderMailingList(mailingList, state, turnstileMode, presentation) {
     return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1"${localAttributes}>${escapeAttribute(copy.accepted)}</div>`;
   }
   const stateKind = state.kind;
-  const email = state.kind === "pending" || state.kind === "error" || state.kind === "verification-error" ? ` value="${escapeAttribute(state.email)}"` : "";
+  const email = state.kind === "pending" || state.kind === "error" ? ` value="${escapeAttribute(state.email)}"` : "";
   const pendingAttributes = state.kind === "pending" ? ' aria-busy="true"' : "";
-  const verificationRetry = turnstileMode === "explicit" && state.kind === "verification-error";
-  const verificationPending = turnstileMode === "explicit" && state.kind !== "pending" && !verificationRetry;
-  const buttonAttributes = state.kind === "pending" || verificationPending ? ' aria-disabled="true" disabled=""' : "";
-  const buttonLabel = state.kind === "pending" ? copy.pending : verificationRetry ? copy.retryVerification : verificationPending ? copy.verifying : copy.button;
-  const statusAttributes = state.kind === "error" || state.kind === "verification-error" ? ' aria-live="assertive" role="alert"' : ' aria-live="polite" role="status"';
-  const statusCopy = state.kind === "pending" ? copy.submitting : state.kind === "error" ? copy.requestError : state.kind === "verification-error" ? copy.verificationError : "";
-  const turnstileAction = getHranessMailingTurnstileAction(mailingList.audience);
-  const implicitClass = turnstileMode === "implicit" ? " cf-turnstile" : "";
-  const turnstile = `<div class="${footerClasses.turnstile}${implicitClass}" data-action="${turnstileAction}" data-appearance="interaction-only" data-execution="render" data-refresh-expired="auto" data-refresh-timeout="auto" data-response-field="true" data-response-field-name="${HRANESS_TURNSTILE_RESPONSE_FIELD}" data-retry="auto" data-sitekey="${escapeAttribute(mailingList.turnstileSitekey)}" data-size="flexible" data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}" data-theme="auto"></div>`;
-  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${turnstile}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
+  const buttonAttributes = state.kind === "pending" ? ' aria-disabled="true" disabled=""' : "";
+  const buttonLabel = state.kind === "pending" ? copy.pending : copy.button;
+  const statusAttributes = state.kind === "error" ? ' aria-live="assertive" role="alert"' : ' aria-live="polite" role="status"';
+  const statusCopy = state.kind === "pending" ? copy.submitting : state.kind === "error" ? copy.requestError : "";
+  const honeypot = `<input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value="">`;
+  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${honeypot}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
   if (variant.layout === "inline")
     return form;
   const open = state.kind === "idle" ? "" : ' open=""';
   const label = escapeAttribute(copy.button);
   return `<details class="${footerClasses.disclosure}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary aria-label="${escapeAttribute(copy.openLabel)}" class="${footerClasses.disclosureTrigger}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}</summary><div class="${footerClasses.disclosurePanel}">${form}</div></details>`;
 }
-function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, turnstileMode = "implicit", turnstileScriptNonce, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
-  const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, turnstileMode, presentation);
-  const turnstileScript = mailingList.kind === "signup" && turnstileMode === "implicit" ? `<script async="" data-slot="${HRANESS_TURNSTILE_SCRIPT_SLOT}" defer=""${turnstileScriptNonce === undefined ? "" : ` nonce="${escapeAttribute(turnstileScriptNonce)}"`} src="${HRANESS_TURNSTILE_SCRIPT_URL}"></script>` : "";
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>${turnstileScript}`;
+function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
+  const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/react.tsx
 import { createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-var MAX_TURNSTILE_TOKEN_LENGTH = 2048;
-var TURNSTILE_SCRIPT_LOAD_TIMEOUT_MS = 15000;
-var turnstileScriptPromise = null;
-function installedTurnstile() {
-  return window.turnstile;
-}
-function isTurnstileScript(script) {
-  try {
-    const candidate = new URL(script.src, document.baseURI);
-    const canonical = new URL(HRANESS_TURNSTILE_SCRIPT_URL);
-    return candidate.origin === canonical.origin && candidate.pathname === canonical.pathname;
-  } catch {
-    return false;
-  }
-}
-function isTurnstileToken(value) {
-  return typeof value === "string" && value.length > 0 && value.length <= MAX_TURNSTILE_TOKEN_LENGTH;
-}
-function loadTurnstile(scriptNonce) {
-  const installed = installedTurnstile();
-  if (installed !== undefined)
-    return Promise.resolve(installed);
-  if (turnstileScriptPromise !== null)
-    return turnstileScriptPromise;
-  turnstileScriptPromise = new Promise((resolve, reject) => {
-    const scripts = document.querySelectorAll("script[src]");
-    const existing = [...scripts].find(isTurnstileScript);
-    const ownsScript = existing === undefined;
-    const script = existing ?? document.createElement("script");
-    let timeout;
-    const cleanup = () => {
-      if (timeout !== undefined)
-        clearTimeout(timeout);
-      script.removeEventListener("error", handleError);
-      script.removeEventListener("load", handleLoad);
-    };
-    const handleError = () => {
-      cleanup();
-      if (ownsScript)
-        script.remove();
-      reject(new Error("Cloudflare Turnstile could not be loaded."));
-    };
-    const handleLoad = () => {
-      const api = installedTurnstile();
-      if (api === undefined) {
-        handleError();
-        return;
-      }
-      cleanup();
-      delete script.dataset.hranessTurnstileLoading;
-      script.dataset.hranessTurnstileLoaded = "true";
-      resolve(api);
-    };
-    script.addEventListener("error", handleError, {
-      once: true
-    });
-    script.addEventListener("load", handleLoad, {
-      once: true
-    });
-    timeout = setTimeout(handleError, TURNSTILE_SCRIPT_LOAD_TIMEOUT_MS);
-    if (ownsScript) {
-      script.async = true;
-      script.defer = true;
-      script.dataset.slot = HRANESS_TURNSTILE_SCRIPT_SLOT;
-      script.dataset.hranessTurnstileLoading = "true";
-      if (scriptNonce !== undefined)
-        script.setAttribute("nonce", scriptNonce);
-      script.src = HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL;
-      document.head.append(script);
-    } else if (installedTurnstile() !== undefined) {
-      queueMicrotask(handleLoad);
-    }
-  }).catch((error) => {
-    turnstileScriptPromise = null;
-    throw error;
-  });
-  return turnstileScriptPromise;
-}
 var IDLE_STATE = {
   kind: "idle"
 };
@@ -1846,28 +1581,21 @@ function HranessSiteFooter({
   placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
-  social: socialInput,
-  turnstileScriptNonce: turnstileScriptNonceInput
+  social: socialInput
 }) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
   const socialLinks = resolveHranessSocialLinks(socialInput);
-  const turnstileScriptNonce = parseHranessTurnstileScriptNonce(turnstileScriptNonceInput);
   const [state, setState] = useState(IDLE_STATE);
-  const [widgetRevision, setWidgetRevision] = useState(0);
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   const [enrollment, setEnrollment] = useState(null);
   const interacted = useRef(false);
   const exposedEnrollment = useRef(null);
   const enrollmentRequest = useRef(null);
   const variant = enrollment?.assignment ?? DEFAULT_FOOTER_VARIANT;
-  const copy = locale.styles[variant.copyStyle];
   const presentationKey = `${locale.locale}:${variant.layout}:${variant.copyStyle}:${variant.color}:${variant.shimmer}:${placement}`;
   const activeRequest = useRef(null);
   const footer = useRef(null);
-  const turnstileApi = useRef(null);
-  const turnstileToken = useRef(null);
-  const turnstileWidget = useRef(null);
-  const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}:${mailingList.turnstileSitekey}` : "none";
+  const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : "none";
   const socialKey = socialLinks.map((link) => `${link.platform}:${link.href}:${link.label}`).join("|");
   const renderState = activeStateFor(mailingList, state);
   const markExposure = useCallback((token) => {
@@ -1935,133 +1663,15 @@ function HranessSiteFooter({
   useEffect(() => {
     activeRequest.current?.abort();
     activeRequest.current = null;
-    turnstileToken.current = null;
     setState(IDLE_STATE);
   }, [mailingListKey]);
   useEffect(() => () => {
     activeRequest.current?.abort();
   }, []);
   useEffect(() => {
-    if (mailingList.kind !== "signup" || renderState.kind === "accepted" || renderState.kind === "pending") {
-      return;
-    }
-    let cancelled = false;
-    let ownedWidget = null;
-    const setVerificationPending = () => {
-      turnstileToken.current = null;
-      const button = footer.current?.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
-      if (button === null || button === undefined)
-        return;
-      button.disabled = true;
-      button.setAttribute("aria-disabled", "true");
-      (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.verifying;
-    };
-    const setVerificationReady = (token) => {
-      turnstileToken.current = token;
-      const form = footer.current?.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
-      const button = form?.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
-      if (button !== null && button !== undefined) {
-        button.disabled = false;
-        button.removeAttribute("aria-disabled");
-        (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.button;
-      }
-      if (form?.dataset.state === "verification-error") {
-        form.dataset.state = "idle";
-        const status = form.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
-        if (status !== null) {
-          status.className = mailingStatusClassName("idle");
-          status.setAttribute("aria-live", "polite");
-          status.setAttribute("role", "status");
-          status.textContent = "";
-        }
-      }
-    };
-    const resetWidget = () => {
-      setVerificationPending();
-      if (cancelled || ownedWidget === null)
-        return;
-      try {
-        turnstileApi.current?.reset(ownedWidget);
-      } catch {
-        setWidgetRevision((revision) => revision + 1);
-      }
-    };
-    const reportChallengeError = (_errorCode) => {
-      if (cancelled)
-        return;
-      setVerificationPending();
-      const form = footer.current?.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
-      if (form === null || form === undefined)
-        return;
-      form.dataset.state = "verification-error";
-      const status = form.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
-      if (status !== null) {
-        status.className = mailingStatusClassName("verification-error");
-        status.setAttribute("aria-live", "assertive");
-        status.setAttribute("role", "alert");
-        status.textContent = copy.verificationError;
-      }
-      const button = form.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
-      if (button !== null) {
-        button.disabled = false;
-        button.removeAttribute("aria-disabled");
-        (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.retryVerification;
-      }
-    };
-    loadTurnstile(turnstileScriptNonce).then((api) => {
-      if (cancelled)
-        return;
-      const container = footer.current?.querySelector(`[data-slot="${HRANESS_TURNSTILE_WIDGET_SLOT}"]`);
-      if (container === null || container === undefined)
-        return;
-      turnstileApi.current = api;
-      ownedWidget = api.render(container, {
-        action: getHranessMailingTurnstileAction(mailingList.audience),
-        appearance: "interaction-only",
-        callback: (token) => {
-          if (cancelled)
-            return;
-          if (!isTurnstileToken(token)) {
-            reportChallengeError();
-            return;
-          }
-          setVerificationReady(token);
-        },
-        execution: "render",
-        "error-callback": reportChallengeError,
-        "expired-callback": resetWidget,
-        "refresh-expired": "auto",
-        "refresh-timeout": "auto",
-        "response-field": true,
-        "response-field-name": HRANESS_TURNSTILE_RESPONSE_FIELD,
-        retry: "auto",
-        sitekey: mailingList.turnstileSitekey,
-        size: "flexible",
-        theme: "auto",
-        "timeout-callback": resetWidget,
-        "unsupported-callback": reportChallengeError
-      });
-      turnstileWidget.current = ownedWidget;
-    }).catch(() => {
-      reportChallengeError();
-    });
-    return () => {
-      cancelled = true;
-      turnstileToken.current = null;
-      if (ownedWidget !== null) {
-        try {
-          turnstileApi.current?.remove(ownedWidget);
-        } catch {}
-      }
-      if (turnstileWidget.current === ownedWidget) {
-        turnstileWidget.current = null;
-      }
-    };
-  }, [mailingListKey, renderState.kind, showBrand, socialKey, turnstileScriptNonce, widgetRevision, presentationKey]);
-  useEffect(() => {
     if (renderState.kind === "idle")
       return;
-    if (renderState.kind === "error" || renderState.kind === "verification-error") {
+    if (renderState.kind === "error") {
       const emailControl = footer.current?.querySelector('input[name="email"]');
       emailControl?.focus({
         preventScroll: true
@@ -2085,39 +1695,18 @@ function HranessSiteFooter({
     if (activeRequest.current !== null || renderState.kind === "pending" || renderState.kind === "accepted")
       return;
     const email = emailControl.value;
-    const token = turnstileToken.current;
-    if (!isTurnstileToken(token)) {
-      if (target.dataset.state === "verification-error") {
-        target.dataset.state = "idle";
-        const status = target.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
-        if (status !== null) {
-          status.className = mailingStatusClassName("idle");
-          status.setAttribute("aria-live", "polite");
-          status.setAttribute("role", "status");
-          status.textContent = "";
-        }
-        const button = target.querySelector(`button[data-slot="${HRANESS_MAILING_FORM_SLOT}-submit"]`);
-        if (button !== null) {
-          button.disabled = true;
-          button.setAttribute("aria-disabled", "true");
-          (button.querySelector('[data-slot="hraness-mailing-button-label"]') ?? button).textContent = copy.verifying;
-        }
-        setWidgetRevision((revision) => revision + 1);
-      }
-      return;
-    }
+    const honeypot = target.querySelector('input[name="website"]');
     const body = new FormData;
     body.set("audience", mailingList.audience);
     body.set("email", email);
     body.set("source", HRANESS_MAILING_SOURCE);
-    body.set(HRANESS_TURNSTILE_RESPONSE_FIELD, token);
+    body.set("website", honeypot instanceof HTMLInputElement ? honeypot.value : "");
     if (enrollment !== null) {
       markExposure(enrollment.token);
       body.set("experimentToken", enrollment.token);
     }
     const request = new AbortController;
     activeRequest.current = request;
-    turnstileToken.current = null;
     setState({
       audience: mailingList.audience,
       email,
@@ -2154,7 +1743,7 @@ function HranessSiteFooter({
       });
     });
   }, [mailingListKey, renderState.kind, enrollment, presentationKey, markExposure]);
-  const innerHtml = useMemo(() => renderHranessSiteFooterInnerHtml(showBrand, mailingList, renderState, "explicit", undefined, socialLinks, {
+  const innerHtml = useMemo(() => renderHranessSiteFooterInnerHtml(showBrand, mailingList, renderState, socialLinks, {
     locale,
     variant,
     sticky: placement === "sticky"
@@ -2196,4 +1785,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=9B31D92C346A3E1164756E2164756E21
+//# debugId=E8E74052A25BD8E864756E2164756E21
