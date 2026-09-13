@@ -84,7 +84,7 @@ if (
   || !html.includes('name="audience" type="hidden" value="package-smoke"')
   || !html.includes('name="website"')
   || html.includes("turnstile")
-  || html.includes("challenges.cloudflare.com")
+  || /challenges\.cloudflare\.com/u.test(html)
   || html.includes("<script")
   || !html.includes('href="https://substack.com/@hraness"')
   || html.indexOf('href="https://substack.com/@hraness"')
