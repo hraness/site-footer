@@ -19,11 +19,11 @@
 - Preserve exact social-link order: Substack, X, LinkedIn, GitHub. Keep all four visible at every supported width. The home link shows only the Ra icon and retains its accessible name.
 - Keep matching top and bottom control padding inside the footer, with the device safe-area inset added below that spacing. Include the same inset in the computed bar height. Consumers must not reserve a second footer bar or add a separate spacer below the shared footer.
 - Require every consumer to configure `mailingList` explicitly. Never infer the Hraness umbrella audience for a product site.
-- Keep every meaningful link and the footer identity functional without JavaScript. Mailing signup must fail closed without JavaScript because the required Turnstile proof is generated client-side and verified by Accounts. Inline vectors remain decorative, and controls and links retain specific accessible names.
-- Require one explicit public Turnstile site key for signup. Bind its managed interaction-only widget to the audience-derived action, load only Cloudflare's exact script origin, reset expired or failed proofs, and never expose the private secret.
+- Keep every meaningful link, the footer identity, and the mailing signup functional without JavaScript. The plain form posts directly to Accounts; React progressively enhances it with inline states. Inline vectors remain decorative, and controls and links retain specific accessible names.
+- Keep signup proof-of-personhood server-owned: Accounts rate limiting, the hidden `website` honeypot, and double opt-in. The footer renders no third-party script or frame and accepts no provider key or secret prop.
 - Bundle the reviewed HugeIcons vectors and retain their attribution so consumers do not inherit an icon-library runtime dependency.
 - Commit generated `dist/` artifacts only through the checked build. Never edit them by hand.
-- Keep browser verification local, synthetic, loopback-only, and development-only. It may replace Turnstile and Accounts at their browser boundaries, but it must drive the real React footer and retain screenshots outside disposable runtime state.
+- Keep browser verification local, synthetic, loopback-only, and development-only. It may replace Accounts at its browser boundary, but it must drive the real React footer and retain screenshots outside disposable runtime state.
 - Deliver changes through a current-head pull request after the initial repository bootstrap. Never force-push.
 
 <!-- oompa-local-efficiency:start -->

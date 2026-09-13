@@ -37,7 +37,7 @@ so that state requires both control samples to be absent.
 
 ## Gotchas
 
-- The non-idle status and Turnstile surfaces intentionally overlay above the in-flow footer row. They must clear its top border rather than sit inside it.
+- The non-idle status surface intentionally overlays above the in-flow footer row. It must clear its top border rather than sit inside it.
 - A passing rectangle contract does not prove typography, contrast, prominence, or rhythm. Review both screenshots.
 - Fine-pointer controls are checked at the package's 40 CSS pixel baseline. The existing stylesheet test separately protects the 44 CSS pixel coarse-pointer override.
 - A zero inset in the Chromium fixture proves the ordinary-screen spacing contract, not a physical mobile device or a forced nonzero inset. Retain the measured inset in the evidence.

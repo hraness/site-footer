@@ -74,7 +74,6 @@ const fixtureStates = [
   "pending",
   "accepted",
   "error",
-  "verification-error",
 ] as const;
 type FixtureState = typeof fixtureStates[number];
 type ViewportKind = "compact" | "wide";
@@ -114,31 +113,13 @@ interface FixtureSnapshot {
     audience: string | null;
     credentials: string | null;
     email: string | null;
+    honeypot: string | null;
     method: string | null;
     source: string | null;
-    turnstileResponse: string | null;
     url: string;
   }>[];
   readonly schema: "hraness.site-footer.browser-fixture/v1";
   readonly selectedState: FixtureState;
-  readonly turnstile: Readonly<{
-    options: Readonly<{
-      action: string;
-      appearance: string;
-      execution: string;
-      refreshExpired: string;
-      refreshTimeout: string;
-      responseField: boolean;
-      responseFieldName: string;
-      retry: string;
-      sitekey: string;
-      size: string;
-      theme: string;
-    }> | null;
-    removeCount: number;
-    renderCount: number;
-    resetCount: number;
-  }>;
 }
 
 interface ManualGeometry {
@@ -498,7 +479,6 @@ function parseFixtureSnapshot(input: unknown, expectedState: FixtureState): Fixt
     "requests",
     "schema",
     "selectedState",
-    "turnstile",
   ], "Footer fixture snapshot");
   if (record.schema !== "hraness.site-footer.browser-fixture/v1") {
     throw new Error("The footer fixture snapshot schema changed.");
@@ -514,59 +494,21 @@ function parseFixtureSnapshot(input: unknown, expectedState: FixtureState): Fixt
       "audience",
       "credentials",
       "email",
+      "honeypot",
       "method",
       "source",
-      "turnstileResponse",
       "url",
     ], `Footer fixture request ${String(index)}`);
     return Object.freeze({
       audience: nullableString(found.audience, "Request audience"),
       credentials: nullableString(found.credentials ?? null, "Request credentials"),
       email: nullableString(found.email, "Request email"),
+      honeypot: nullableString(found.honeypot, "Request honeypot"),
       method: nullableString(found.method ?? null, "Request method"),
       source: nullableString(found.source, "Request source"),
-      turnstileResponse: nullableString(found.turnstileResponse, "Turnstile response"),
       url: requiredString(found.url, "Request URL"),
     });
   });
-  const turnstile = exactRecord(record.turnstile, [
-    "options",
-    "removeCount",
-    "renderCount",
-    "resetCount",
-  ], "Footer fixture Turnstile snapshot");
-  let options: FixtureSnapshot["turnstile"]["options"] = null;
-  if (turnstile.options !== null) {
-    const found = exactRecord(turnstile.options, [
-      "action",
-      "appearance",
-      "execution",
-      "refreshExpired",
-      "refreshTimeout",
-      "responseField",
-      "responseFieldName",
-      "retry",
-      "sitekey",
-      "size",
-      "theme",
-    ], "Footer fixture Turnstile options");
-    if (typeof found.responseField !== "boolean") {
-      throw new Error("Turnstile responseField must be boolean.");
-    }
-    options = Object.freeze({
-      action: requiredString(found.action, "Turnstile action"),
-      appearance: requiredString(found.appearance, "Turnstile appearance"),
-      execution: requiredString(found.execution, "Turnstile execution"),
-      refreshExpired: requiredString(found.refreshExpired, "Turnstile refresh-expired"),
-      refreshTimeout: requiredString(found.refreshTimeout, "Turnstile refresh-timeout"),
-      responseField: found.responseField,
-      responseFieldName: requiredString(found.responseFieldName, "Turnstile response field"),
-      retry: requiredString(found.retry, "Turnstile retry"),
-      sitekey: requiredString(found.sitekey, "Turnstile sitekey"),
-      size: requiredString(found.size, "Turnstile size"),
-      theme: requiredString(found.theme, "Turnstile theme"),
-    });
-  }
   return Object.freeze({
     domState: requiredString(record.domState, "Footer DOM state"),
     errors: Object.freeze([...record.errors] as string[]),
@@ -574,12 +516,6 @@ function parseFixtureSnapshot(input: unknown, expectedState: FixtureState): Fixt
     requests: Object.freeze(requests),
     schema: "hraness.site-footer.browser-fixture/v1",
     selectedState,
-    turnstile: Object.freeze({
-      options,
-      removeCount: nonnegativeInteger(turnstile.removeCount, "Turnstile remove count"),
-      renderCount: nonnegativeInteger(turnstile.renderCount, "Turnstile render count"),
-      resetCount: nonnegativeInteger(turnstile.resetCount, "Turnstile reset count"),
-    }),
   });
 }
 
@@ -1370,29 +1306,11 @@ function assertFixtureState(snapshot: FixtureSnapshot, state: FixtureState): voi
       || request.credentials !== "omit"
       || request.audience !== "footer-fixture"
       || request.email !== TEST_EMAIL
+      || request.honeypot !== ""
       || request.source !== "hraness-site-footer"
-      || request.turnstileResponse?.startsWith("fixture-") !== true
     ) {
       throw new Error(`${state} produced an invalid synthetic Accounts boundary request.`);
     }
-  }
-  const options = snapshot.turnstile.options;
-  if (
-    snapshot.turnstile.renderCount < 1
-    || options === null
-    || options.action !== "mailing_footer_fixture"
-    || options.appearance !== "interaction-only"
-    || options.execution !== "render"
-    || options.refreshExpired !== "auto"
-    || options.refreshTimeout !== "auto"
-    || options.responseField !== true
-    || options.responseFieldName !== "cf-turnstile-response"
-    || options.retry !== "auto"
-    || options.sitekey !== "1x00000000000000000000AA"
-    || options.size !== "flexible"
-    || options.theme !== "auto"
-  ) {
-    throw new Error(`${state} lost the Turnstile rendering contract.`);
   }
 }
 
@@ -1591,13 +1509,6 @@ async function driveState(options: {
     `${DEFAULT_BASE_URL}/?state=${encodeURIComponent(options.state)}`,
   ]);
   await options.browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
-  await options.browser.run([
-    "wait",
-    "--fn",
-    "window.__siteFooterFixture?.snapshot().turnstile.renderCount >= 1",
-    "--timeout",
-    "5000",
-  ]);
   await options.browser.evaluate(SETTLE_EXPRESSION);
   if (options.state === "pending" || options.state === "accepted" || options.state === "error") {
     await options.browser.run(["fill", 'input[name="email"]', TEST_EMAIL]);
@@ -1617,15 +1528,20 @@ async function driveState(options: {
   );
   assertFixtureState(fixture, options.state);
   if (options.state === "idle") {
-    const gated = await options.browser.evaluate(
+    const ready = await options.browser.evaluate(
       `(() => {
         const button = document.querySelector('button[type="submit"]');
+        const honeypot = document.querySelector('input[name="website"]');
         return button instanceof HTMLButtonElement
-          && button.disabled
-          && button.textContent === "Verifying…";
+          && !button.disabled
+          && button.textContent === "Subscribe"
+          && honeypot instanceof HTMLInputElement
+          && honeypot.value === ""
+          && honeypot.getAttribute("aria-hidden") === "true"
+          && honeypot.getBoundingClientRect().width < 2;
       })()`,
     );
-    if (gated !== true) throw new Error("Idle signup is not gated on Turnstile readiness.");
+    if (ready !== true) throw new Error("Idle signup is not immediately usable with a hidden honeypot.");
   }
   if (options.state === "pending" || options.state === "accepted") {
     const focused = await options.browser.evaluate(
@@ -1638,17 +1554,6 @@ async function driveState(options: {
       "document.activeElement?.matches('input[name=\"email\"]') === true",
     );
     if (focused !== true) throw new Error(`${options.state} did not restore email focus.`);
-  }
-  if (options.state === "verification-error") {
-    const preserved = await options.browser.evaluate(
-      "document.activeElement === document.body",
-    );
-    if (preserved !== true) throw new Error("Background verification failure moved initial page focus.");
-    await options.browser.run(["press", "Tab"]);
-    const firstTab = await options.browser.evaluate(
-      "document.activeElement?.getAttribute('aria-label') === 'Hraness home'",
-    );
-    if (firstTab !== true) throw new Error("Background verification failure interrupted normal first-Tab order.");
   }
   const wide = await sampleViewport({ ...options, kind: "wide" });
   await options.browser.run(["set", "viewport", "390", "844"]);
@@ -1733,7 +1638,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       if (links.length !== 5 || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
       if (footer.querySelector('form, script, .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();
-      if (state.requests.length || state.turnstile.renderCount || state.errors.length) throw new Error('No-signup footer used a provider boundary.');
+      if (state.requests.length || state.errors.length) throw new Error('No-signup footer used a provider boundary.');
       if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('No-signup footer overflows.');
       const boxes = links.map(link => {
         const rect = link.getBoundingClientRect();
@@ -1925,7 +1830,7 @@ async function runVerifier(): Promise<string> {
     finalInventory,
     generatedAt: artifacts.generatedAt,
     limitations: [
-      "Synthetic Turnstile and Accounts boundaries do not prove either live provider.",
+      "A synthetic Accounts boundary does not prove the live provider.",
       "Named rectangles do not judge typography, contrast, hierarchy, rhythm, or overall visual quality.",
       "Measured safe-area insets may be zero; this fixture does not force a nonzero inset or prove physical-device behavior.",
       "The fixture does not prove a consuming site's CSP, theme integration, or deployed footer release.",

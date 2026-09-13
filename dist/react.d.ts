@@ -16,11 +16,9 @@ export interface HranessSiteFooterProps {
      * order. Defaults remain the shared Hraness profiles.
      */
     readonly social?: HranessSocialConfig;
-    /** Optional per-response CSP nonce used only when this component inserts Turnstile. */
-    readonly turnstileScriptNonce?: string;
 }
 /** Progressively enhance the canonical native mailing-list form when JavaScript is available. */
-export declare function HranessSiteFooter({ locale: localeInput, experiment, placement, mailingList: mailingListInput, showBrand, social: socialInput, turnstileScriptNonce: turnstileScriptNonceInput, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
+export declare function HranessSiteFooter({ locale: localeInput, experiment, placement, mailingList: mailingListInput, showBrand, social: socialInput, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
     "aria-label": string;
     className: string;
     "data-brand": string;

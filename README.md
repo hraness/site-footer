@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.8.0
+bun add github:hraness/site-footer#v0.9.0
 ```
 
 Start with the network footer and no mailing form:
@@ -36,9 +36,9 @@ export function ProductLayout({
 ```
 
 That render has the stable `id="hraness-site-footer"`, one Hraness home link
-and four specifically named social links, and no form, Turnstile script, request,
-cookie, or local storage. The links and inline decorative vectors work without
-client-side JavaScript.
+and four specifically named social links, and no form, third-party script,
+request, cookie, or local storage. The links and inline decorative vectors work
+without client-side JavaScript.
 
 ## Choose an interface
 
@@ -62,9 +62,8 @@ const footerHtml = renderHranessSiteFooter({
 ```
 
 Both renderers require `mailingList`. Both accept `showBrand: false` when the
-host page already supplies the Hraness identity, an optional `social` object
-that retargets owned destinations, and an optional `turnstileScriptNonce` when
-signup runs under a nonce-based Content Security Policy.
+host page already supplies the Hraness identity and an optional `social` object
+that retargets owned destinations.
 
 Static generators can resolve the checked stylesheet without assuming a
 `node_modules` path:
@@ -87,51 +86,41 @@ No consumer compiler or React runtime is required by the static renderer.
 Every consumer chooses one explicit mode.
 
 Use `{ kind: "none" }` when the product has no mailing list. To enable signup,
-provide a stable lowercase product audience and a public Turnstile site key:
+provide a stable lowercase product audience:
 
 ```tsx
 <HranessSiteFooter
   mailingList={{
     audience: "soundfish",
     kind: "signup",
-    // Cloudflare's public test site key. Replace it before production.
-    turnstileSitekey: "1x00000000000000000000AA",
   }}
 />
 ```
 
-Hraness.com uses the same shared `hraness` audience and experiment. Pass its
-public Turnstile site key from the site environment:
+Hraness.com uses the same shared `hraness` audience and experiment:
 
 ```tsx
 <HranessSiteFooter
   experiment
-  mailingList={{ audience: "hraness", kind: "signup", turnstileSitekey }}
+  mailingList={{ audience: "hraness", kind: "signup" }}
   showBrand={false}
 />
 ```
 
-Keep the configuration fail-closed until Accounts has a matching `hraness`
-widget key and hostname binding.
-
 The configured signup follows one checked state path:
 
 1. The footer renders a required email field, a product audience, the fixed
-   package source, and an interaction-only Turnstile widget.
-2. Turnstile binds its proof to `mailing_<audience>`. The React submit control
-   stays disabled while verification is pending. An expired proof resets
-   automatically; a genuine verification failure exposes a bounded retry that
-   resets the widget before another request.
-3. The enhanced React form sends one multipart `POST` with
-   `credentials: "omit"` only after it has a bounded proof.
-4. The button and live status move through pending, accepted, retryable request
-   error, or verification error. A failed request keeps the address and returns
-   keyboard focus to the email field.
+   package source, and a hidden honeypot field that Accounts checks and
+   silently discards when filled.
+2. The enhanced React form sends one multipart `POST` with
+   `credentials: "omit"`. The plain form performs a normal cross-origin
+   submission, so signup also works without JavaScript.
+3. The button and live status move through pending, accepted, or a retryable
+   request error. A failed request keeps the address and returns keyboard
+   focus to the email field.
 
-Background Turnstile failures, including script-loading and challenge errors,
-announce the verification error and expose Retry check without moving focus
-away from the visitor's current place on the page. Focus recovery applies to
-the result of a submitted subscription request, not a background security check.
+Accounts applies rate limiting and double opt-in; the visitor is only
+subscribed after confirming the emailed link.
 
 The static form uses the same fields and package-owned Accounts action:
 
@@ -140,13 +129,12 @@ POST https://account.hraness.com/api/mailing/subscribe
 email=<visitor address>
 audience=<the consumer's explicit stable audience ID>
 source=hraness-site-footer
-cf-turnstile-response=<short-lived widget proof>
+website=<empty honeypot; Accounts ignores the request when filled>
 ```
 
-Static HTML uses Turnstile's implicit widget. React uses explicit rendering and
-sends `Accept: application/json`. A successful 2xx response replaces the form
-with `Check your email to confirm`. Provider validation details remain private
-to Accounts.
+React sends `Accept: application/json`. A successful 2xx response replaces the
+form with `Check your email to confirm`. Provider validation details remain
+private to Accounts.
 
 ## Retarget owned social destinations
 
@@ -185,9 +173,9 @@ name “Hraness on LinkedIn.”
 | --- | --- |
 | Ra mark, Hraness home destination, four social platforms, default destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand`; optional `href` and `label` overrides for owned platforms |
 | Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
-| Static and React markup, Turnstile action derivation, proof handling, and fixed script origins | The public site key, production hostname policy, and private Turnstile secret |
-| Responsive CSS, document-flow placement, coarse-pointer targets, focus treatment, and forced-color handling | Product theme variables and CSP allowlist or nonce |
-| Configuration parsing for audience, site-key, nonce, and social-override bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
+| Static and React markup, honeypot field, and the fixed Accounts action | Accounts rate limits, double opt-in, delivery, and retention |
+| Responsive CSS, document-flow placement, coarse-pointer targets, focus treatment, and forced-color handling | Product theme variables and CSP `form-action`/`connect-src` allowlist |
+| Configuration parsing for audience and social-override bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
 
 Consumers must not fork the package action, source, copy, social platforms,
 vector mark, order, semantics, or interaction behavior. A product can choose
@@ -203,20 +191,13 @@ browser storage in either mode.
 Signup changes that boundary in visible, bounded ways:
 
 - The visitor's `email`, the consumer's `audience`,
-  `source=hraness-site-footer`, and `cf-turnstile-response` are transmitted to
-  `https://account.hraness.com/api/mailing/subscribe`.
+  `source=hraness-site-footer`, and the empty `website` honeypot field are
+  transmitted to `https://account.hraness.com/api/mailing/subscribe`.
 - The React request uses `credentials: "omit"`. The static form performs a
-  normal cross-origin form submission after Turnstile supplies the required
-  field.
-- The browser loads
-  `https://challenges.cloudflare.com/turnstile/v0/api.js` and the provider's
-  challenge frame only when signup is configured.
-- The Turnstile site key is a public identifier. The package does not accept,
-  expose, or validate the private Turnstile secret. Accounts owns server-side
-  proof validation.
-- Without JavaScript, the Hraness identity and network links still work, but
-  signup fails closed because no server-verified Turnstile proof can be
-  generated.
+  normal cross-origin form submission.
+- The package loads no third-party script or frame in either mode.
+- Without JavaScript, the Hraness identity, network links, and signup form all
+  still work; Accounts rate limiting and double opt-in apply identically.
 
 The package does not store subscriber data, deliver confirmation email,
 configure consent, decide provider retention, or verify the consumer's live
@@ -248,6 +229,9 @@ style, color, and shimmer. Accounts keeps a randomized exploration stream and
 serves an evidence-qualified recipe to the remaining traffic; PostHog receives
 only anonymous enrollment events and confirmed double-opt-in conversions.
 
+Version 0.9.0 removes the Cloudflare Turnstile widget, site-key
+configuration, and script injection; signup relies on Accounts rate limiting,
+a hidden honeypot field, and double opt-in, and now works without JavaScript.
 Version 0.8.0 adds the sticky, localized signup experiment. React consumers
 request an opaque Accounts assignment, while static consumers can select a
 bounded recipe explicitly; the assignment is fail-closed until the Accounts
@@ -299,59 +283,34 @@ Signup consumers must merge these origins into their existing policy:
 | --- | --- |
 | `form-action` | `https://account.hraness.com` |
 | `connect-src` | `https://account.hraness.com` for the enhanced React request |
-| `script-src` | `https://challenges.cloudflare.com` |
-| `frame-src` | `https://challenges.cloudflare.com` |
 
-Preserve every other origin the product already needs. Load Turnstile only from
-its exact script URL. Do not proxy or cache it.
-
-Cloudflare's current CSP guidance recommends a request-scoped nonce with CSP3
-`strict-dynamic` when the host already uses nonce-based script admission. Pass
-the base64 or base64url nonce through either renderer:
-
-```tsx
-<HranessSiteFooter
-  mailingList={{
-    audience: "soundfish",
-    kind: "signup",
-    turnstileSitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!,
-  }}
-  turnstileScriptNonce={nonce}
-/>
-```
-
-The static renderer writes the nonce on its implicit Turnstile script. The
-React adapter uses it when inserting the explicit script and reuses an existing
-matching host script without replacing a host-owned nonce.
-
-Review the current primary guidance before changing a production policy:
-[Cloudflare Turnstile CSP](https://developers.cloudflare.com/turnstile/reference/content-security-policy/)
-and
-[client-side rendering](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/).
+Preserve every other origin the product already needs. The package renders no
+third-party script or frame, so no script or frame admission is required for
+signup.
 
 ## Evidence
 
 | Contract | Checked evidence |
 | --- | --- |
-| Static markup, explicit mailing mode, social order, config rejection, CSP nonce, and no-signup boundary | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/footer.test.ts ./tests/readme.test.ts` |
-| React and static parity, Turnstile gating, request fields, focus recovery, and accepted/error states | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/react.test.tsx` |
+| Static markup, explicit mailing mode, social order, config rejection, and no-signup boundary | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/footer.test.ts ./tests/readme.test.ts` |
+| React and static parity, request fields, focus recovery, and accepted/error states | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/react.test.tsx` |
 | Responsive geometry, focus, coarse pointer, reduced motion, forced colors, exact CSS boundaries, and mutation rejection | `bun test --preload ./scripts/register-stylex-test-transform.ts ./tests/styles.test.ts` after the checked build |
 | Complete compiler manifest, source recipes, runtime boundaries, CSS exports, and absence of handwritten presentation | `bun run check:stylex-artifacts` |
 | Identical generated artifacts across two absolute package roots | `bun run check:stylex-determinism` |
-| Real React idle, pending, accepted, request-error, and Turnstile-error states at wide and compact viewports; named alignment, containment, minimum-size, overflow, stability, browser diagnostics, exact source identity, and retained screenshots | `bun run verify:browser` after `bun run verify:browser:doctor` |
+| Real React idle, pending, accepted, and request-error states at wide and compact viewports; named alignment, containment, minimum-size, overflow, stability, browser diagnostics, exact source identity, and retained screenshots | `bun run verify:browser` after `bun run verify:browser:doctor` |
 | ESM artifacts and declaration output | `bun run build` |
 | Published files, public exports, server-safe root, React client directive, and packed smoke render | `bun run test:package` |
 | TypeScript, generated artifacts, all tests, and package boundary | `bun run check` |
 
-The browser verifier uses the real React adapter with synthetic Turnstile and
-Accounts boundaries on loopback. It proves the package state path and declared
+The browser verifier uses the real React adapter with a synthetic Accounts
+boundary on loopback. It proves the package state path and declared
 geometry, but not either live provider or overall visual quality. Inspect its
 wide and compact screenshots before making a design judgment.
 It compiles the real source with the same public collector and checks every
 extracted rule against the verified package manifest before launching a browser.
 
-These deterministic checks do not prove a consumer's CSP, live Turnstile
-hostname policy, Accounts delivery, or provider retention. Verify those facts
+These deterministic checks do not prove a consumer's CSP, Accounts delivery,
+or provider retention. Verify those facts
 in the deployed consumer and provider consoles.
 
 Generated files in `dist/` come only from `bun run build`; do not edit them by
@@ -365,7 +324,7 @@ under the [MIT License](LICENSE).
 <summary>Do I need to enable email signup?</summary>
 
 No. Pass `mailingList={{ kind: "none" }}`. This renders the organization
-identity and social links without a form, Turnstile, or network request.
+identity and social links without a form or network request.
 
 </details>
 
@@ -389,20 +348,12 @@ variables, and CSP for everything else.
 </details>
 
 <details>
-<summary>Why does signup require JavaScript?</summary>
+<summary>Does signup work without JavaScript?</summary>
 
-Accounts accepts a signup only after server-side Turnstile verification. The
-browser widget creates the short-lived proof, so a form without JavaScript
-cannot satisfy that requirement.
-
-</details>
-
-<details>
-<summary>Is the Turnstile site key a secret?</summary>
-
-No. It is an opaque public provider value placed in rendered markup. Keep the
-matching private secret in the server-side provider integration, never in a
-browser environment or footer prop.
+Yes. The plain form posts directly to Accounts, which applies rate limiting
+and double opt-in and redirects to a confirmation page. The React adapter
+progressively enhances the same form with inline pending, error, and
+confirmation states.
 
 </details>
 
@@ -426,8 +377,8 @@ with the package release, renderer, mailing mode, and reproducible output.
 ## Verify a checkout
 
 To add the footer now, install the pinned release and begin with
-`mailingList={{ kind: "none" }}`. Enable signup only after the product audience,
-public site key, hostname policy, Accounts route, and CSP are ready.
+`mailingList={{ kind: "none" }}`. Enable signup after the product audience,
+Accounts route, and CSP `form-action`/`connect-src` entries are ready.
 
 For a source checkout, install the frozen dependency graph and run the complete
 repository gate:

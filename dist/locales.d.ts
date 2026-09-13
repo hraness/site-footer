@@ -11,9 +11,6 @@ export type FooterMessages = Readonly<{
     formLabel: string;
     pending: string;
     submitting: string;
-    verifying: string;
-    retryVerification: string;
-    verificationError: string;
     requestError: string;
     accepted: string;
     openLabel: string;

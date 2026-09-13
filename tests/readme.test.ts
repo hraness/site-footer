@@ -3,7 +3,6 @@ import { parseHTML } from "linkedom";
 
 import {
   HRANESS_MAILING_SUBSCRIBE_URL,
-  HRANESS_TURNSTILE_SCRIPT_URL,
   renderHranessSiteFooter,
 } from "../src/index.js";
 
@@ -68,7 +67,7 @@ describe("README product contract", () => {
       "one Hraness home link and four specifically named social links",
     );
     expect(normalizedReadme).toContain(
-      "no form, Turnstile script, request, cookie, or local storage",
+      "no form, third-party script, request, cookie, or local storage",
     );
     expect(document.querySelector("form")).toBeNull();
     expect(document.querySelector("script")).toBeNull();
@@ -98,16 +97,15 @@ describe("README product contract", () => {
   test("states the mailing transport and product-versus-package authority", () => {
     for (const value of [
       HRANESS_MAILING_SUBSCRIBE_URL,
-      HRANESS_TURNSTILE_SCRIPT_URL,
       "`email`",
       "`audience`",
       "`source=hraness-site-footer`",
-      "`cf-turnstile-response`",
+      "`website`",
       "`credentials: \"omit\"`",
       "Package-owned",
       "Consumer-owned",
       "must not fork",
-      "private Turnstile secret",
+      "double opt-in",
     ]) {
       expect(readme).toContain(value);
     }
@@ -122,7 +120,7 @@ describe("README product contract", () => {
       expect(manifest.scripts[script]).toBeTruthy();
     }
     expect(normalizedReadme).toContain(
-      "do not prove a consumer's CSP, live Turnstile hostname policy, Accounts delivery, or provider retention",
+      "do not prove a consumer's CSP, Accounts delivery, or provider retention",
     );
   });
 });

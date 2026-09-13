@@ -11,7 +11,7 @@ export declare const footerClasses: {
     socialLink: string;
     socialIcon: string;
     mailing: string;
-    turnstile: string;
+    honeypot: string;
     mailingControls: string;
     mailingLabel: string;
     mailingInput: string;

@@ -48,7 +48,7 @@ describe("site-footer browser verifier", () => {
       supportsLanguage: true as const,
       supportsPalette: true as const,
     };
-    for (const state of ["idle", "pending", "error", "verification-error"] as const) {
+    for (const state of ["idle", "pending", "error"] as const) {
       expect(assertFontCascade(sample, state)).toEqual(sample);
       for (const control of ["input", "submit"] as const) {
         expect(() => assertFontCascade({

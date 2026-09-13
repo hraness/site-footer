@@ -10,12 +10,7 @@ import {
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
   HRANESS_SOCIAL_LINKS,
-  HRANESS_TURNSTILE_RESPONSE_FIELD,
-  HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL,
-  HRANESS_TURNSTILE_SCRIPT_URL,
-  getHranessMailingTurnstileAction,
   parseHranessMailingListConfig,
-  parseHranessTurnstileScriptNonce,
   renderHranessSiteFooterInnerHtml,
   resolveHranessSocialLinks,
   type HranessMailingListConfig,
@@ -26,13 +21,7 @@ import {
 } from "./internal.js";
 
 export const HRANESS_HOME_URL = "https://hraness.com/";
-export {
-  HRANESS_MAILING_SUBSCRIBE_URL,
-  HRANESS_TURNSTILE_EXPLICIT_SCRIPT_URL,
-  HRANESS_TURNSTILE_RESPONSE_FIELD,
-  HRANESS_TURNSTILE_SCRIPT_URL,
-  getHranessMailingTurnstileAction,
-};
+export { HRANESS_MAILING_SUBSCRIBE_URL };
 
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export const hranessSocialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS;
@@ -59,8 +48,6 @@ export interface HranessSiteFooterOptions {
    * order. Defaults remain the shared Hraness profiles.
    */
   readonly social?: HranessSocialConfig;
-  /** Optional per-response CSP nonce for the static Turnstile script. */
-  readonly turnstileScriptNonce?: string;
 }
 
 /** Render the complete framework-neutral Hraness network footer. */
@@ -71,13 +58,9 @@ export function renderHranessSiteFooter({
   mailingList: mailingListInput,
   showBrand = true,
   social: socialInput,
-  turnstileScriptNonce: turnstileScriptNonceInput,
 }: HranessSiteFooterOptions): string {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
   variant = parseFooterVariant(variant);
   const socialLinks = resolveHranessSocialLinks(socialInput);
-  const turnstileScriptNonce = parseHranessTurnstileScriptNonce(
-    turnstileScriptNonceInput,
-  );
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, "implicit", turnstileScriptNonce, socialLinks, { locale: resolveFooterLocale(localeInput), variant, sticky: placement === "sticky" })}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, socialLinks, { locale: resolveFooterLocale(localeInput), variant, sticky: placement === "sticky" })}</footer>`;
 }
