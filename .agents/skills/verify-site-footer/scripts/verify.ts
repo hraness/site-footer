@@ -1636,7 +1636,8 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       const footer = document.querySelector('#hraness-site-footer');
       const inner = footer.querySelector('.hraness-site-footer__inner');
       const brand = footer.querySelector('.hraness-site-footer__brand');
-      const links = [...footer.querySelectorAll('a')];
+      const links = [...footer.querySelectorAll('a')]
+        .filter(link => link.closest('[data-slot="hraness-cookie-consent"]') === null);
       if (links.length !== 5 || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
       if (footer.querySelector('form, script, .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();

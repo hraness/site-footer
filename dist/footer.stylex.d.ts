@@ -10,6 +10,13 @@ export declare const footerClasses: {
     socials: string;
     socialLink: string;
     socialIcon: string;
+    consent: string;
+    consentAccept: string;
+    consentSeparator: string;
+    consentMore: string;
+    consentLearn: string;
+    consentPanel: string;
+    consentLink: string;
     mailing: string;
     honeypot: string;
     mailingControls: string;

@@ -35,10 +35,15 @@ export function ProductLayout({
 }
 ```
 
-That render has the stable `id="hraness-site-footer"`, one Hraness home link
-and four specifically named social links, and no form, third-party script,
-request, cookie, or local storage. The links and inline decorative vectors work
-without client-side JavaScript.
+That render has the stable `id="hraness-site-footer"`, one Hraness home link,
+four specifically named social links, and one hidden geo-gated cookie-consent
+note linking to the Hraness privacy policy. The consent note stays hidden
+without client-side JavaScript; after hydration the React adapter asks the
+shared Accounts region endpoint whether consent applies, fails toward showing
+the note when detection is unavailable, and stores acceptance in local storage.
+The first render issues no request, sets no cookie, and writes no local
+storage. The links and inline decorative vectors work without client-side
+JavaScript.
 
 ## Choose an interface
 

@@ -64,14 +64,16 @@ describe("README product contract", () => {
 
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
     expect(normalizedReadme).toContain(
-      "one Hraness home link and four specifically named social links",
+      "one Hraness home link, four specifically named social links, and one hidden geo-gated cookie-consent note",
     );
     expect(normalizedReadme).toContain(
-      "no form, third-party script, request, cookie, or local storage",
+      "The first render issues no request, sets no cookie, and writes no local storage",
     );
     expect(document.querySelector("form")).toBeNull();
     expect(document.querySelector("script")).toBeNull();
-    expect(document.querySelectorAll("a")).toHaveLength(5);
+    expect(document.querySelectorAll("a")).toHaveLength(6);
+    expect(document.querySelector('[data-slot="hraness-cookie-consent"]')?.hasAttribute("hidden"))
+      .toBeTrue();
   });
 
   test("documents the shared Hraness.com signup experiment", () => {

@@ -6,6 +6,7 @@ import "../../../../styles.css";
 import "./fixture.css";
 
 const MAILING_URL = "https://account.hraness.com/api/mailing/subscribe";
+const CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 const TEST_EMAIL = "footer-fixture@example.test";
 
 const fixtureStates = [
@@ -56,7 +57,9 @@ function boundedError(value: unknown): string {
 }
 
 const selectedState = selectedFixtureState();
-const signupEnabled = new URL(window.location.href).searchParams.get("mailing") !== "none";
+const pageParams = new URL(window.location.href).searchParams;
+const signupEnabled = pageParams.get("mailing") !== "none";
+const consentRequired = pageParams.get("consent") === "required";
 const errors: string[] = [];
 const requests: RecordedRequest[] = [];
 
@@ -69,6 +72,9 @@ window.addEventListener("unhandledrejection", (event) => {
 
 window.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
   const url = input instanceof Request ? input.url : String(input);
+  if (url === CONSENT_REGION_URL) {
+    return Response.json({ region: null, required: consentRequired });
+  }
   if (url !== MAILING_URL) {
     throw new Error(`The footer fixture blocked an unexpected request: ${url}`);
   }
