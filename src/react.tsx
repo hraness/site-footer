@@ -5,6 +5,10 @@ import { resolveFooterLocale } from "./locales.js";
 import { DEFAULT_FOOTER_VARIANT, exposeFooterEnrollment, requestFooterEnrollment, type FooterEnrollment } from "./experiment.js";
 
 import {
+  HRANESS_CONSENT_ACCEPT_SLOT,
+  HRANESS_CONSENT_REGION_URL,
+  HRANESS_CONSENT_SLOT,
+  HRANESS_CONSENT_STORAGE_KEY,
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_FORM_SLOT,
@@ -68,6 +72,7 @@ export function HranessSiteFooter({
   const mailingList = parseHranessMailingListConfig(mailingListInput);
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
+  const [consentPending, setConsentPending] = useState(false);
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   const [enrollment, setEnrollment] = useState<FooterEnrollment | null>(null);
   const interacted = useRef(false);
@@ -232,6 +237,41 @@ export function HranessSiteFooter({
   );
   const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
 
+  // Cookie consent is a one-way localStorage decision; geo detection is advisory
+  // and fails toward showing the note.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") return;
+    } catch {
+      // Storage disabled: the in-memory accept still applies for this page.
+    }
+    const controller = new AbortController();
+    void fetch(HRANESS_CONSENT_REGION_URL, {
+      cache: "no-store",
+      credentials: "omit",
+      headers: { accept: "application/json" },
+      signal: controller.signal,
+    }).then(async (response) => {
+      const body: unknown = await response.json();
+      const required = typeof body === "object" && body !== null
+        ? Reflect.get(body, "required") === true
+        : true;
+      if (!controller.signal.aborted) setConsentPending(required);
+    }).catch(() => {
+      if (!controller.signal.aborted) setConsentPending(true);
+    });
+    return () => { controller.abort(); };
+  }, []);
+
+  // The dangerouslySetInnerHTML content is rebuilt on state changes, so the
+  // revealed consent element must be re-marked whenever the markup changes.
+  useEffect(() => {
+    const target = footer.current?.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`);
+    if (!(target instanceof Element)) return;
+    if (consentPending) target.removeAttribute("hidden");
+    else target.setAttribute("hidden", "");
+  }, [innerHtml, consentPending]);
+
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
     className: footerClassName(mailingList.kind === "signup", placement === "sticky"),
@@ -241,14 +281,28 @@ export function HranessSiteFooter({
     id: HRANESS_FOOTER_SLOT,
     // The HTML is composed only from validated package-owned constants and state.
     dangerouslySetInnerHTML: innerHtmlProp,
+    onClick: (event: { target: EventTarget | null }) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`) === null) return;
+      try {
+        window.localStorage.setItem(HRANESS_CONSENT_STORAGE_KEY, "accepted");
+      } catch {
+        // Private browsing or disabled storage: hide for this page only.
+      }
+      setConsentPending(false);
+    },
     onSubmit: handleSubmit,
     onPointerDownCapture: () => { interacted.current = true; enrollmentRequest.current?.abort(); },
     onFocusCapture: () => { interacted.current = true; enrollmentRequest.current?.abort(); },
     onKeyDown: (event: { key: string; preventDefault: () => void }) => {
       if (event.key !== "Escape") return;
-      const disclosure = footer.current?.querySelector("details");
-      if (disclosure?.open) {
-        event.preventDefault(); disclosure.open = false; disclosure.querySelector("summary")?.focus();
+      const disclosures = footer.current?.querySelectorAll("details[open]");
+      const last = disclosures === undefined || disclosures.length === 0
+        ? null
+        : disclosures[disclosures.length - 1] as HTMLDetailsElement;
+      if (last !== null) {
+        event.preventDefault(); last.open = false; last.querySelector("summary")?.focus();
       }
     },
     ref: footer,

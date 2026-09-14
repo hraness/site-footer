@@ -143,6 +143,38 @@ describe("Hraness site footer", () => {
     expect(socialLinks[0]?.getAttribute("aria-label")).toBe("Hraness on Substack");
   });
 
+  test("renders the geo-gated cookie consent note hidden beside the social links", () => {
+    const html = renderHranessSiteFooter({ mailingList: productMailingList });
+    const { document } = parseHTML(html);
+    const consent = document.querySelector('[data-slot="hraness-cookie-consent"]');
+    const accept = consent?.querySelector('[data-slot="hraness-cookie-consent-accept"]');
+    const learnMore = consent?.querySelector("details");
+    const privacy = consent?.querySelector('a[href="https://hraness.com/privacy"]');
+
+    expect(consent).not.toBeNull();
+    expect(consent?.hasAttribute("hidden")).toBeTrue();
+    expect(accept?.tagName).toBe("BUTTON");
+    expect(accept?.getAttribute("type")).toBe("button");
+    expect(accept?.textContent).toBe("Accept cookies");
+    expect(learnMore?.querySelector("summary")?.textContent).toBe("Learn more");
+    expect(learnMore?.textContent).toContain("no advertising or cross-site trackers");
+    expect(privacy?.textContent).toBe("Privacy policy");
+    expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeGreaterThan(
+      html.indexOf('data-slot="hraness-mailing-list-signup"'),
+    );
+    expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeLessThan(
+      html.indexOf('aria-label="Hraness links"'),
+    );
+  });
+
+  test("keeps the consent note when the mailing list is omitted", () => {
+    const html = renderHranessSiteFooter({ mailingList: noMailingList });
+    const { document } = parseHTML(html);
+
+    expect(document.querySelector('[data-slot="hraness-cookie-consent"]')).not.toBeNull();
+    expect(document.querySelector("form")).toBeNull();
+  });
+
   test("renders localized button and inline experiment recipes", () => {
     const html = renderHranessSiteFooter({
       mailingList: productMailingList,
