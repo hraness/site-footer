@@ -49,13 +49,13 @@ describe("compiled footer presentation", () => {
     contains(root, "min-block-size:var(--hraness-site-footer-bar-block-size)");
     expect(cssFor(root)).not.toMatch(/[{;]block-size:/u);
     contains(footerInnerClassName(false), "position:fixed");
-    contains(footerInnerClassName(false), 'grid-template-areas:"brand links"');
+    contains(footerInnerClassName(false), 'grid-template-areas:"brand consent links"');
     contains(footerInnerClassName(true), 'grid-template-areas:"brand links" "mailing mailing"');
-    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing links"');
+    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing consent links"');
     contains(footerInnerClassName(true), "@media (min-width:47.5rem)");
     contains(signup, "--hraness-site-footer-mailing-overlay-clearance:0rem");
     contains(signup, "--hraness-site-footer-content-block-size:max(var(--hraness-site-footer-social-target),var(--hraness-site-footer-form-block-size))");
-    contains(footerInnerClassName(true), "block-size:var(--hraness-site-footer-bar-block-size)");
+    contains(footerInnerClassName(true), "min-block-size:var(--hraness-site-footer-bar-block-size)");
     for (const inset of ["left", "right"]) contains(footerInnerClassName(true), `env(safe-area-inset-${inset})`);
     contains(footerInnerClassName(true), "env(safe-area-inset-bottom, 0px)");
   });

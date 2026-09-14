@@ -111,6 +111,267 @@ test("a stale response state cannot leak across audience changes", () => {
   expect(html).not.toContain("Check your email to confirm");
 });
 
+test("the React adapter reveals geo-gated cookie consent and persists acceptance", async () => {
+  const { window } = parseHTML('<main id="content"></main><div id="root"></div>');
+  const overrides = {
+    Comment: window.Comment,
+    document: window.document,
+    Element: window.Element,
+    Event: window.Event,
+    HTMLElement: window.HTMLElement,
+    MutationObserver: window.MutationObserver,
+    navigator: window.navigator,
+    Node: window.Node,
+    Text: window.Text,
+    window,
+  } as const;
+  const previous = new Map<string, PropertyDescriptor | undefined>();
+  for (const [name, value] of Object.entries(overrides)) {
+    previous.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
+    Object.defineProperty(globalThis, name, {
+      configurable: true,
+      value,
+      writable: true,
+    });
+  }
+  const actEnvironment = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "IS_REACT_ACT_ENVIRONMENT",
+  );
+  Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {
+    configurable: true,
+    value: true,
+    writable: true,
+  });
+
+  const storage = new Map<string, string>();
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => { storage.set(key, String(value)); },
+    },
+  });
+
+  const originalFetch = globalThis.fetch;
+  const requests: Array<Readonly<{ input: string | URL | Request; init?: RequestInit }>> = [];
+  const regionResponses: Array<(response: Response) => void> = [];
+  globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) => {
+    requests.push(init === undefined ? { input } : { init, input });
+    if (String(input).includes("/api/consent/region")) {
+      return new Promise<Response>((resolve) => {
+        regionResponses.push(resolve);
+      });
+    }
+    return new Promise<Response>(() => {});
+  }) as typeof fetch;
+
+  const container = window.document.querySelector<HTMLElement>("#root");
+  expect(container).not.toBeNull();
+  const { createRoot } = await import("react-dom/client");
+  const root = createRoot(container!);
+
+  try {
+    await act(async () => {
+      root.render(
+        <HranessSiteFooter mailingList={noMailingList} experiment={false} />,
+      );
+    });
+
+    const consent = container!.querySelector<HTMLElement>(
+      '[data-slot="hraness-cookie-consent"]',
+    );
+    expect(consent).not.toBeNull();
+    expect(consent!.hasAttribute("hidden")).toBeTrue();
+    expect(requests.map((entry) => String(entry.input))).toContain(
+      "https://account.hraness.com/api/consent/region",
+    );
+    expect(requests.find((entry) => String(entry.input).includes("consent"))?.init?.credentials)
+      .toBe("omit");
+
+    await act(async () => {
+      regionResponses.forEach((resolve) => {
+        resolve(Response.json({ region: "DE", required: true }));
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const revealed = container!.querySelector<HTMLElement>(
+      '[data-slot="hraness-cookie-consent"]',
+    );
+    expect(revealed!.hasAttribute("hidden")).toBeFalse();
+
+    await act(async () => {
+      container!.querySelector<HTMLElement>(
+        '[data-slot="hraness-cookie-consent-accept"]',
+      )!.dispatchEvent(new window.Event("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(storage.get("hraness-consent-cookies-v1")).toBe("accepted");
+    expect(
+      container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent"]')!.hasAttribute("hidden"),
+    ).toBeTrue();
+  } finally {
+    await act(async () => {
+      root.unmount();
+    });
+    globalThis.fetch = originalFetch;
+    if (actEnvironment === undefined) {
+      Reflect.deleteProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT");
+    } else {
+      Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", actEnvironment);
+    }
+    for (const [name, descriptor] of previous) {
+      if (descriptor === undefined) Reflect.deleteProperty(globalThis, name);
+      else Object.defineProperty(globalThis, name, descriptor);
+    }
+  }
+});
+
+test("the React adapter keeps consent hidden when already accepted", async () => {
+  const { window } = parseHTML('<div id="root"></div>');
+  const overrides = {
+    Comment: window.Comment,
+    document: window.document,
+    Element: window.Element,
+    Event: window.Event,
+    HTMLElement: window.HTMLElement,
+    MutationObserver: window.MutationObserver,
+    navigator: window.navigator,
+    Node: window.Node,
+    Text: window.Text,
+    window,
+  } as const;
+  const previous = new Map<string, PropertyDescriptor | undefined>();
+  for (const [name, value] of Object.entries(overrides)) {
+    previous.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
+    Object.defineProperty(globalThis, name, {
+      configurable: true,
+      value,
+      writable: true,
+    });
+  }
+  Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {
+    configurable: true,
+    value: true,
+    writable: true,
+  });
+
+  const storage = new Map<string, string>([["hraness-consent-cookies-v1", "accepted"]]);
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => { storage.set(key, String(value)); },
+    },
+  });
+
+  const originalFetch = globalThis.fetch;
+  const requests: Array<string> = [];
+  globalThis.fetch = ((input: string | URL | Request) => {
+    requests.push(String(input));
+    return new Promise<Response>(() => {});
+  }) as typeof fetch;
+
+  const container = window.document.querySelector<HTMLElement>("#root");
+  const { createRoot } = await import("react-dom/client");
+  const root = createRoot(container!);
+
+  try {
+    await act(async () => {
+      root.render(
+        <HranessSiteFooter mailingList={noMailingList} experiment={false} />,
+      );
+      await Promise.resolve();
+    });
+
+    expect(
+      container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent"]')!.hasAttribute("hidden"),
+    ).toBeTrue();
+    expect(requests).not.toContain("https://account.hraness.com/api/consent/region");
+  } finally {
+    await act(async () => {
+      root.unmount();
+    });
+    globalThis.fetch = originalFetch;
+    for (const [name, descriptor] of previous) {
+      if (descriptor === undefined) Reflect.deleteProperty(globalThis, name);
+      else Object.defineProperty(globalThis, name, descriptor);
+    }
+  }
+});
+
+test("the React adapter shows consent when region detection fails", async () => {
+  const { window } = parseHTML('<div id="root"></div>');
+  const overrides = {
+    Comment: window.Comment,
+    document: window.document,
+    Element: window.Element,
+    Event: window.Event,
+    HTMLElement: window.HTMLElement,
+    MutationObserver: window.MutationObserver,
+    navigator: window.navigator,
+    Node: window.Node,
+    Text: window.Text,
+    window,
+  } as const;
+  const previous = new Map<string, PropertyDescriptor | undefined>();
+  for (const [name, value] of Object.entries(overrides)) {
+    previous.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
+    Object.defineProperty(globalThis, name, {
+      configurable: true,
+      value,
+      writable: true,
+    });
+  }
+  Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {
+    configurable: true,
+    value: true,
+    writable: true,
+  });
+
+  const storage = new Map<string, string>();
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => { storage.set(key, String(value)); },
+    },
+  });
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (() => Promise.reject(new Error("offline"))) as unknown as typeof fetch;
+
+  const container = window.document.querySelector<HTMLElement>("#root");
+  const { createRoot } = await import("react-dom/client");
+  const root = createRoot(container!);
+
+  try {
+    await act(async () => {
+      root.render(
+        <HranessSiteFooter mailingList={noMailingList} experiment={false} />,
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(
+      container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent"]')!.hasAttribute("hidden"),
+    ).toBeFalse();
+  } finally {
+    await act(async () => {
+      root.unmount();
+    });
+    globalThis.fetch = originalFetch;
+    for (const [name, descriptor] of previous) {
+      if (descriptor === undefined) Reflect.deleteProperty(globalThis, name);
+      else Object.defineProperty(globalThis, name, descriptor);
+    }
+  }
+});
+
 test("the React adapter posts the native form, restores request focus, and confirms", async () => {
   const { window } = parseHTML('<a id="host-link" href="#content">Skip to content</a><main id="content"></main><div id="root"></div>');
   const overrides = {

@@ -28,6 +28,9 @@ export declare function HranessSiteFooter({ locale: localeInput, experiment, pla
     dangerouslySetInnerHTML: {
         __html: string;
     };
+    onClick: (event: {
+        target: EventTarget | null;
+    }) => void;
     onSubmit: (event: FormEvent<HTMLElement>) => void;
     onPointerDownCapture: () => void;
     onFocusCapture: () => void;
