@@ -390,7 +390,7 @@ export function createLayoutContract(
         box: name,
         id: `${viewport}.${name}.minimum`,
         kind: "minimum-size",
-        minimumHeight: 40,
+        minimumHeight: 28,
         minimumWidth: name === "submit" ? 72 : 80,
       });
     }
@@ -399,14 +399,14 @@ export function createLayoutContract(
     box: "brand",
     id: `${viewport}.brand.minimum`,
     kind: "minimum-size",
-    minimumHeight: 40,
+    minimumHeight: 28,
     minimumWidth: 28,
   });
   add({
     box: "mailing",
     id: `${viewport}.mailing.minimum`,
     kind: "minimum-size",
-    minimumHeight: 40,
+    minimumHeight: 28,
     minimumWidth: 80,
   });
   for (const name of boxNames.filter((name) => name.startsWith("social."))) {
@@ -414,8 +414,8 @@ export function createLayoutContract(
       box: name,
       id: `${viewport}.${name}.minimum`,
       kind: "minimum-size",
-      minimumHeight: 40,
-      minimumWidth: 40,
+      minimumHeight: 28,
+      minimumWidth: 28,
     });
     add({
       id: `${viewport}.${name}.inside`,
@@ -503,7 +503,9 @@ function parseFixtureSnapshot(input: unknown, expectedState: FixtureState): Fixt
       audience: nullableString(found.audience, "Request audience"),
       credentials: nullableString(found.credentials ?? null, "Request credentials"),
       email: nullableString(found.email, "Request email"),
-      honeypot: nullableString(found.honeypot, "Request honeypot"),
+      honeypot: found.honeypot === null || found.honeypot === ""
+        ? found.honeypot
+        : requiredString(found.honeypot, "Request honeypot"),
       method: nullableString(found.method ?? null, "Request method"),
       source: nullableString(found.source, "Request source"),
       url: requiredString(found.url, "Request URL"),
@@ -1338,8 +1340,8 @@ function assertManualGeometry(
   if (geometry.visibleSocialTargets.length !== 4) {
     throw new Error(`${state}/${viewport} must expose exactly four social targets.`);
   }
-  if (geometry.visibleSocialTargets.some(({ height, width }) => height < 40 || width < 40)) {
-    throw new Error(`${state}/${viewport} has a visible social target smaller than 40 CSS pixels.`);
+  if (geometry.visibleSocialTargets.some(({ height, width }) => height < 28 || width < 28)) {
+    throw new Error(`${state}/${viewport} has a visible social target smaller than 28 CSS pixels.`);
   }
   if (state !== "accepted") {
     if (
@@ -1642,7 +1644,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('No-signup footer overflows.');
       const boxes = links.map(link => {
         const rect = link.getBoundingClientRect();
-        if (rect.width < 40 || rect.height < 40 || rect.left < 0 || rect.right > innerWidth + 0.5) throw new Error('Footer target is clipped or too small.');
+        if (rect.width < 28 || rect.height < 28 || rect.left < 0 || rect.right > innerWidth + 0.5) throw new Error('Footer target is clipped or too small.');
         return { name: link.getAttribute('aria-label'), x: rect.x, y: rect.y, width: rect.width, height: rect.height };
       });
       return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes };

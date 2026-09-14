@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.9.0
+bun add github:hraness/site-footer#v0.9.1
 ```
 
 Start with the network footer and no mailing form:
@@ -229,6 +229,9 @@ style, color, and shimmer. Accounts keeps a randomized exploration stream and
 serves an evidence-qualified recipe to the remaining traffic; PostHog receives
 only anonymous enrollment events and confirmed double-opt-in conversions.
 
+Version 0.9.1 halves the footer's resting height: a 1.75rem control row,
+28px fine-pointer social targets (44px stays for coarse pointers), smaller
+icons, tighter padding, and an 0.875rem text size.
 Version 0.9.0 removes the Cloudflare Turnstile widget, site-key
 configuration, and script injection; signup relies on Accounts rate limiting,
 a hidden honeypot field, and double opt-in, and now works without JavaScript.
