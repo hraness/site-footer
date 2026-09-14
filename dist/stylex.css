@@ -225,12 +225,8 @@
     background-size: calc(200% + var(--hraness-site-footer-shimmer-spread) * 2) 100%;
   }
 
-  .xf7zn63 {
-    block-size: 1.125rem;
-  }
-
-  .x18i7o63 {
-    block-size: 1.75rem;
+  .x1wugil3 {
+    block-size: 1.375rem;
   }
 
   .xuxy95z {
@@ -239,6 +235,10 @@
 
   .xpoyz9m {
     block-size: 1px;
+  }
+
+  .x38bysi {
+    block-size: 1rem;
   }
 
   .x1c419km {
@@ -437,10 +437,6 @@
     font-size: .875rem;
   }
 
-  .x1jchvi3 {
-    font-size: 1rem;
-  }
-
   .x1qlqyl8 {
     font-size: inherit;
   }
@@ -481,12 +477,8 @@
     grid-template-rows: var(--hraness-site-footer-control-block-size);
   }
 
-  .x1ri1nt6 {
-    inline-size: 1.125rem;
-  }
-
-  .x1mgeycz {
-    inline-size: 1.75rem;
+  .xif76xs {
+    inline-size: 1.375rem;
   }
 
   .xiuoait {
@@ -495,6 +487,10 @@
 
   .xi8173g {
     inline-size: 1px;
+  }
+
+  .x1milg1j {
+    inline-size: 1rem;
   }
 
   .x6n8wx1 {
@@ -918,8 +914,8 @@
   --hraness-site-footer-content-block-size: var(--hraness-site-footer-control-block-size);
 }
 
-.x1g1m258 {
-  --hraness-site-footer-control-block-size: max(var(--hraness-site-footer-social-target),2.5rem);
+.x1xgbxbt {
+  --hraness-site-footer-control-block-size: max(var(--hraness-site-footer-social-target),1.75rem);
 }
 
 .xsctza4 {
@@ -966,20 +962,20 @@
   --hraness-site-footer-muted: var(--plain-muted, var(--muted, color-mix(in srgb,currentColor 68%,transparent)));
 }
 
-.xz6zgvz {
-  --hraness-site-footer-padding-block: clamp(.375rem,1vw,.5rem);
+.x19y8ktx {
+  --hraness-site-footer-padding-block: clamp(.25rem,.8vw,.375rem);
 }
 
-.x1mokxn7 {
-  --hraness-site-footer-row-gap: .375rem;
+.x1d4g2j8 {
+  --hraness-site-footer-row-gap: .25rem;
 }
 
 .x94vt28 {
   --hraness-site-footer-shimmer-spread: calc(3ch + 40px);
 }
 
-.xms9e4r {
-  --hraness-site-footer-social-target: 40px;
+.xtq98z5 {
+  --hraness-site-footer-social-target: 1.75rem;
 }
 
 .x4sry57 {
@@ -993,8 +989,8 @@
 }
 
 @media (pointer: coarse) {
-  .xywhp07.xywhp07 {
-    --hraness-site-footer-control-block-size: max(var(--hraness-site-footer-social-target),2.75rem);
+  .x9cmhvv.x9cmhvv {
+    --hraness-site-footer-control-block-size: max(var(--hraness-site-footer-social-target),2.25rem);
   }
 }
 

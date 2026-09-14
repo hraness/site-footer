@@ -154,20 +154,20 @@ var styles = {
     "--hraness-site-footer-action-background": "xdg0xw2",
     "--hraness-site-footer-action-foreground": "x1munjs5",
     "--hraness-site-footer-field-background": "xsctza4",
-    "--hraness-site-footer-social-target": "xms9e4r x1w6jg7m",
-    "--hraness-site-footer-control-block-size": "x1g1m258 xywhp07",
+    "--hraness-site-footer-social-target": "xtq98z5 x1w6jg7m",
+    "--hraness-site-footer-control-block-size": "x1xgbxbt x9cmhvv",
     "--hraness-site-footer-status-block-size": "x4sry57",
     "--hraness-site-footer-form-block-size": "xys6ka6",
-    "--hraness-site-footer-row-gap": "x1mokxn7",
+    "--hraness-site-footer-row-gap": "x1d4g2j8",
     "--hraness-site-footer-mailing-overlay-clearance": "x1sphz0r",
-    "--hraness-site-footer-padding-block": "xz6zgvz",
+    "--hraness-site-footer-padding-block": "x19y8ktx",
     "--hraness-site-footer-mailing-overlay-offset": "x1h47zgc",
     "--hraness-site-footer-content-block-size": "x1ghcxmq",
     "--hraness-site-footer-bar-block-size": "xe0js8b",
     kULEZF: "xiuoait",
     kMwMTN: "x1g4142m",
     kMv6JI: "xprmc4t",
-    kGuDYH: "x1jchvi3",
+    kGuDYH: "xkpwil5",
     $$css: true
   },
   signup: {
@@ -346,8 +346,8 @@ var styles = {
     $$css: true
   },
   mark: {
-    kULEZF: "x1mgeycz",
-    kLWsYc: "x18i7o63",
+    kULEZF: "xif76xs",
+    kLWsYc: "x1wugil3",
     $$css: true
   },
   links: {
@@ -403,8 +403,8 @@ var styles = {
     $$css: true
   },
   socialIcon: {
-    kULEZF: "x1ri1nt6",
-    kLWsYc: "xf7zn63",
+    kULEZF: "x1milg1j",
+    kLWsYc: "x38bysi",
     $$css: true
   },
   mailingGeometry: {
@@ -1557,4 +1557,4 @@ export {
   HRANESS_HOME_URL
 };
 
-//# debugId=FAF9BCB656CB852264756E2164756E21
+//# debugId=007F3CC5A00FE26264756E2164756E21

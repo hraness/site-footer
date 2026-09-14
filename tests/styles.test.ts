@@ -24,7 +24,7 @@ function contains(classes: string, declaration: string): void {
 describe("compiled footer presentation", () => {
   test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.9.0");
+    expect(pkg.version).toBe("0.9.1");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -62,7 +62,7 @@ describe("compiled footer presentation", () => {
 
   test("preserves theme fallbacks, coarse targets, and root overrides", () => {
     contains(footerClassName(false), "var(--foreground,currentColor)");
-    contains(footerClassName(false), "--hraness-site-footer-social-target:40px");
+    contains(footerClassName(false), "--hraness-site-footer-social-target:1.75rem");
     contains(footerClassName(false), "--hraness-site-footer-social-target:44px");
     contains(footerClassName(false), "@media (pointer:coarse)");
     contains(footerClassName(false), "--hraness-site-footer-action-background:var(--plain-foreground,var(--foreground,CanvasText))");
@@ -77,7 +77,7 @@ describe("compiled footer presentation", () => {
     expect(css).not.toContain("@container");
     contains(footerClasses.brand, "min-inline-size:var(--hraness-site-footer-control-block-size)");
     contains(footerClasses.brand, "min-block-size:var(--hraness-site-footer-control-block-size)");
-    contains(footerClassName(false), "font-size:1rem");
+    contains(footerClassName(false), "font-size:.875rem");
   });
 
   test("reserves matching visual padding plus the device safe area in both layouts", () => {
