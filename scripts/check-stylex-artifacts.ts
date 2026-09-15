@@ -37,7 +37,16 @@ export function assertSourceBoundary(path: string, source: string): void {
       assert.notEqual(key, "style", `Owned style objects are forbidden: ${path}`);
     }
     if (ts.isPropertyAccessExpression(node)) {
-      assert.ok(!["style", "adoptedStyleSheets", "insertRule"].includes(node.name.text),
+      // The pointer controller may only update three numeric inputs consumed by
+      // compiled recipes. It cannot set CSS declarations, inject styles or sheets.
+      const call = node.parent.parent;
+      const foilInput = path === "src/foil.ts" && node.name.text === "style"
+        && ts.isPropertyAccessExpression(node.parent)
+        && ["setProperty", "removeProperty"].includes(node.parent.name.text)
+        && ts.isCallExpression(call) && call.expression === node.parent
+        && call.arguments[0] !== undefined && ts.isStringLiteral(call.arguments[0])
+        && ["--footer-foil-x", "--footer-foil-y", "--footer-foil-angle"].includes(call.arguments[0].text);
+      assert.ok(foilInput || !["style", "adoptedStyleSheets", "insertRule"].includes(node.name.text),
         `Owned runtime CSS mutation is forbidden: ${path}`);
     }
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {

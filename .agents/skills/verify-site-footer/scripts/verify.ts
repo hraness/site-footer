@@ -368,7 +368,7 @@ export function createLayoutContract(
       tolerance: 0,
     });
   }
-  if (names.has("controls")) {
+  if (viewport === "wide" && names.has("controls")) {
     add({
       id: `${viewport}.controls.inside`,
       inner: "controls",
@@ -450,6 +450,9 @@ export function createLayoutContract(
       });
     }
   } else {
+    for (const second of ["mailing", "socials"]) add({
+      first: "brand", id: `compact.brand-${second}.center-y`, kind: "center-y", second, tolerance: 1,
+    });
     add({
       first: "brand",
       id: "compact.brand-mailing.clear",
@@ -1109,7 +1112,8 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   const footer = required("#hraness-site-footer", "Footer");
   const inner = required(".hraness-site-footer__inner", "Footer inner");
   const brand = required(".hraness-site-footer__brand", "Footer brand");
-  const mailing = document.querySelector(".hraness-site-footer__mailing")
+  const compact = !window.matchMedia("(min-width: 47.5rem)").matches;
+  const mailing = (compact ? document.querySelector(".hraness-site-footer__disclosure-trigger") : document.querySelector(".hraness-site-footer__mailing"))
     ?? required(".hraness-site-footer__mailing-confirmation", "Footer mailing surface");
   const socials = required(".hraness-site-footer__socials", "Footer social group");
   const socialLinks = [...document.querySelectorAll(".hraness-site-footer__social-link")];
@@ -1135,12 +1139,12 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   const input = document.querySelector(".hraness-site-footer__mailing-input");
   const submit = document.querySelector(".hraness-site-footer__mailing-submit");
   const status = document.querySelector(".hraness-site-footer__mailing-status");
-  if (controls instanceof HTMLElement) boxes.push(rect("controls", controls));
-  if (input instanceof HTMLElement) boxes.push(rect("input", input));
-  if (submit instanceof HTMLElement) boxes.push(rect("submit", submit));
+  if (controls instanceof HTMLElement && controls.checkVisibility()) boxes.push(rect("controls", controls));
+  if (input instanceof HTMLElement && input.checkVisibility()) boxes.push(rect("input", input));
+  if (submit instanceof HTMLElement && submit.checkVisibility()) boxes.push(rect("submit", submit));
   if (
     status instanceof HTMLElement
-    && getComputedStyle(status).visibility !== "hidden"
+    && status.checkVisibility() && getComputedStyle(status).visibility !== "hidden"
   ) boxes.push(rect("status", status));
   socialLinks
     .filter((element) => {
@@ -1161,9 +1165,10 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const content = [...inner.querySelectorAll([
     ".hraness-site-footer__brand", ".hraness-site-footer__social-link",
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
-    ".hraness-site-footer__mailing-confirmation",
-  ].join(","))].map(element => element.getBoundingClientRect());
-  if (content.length < 5 || content.some(box => box.width <= 0 || box.height <= 0)) {
+    ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger",
+  ].join(","))].filter(element => element.checkVisibility()).map(element => element.getBoundingClientRect())
+    .filter(box => box.width > 0 && box.height > 0 && box.top >= inner.getBoundingClientRect().top);
+  if (content.length < 2) {
     throw new Error("Footer spacing requires visible content targets.");
   }
   // Resolve the device inset independently of the footer's own padding rule.
@@ -1337,13 +1342,14 @@ function assertManualGeometry(
   ) {
     throw new Error(`${state}/${viewport} footer is not in normal document flow.`);
   }
-  if (geometry.visibleSocialTargets.length !== 4) {
-    throw new Error(`${state}/${viewport} must expose exactly four social targets.`);
+  if (geometry.visibleSocialTargets.length < 1 || geometry.visibleSocialTargets.length > 4
+    || (viewport === "wide" && geometry.visibleSocialTargets.length !== 4)) {
+    throw new Error(`${state}/${viewport} must retain Substack and reveal later socials as space permits.`);
   }
   if (geometry.visibleSocialTargets.some(({ height, width }) => height < 28 || width < 28)) {
     throw new Error(`${state}/${viewport} has a visible social target smaller than 28 CSS pixels.`);
   }
-  if (state !== "accepted") {
+  if (state !== "accepted" && !(state === "idle" && viewport === "compact")) {
     if (
       geometry.inputHeight === null
       || geometry.submitHeight === null
@@ -1536,7 +1542,7 @@ async function driveState(options: {
         const honeypot = document.querySelector('input[name="website"]');
         return button instanceof HTMLButtonElement
           && !button.disabled
-          && button.textContent === "Subscribe"
+          && button.textContent === "Send me things"
           && honeypot instanceof HTMLInputElement
           && honeypot.value === ""
           && honeypot.getAttribute("aria-hidden") === "true"

@@ -1,8 +1,9 @@
 "use client";
 
+import { attachFooterFoil } from "./foil.js";
 import { footerClassName } from "./footer.stylex.js";
 import { resolveFooterLocale } from "./locales.js";
-import { DEFAULT_FOOTER_VARIANT, exposeFooterEnrollment, requestFooterEnrollment, type FooterEnrollment } from "./experiment.js";
+import { DEFAULT_FOOTER_VARIANT, FOOTER_WIDE_QUERY, isFooterEnrollmentEligible, exposeFooterEnrollment, requestFooterEnrollment, type FooterEnrollment, type FooterViewport } from "./experiment.js";
 
 import {
   HRANESS_CONSENT_ACCEPT_SLOT,
@@ -77,9 +78,13 @@ export function HranessSiteFooter({
   const [enrollment, setEnrollment] = useState<FooterEnrollment | null>(null);
   const interacted = useRef(false);
   const exposedEnrollment = useRef<string | null>(null);
+  const enrollmentViewport = useRef<FooterViewport | null>(null);
   const enrollmentRequest = useRef<AbortController | null>(null);
   const variant = enrollment?.assignment ?? DEFAULT_FOOTER_VARIANT;
-  const presentationKey = `${locale.locale}:${variant.layout}:${variant.copyStyle}:${variant.color}:${variant.shimmer}:${placement}`;
+  // Keep markup identity stable on resize, including a later host/consent render.
+  // Attribution is invalidated separately without reconstructing an active form.
+  const experimentToken = enrollmentViewport.current === null ? undefined : enrollment?.token;
+  const presentationKey = `${enrollment?.token ?? "none"}:${locale.locale}:${variant.layout}:${variant.copyStyle}:${variant.color}:${variant.shimmer}:${placement}`;
   const activeRequest = useRef<AbortController | null>(null);
   const footer = useRef<HTMLElement | null>(null);
   const mailingListKey = mailingList.kind === "signup"
@@ -90,7 +95,8 @@ export function HranessSiteFooter({
     .join("|");
   const renderState = activeStateFor(mailingList, state);
   const markExposure = useCallback((token: string) => {
-    if (exposedEnrollment.current === token) return;
+    const currentViewport = typeof window.matchMedia === "function" && !window.matchMedia(FOOTER_WIDE_QUERY).matches ? "compact" : "wide";
+    if (enrollmentViewport.current !== currentViewport || exposedEnrollment.current === token) return;
     exposedEnrollment.current = token;
     void exposeFooterEnrollment(token, new AbortController().signal);
   }, []);
@@ -102,21 +108,41 @@ export function HranessSiteFooter({
     const selectedLocale = resolveFooterLocale(localeInput ?? navigator.languages);
     setLocale(selectedLocale);
     if (mailingList.kind !== "signup" || !experiment) return;
-    const controller = new AbortController();
-    enrollmentRequest.current = controller;
-    const timeout = setTimeout(() => controller.abort(), 1_500);
-    void requestFooterEnrollment(mailingList.audience, selectedLocale.locale, controller.signal)
-      .then((result) => {
-        if (!controller.signal.aborted && !interacted.current && result !== null
-          && result.assignment.locale === selectedLocale.locale) setEnrollment(result);
-      }).finally(() => clearTimeout(timeout));
-    return () => { clearTimeout(timeout); controller.abort(); };
+    const query = typeof window.matchMedia === "function" ? window.matchMedia(FOOTER_WIDE_QUERY) : null;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const assign = () => {
+      enrollmentRequest.current?.abort();
+      if (timeout) clearTimeout(timeout);
+      const tokenInput = footer.current?.querySelector<HTMLInputElement>('input[name="experimentToken"]');
+      if (tokenInput) { tokenInput.disabled = true; tokenInput.value = ""; }
+      enrollmentViewport.current = null;
+      // CSS handles resizing without rebuilding an active form or losing its text.
+      if (interacted.current) return;
+      setEnrollment(null);
+      const viewport: FooterViewport = query?.matches === false ? "compact" : "wide";
+      const controller = new AbortController();
+      enrollmentRequest.current = controller;
+      timeout = setTimeout(() => controller.abort(), 1_500);
+      void requestFooterEnrollment(mailingList.audience, selectedLocale.locale, controller.signal, viewport)
+        .then((result) => {
+          if (!controller.signal.aborted && !interacted.current && result !== null
+            && isFooterEnrollmentEligible(result, selectedLocale.locale, viewport, typeof CSS !== "undefined" && CSS.supports("selector(::details-content)"))) {
+            enrollmentViewport.current = viewport;
+            setEnrollment(result);
+          }
+        }).finally(() => { if (enrollmentRequest.current === controller && timeout) clearTimeout(timeout); });
+    };
+    assign();
+    query?.addEventListener("change", assign);
+    return () => { if (timeout) clearTimeout(timeout); enrollmentRequest.current?.abort(); query?.removeEventListener("change", assign); };
   }, [mailingListKey, experiment, typeof localeInput === "string" ? localeInput : localeInput?.join(",")]);
 
   useEffect(() => {
     if (enrollment === null || footer.current === null || typeof IntersectionObserver !== "function") return;
-    const target = footer.current.querySelector('[data-slot="hraness-mailing-disclosure"] > summary')
-      ?? footer.current.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
+    const useButton = enrollmentViewport.current === "compact" || enrollment.assignment.layout === "button";
+    const target = footer.current.querySelector(useButton
+      ? '[data-slot="hraness-mailing-disclosure"] > summary'
+      : `form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
     if (target === null) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -198,7 +224,8 @@ export function HranessSiteFooter({
     body.set("email", email);
     body.set("source", HRANESS_MAILING_SOURCE);
     body.set("website", honeypot instanceof HTMLInputElement ? honeypot.value : "");
-    if (enrollment !== null) {
+    const currentViewport = typeof window.matchMedia === "function" && !window.matchMedia(FOOTER_WIDE_QUERY).matches ? "compact" : "wide";
+    if (enrollment !== null && enrollmentViewport.current === currentViewport) {
       markExposure(enrollment.token);
       body.set("experimentToken", enrollment.token);
     }
@@ -231,11 +258,16 @@ export function HranessSiteFooter({
       mailingList,
       renderState,
       socialLinks,
-      { locale, variant, sticky: placement === "sticky" },
+      { locale, variant, sticky: placement === "sticky", ...(experimentToken ? { experimentToken } : {}) },
     ),
     [mailingListKey, renderState, showBrand, socialKey, presentationKey],
   );
   const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
+
+  useEffect(() => {
+    if (footer.current === null || mailingList.kind !== "signup") return;
+    return attachFooterFoil(footer.current);
+  }, [innerHtml, mailingListKey]);
 
   // Cookie consent is a one-way localStorage decision; geo detection is advisory
   // and fails toward showing the note.

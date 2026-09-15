@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.9.2
+bun add github:hraness/site-footer#v0.10.0
 ```
 
 Start with the network footer and no mailing form:
@@ -217,10 +217,11 @@ the required client-component directive.
 The stylesheet follows `--plain-*` or common product theme variables when
 present and falls back to system colors. The footer is sticky by default and reserves its own document footprint, so
 content is not obscured. Pass `placement="flow"` for a host that owns a full-height
-layout and wants normal document flow. A narrow signup footer uses one row for identity and essential links
-plus one row for the form; at `47.5rem` it moves to one aligned row. Substack is
-always the first social link. Substack, X, LinkedIn, and GitHub stay
-visible at every supported width. The home link shows only the Ra icon and
+layout and wants normal document flow. The signup footer always uses one aligned row.
+Below `47.5rem`, every recipe presents a compact native disclosure button; opening
+it reveals the email form above the bar. At wider widths the layout experiment
+selects that button or an inline form. Substack always remains visible; X,
+LinkedIn and GitHub appear in that order as the social group's available space permits. The home link shows only the Ra icon and
 keeps the accessible name “Hraness home.”
 
 The footer keeps matching top and bottom padding around its controls and adds
@@ -229,10 +230,28 @@ both. Do not add another footer bar, viewport spacer, or blank padding after it 
 consumer layout. Product navigation belongs with the page navigation.
 
 The React adapter requests a short-lived Accounts enrollment and exposes it
-only after the visible footer settles. The four bounded factors are layout, copy
-style, color, and shimmer. Accounts keeps a randomized exploration stream and
+only after the visible footer settles. Presentation version 2 isolates compact and
+wide cohorts: compact assignments always use the button and are never counted
+as inline exposures. Crossing the breakpoint invalidates attribution; active
+email text is preserved. The native form carries the same eligible enrollment
+capability as enhanced submission. Version 2 tests copy and wide-screen layout;
+its holographic treatment is fixed (`color: green`, `shimmer: false`) so cosmetic
+arms do not dilute the results. Legacy recipes retain bounded color and shimmer
+support. Accounts keeps a randomized exploration stream and
 serves an evidence-qualified recipe to the remaining traffic; PostHog receives
 only anonymous enrollment events and confirmed double-opt-in conversions.
+
+English copy tests six stable, deliberately different paired hypotheses: “Send me
+things” / “your inbox, but weirder”; “I'm curious” / “where should the plot thicken?”;
+“Feed the goblin” / “goblin delivery address”; “Beam me up” / “earthling@probably.earth”;
+“Push the button” / “put the internet in here”; and “Let me in” / “your secret inbox lair”.
+Other locales retain their two localized styles. Programmatic labels still say
+email signup, independently of the playful visible copy.
+
+The CTA has a static holographic border in both renderers. React adds a
+pointer-following glint for fine mouse hover, with one coalesced animation frame
+per pointer update and no idle loop, filters, canvas or React rerenders. Reduced
+motion, coarse pointers and forced colors disable this enhancement.
 
 Version 0.9.1 halves the footer's resting height: a 1.75rem control row,
 28px fine-pointer social targets (44px stays for coarse pointers), smaller

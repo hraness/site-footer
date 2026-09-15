@@ -4,6 +4,7 @@ export interface FooterPresentation {
     readonly locale: FooterLocale;
     readonly variant: FooterVariant;
     readonly sticky: boolean;
+    readonly experimentToken?: string;
 }
 export declare const DEFAULT_FOOTER_PRESENTATION: FooterPresentation;
 export declare const HRANESS_FOOTER_LABEL = "Hraness network";

@@ -32,7 +32,7 @@ Resolve `ABSOLUTE_OOMPA_HOST_RUN` with `command -v oompa-host-run` first. The ve
 The four sequential contexts are `idle`, `pending`, `accepted`, and `error`. Each context:
 
 1. starts with `tab new` beside the inert bootstrap tab, with the `127.0.0.1` browser allowlist already active;
-2. drives the visible email field and Subscribe button when submission is part of the state;
+2. drives the visible email field and signup button when submission is part of the state;
 3. observes the exact Accounts request at the external boundary;
 4. captures two settled named-layout samples at widths 1280, 390, 320, and 760 in the same context; and
 5. inventories the scenario, returns to the inert bootstrap tab, closes the inactive scenario tab by stable ID, and verifies the post-close inventory.
@@ -52,7 +52,7 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - wide brand, mailing, and social centerlines within 1 CSS pixel;
 - equal input and submit heights;
 - an absolute hidden idle status that does not enlarge its form row;
-- exactly four social targets visible at wide and compact widths, with Substack first;
+- four social targets at wide widths and a visible priority prefix beginning with Substack at compact widths;
 - an icon-only home link;
 - positive computed top padding and bottom padding equal to that padding plus an independently measured device safe-area inset;
 - actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;

@@ -28,6 +28,11 @@ export declare const footerClasses: {
 };
 export declare function footerClassName(signup: boolean, sticky?: boolean): string;
 export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"]): string;
-export declare function socialItemClassName(): string;
+export declare function socialItemClassName(index?: number): string;
 export declare function mailingStatusClassName(state: string): string;
+export declare function disclosureClassNames(layout: FooterVariant["layout"]): {
+    root: string;
+    trigger: string;
+    panel: string;
+};
 //# sourceMappingURL=footer.stylex.d.ts.map

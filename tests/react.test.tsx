@@ -34,7 +34,7 @@ test("the idle React adapter renders identically to the static renderer", () => 
   expect(signupHtml).not.toContain("challenges.cloudflare.com");
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
   expect(signupHtml).toContain('name="website"');
-  expect(signupHtml).toContain('type="submit">Subscribe</button>');
+  expect(signupHtml).toContain('type="submit">Send me things</button>');
   expect(signupHtml).not.toContain('data-slot="hraness-mark"');
   const social = {
     github: {
@@ -460,7 +460,7 @@ test("the React adapter posts the native form, restores request focus, and confi
     expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
       .toBeFalse();
     expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
-      .toBe("Subscribe");
+      .toBe("Send me things");
     expect(window.document.querySelectorAll("script")).toHaveLength(0);
     input!.value = "reader@example.com";
 
@@ -537,6 +537,65 @@ test("the React adapter posts the native form, restores request focus, and confi
     for (const [name, descriptor] of previous) {
       if (descriptor === undefined) Reflect.deleteProperty(globalThis, name);
       else Object.defineProperty(globalThis, name, descriptor);
+    }
+  }
+});
+
+test("eligible enrollment survives native submission but resize removes stale attribution without erasing email", async () => {
+  const { window } = parseHTML('<div id="root"></div>');
+  const changes = new Set<() => void>();
+  const media = { matches: false, addEventListener: (_type: string, fn: () => void) => changes.add(fn), removeEventListener: (_type: string, fn: () => void) => changes.delete(fn) };
+  Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => query === "(min-width: 47.5rem)" ? media : { matches: false, addEventListener() {}, removeEventListener() {} } });
+  Object.defineProperty(window, "localStorage", { configurable: true, value: { getItem: () => "accepted" } });
+  const requests: Array<{ action: string; audience?: string; locale?: string; presentationVersion?: number; viewport?: string }> = [];
+  const token = "b".repeat(64);
+  const overrides = {
+    Comment: window.Comment, document: window.document, Element: window.Element, Event: window.Event,
+    HTMLElement: window.HTMLElement, HTMLInputElement: window.HTMLInputElement, MutationObserver: window.MutationObserver,
+    navigator: window.navigator, Node: window.Node, Text: window.Text, window, IS_REACT_ACT_ENVIRONMENT: true,
+    fetch: (async (_input: unknown, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body));
+      requests.push(body);
+      return Response.json({ version: 1, token, assignment: {
+        id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "goblin",
+        color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v2-${body.viewport}`,
+      } });
+    }) as typeof fetch,
+  };
+  const previous = new Map<string, PropertyDescriptor | undefined>();
+  for (const [key, value] of Object.entries(overrides)) {
+    previous.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
+    Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
+  }
+  const { createRoot } = await import("react-dom/client");
+  const container = window.document.querySelector<HTMLElement>("#root")!;
+  const root = createRoot(container);
+  try {
+    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
+    const email = container.querySelector<HTMLInputElement>('input[name="email"]')!;
+    const nativeToken = container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!;
+    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 2, viewport: "compact" }]);
+    expect(nativeToken.value).toBe(token);
+    expect(nativeToken.disabled).toBeFalse();
+    expect(container.querySelector("summary")?.textContent).toBe("Feed the goblin");
+    email.value = "do-not-erase@example.test";
+    await act(async () => { email.dispatchEvent(new window.Event("focusin", { bubbles: true })); });
+    await act(async () => { media.matches = true; changes.forEach(fn => fn()); });
+    expect(container.querySelector('input[name="email"]')).toBe(email);
+    expect(email.value).toBe("do-not-erase@example.test");
+    expect(nativeToken.disabled).toBeTrue();
+    expect(nativeToken.value).toBe("");
+    expect(requests).toHaveLength(1);
+    // A later parent render must not rebuild the now-unattributed active form.
+    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
+    expect(container.querySelector('input[name="email"]')).toBe(email);
+    expect(email.value).toBe("do-not-erase@example.test");
+    expect(nativeToken.disabled).toBeTrue();
+  } finally {
+    await act(async () => { root.unmount(); });
+    for (const [key, descriptor] of previous) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else Reflect.deleteProperty(globalThis, key);
     }
   }
 });
