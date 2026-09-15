@@ -9,6 +9,7 @@ import {
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
+  HRANESS_ACCOUNT_URL,
   HRANESS_SOCIAL_LINKS,
   parseHranessMailingListConfig,
   renderHranessSiteFooterInnerHtml,
@@ -21,7 +22,7 @@ import {
 } from "./internal.js";
 
 export const HRANESS_HOME_URL = "https://hraness.com/";
-export { HRANESS_MAILING_SUBSCRIBE_URL };
+export { HRANESS_MAILING_SUBSCRIBE_URL, HRANESS_ACCOUNT_URL };
 
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export const hranessSocialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS;
@@ -39,7 +40,7 @@ export interface HranessSiteFooterOptions {
   readonly placement?: "sticky" | "flow";
   /** A server may provide a checked experiment assignment; static rendering makes no analytics request. */
   readonly variant?: FooterVariant;
-  /** Explicitly select one mailing-list audience or omit mailing-list UI. */
+  /** Select signup, the signed-in account link, or no account/signup control. */
   readonly mailingList: HranessMailingListConfig;
   /** Omit the Hraness home link when the containing site already supplies that identity. */
   readonly showBrand?: boolean;

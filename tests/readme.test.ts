@@ -27,7 +27,8 @@ describe("README product contract", () => {
     const headings = [
       "Install and first render",
       "Choose an interface",
-      "Configure one mailing-list mode",
+      "Configure the account or mailing-list mode",
+      "Signed-in account navigation",
       "Retarget owned social destinations",
       "Ownership boundary",
       "Trust and privacy boundary",

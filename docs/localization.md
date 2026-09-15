@@ -1,6 +1,6 @@
-# Localized email signup
+# Localized signup and account controls
 
-The shared footer localizes only its email-signup controls and interaction states. Navigation, product names and social labels keep their existing language. The canonical `FOOTER_LOCALES` catalog contains 61 locale/region/script records and two localized paired copy styles, `direct` and `inviting`. English has six distinct v3 hypotheses (`direct`, `inviting`, `goblin`, `cosmic`, `chaos`, `secret`), with explicit email guidance or playful example addresses and short CTA text. The extra English styles are never silently substituted into another language. Each pair changes both the button and its placeholder. The accessible email label and all verification/error states stay stable between styles.
+The shared footer localizes its email-signup controls, interaction states and account link. Other navigation, product names and social labels keep their existing language. The canonical `FOOTER_LOCALES` catalog contains 61 locale/region/script records and two localized paired copy styles, `direct` and `inviting`. English has six distinct v3 hypotheses (`direct`, `inviting`, `goblin`, `cosmic`, `chaos`, `secret`), with explicit email guidance or playful example addresses and short CTA text. The extra English styles are never silently substituted into another language. Each pair changes both the button and its placeholder. The accessible email label and all verification/error states stay stable between styles.
 
 These are translation and transcreation drafts reviewed as code. They are **not native-speaker validated**. Primary sources below support particular terminology or constructions, not conversion performance or every generated sentence. No measured claim that a phrase is preferred by a whole locality is made. Regional siblings may deliberately share wording; dialect is not invented simply to make every key different.
 
@@ -22,7 +22,7 @@ Region-specific choices are deliberately bounded: Argentina uses voseo; Canadian
 
 ## Rendering and accessibility
 
-Set `lang` and `dir` on the signup surface only. Arabic, Hebrew, Persian and Urdu packs are RTL; keep the email input's typed value `dir="ltr"` and isolate any interpolated Latin text. Use logical spacing/insets and direction-aware flow. Do not reverse the entire network footer or social links. Placeholders supplement a programmatic label and never replace it. Preserve `type="email"`, `inputmode="email"`, `autocomplete="email"`, `autocapitalize="none"`, spellcheck off, and a required input. Associate localized error/status text through `aria-describedby`; use an appropriate live region and move focus only for an interaction outcome.
+Set `lang` and `dir` on the signup surface or account link only. Arabic, Hebrew, Persian and Urdu packs are RTL; keep the email input's typed value `dir="ltr"` and isolate any interpolated Latin text. Use logical spacing/insets and direction-aware flow. Do not reverse the entire network footer or social links. Placeholders supplement a programmatic label and never replace it. Preserve `type="email"`, `inputmode="email"`, `autocomplete="email"`, `autocapitalize="none"`, spellcheck off, and a required input. Associate localized error/status text through `aria-describedby`; use an appropriate live region and move focus only for an interaction outcome.
 
 Let button width and footer height grow: German, Finnish, Tamil and Thai are useful overflow cases. Do not truncate the action. Avoid forced uppercase, which changes Turkish and other language casing. Verification, focus, color and reduced-motion behavior must not depend on language. Browser-native email validity messages may use the browser's language; use `invalidEmail` for a localized custom error when the component handles validation itself. Never implement an ASCII-only email restriction as a side effect of localization.
 
@@ -61,3 +61,11 @@ For editorial review, compare each pair for action clarity, idiomatic register, 
 ## Presentation version 3
 
 The Accounts request includes `presentationVersion: 3` and `viewport: compact | wide`. Its `footer-v3-<viewport>` policy separates these recipes from historical observations. Compact enrollment is button-only; it does not fold inline allocations into button analytics. Each copy pair remains stable for its enrollment. A breakpoint change suppresses exposure and conversion attribution from the prior viewport, including native form submission. No-JavaScript rendering uses the same responsive disclosure and email form.
+
+## Account link
+
+The independent account label is localized through the same deterministic locale
+resolver. It is never drawn from an experiment copy style: English always says
+“My account.” Regional packs share an ordinary account-navigation label where
+appropriate. This is a native link, not a subscription confirmation or claim that
+a signup created an account. The host supplies confirmed authentication state.

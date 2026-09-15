@@ -1175,7 +1175,7 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const content = [...inner.querySelectorAll([
     ".hraness-site-footer__brand", ".hraness-site-footer__social-link",
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
-    ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger",
+    ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger", ".hraness-site-footer__account",
   ].join(","))].filter(element => element.checkVisibility()).map(element => element.getBoundingClientRect())
     .filter(box => box.width > 0 && box.height > 0 && box.top >= inner.getBoundingClientRect().top);
   if (content.length < 2) {
@@ -1747,9 +1747,10 @@ async function driveState(options: {
   return evidence;
 }
 
-async function driveNoSignup(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
+async function driveNoSignup(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string, account = false): Promise<readonly unknown[]> {
+  const scenario = account ? "account" : "no-signup";
   await browser.run(["tab", "new"]);
-  await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=none`]);
+  await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=${account ? "account&experiment=inline" : "none"}`]);
   await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
   const evidence: unknown[] = [];
   for (const width of [320, 390, 760, 1280]) {
@@ -1761,30 +1762,39 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       const brand = footer.querySelector('.hraness-site-footer__brand');
       const links = [...footer.querySelectorAll('a')]
         .filter(link => link.closest('[data-slot="hraness-cookie-consent"]') === null);
-      if (links.length !== 5 || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
-      if (footer.querySelector('form, script, .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
+      if (links.length !== ${account ? 6 : 5} || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
+      if (footer.querySelector('form, input, script, [data-foil], [data-copy-variant], .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();
-      if (state.requests.length || state.errors.length) throw new Error('No-signup footer used a provider boundary.');
+      if (state.requests.length || state.errors.length || window.__siteFooterFixture.experimentSnapshot().length) throw new Error('No-signup footer used a signup or experiment boundary.');
+      const account = footer.querySelector('[data-slot="hraness-account-link"]');
+      if (${account}) {
+        if (!(account instanceof HTMLAnchorElement) || account.href !== 'https://account.hraness.com/' || account.textContent !== 'My account' || account.target) throw new Error('Account navigation lost native semantics.');
+        const style = getComputedStyle(account);
+        if (style.backgroundImage !== 'none' || style.borderStyle !== 'solid' || parseFloat(style.borderWidth) < 1 || style.animationName !== 'none') throw new Error('Account link must have a normal border without foil or animation.');
+        if (!footer.querySelector('.hraness-site-footer__social-link').checkVisibility()) throw new Error('Account mode lost Substack.');
+      }
       if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('No-signup footer overflows.');
-      const boxes = links.map(link => {
+      const boxes = links.filter(link => link.checkVisibility()).map(link => {
         const rect = link.getBoundingClientRect();
         if (rect.width < 28 || rect.height < 28 || rect.left < 0 || rect.right > innerWidth + 0.5) throw new Error('Footer target is clipped or too small.');
-        return { name: link.getAttribute('aria-label'), x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+        return { name: link.getAttribute('aria-label') ?? link.textContent, x: rect.x, y: rect.y, width: rect.width, height: rect.height };
       });
+      const centers = boxes.map(box => box.y + box.height / 2);
+      if (Math.max(...centers) - Math.min(...centers) > 1) throw new Error('Footer links must stay in one centered row.');
       return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes };
     })()`);
     const spacing = assertFooterSpacing(
-      await browser.evaluate(FOOTER_SPACING_EXPRESSION), `no-signup/${String(width)}`,
+      await browser.evaluate(FOOTER_SPACING_EXPRESSION), `${scenario}/${String(width)}`,
     );
-    const screenshotPath = join(runDirectory, `no-signup-${String(width)}.png`);
+    const screenshotPath = join(runDirectory, `${scenario}-${String(width)}.png`);
     await screenshot(browser, screenshotPath);
     evidence.push({ geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   await browser.run(["press", "Tab"]);
-  for (const name of ["Hraness home", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
+  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
     const focused = await browser.evaluate(`(() => {
       const element = document.activeElement;
-      return { name: element?.getAttribute('aria-label'), outline: element ? getComputedStyle(element).outlineStyle : null };
+      return { name: element?.getAttribute('aria-label') ?? element?.textContent, outline: element ? getComputedStyle(element).outlineStyle : null };
     })()`);
     if (!isRecord(focused) || focused.name !== name || focused.outline !== "solid") {
       throw new Error(`Keyboard focus did not visibly reach ${name}.`);
@@ -1867,6 +1877,7 @@ async function runVerifier(): Promise<string> {
   let serverCleanup: "failed" | "passed" = "failed";
   const evidence: ScenarioEvidence[] = [];
   let noSignupEvidence: readonly unknown[] = [];
+  let accountEvidence: readonly unknown[] = [];
   let bootstrapInventory: unknown = null;
   let finalInventory: unknown = null;
   let postDriveSource: SourceIdentity | null = null;
@@ -1917,6 +1928,7 @@ async function runVerifier(): Promise<string> {
     evidence.push(await driveState({ bootstrapTabId, browser, runDirectory: inlineDirectory, state: "idle", experiment: "inline" }));
     assertCrossStateGeometry(evidence);
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
+    accountEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId, true);
     finalInventory = await browser.run(["tab"]);
     postDriveSource = sourceIdentity();
     assertSameSourceIdentity(initialSource, postDriveSource);
@@ -1968,6 +1980,7 @@ async function runVerifier(): Promise<string> {
     readiness,
     scenarios: evidence,
     noSignup: noSignupEvidence,
+    account: accountEvidence,
     schema: "hraness.site-footer.browser-verification/v1",
     source: {
       afterCleanup: finalSource,

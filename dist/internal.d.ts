@@ -14,6 +14,7 @@ export declare const HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 export declare const HRANESS_MAILING_SOURCE = "hraness-site-footer";
 export declare const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 export declare const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
+export declare const HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 export declare const HRANESS_MAILING_HONEYPOT_FIELD = "website";
 export declare const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 export declare const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
@@ -24,6 +25,8 @@ export type HranessMailingListConfig = Readonly<{
     kind: "signup";
 }> | Readonly<{
     kind: "none";
+}> | Readonly<{
+    kind: "account";
 }>;
 export type HranessMailingListRenderState = Readonly<{
     kind: "idle";

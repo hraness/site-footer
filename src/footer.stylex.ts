@@ -180,6 +180,17 @@ const styles = stylex.create({
     gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(12rem, 26rem) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
     gridTemplateRows: "var(--hraness-site-footer-content-block-size)",
   },
+  innerAccount: {
+    gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+  },
+  account: {
+    gridArea: "mailing", display: "inline-flex", alignItems: "center", justifyContent: "center",
+    "min-inline-size": 0, "max-inline-size": "12rem", "padding-inline": "0.625rem",
+    borderRadius: "0.375rem", color: "var(--hraness-site-footer-muted)",
+    fontSize: "0.8125rem", fontWeight: 500, lineHeight: 1, textDecoration: "none",
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+  },
   flexCenter: { display: "flex", alignItems: "center" },
   fixedFlex: { flexGrow: 0, flexShrink: 0, flexBasis: "auto" },
   brand: {
@@ -314,6 +325,7 @@ function className(hook: string, ...recipes: Array<(typeof styles)[keyof typeof 
 }
 
 export const footerClasses = {
+  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focus),
   disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${stylex.props(disclosureMarker).className}`,
   disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focus, styles.motion),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
@@ -347,9 +359,9 @@ export function footerClassName(signup: boolean, sticky = true): string {
   return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
 }
 
-export function footerInnerClassName(signup: boolean, sticky = true, color: FooterVariant["color"] = "green"): string {
+export function footerInnerClassName(signup: boolean, sticky = true, color: FooterVariant["color"] = "green", account = false): string {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, sticky && styles.stickyBar, signup && colorStyle);
 }
 
 export function socialItemClassName(index = 0): string {

@@ -1,7 +1,7 @@
 # @hraness/site-footer
 
 Add the same Hraness identity, accessible network links, and optional
-product-scoped email signup to a React or static website. One package owns the
+product-scoped email signup or signed-in account access to a React or static website. One package owns the
 markup, link order, mailing action, response states, and responsive layout.
 Each product chooses its mailing audience, theme bindings, and security policy.
 
@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.10.2
+bun add github:hraness/site-footer#v0.11.0
 ```
 
 Start with the network footer and no mailing form:
@@ -86,7 +86,7 @@ site. A bundler resolves the compatibility stylesheet's relative import. If you
 copy that compatibility file itself, retain its sibling `dist/stylex.css` path.
 No consumer compiler or React runtime is required by the static renderer.
 
-## Configure one mailing-list mode
+## Configure the account or mailing-list mode
 
 Every consumer chooses one explicit mode.
 
@@ -141,6 +141,31 @@ React sends `Accept: application/json`. A successful 2xx response replaces the
 form with `Check your email to confirm`. Provider validation details remain
 private to Accounts.
 
+## Signed-in account navigation
+
+Use `mailingList={{ kind: "account" }}` for a confirmed signed-in visitor. The
+footer renders the localized “My account” native link to
+`https://account.hraness.com/`, with a normal muted border and no signup form,
+holographic effect, experiment assignment, exposure, token, or click tracking.
+The static renderer supports the same state without JavaScript.
+
+The host owns authentication; the footer never reads session cookies or fetches
+identity. Use `none` while the initial session is unresolved or unavailable,
+`account` when signed in, and `signup` only after confirming signed-out status.
+These states are mutually exclusive and require no audience for account access.
+
+```tsx
+<HranessSiteFooter mailingList={{ kind: "account" }} />
+```
+
+During a background session refresh, a host may retain the current signup form
+and pass `experiment={false}` to preserve typed email while disabling all signup
+attribution. The existing native hidden token is disabled before another event
+can submit it. An interacted form remains unattributed after refresh; a fresh
+signup surface may receive a new enrollment. Switching to account or none aborts
+pending signup work and ignores late responses. The independent cookie-consent
+behavior and social links stay available in every mode.
+
 ## Retarget owned social destinations
 
 The package owns the platform set and order: Substack, X, LinkedIn, and
@@ -189,9 +214,10 @@ without creating another footer contract.
 
 ## Trust and privacy boundary
 
-With `mailingList: { kind: "none" }`, the package renders no form or external
-script and initiates no request. It does not create cookies or persistent
-browser storage in either mode.
+With `mailingList: { kind: "none" }` or `{ kind: "account" }`, the package renders
+no signup form or external script and initiates no signup or experiment request.
+The shared React cookie-consent check and acceptance storage described above
+remain independent of this mode.
 
 Signup changes that boundary in visible, bounded ways:
 
