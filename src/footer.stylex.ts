@@ -38,14 +38,8 @@ const styles = stylex.create({
     fontSize: "0.875rem",
   },
   signup: {
-    "--hraness-site-footer-content-block-size": {
-      default: "calc(var(--hraness-site-footer-control-block-size) + var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-form-block-size))",
-      "@media (min-width: 47.5rem)": "max(var(--hraness-site-footer-social-target), var(--hraness-site-footer-form-block-size))",
-    },
-    "--hraness-site-footer-mailing-overlay-clearance": {
-      default: "calc(var(--hraness-site-footer-control-block-size) + var(--hraness-site-footer-row-gap))",
-      "@media (min-width: 47.5rem)": "0rem",
-    },
+    "--hraness-site-footer-content-block-size": "max(var(--hraness-site-footer-social-target), var(--hraness-site-footer-form-block-size))",
+    "--hraness-site-footer-mailing-overlay-clearance": "0rem",
   },
   stickyFootprint: { "min-block-size": "var(--hraness-site-footer-bar-block-size)" },
   stickyBar: { position: "fixed", "inset-inline": 0, "inset-block-end": 0, zIndex: 40 },
@@ -67,18 +61,48 @@ const styles = stylex.create({
   experimentBorder: {
     borderColor: { default: "var(--hraness-site-footer-field-line, var(--hraness-site-footer-line))", "@media (forced-colors: active)": "ButtonText" },
   },
-  disclosure: { position: "relative", gridArea: "mailing", "min-inline-size": 0 },
+  disclosure: { position: { default: "static", "@media (min-width: 47.5rem)": "relative" }, gridArea: "mailing", "min-inline-size": 0, "max-inline-size": { default: "12rem", "@media (min-width: 47.5rem)": "26rem" } },
+  disclosureInline: {
+    // Keep one native form: on wide screens the same closed disclosure becomes
+    // the inline experiment arm. Modern details hides via content-visibility.
+    contentVisibility: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": { "::details-content": "visible" } } },
+  },
+  triggerInline: { display: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "none" } } },
+  panelInline: {
+    display: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "block" } },
+    position: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "static" } },
+    padding: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
+    borderWidth: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
+    "inline-size": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "100%" } },
+  },
   disclosureTrigger: {
     listStyleType: "none", "inline-size": "fit-content", "max-inline-size": "100%",
     borderRadius: "0.375rem", "margin-inline-start": 0,
+    fontSize: { default: "0.75rem", "@media (min-width: 47.5rem)": "0.8125rem" },
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+    "padding-inline": "0.625rem",
     display: { default: "inline-flex", "::-webkit-details-marker": "none" },
   },
   disclosurePanel: {
-    position: "absolute", "inset-block-end": "calc(100% + 0.75rem)", "inset-inline-start": 0,
+    position: "absolute", "inset-block-end": "calc(100% + 0.75rem)",
+    "inset-inline-start": { default: "1rem", "@media (min-width: 47.5rem)": 0 },
     "inline-size": "min(26rem, calc(100vw - 2rem))", "max-inline-size": "calc(100vw - 2rem)",
-    "padding-block": "0.75rem", "padding-inline": "0.75rem", borderRadius: "0.5rem",
+    "padding-block": "0.75rem", "padding-inline": "0.75rem", borderRadius: "0.5rem", zIndex: 3,
     backgroundColor: "var(--hraness-site-footer-background)",
   },
+  holographic: {
+    borderWidth: "1.5px",
+    borderColor: { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
+    backgroundColor: "var(--hraness-site-footer-background)",
+    color: "var(--hraness-site-footer-foreground)",
+    backgroundImage: {
+      default: "linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), #ffffff 0%, #ffffff00 65%), conic-gradient(from var(--footer-foil-angle, 135deg), #ff86d7, #af96ff, #73e8ff, #8cffba, #fff29b, #ffaf85, #ff86d7)",
+      "@media (forced-colors: active)": "none",
+    },
+    backgroundOrigin: "padding-box, border-box, border-box",
+    backgroundClip: "padding-box, border-box, border-box",
+  },
+  compactConfirmation: { fontSize: "0.75rem", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" },
   shimmer: {
     "--hraness-site-footer-shimmer-spread": "calc(3ch + 40px)",
     animationName: { default: null, "@media (prefers-reduced-motion: no-preference)": textShimmer, "@media (forced-colors: active)": "none" },
@@ -134,9 +158,9 @@ const styles = stylex.create({
     "padding-inline-end": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right))",
   },
   innerSignup: {
-    gridTemplateAreas: { default: '"brand links" "mailing mailing"', "@media (min-width: 47.5rem)": '"brand mailing consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(12rem, 26rem) auto minmax(max-content, 1fr)" },
-    gridTemplateRows: { default: "var(--hraness-site-footer-control-block-size) var(--hraness-site-footer-form-block-size)", "@media (min-width: 47.5rem)": "var(--hraness-site-footer-content-block-size)" },
+    gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(12rem, 26rem) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateRows: "var(--hraness-site-footer-content-block-size)",
   },
   flexCenter: { display: "flex", alignItems: "center" },
   fixedFlex: { flexGrow: 0, flexShrink: 0, flexBasis: "auto" },
@@ -149,7 +173,7 @@ const styles = stylex.create({
   },
   mark: { "inline-size": "1.375rem", "block-size": "1.375rem" },
   links: {
-    gridArea: "links",
+    gridArea: "links", containerName: "hraness-socials", containerType: "inline-size",
     "inline-size": "100%", "min-inline-size": 0, justifyContent: "flex-end", "margin-inline-start": "auto",
   },
   socials: {
@@ -161,6 +185,9 @@ const styles = stylex.create({
     flexGrow: 0, flexShrink: 0, flexBasis: "var(--hraness-site-footer-social-target)", "min-inline-size": 0, "min-block-size": 0,
   },
   socialAlways: { display: "block" },
+  socialSecond: { display: { default: "none", "@media (pointer: fine), (pointer: none)": { "@container hraness-socials (min-width: 3.625rem)": "block" }, "@media (pointer: coarse)": { "@container hraness-socials (min-width: 90px)": "block" } } },
+  socialThird: { display: { default: "none", "@media (pointer: fine), (pointer: none)": { "@container hraness-socials (min-width: 5.5rem)": "block" }, "@media (pointer: coarse)": { "@container hraness-socials (min-width: 136px)": "block" } } },
+  socialFourth: { display: { default: "none", "@media (pointer: fine), (pointer: none)": { "@container hraness-socials (min-width: 7.375rem)": "block" }, "@media (pointer: coarse)": { "@container hraness-socials (min-width: 182px)": "block" } } },
   socialLink: {
     "inline-size": "100%", "block-size": "100%", justifyContent: "center", borderRadius: "999px",
     color: { default: "var(--hraness-site-footer-muted)", "@media (hover: hover)": { ":hover": "var(--hraness-site-footer-foreground)" } },
@@ -176,8 +203,10 @@ const styles = stylex.create({
   },
   socialIcon: { "inline-size": "1rem", "block-size": "1rem" },
   consent: {
-    // Compact templates omit a `consent` area: spanning every column drops the
-    // note into an implicit trailing row that only exists while it is rendered.
+    // The advisory consent note floats above compact bars without creating a row.
+    position: { default: "absolute", "@media (min-width: 47.5rem)": "static" },
+    "inset-block-end": { default: "calc(100% + 0.5rem)", "@media (min-width: 47.5rem)": "auto" },
+    "inset-inline-end": "1rem", backgroundColor: "var(--hraness-site-footer-background)",
     gridColumnStart: { default: 1, "@media (min-width: 47.5rem)": "consent" },
     gridColumnEnd: { default: -1, "@media (min-width: 47.5rem)": "consent" },
     gridRowStart: { default: null, "@media (min-width: 47.5rem)": "consent" },
@@ -223,7 +252,7 @@ const styles = stylex.create({
     fontOpticalSizing: "inherit", fontVariationSettings: "inherit",
   },
   mailingInput: {
-    "inline-size": "100%", "min-inline-size": 0,
+    "inline-size": "100%", "min-inline-size": 0, fontSize: "0.8125rem",
     borderStartStartRadius: "0.375rem", borderStartEndRadius: 0, borderEndEndRadius: 0, borderEndStartRadius: "0.375rem",
     backgroundColor: "var(--hraness-site-footer-field-background)",
     color: { default: "var(--hraness-site-footer-foreground)", "::placeholder": "var(--hraness-site-footer-muted)" },
@@ -236,7 +265,7 @@ const styles = stylex.create({
     color: { default: "var(--hraness-site-footer-action-foreground)", "@media (forced-colors: active)": "ButtonFace" },
     cursor: { default: "pointer", ":disabled": "wait" },
     opacity: { default: null, ":disabled": 0.62, "@media (hover: hover)": { ":hover:not(:disabled)": 0.82 } },
-    fontWeight: 650, "padding-inline": "clamp(0.625rem, 1.5vw, 0.875rem)", "max-inline-size": "60%", textAlign: "center",
+    fontWeight: 650, fontSize: "0.8125rem", "padding-inline": "0.625rem", "max-inline-size": "55%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center",
   },
   mailingStatus: {
     position: "absolute", zIndex: 2,
@@ -267,7 +296,7 @@ function className(hook: string, ...recipes: Array<(typeof styles)[keyof typeof 
 
 export const footerClasses = {
   disclosure: className("hraness-site-footer__disclosure", styles.disclosure),
-  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.experimentBorder, styles.disclosureTrigger, styles.focus, styles.motion),
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focus, styles.motion),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
@@ -288,8 +317,8 @@ export const footerClasses = {
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
   mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
-  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.focus, styles.motion),
-  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.focus),
+  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focus, styles.motion),
+  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focus),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden),
 };
 
@@ -302,12 +331,21 @@ export function footerInnerClassName(signup: boolean, sticky = true, color: Foot
   return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, sticky && styles.stickyBar, signup && colorStyle);
 }
 
-export function socialItemClassName(): string {
-  return className("hraness-site-footer__social-item", styles.socialItem, styles.socialAlways);
+export function socialItemClassName(index = 0): string {
+  return className("hraness-site-footer__social-item", styles.socialItem,
+    index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
 }
 
 export function mailingStatusClassName(state: string): string {
   return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus,
     state !== "idle" && styles.statusVisible,
     state === "error" && styles.statusError);
+}
+
+export function disclosureClassNames(layout: FooterVariant["layout"]): { root: string; trigger: string; panel: string } {
+  return {
+    root: `${footerClasses.disclosure} ${layout === "inline" ? stylex.props(styles.disclosureInline).className : ""}`.trim(),
+    trigger: `${footerClasses.disclosureTrigger} ${layout === "inline" ? stylex.props(styles.triggerInline).className : ""}`.trim(),
+    panel: `${footerClasses.disclosurePanel} ${layout === "inline" ? stylex.props(styles.panelInline).className : ""}`.trim(),
+  };
 }

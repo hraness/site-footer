@@ -129,7 +129,7 @@ describe("Hraness site footer", () => {
     expect(footer?.querySelector("script")).toBeNull();
     expect(html).not.toContain("turnstile");
     expect(html).not.toContain("challenges.cloudflare.com");
-    expect(submit?.textContent).toBe("Subscribe");
+    expect(submit?.textContent).toBe("Send me things");
     const status = form?.querySelector('[data-slot="hraness-mailing-list-status"]');
     expect(status?.id).toBe("hraness-mailing-list-status");
     expect(status?.getAttribute("aria-atomic")).toBe("true");
@@ -295,4 +295,17 @@ describe("Hraness site footer", () => {
     expect(document.querySelector("mask")).toBeNull();
     expect(html).not.toContain("0thernet");
   });
+});
+
+
+test("inline recipes retain one native mobile disclosure and one uniquely labelled form", () => {
+  const { document } = parseHTML(renderHranessSiteFooter({ mailingList: { kind: "signup", audience: "hraness" }, variant: { layout: "inline", copyStyle: "goblin", color: "blue", shimmer: false } }));
+  const disclosure = document.querySelector('[data-slot="hraness-mailing-disclosure"]');
+  expect(disclosure?.tagName).toBe("DETAILS");
+  expect(disclosure?.hasAttribute("open")).toBeFalse();
+  expect(disclosure?.querySelector("summary")?.textContent).toBe("Feed the goblin");
+  expect(disclosure?.querySelector("summary")?.getAttribute("aria-label")).toContain("Subscribe by email");
+  expect(document.querySelectorAll("form")).toHaveLength(1);
+  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("goblin delivery address");
+  expect(document.querySelector('input[name="email"]')?.closest("label")?.textContent).toBe("Email address");
 });

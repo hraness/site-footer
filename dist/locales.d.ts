@@ -3,7 +3,38 @@
  * See docs/localization.md for evidence, register choices and fallback rules.
  * These are reviewed-as-code translation drafts, not native-speaker validation.
  */
-export type FooterCopyStyle = "direct" | "inviting";
+export declare const FOOTER_COPY_STYLES: readonly ["direct", "inviting", "goblin", "cosmic", "chaos", "secret"];
+export type FooterCopyStyle = typeof FOOTER_COPY_STYLES[number];
+export type LocalizedFooterCopyStyle = "direct" | "inviting";
+/** Paired hypotheses stay stable within an enrollment; never randomize each render. */
+export declare const ENGLISH_FOOTER_COPY: Readonly<{
+    readonly direct: {
+        readonly button: "Send me things";
+        readonly placeholder: "your inbox, but weirder";
+    };
+    readonly inviting: {
+        readonly button: "I'm curious";
+        readonly placeholder: "where should the plot thicken?";
+    };
+    readonly goblin: {
+        readonly button: "Feed the goblin";
+        readonly placeholder: "goblin delivery address";
+    };
+    readonly cosmic: {
+        readonly button: "Beam me up";
+        readonly placeholder: "earthling@probably.earth";
+    };
+    readonly chaos: {
+        readonly button: "Push the button";
+        readonly placeholder: "put the internet in here";
+    };
+    readonly secret: {
+        readonly button: "Let me in";
+        readonly placeholder: "your secret inbox lair";
+    };
+}>;
+export declare function isFooterCopyStyle(value: unknown): value is FooterCopyStyle;
+export declare function supportsFooterCopyStyle(locale: string, style: FooterCopyStyle): boolean;
 export type FooterMessages = Readonly<{
     button: string;
     placeholder: string;
@@ -20,7 +51,7 @@ export type FooterMessages = Readonly<{
 export type FooterLocale = Readonly<{
     locale: string;
     dir: "ltr" | "rtl";
-    styles: Readonly<Record<FooterCopyStyle, FooterMessages>>;
+    styles: Readonly<Record<LocalizedFooterCopyStyle, FooterMessages>> & Readonly<Partial<Record<FooterCopyStyle, FooterMessages>>>;
 }>;
 /** Immutable, canonical BCP 47 locale records. Regional siblings may share wording. */
 export declare const FOOTER_LOCALES: Readonly<Record<string, FooterLocale>>;

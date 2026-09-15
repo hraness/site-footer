@@ -6,7 +6,7 @@
 - Two-row compact composition at 390 by 844.
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
-- All four social targets visible at both widths, with Substack first.
+- One row at both widths; compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
 - Icon-only home link with an accessible name and a full control-sized target.
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.

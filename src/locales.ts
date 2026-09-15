@@ -3,7 +3,27 @@
  * See docs/localization.md for evidence, register choices and fallback rules.
  * These are reviewed-as-code translation drafts, not native-speaker validation.
  */
-export type FooterCopyStyle = "direct" | "inviting";
+export const FOOTER_COPY_STYLES = ["direct", "inviting", "goblin", "cosmic", "chaos", "secret"] as const;
+export type FooterCopyStyle = typeof FOOTER_COPY_STYLES[number];
+export type LocalizedFooterCopyStyle = "direct" | "inviting";
+
+/** Paired hypotheses stay stable within an enrollment; never randomize each render. */
+export const ENGLISH_FOOTER_COPY = Object.freeze({
+  direct: { button: "Send me things", placeholder: "your inbox, but weirder" },
+  inviting: { button: "I'm curious", placeholder: "where should the plot thicken?" },
+  goblin: { button: "Feed the goblin", placeholder: "goblin delivery address" },
+  cosmic: { button: "Beam me up", placeholder: "earthling@probably.earth" },
+  chaos: { button: "Push the button", placeholder: "put the internet in here" },
+  secret: { button: "Let me in", placeholder: "your secret inbox lair" },
+} as const);
+
+export function isFooterCopyStyle(value: unknown): value is FooterCopyStyle {
+  return typeof value === "string" && (FOOTER_COPY_STYLES as readonly string[]).includes(value);
+}
+
+export function supportsFooterCopyStyle(locale: string, style: FooterCopyStyle): boolean {
+  return /^en(?:-|$)/u.test(locale) || style === "direct" || style === "inviting";
+}
 
 export type FooterMessages = Readonly<{
   button: string;
@@ -22,7 +42,7 @@ export type FooterMessages = Readonly<{
 export type FooterLocale = Readonly<{
   locale: string;
   dir: "ltr" | "rtl";
-  styles: Readonly<Record<FooterCopyStyle, FooterMessages>>;
+  styles: Readonly<Record<LocalizedFooterCopyStyle, FooterMessages>> & Readonly<Partial<Record<FooterCopyStyle, FooterMessages>>>;
 }>;
 
 type SharedMessages = Omit<FooterMessages, "button" | "placeholder" | "emailLabel">;
@@ -526,6 +546,9 @@ function defineLocale(
     styles: Object.freeze({
       direct: Object.freeze({ ...shared, button: directButton, placeholder: directPlaceholder, emailLabel: directPlaceholder }),
       inviting: Object.freeze({ ...shared, button: invitingButton, placeholder: invitingPlaceholder, emailLabel: directPlaceholder }),
+      ...(messageKey === "en" ? Object.fromEntries(Object.entries(ENGLISH_FOOTER_COPY).map(([key, copy]) => [
+        key, Object.freeze({ ...shared, ...copy, emailLabel: "Email address" }),
+      ])) : {}),
     }),
   });
 }

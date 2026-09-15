@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { FOOTER_LOCALES, resolveFooterLocale } from "../src/locales.js";
+import { ENGLISH_FOOTER_COPY, FOOTER_LOCALES, resolveFooterLocale } from "../src/locales.js";
 
 test("ships a broad bounded locale catalog with paired copy styles", () => {
   expect(Object.keys(FOOTER_LOCALES).length).toBeGreaterThanOrEqual(60);
@@ -21,4 +21,19 @@ test("preserves regional and script choices and falls back by language", () => {
   expect(resolveFooterLocale("ar").dir).toBe("rtl");
   expect(resolveFooterLocale(["xx", "fr-CA"]).locale).toBe("fr-CA");
   expect(resolveFooterLocale("invalid").locale).toBe("en");
+});
+
+
+test("English hypotheses pair distinct short CTAs with surprising placeholders and stable email labels", () => {
+  const copies = Object.values(ENGLISH_FOOTER_COPY);
+  expect(new Set(copies.map(copy => copy.button)).size).toBe(6);
+  expect(new Set(copies.map(copy => copy.placeholder)).size).toBe(6);
+  for (const locale of Object.values(FOOTER_LOCALES).filter(locale => locale.locale.startsWith("en"))) {
+    for (const key of Object.keys(ENGLISH_FOOTER_COPY) as Array<keyof typeof ENGLISH_FOOTER_COPY>) {
+      expect(locale.styles[key]?.emailLabel).toBe("Email address");
+      expect(locale.styles[key]?.button.length).toBeLessThanOrEqual(16);
+      expect(locale.styles[key]?.placeholder.length).toBeLessThanOrEqual(30);
+    }
+  }
+  expect(FOOTER_LOCALES["es-AR"]?.styles.goblin).toBeUndefined();
 });

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createStylexTransformCollector, readStylexPackageManifest } from "@hraness/ui/stylex-build";
 import { resolve } from "node:path";
 import {
-  footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, socialItemClassName,
+  disclosureClassNames, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, socialItemClassName,
 } from "../src/footer.stylex.js";
 import { assertPresentationBoundary, assertSourceBoundary } from "../scripts/check-stylex-artifacts.js";
 
@@ -24,7 +24,7 @@ function contains(classes: string, declaration: string): void {
 describe("compiled footer presentation", () => {
   test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.9.2");
+    expect(pkg.version).toBe("0.10.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -50,7 +50,7 @@ describe("compiled footer presentation", () => {
     expect(cssFor(root)).not.toMatch(/[{;]block-size:/u);
     contains(footerInnerClassName(false), "position:fixed");
     contains(footerInnerClassName(false), 'grid-template-areas:"brand consent links"');
-    contains(footerInnerClassName(true), 'grid-template-areas:"brand links" "mailing mailing"');
+    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing links"');
     contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing consent links"');
     contains(footerInnerClassName(true), "@media (min-width:47.5rem)");
     contains(signup, "--hraness-site-footer-mailing-overlay-clearance:0rem");
@@ -70,14 +70,28 @@ describe("compiled footer presentation", () => {
     expect(footerClassName(false).split(" ")[0]).toBe("hraness-site-footer");
   });
 
-  test("keeps every social target visible and the icon home link fully clickable", () => {
+  test("keeps Substack visible and progressively reveals later social targets", () => {
     const css = cssFor(socialItemClassName());
     expect(css).toContain("display:block");
     expect(css).not.toContain("display:none");
     expect(css).not.toContain("@container");
+    for (const index of [1, 2, 3]) {
+      expect(cssFor(socialItemClassName(index))).toContain("display:none");
+      expect(cssFor(socialItemClassName(index))).toContain("@container hraness-socials".replaceAll(" ", ""));
+    }
     contains(footerClasses.brand, "min-inline-size:var(--hraness-site-footer-control-block-size)");
     contains(footerClasses.brand, "min-block-size:var(--hraness-site-footer-control-block-size)");
     contains(footerClassName(false), "font-size:.875rem");
+  });
+
+  test("shares a static holographic border and responsive native disclosure", () => {
+    contains(footerClasses.disclosureTrigger, "conic-gradient(");
+    contains(footerClasses.disclosureTrigger, "var(--footer-foil-x,50%)");
+    contains(disclosureClassNames("inline").root, "@supports selector(::details-content)");
+    contains(disclosureClassNames("inline").trigger, "@supports selector(::details-content)");
+    contains(disclosureClassNames("inline").root, "content-visibility:visible");
+    contains(disclosureClassNames("inline").trigger, "display:none");
+    expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("animation-name");
   });
 
   test("reserves matching visual padding plus the device safe area in both layouts", () => {
@@ -106,8 +120,8 @@ describe("compiled footer presentation", () => {
       contains(classes, "@media (prefers-reduced-motion:no-preference)");
       contains(classes, "transition-duration:.12s");
     }
-    contains(footerClasses.mailingSubmit, "background-color:ButtonText");
-    contains(footerClasses.mailingSubmit, "color:ButtonFace");
+    contains(footerClasses.mailingSubmit, "border-color:ButtonText");
+    contains(footerClasses.mailingSubmit, "background-image:none");
     contains(footerInnerClassName(false), "background-color:Canvas");
   });
 
@@ -142,7 +156,8 @@ describe("compiled footer presentation", () => {
       // font-language-override, a separately cascaded child palette must survive.
       expect(cssFor(classes)).not.toContain("font-palette:");
       contains(classes, "background-image:none");
-      contains(classes, "background-origin:padding-box");
+      if (classes === footerClasses.mailingInput) contains(classes, "background-origin:padding-box");
+      else contains(classes, "background-origin:padding-box,border-box,border-box");
       contains(classes, "border-image-source:none");
     }
     contains(footerClasses.mailingInput, "border-start-start-radius:.375rem");
@@ -182,4 +197,13 @@ describe("presentation boundary negative controls", () => {
       'const styles = stylex.create({ root: { color: "red" } });',
     ]) expect(() => assertSourceBoundary("src/react.tsx", mutation)).toThrow();
   });
+});
+
+
+test("runtime presentation exception only permits the foil controller's numeric inputs", () => {
+  expect(() => assertSourceBoundary("src/foil.ts", 'target.style.setProperty("--footer-foil-x", "50%");')).not.toThrow();
+  for (const path of ["src/foil.ts", "src/react.tsx"]) {
+    expect(() => assertSourceBoundary(path, 'target.style.setProperty("color", "red");')).toThrow();
+  }
+  expect(() => assertSourceBoundary("src/react.tsx", 'target.style.setProperty("--footer-foil-x", "50%");')).toThrow();
 });
