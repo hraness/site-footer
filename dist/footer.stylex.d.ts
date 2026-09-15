@@ -4,6 +4,7 @@ export declare const disclosureMarker: Readonly<{
     readonly marker: stylex.StyleXClassNameFor<"marker", symbol>;
 }>;
 export declare const footerClasses: {
+    account: string;
     disclosure: string;
     disclosureTrigger: string;
     triggerClosed: string;
@@ -33,7 +34,7 @@ export declare const footerClasses: {
     visuallyHidden: string;
 };
 export declare function footerClassName(signup: boolean, sticky?: boolean): string;
-export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"]): string;
+export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"], account?: boolean): string;
 export declare function socialItemClassName(index?: number): string;
 export declare function mailingStatusClassName(state: string): string;
 export declare function disclosureClassNames(layout: FooterVariant["layout"]): {

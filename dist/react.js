@@ -461,6 +461,30 @@ var styles = {
     k9llMU: "x42z6zh",
     $$css: true
   },
+  innerAccount: {
+    kC13JO: "x1m6ayzh xy48kin",
+    kumcoG: "xo69rmz x1drxdiy",
+    $$css: true
+  },
+  account: {
+    kJuA4N: "x1qaspin",
+    k1xSpc: "x3nfvp2",
+    kGNEyG: "x6s0dn4",
+    kjj79g: "xl56j7k",
+    kdYMnH: "xesnm00",
+    k2kXS: "xmk4v7v",
+    kJVvJu: "xvpgqt4",
+    kaIpWk: "x6i6fhv",
+    kMwMTN: "xj5idha",
+    kGuDYH: "x1dcheo9",
+    k63SB2: "xk50ysn",
+    kLWn49: "xo5v014",
+    kybGjl: "x1hl2dhg",
+    khDVqt: "xuxw1ft",
+    kVQacm: "xb3r6kr",
+    kg5iWk: "xlyipyv",
+    $$css: true
+  },
   flexCenter: {
     k1xSpc: "x78zum5",
     kGNEyG: "x6s0dn4",
@@ -774,6 +798,7 @@ function className(hook, ...recipes) {
   return `${hook} ${props(...recipes).className ?? ""}`.trim();
 }
 var footerClasses = {
+  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focus),
   disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${{
     className: "x1gmlqhs"
   }.className}`,
@@ -807,9 +832,9 @@ var footerClasses = {
 function footerClassName(signup, sticky = true) {
   return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
 }
-function footerInnerClassName(signup, sticky = true, color = "green") {
+function footerInnerClassName(signup, sticky = true, color = "green", account = false) {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, sticky && styles.stickyBar, signup && colorStyle);
 }
 function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
@@ -1347,11 +1372,62 @@ var sharedMessages = {
     invalidEmail: "Voer ’n geldige e-posadres in."
   }
 };
+var accountLabels = {
+  en: "My account",
+  es: "Mi cuenta",
+  "es-AR": "Mi cuenta",
+  fr: "Mon compte",
+  "fr-CA": "Mon compte",
+  "pt-BR": "Minha conta",
+  "pt-PT": "A minha conta",
+  de: "Mein Konto",
+  nl: "Mijn account",
+  it: "Il mio account",
+  ca: "El meu compte",
+  sv: "Mitt konto",
+  da: "Min konto",
+  nb: "Min konto",
+  fi: "Oma tili",
+  pl: "Moje konto",
+  cs: "Můj účet",
+  sk: "Môj účet",
+  hu: "Saját fiók",
+  ro: "Contul meu",
+  el: "Ο λογαριασμός μου",
+  bg: "Моят профил",
+  hr: "Moj račun",
+  sl: "Moj račun",
+  "sr-Cyrl": "Мој налог",
+  "sr-Latn": "Moj nalog",
+  uk: "Мій обліковий запис",
+  ru: "Мой аккаунт",
+  tr: "Hesabım",
+  ar: "حسابي",
+  he: "החשבון שלי",
+  fa: "حساب من",
+  hi: "मेरा खाता",
+  bn: "আমার অ্যাকাউন্ট",
+  ta: "எனது கணக்கு",
+  ur: "میرا اکاؤنٹ",
+  id: "Akun saya",
+  ms: "Akaun saya",
+  vi: "Tài khoản của tôi",
+  th: "บัญชีของฉัน",
+  fil: "Account ko",
+  ja: "マイアカウント",
+  ko: "내 계정",
+  "zh-Hans": "我的账户",
+  "zh-Hant-TW": "我的帳戶",
+  "zh-Hant-HK": "我的帳戶",
+  sw: "Akaunti yangu",
+  af: "My rekening"
+};
 function defineLocale(locale, messageKey, directButton, directPlaceholder, invitingButton, invitingPlaceholder, dir = "ltr") {
   const shared = sharedMessages[messageKey];
   return Object.freeze({
     locale,
     dir,
+    accountLabel: accountLabels[messageKey],
     styles: Object.freeze({
       direct: Object.freeze({
         ...shared,
@@ -1648,6 +1724,7 @@ var HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 var HRANESS_MAILING_SOURCE = "hraness-site-footer";
 var HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 var HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
+var HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 var HRANESS_MAILING_HONEYPOT_FIELD = "website";
 var HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 var HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
@@ -1718,7 +1795,7 @@ function parseHranessMailingListConfig(value) {
   if (typeof value !== "object" || value === null || !("kind" in value)) {
     throw new TypeError("Hraness site footer mailingList must be explicitly configured.");
   }
-  if (value.kind === "none")
+  if (value.kind === "none" || value.kind === "account")
     return value;
   if (value.kind !== "signup" || typeof value.audience !== "string") {
     throw new TypeError("Hraness site footer mailingList configuration is invalid.");
@@ -1862,18 +1939,18 @@ function renderMailingList(mailingList, state, presentation) {
 }
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
-  const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/react.tsx
-import { createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 var IDLE_STATE = {
   kind: "idle"
 };
 function activeStateFor(mailingList, state) {
-  if (mailingList.kind === "none" || state.kind === "idle")
+  if (mailingList.kind !== "signup" || state.kind === "idle")
     return IDLE_STATE;
   return state.audience === mailingList.audience ? state : IDLE_STATE;
 }
@@ -1886,6 +1963,7 @@ function HranessSiteFooter({
   social: socialInput
 }) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState(IDLE_STATE);
   const [consentPending, setConsentPending] = useState(false);
@@ -1895,33 +1973,93 @@ function HranessSiteFooter({
   const exposedEnrollment = useRef(null);
   const enrollmentViewport = useRef(null);
   const enrollmentRequest = useRef(null);
+  const exposureRequest = useRef(null);
+  const enrollmentKey = useRef(null);
+  const enrollmentToken = useRef(null);
+  const activeContext = useRef({
+    key: mailingListKey,
+    experiment,
+    signup: mailingList.kind === "signup"
+  });
+  const mounted = useRef(false);
   const variant = enrollment?.assignment ?? DEFAULT_FOOTER_VARIANT;
   const experimentToken = enrollmentViewport.current === null ? undefined : enrollment?.token;
   const presentationKey = `${enrollment?.token ?? "none"}:${locale.locale}:${variant.layout}:${variant.copyStyle}:${variant.color}:${variant.shimmer}:${placement}`;
   const activeRequest = useRef(null);
   const footer = useRef(null);
-  const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : "none";
   const socialKey = socialLinks.map((link) => `${link.platform}:${link.href}:${link.label}`).join("|");
   const renderState = activeStateFor(mailingList, state);
-  const markExposure = useCallback((token) => {
-    const currentViewport = typeof window.matchMedia === "function" && !window.matchMedia(FOOTER_WIDE_QUERY).matches ? "compact" : "wide";
-    if (enrollmentViewport.current !== currentViewport || exposedEnrollment.current === token)
+  useLayoutEffect(() => {
+    const previous = activeContext.current;
+    const modeChanged = previous.key !== mailingListKey;
+    if (!modeChanged && previous.experiment === experiment)
       return;
+    activeContext.current = {
+      key: mailingListKey,
+      experiment,
+      signup: mailingList.kind === "signup"
+    };
+    enrollmentRequest.current?.abort();
+    exposureRequest.current?.abort();
+    enrollmentViewport.current = null;
+    enrollmentKey.current = null;
+    enrollmentToken.current = null;
+    exposedEnrollment.current = null;
+    const token = footer.current?.querySelector('input[name="experimentToken"]');
+    if (token) {
+      token.disabled = true;
+      token.value = "";
+    }
+    if (modeChanged) {
+      interacted.current = false;
+      activeRequest.current?.abort();
+      activeRequest.current = null;
+    }
+  }, [mailingListKey, experiment]);
+  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      enrollmentViewport.current = null;
+      enrollmentKey.current = null;
+      enrollmentToken.current = null;
+      activeRequest.current?.abort();
+      enrollmentRequest.current?.abort();
+      exposureRequest.current?.abort();
+    };
+  }, []);
+  const markExposure = useCallback((token) => {
+    const context = activeContext.current;
+    const currentViewport = typeof window.matchMedia === "function" && !window.matchMedia(FOOTER_WIDE_QUERY).matches ? "compact" : "wide";
+    if (!mounted.current || !context.signup || !context.experiment || enrollmentKey.current !== context.key || enrollmentToken.current !== token || enrollmentViewport.current !== currentViewport)
+      return false;
+    if (exposedEnrollment.current === token)
+      return true;
     exposedEnrollment.current = token;
-    exposeFooterEnrollment(token, new AbortController().signal);
+    const controller = new AbortController;
+    exposureRequest.current?.abort();
+    exposureRequest.current = controller;
+    exposeFooterEnrollment(token, controller.signal);
+    return true;
   }, []);
   useEffect(() => {
-    interacted.current = false;
-    exposedEnrollment.current = null;
-    setEnrollment(null);
     const selectedLocale = resolveFooterLocale(localeInput ?? navigator.languages);
     setLocale(selectedLocale);
-    if (mailingList.kind !== "signup" || !experiment)
+    if (mailingList.kind !== "signup") {
+      setEnrollment(null);
       return;
+    }
+    if (!experiment)
+      return;
+    const context = activeContext.current;
     const query = typeof window.matchMedia === "function" ? window.matchMedia(FOOTER_WIDE_QUERY) : null;
     let timeout;
     const assign = () => {
+      if (!mounted.current || activeContext.current !== context || !context.signup || !context.experiment)
+        return;
       enrollmentRequest.current?.abort();
+      exposureRequest.current?.abort();
+      exposedEnrollment.current = null;
       if (timeout)
         clearTimeout(timeout);
       const tokenInput = footer.current?.querySelector('input[name="experimentToken"]');
@@ -1930,6 +2068,8 @@ function HranessSiteFooter({
         tokenInput.value = "";
       }
       enrollmentViewport.current = null;
+      enrollmentKey.current = null;
+      enrollmentToken.current = null;
       if (interacted.current)
         return;
       setEnrollment(null);
@@ -1938,8 +2078,10 @@ function HranessSiteFooter({
       enrollmentRequest.current = controller;
       timeout = setTimeout(() => controller.abort(), 1500);
       requestFooterEnrollment(mailingList.audience, selectedLocale.locale, controller.signal, viewport).then((result) => {
-        if (!controller.signal.aborted && !interacted.current && result !== null && isFooterEnrollmentEligible(result, selectedLocale.locale, viewport, typeof CSS !== "undefined" && CSS.supports("selector(::details-content)"))) {
+        if (activeContext.current === context && !controller.signal.aborted && !interacted.current && result !== null && isFooterEnrollmentEligible(result, selectedLocale.locale, viewport, typeof CSS !== "undefined" && CSS.supports("selector(::details-content)"))) {
           enrollmentViewport.current = viewport;
+          enrollmentKey.current = context.key;
+          enrollmentToken.current = result.token;
           setEnrollment(result);
         }
       }).finally(() => {
@@ -1957,13 +2099,12 @@ function HranessSiteFooter({
     };
   }, [mailingListKey, experiment, typeof localeInput === "string" ? localeInput : localeInput?.join(",")]);
   useEffect(() => {
-    if (enrollment === null || footer.current === null || typeof IntersectionObserver !== "function")
+    if (mailingList.kind !== "signup" || !experiment || enrollmentKey.current !== mailingListKey || enrollment === null || footer.current === null || typeof IntersectionObserver !== "function")
       return;
     const useButton = enrollmentViewport.current === "compact" || enrollment.assignment.layout === "button";
     const target = footer.current.querySelector(useButton ? '[data-slot="hraness-mailing-disclosure"] > summary' : `form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
     if (target === null)
       return;
-    const controller = new AbortController;
     let timer;
     let visible = false;
     let sent = false;
@@ -1987,12 +2128,11 @@ function HranessSiteFooter({
     document.addEventListener("visibilitychange", update);
     return () => {
       observer.disconnect();
-      controller.abort();
       if (timer !== undefined)
         clearTimeout(timer);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [enrollment, markExposure]);
+  }, [enrollment, markExposure, mailingListKey, experiment]);
   useEffect(() => {
     activeRequest.current?.abort();
     activeRequest.current = null;
@@ -2000,6 +2140,8 @@ function HranessSiteFooter({
   }, [mailingListKey]);
   useEffect(() => () => {
     activeRequest.current?.abort();
+    enrollmentRequest.current?.abort();
+    exposureRequest.current?.abort();
   }, []);
   useEffect(() => {
     if (renderState.kind === "idle")
@@ -2018,7 +2160,7 @@ function HranessSiteFooter({
   }, [renderState]);
   const handleSubmit = useCallback((event) => {
     const target = event.target;
-    if (!(target instanceof HTMLElement) || target.tagName !== "FORM" || target.dataset.slot !== HRANESS_MAILING_FORM_SLOT || mailingList.kind !== "signup" || typeof fetch !== "function" || typeof FormData !== "function" || typeof AbortController !== "function") {
+    if (!(target instanceof HTMLElement) || target.tagName !== "FORM" || target.dataset.slot !== HRANESS_MAILING_FORM_SLOT || !mounted.current || mailingList.kind !== "signup" || activeContext.current.key !== mailingListKey || typeof fetch !== "function" || typeof FormData !== "function" || typeof AbortController !== "function") {
       return;
     }
     const emailControl = target.querySelector('input[name="email"]');
@@ -2035,11 +2177,11 @@ function HranessSiteFooter({
     body.set("source", HRANESS_MAILING_SOURCE);
     body.set("website", honeypot instanceof HTMLInputElement ? honeypot.value : "");
     const currentViewport = typeof window.matchMedia === "function" && !window.matchMedia(FOOTER_WIDE_QUERY).matches ? "compact" : "wide";
-    if (enrollment !== null && enrollmentViewport.current === currentViewport) {
-      markExposure(enrollment.token);
+    if (enrollment !== null && enrollmentViewport.current === currentViewport && markExposure(enrollment.token)) {
       body.set("experimentToken", enrollment.token);
     }
     const request = new AbortController;
+    const requestContext = activeContext.current;
     activeRequest.current = request;
     setState({
       audience: mailingList.audience,
@@ -2055,7 +2197,7 @@ function HranessSiteFooter({
       method: "POST",
       signal: request.signal
     }).then((response) => {
-      if (activeRequest.current !== request)
+      if (request.signal.aborted || activeRequest.current !== request || activeContext.current.key !== requestContext.key)
         return;
       activeRequest.current = null;
       setState(response.ok ? {
@@ -2067,7 +2209,7 @@ function HranessSiteFooter({
         kind: "error"
       });
     }).catch(() => {
-      if (activeRequest.current !== request || request.signal.aborted)
+      if (activeRequest.current !== request || request.signal.aborted || activeContext.current.key !== requestContext.key)
         return;
       activeRequest.current = null;
       setState({
@@ -2189,4 +2331,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=5BFB2B0E8B67E56264756E2164756E21
+//# debugId=440D725D02A432A064756E2164756E21

@@ -967,6 +967,10 @@
       grid-template-columns: auto auto minmax(0, 1fr);
     }
 
+    .x1drxdiy.x1drxdiy {
+      grid-template-columns: auto minmax(0,max-content) auto minmax(var(--hraness-site-footer-social-target),1fr);
+    }
+
     .xvdon42.xvdon42 {
       grid-template-columns: auto minmax(12rem,26rem) auto minmax(var(--hraness-site-footer-social-target),1fr);
     }

@@ -1,5 +1,5 @@
 /**
- * Canonical copy for the shared mailing-signup surface only.
+ * Canonical copy for the shared signup and account controls.
  * See docs/localization.md for evidence, register choices and fallback rules.
  * These are reviewed-as-code translation drafts, not native-speaker validation.
  */
@@ -51,6 +51,7 @@ export type FooterMessages = Readonly<{
 export type FooterLocale = Readonly<{
     locale: string;
     dir: "ltr" | "rtl";
+    accountLabel: string;
     styles: Readonly<Record<LocalizedFooterCopyStyle, FooterMessages>> & Readonly<Partial<Record<FooterCopyStyle, FooterMessages>>>;
 }>;
 /** Immutable, canonical BCP 47 locale records. Regional siblings may share wording. */

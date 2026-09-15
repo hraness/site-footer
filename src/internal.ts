@@ -30,6 +30,7 @@ export const HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 export const HRANESS_MAILING_SOURCE = "hraness-site-footer";
 export const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 export const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
+export const HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 export const HRANESS_MAILING_HONEYPOT_FIELD = "website";
 export const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 export const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
@@ -64,6 +65,9 @@ export type HranessMailingListConfig =
   }>
   | Readonly<{
     kind: "none";
+  }>
+  | Readonly<{
+    kind: "account";
   }>;
 
 export type HranessMailingListRenderState =
@@ -164,7 +168,7 @@ export function parseHranessMailingListConfig(
   if (typeof value !== "object" || value === null || !("kind" in value)) {
     throw new TypeError("Hraness site footer mailingList must be explicitly configured.");
   }
-  if (value.kind === "none") return value;
+  if (value.kind === "none" || value.kind === "account") return value;
   if (
     value.kind !== "signup"
     || typeof value.audience !== "string"
@@ -402,6 +406,8 @@ export function renderHranessSiteFooterInnerHtml(
 ): string {
   const mailingHtml = mailingList.kind === "none"
     ? ""
+    : mailingList.kind === "account"
+    ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>`
     : renderMailingList(
       mailingList,
       state.kind !== "idle" && state.audience === mailingList.audience
@@ -409,5 +415,5 @@ export function renderHranessSiteFooterInnerHtml(
         : MAILING_IDLE_STATE,
       presentation,
     );
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }

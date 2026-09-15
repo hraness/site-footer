@@ -29,9 +29,18 @@ function contains(classes: string, declaration: string): void {
 }
 
 describe("compiled footer presentation", () => {
+  test("account navigation has a quiet border and content-sized one-row layout", () => {
+    contains(footerClasses.account, "border-color:var(--hraness-site-footer-line)");
+    contains(footerClasses.account, "color:var(--hraness-site-footer-muted)");
+    contains(footerClasses.account, ":focus-visible");
+    expect(cssFor(footerClasses.account)).not.toContain("conic-gradient");
+    expect(cssFor(footerClasses.account)).not.toContain("animation-name");
+    contains(footerInnerClassName(false, true, "green", true), 'grid-template-areas:"brand mailing links"');
+    expect(cssFor(footerInnerClassName(false, true, "green", true))).not.toContain("#166534");
+  });
   test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.10.2");
+    expect(pkg.version).toBe("0.11.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });

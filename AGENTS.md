@@ -12,7 +12,7 @@
 # Guidelines
 
 - Use Bun 1.3.14 and run `bun run check` before handing off a change.
-- Keep the footer organization-owned and product-independent. Products may select one explicit stable mailing-list audience or no mailing list, retarget owned social destinations through the package `social` prop, and set documented CSS custom properties, but must not fork the action, source, copy, social platforms, vector mark, order, semantics, or interaction behavior.
+- Keep the footer organization-owned and product-independent. Products may select one explicit stable mailing-list audience, a confirmed signed-in account link, or no account/signup control, retarget owned social destinations through the package `social` prop, and set documented CSS custom properties, but must not fork the action, source, copy, social platforms, vector mark, order, semantics, or interaction behavior.
 - Keep the root export framework-neutral. React runtime belongs only behind `@hraness/site-footer/react`.
 - Compile all owned presentation through the public `@hraness/ui/stylex-build` collector. Keep stable BEM hooks, explicit slot and state variants, custom-property overrides, and native pseudo-class behavior. Do not restore handwritten component selectors or runtime CSS injection. The foil controller may update only its three bounded numeric CSS custom-property inputs; all presentation remains in the compiled recipes.
 - Collect the static and React entry graphs serially into one verified manifest. Require artifact, source-boundary, absolute-root determinism, package, and real-source browser checks before release.

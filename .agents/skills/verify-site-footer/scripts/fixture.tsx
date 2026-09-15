@@ -61,7 +61,8 @@ function boundedError(value: unknown): string {
 
 const selectedState = selectedFixtureState();
 const pageParams = new URL(window.location.href).searchParams;
-const signupEnabled = pageParams.get("mailing") !== "none";
+const accountEnabled = pageParams.get("mailing") === "account";
+const signupEnabled = !accountEnabled && pageParams.get("mailing") !== "none";
 const consentRequired = pageParams.get("consent") === "required";
 const experimentEnabled = pageParams.get("experiment") === "inline";
 const experimentRequests: unknown[] = [];
@@ -178,7 +179,7 @@ function Fixture() {
         placement="flow"
         experiment={experimentEnabled}
         locale="en"
-        mailingList={signupEnabled ? {
+        mailingList={accountEnabled ? { kind: "account" } : signupEnabled ? {
           audience: "footer-fixture",
           kind: "signup",
         } : { kind: "none" }}

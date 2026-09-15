@@ -48,7 +48,12 @@ click/keyboard opening, synchronous email focus, Close and Escape, preserved
 input, a stable trigger footprint, localized accessible names, quieter open
 styling, 16px input text, and an attached 4–6px popup gap at 390px and 320px.
 
-A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all five link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and four social links.
+A separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all five link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and four social links.
+
+An additional account context uses `mailingList: { kind: "account" }` with
+experiments enabled to prove it sends no signup or experiment request. At all
+four widths it checks the native account destination, muted border without foil,
+visible keyboard focus, one row, viewport containment and priority socials.
 
 ## Evidence
 

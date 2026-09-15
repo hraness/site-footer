@@ -378,6 +378,30 @@ var styles = {
     k9llMU: "x42z6zh",
     $$css: true
   },
+  innerAccount: {
+    kC13JO: "x1m6ayzh xy48kin",
+    kumcoG: "xo69rmz x1drxdiy",
+    $$css: true
+  },
+  account: {
+    kJuA4N: "x1qaspin",
+    k1xSpc: "x3nfvp2",
+    kGNEyG: "x6s0dn4",
+    kjj79g: "xl56j7k",
+    kdYMnH: "xesnm00",
+    k2kXS: "xmk4v7v",
+    kJVvJu: "xvpgqt4",
+    kaIpWk: "x6i6fhv",
+    kMwMTN: "xj5idha",
+    kGuDYH: "x1dcheo9",
+    k63SB2: "xk50ysn",
+    kLWn49: "xo5v014",
+    kybGjl: "x1hl2dhg",
+    khDVqt: "xuxw1ft",
+    kVQacm: "xb3r6kr",
+    kg5iWk: "xlyipyv",
+    $$css: true
+  },
   flexCenter: {
     k1xSpc: "x78zum5",
     kGNEyG: "x6s0dn4",
@@ -691,6 +715,7 @@ function className(hook, ...recipes) {
   return `${hook} ${props(...recipes).className ?? ""}`.trim();
 }
 var footerClasses = {
+  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focus),
   disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${{
     className: "x1gmlqhs"
   }.className}`,
@@ -724,9 +749,9 @@ var footerClasses = {
 function footerClassName(signup, sticky = true) {
   return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
 }
-function footerInnerClassName(signup, sticky = true, color = "green") {
+function footerInnerClassName(signup, sticky = true, color = "green", account = false) {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, sticky && styles.stickyBar, signup && colorStyle);
 }
 function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
@@ -1261,11 +1286,62 @@ var sharedMessages = {
     invalidEmail: "Voer ’n geldige e-posadres in."
   }
 };
+var accountLabels = {
+  en: "My account",
+  es: "Mi cuenta",
+  "es-AR": "Mi cuenta",
+  fr: "Mon compte",
+  "fr-CA": "Mon compte",
+  "pt-BR": "Minha conta",
+  "pt-PT": "A minha conta",
+  de: "Mein Konto",
+  nl: "Mijn account",
+  it: "Il mio account",
+  ca: "El meu compte",
+  sv: "Mitt konto",
+  da: "Min konto",
+  nb: "Min konto",
+  fi: "Oma tili",
+  pl: "Moje konto",
+  cs: "Můj účet",
+  sk: "Môj účet",
+  hu: "Saját fiók",
+  ro: "Contul meu",
+  el: "Ο λογαριασμός μου",
+  bg: "Моят профил",
+  hr: "Moj račun",
+  sl: "Moj račun",
+  "sr-Cyrl": "Мој налог",
+  "sr-Latn": "Moj nalog",
+  uk: "Мій обліковий запис",
+  ru: "Мой аккаунт",
+  tr: "Hesabım",
+  ar: "حسابي",
+  he: "החשבון שלי",
+  fa: "حساب من",
+  hi: "मेरा खाता",
+  bn: "আমার অ্যাকাউন্ট",
+  ta: "எனது கணக்கு",
+  ur: "میرا اکاؤنٹ",
+  id: "Akun saya",
+  ms: "Akaun saya",
+  vi: "Tài khoản của tôi",
+  th: "บัญชีของฉัน",
+  fil: "Account ko",
+  ja: "マイアカウント",
+  ko: "내 계정",
+  "zh-Hans": "我的账户",
+  "zh-Hant-TW": "我的帳戶",
+  "zh-Hant-HK": "我的帳戶",
+  sw: "Akaunti yangu",
+  af: "My rekening"
+};
 function defineLocale(locale, messageKey, directButton, directPlaceholder, invitingButton, invitingPlaceholder, dir = "ltr") {
   const shared = sharedMessages[messageKey];
   return Object.freeze({
     locale,
     dir,
+    accountLabel: accountLabels[messageKey],
     styles: Object.freeze({
       direct: Object.freeze({
         ...shared,
@@ -1520,6 +1596,7 @@ var HRANESS_MAILING_FORM_SLOT = "hraness-mailing-list-signup";
 var HRANESS_MAILING_SOURCE = "hraness-site-footer";
 var HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 var HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
+var HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 var HRANESS_MAILING_HONEYPOT_FIELD = "website";
 var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
@@ -1588,7 +1665,7 @@ function parseHranessMailingListConfig(value) {
   if (typeof value !== "object" || value === null || !("kind" in value)) {
     throw new TypeError("Hraness site footer mailingList must be explicitly configured.");
   }
-  if (value.kind === "none")
+  if (value.kind === "none" || value.kind === "account")
     return value;
   if (value.kind !== "signup" || typeof value.audience !== "string") {
     throw new TypeError("Hraness site footer mailingList configuration is invalid.");
@@ -1732,8 +1809,8 @@ function renderMailingList(mailingList, state, presentation) {
 }
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
-  const mailingHtml = mailingList.kind === "none" ? "" : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/index.ts
@@ -1763,7 +1840,8 @@ export {
   parseFooterEnrollment,
   hranessSocialLinks,
   HRANESS_MAILING_SUBSCRIBE_URL,
-  HRANESS_HOME_URL
+  HRANESS_HOME_URL,
+  HRANESS_ACCOUNT_URL
 };
 
-//# debugId=F0C8C69506C3321F64756E2164756E21
+//# debugId=CD21DF51125D167364756E2164756E21

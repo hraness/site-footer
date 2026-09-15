@@ -1,5 +1,5 @@
 /**
- * Canonical copy for the shared mailing-signup surface only.
+ * Canonical copy for the shared signup and account controls.
  * See docs/localization.md for evidence, register choices and fallback rules.
  * These are reviewed-as-code translation drafts, not native-speaker validation.
  */
@@ -42,6 +42,7 @@ export type FooterMessages = Readonly<{
 export type FooterLocale = Readonly<{
   locale: string;
   dir: "ltr" | "rtl";
+  accountLabel: string;
   styles: Readonly<Record<LocalizedFooterCopyStyle, FooterMessages>> & Readonly<Partial<Record<FooterCopyStyle, FooterMessages>>>;
 }>;
 
@@ -530,6 +531,57 @@ const sharedMessages = {
   }
 } as const satisfies Record<string, SharedMessages>;
 
+const accountLabels = {
+  "en": "My account",
+  "es": "Mi cuenta",
+  "es-AR": "Mi cuenta",
+  "fr": "Mon compte",
+  "fr-CA": "Mon compte",
+  "pt-BR": "Minha conta",
+  "pt-PT": "A minha conta",
+  "de": "Mein Konto",
+  "nl": "Mijn account",
+  "it": "Il mio account",
+  "ca": "El meu compte",
+  "sv": "Mitt konto",
+  "da": "Min konto",
+  "nb": "Min konto",
+  "fi": "Oma tili",
+  "pl": "Moje konto",
+  "cs": "Můj účet",
+  "sk": "Môj účet",
+  "hu": "Saját fiók",
+  "ro": "Contul meu",
+  "el": "Ο λογαριασμός μου",
+  "bg": "Моят профил",
+  "hr": "Moj račun",
+  "sl": "Moj račun",
+  "sr-Cyrl": "Мој налог",
+  "sr-Latn": "Moj nalog",
+  "uk": "Мій обліковий запис",
+  "ru": "Мой аккаунт",
+  "tr": "Hesabım",
+  "ar": "حسابي",
+  "he": "החשבון שלי",
+  "fa": "حساب من",
+  "hi": "मेरा खाता",
+  "bn": "আমার অ্যাকাউন্ট",
+  "ta": "எனது கணக்கு",
+  "ur": "میرا اکاؤنٹ",
+  "id": "Akun saya",
+  "ms": "Akaun saya",
+  "vi": "Tài khoản của tôi",
+  "th": "บัญชีของฉัน",
+  "fil": "Account ko",
+  "ja": "マイアカウント",
+  "ko": "내 계정",
+  "zh-Hans": "我的账户",
+  "zh-Hant-TW": "我的帳戶",
+  "zh-Hant-HK": "我的帳戶",
+  "sw": "Akaunti yangu",
+  "af": "My rekening"
+} as const satisfies Record<keyof typeof sharedMessages, string>;
+
 function defineLocale(
   locale: string,
   messageKey: keyof typeof sharedMessages,
@@ -543,6 +595,7 @@ function defineLocale(
   return Object.freeze({
     locale,
     dir,
+    accountLabel: accountLabels[messageKey],
     styles: Object.freeze({
       direct: Object.freeze({ ...shared, button: directButton, placeholder: directPlaceholder, emailLabel: directPlaceholder }),
       inviting: Object.freeze({ ...shared, button: invitingButton, placeholder: invitingPlaceholder, emailLabel: directPlaceholder }),

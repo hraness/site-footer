@@ -56,7 +56,8 @@ const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).hr
   renderHranessSiteFooter?: (options: {
     mailingList:
       | { audience: string; kind: "signup" }
-      | { kind: "none" };
+      | { kind: "none" }
+      | { kind: "account" };
     showBrand?: boolean;
     social?: Readonly<Partial<Record<"github" | "linkedin" | "substack" | "x", {
       href: string;
@@ -95,6 +96,11 @@ if (
 ) {
   throw new Error("The built root export lost its closed mailing-list contract.");
 }
+const accountHtml = root.renderHranessSiteFooter?.({ mailingList: { kind: "account" } });
+assert.ok(accountHtml?.includes('href="https://account.hraness.com/"'));
+assert.ok(accountHtml?.includes('>My account</a>'));
+assert.ok(!/data-foil|<form|experimentToken|data-copy-variant/u.test(accountHtml ?? ""));
+
 const aichartsHtml = root.renderHranessSiteFooter?.({
   mailingList: { kind: "none" },
   social: {
@@ -176,6 +182,8 @@ try {
   run([process.execPath, "-e", `
     const { renderHranessSiteFooter } = await import(${JSON.stringify(pathToFileURL(resolve(packed, "dist/index.js")).href)});
     const html = renderHranessSiteFooter({mailingList:{kind:"none"}});
+    const account = renderHranessSiteFooter({mailingList:{kind:"account"}});
+    if (!account.includes('>My account</a>') || /data-foil|<form|experimentToken/.test(account)) throw new Error("Detached account render failed");
     if (!html.includes('class="hraness-site-footer x') || !html.includes('Hraness on Substack')) throw new Error("Detached root render failed");
   `], consumer);
   const cssBuild = await Bun.build({ entrypoints: [resolve(packed, "styles.css")], target: "browser" });
