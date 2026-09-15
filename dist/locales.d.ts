@@ -10,27 +10,27 @@ export type LocalizedFooterCopyStyle = "direct" | "inviting";
 export declare const ENGLISH_FOOTER_COPY: Readonly<{
     readonly direct: {
         readonly button: "Send me things";
-        readonly placeholder: "Your email";
+        readonly placeholder: "sjobs@apple.com";
     };
     readonly inviting: {
         readonly button: "I'm curious";
-        readonly placeholder: "curious@plot.twist";
+        readonly placeholder: "billg@microsoft.com";
     };
     readonly goblin: {
         readonly button: "Feed the goblin";
-        readonly placeholder: "goblin@snack.club";
+        readonly placeholder: "chunkylover53@aol.com";
     };
     readonly cosmic: {
         readonly button: "Beam me up";
-        readonly placeholder: "earthling@probably.earth";
+        readonly placeholder: "tom@myspace.com";
     };
     readonly chaos: {
         readonly button: "Push the button";
-        readonly placeholder: "chaos@inbox.party";
+        readonly placeholder: "neo@metacortex.com";
     };
     readonly secret: {
         readonly button: "Let me in";
-        readonly placeholder: "agent@secret.lair";
+        readonly placeholder: "satoshin@gmx.com";
     };
 }>;
 export declare function isFooterCopyStyle(value: unknown): value is FooterCopyStyle;

@@ -165,7 +165,7 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.honeypot, "inline-size:1px");
     for (const classes of [footerClasses.mailing, footerClasses.mailingConfirmation]) {
       contains(classes, "box-sizing:border-box");
-      contains(classes, "inline-size:min(100%,26rem)");
+      contains(classes, "inline-size:min(100%,18rem)");
       contains(classes, "block-size:var(--hraness-site-footer-form-block-size)");
     }
   });

@@ -295,7 +295,7 @@ var styles = {
     kVAEAm: "x1uhb9sk x1nmvtcz",
     kJuA4N: "x1qaspin",
     kdYMnH: "xesnm00",
-    k2kXS: "xmk4v7v x1s7ke32",
+    k2kXS: "xmk4v7v x3jboi5",
     $$css: true
   },
   disclosureInline: {
@@ -349,7 +349,7 @@ var styles = {
     kVAEAm: "x10l6tqk",
     kctUWg: "xr04doy x12aoker",
     ka7YqC: "xe89of6 x1vbotui",
-    kULEZF: "x1487r7q",
+    kULEZF: "xzm6ek",
     k2kXS: "x1ljtl1n",
     kF3gjK: "x18g2hj5",
     kJVvJu: "x97vtpp",
@@ -457,7 +457,7 @@ var styles = {
   },
   innerSignup: {
     kC13JO: "x1m6ayzh xy48kin",
-    kumcoG: "xo69rmz xvdon42",
+    kumcoG: "xo69rmz xoysss2",
     k9llMU: "x42z6zh",
     $$css: true
   },
@@ -653,7 +653,7 @@ var styles = {
   },
   mailingGeometry: {
     kJuA4N: "x1qaspin",
-    kULEZF: "x1gx0lkv",
+    kULEZF: "xgybh9h",
     kdYMnH: "xesnm00",
     kLWsYc: "x1dmgvpn",
     kogj98: "x1ghz6dp",
@@ -861,27 +861,27 @@ var FOOTER_COPY_STYLES = ["direct", "inviting", "goblin", "cosmic", "chaos", "se
 var ENGLISH_FOOTER_COPY = Object.freeze({
   direct: {
     button: "Send me things",
-    placeholder: "Your email"
+    placeholder: "sjobs@apple.com"
   },
   inviting: {
     button: "I'm curious",
-    placeholder: "curious@plot.twist"
+    placeholder: "billg@microsoft.com"
   },
   goblin: {
     button: "Feed the goblin",
-    placeholder: "goblin@snack.club"
+    placeholder: "chunkylover53@aol.com"
   },
   cosmic: {
     button: "Beam me up",
-    placeholder: "earthling@probably.earth"
+    placeholder: "tom@myspace.com"
   },
   chaos: {
     button: "Push the button",
-    placeholder: "chaos@inbox.party"
+    placeholder: "neo@metacortex.com"
   },
   secret: {
     button: "Let me in",
-    placeholder: "agent@secret.lair"
+    placeholder: "satoshin@gmx.com"
   }
 });
 function isFooterCopyStyle(value) {
@@ -1422,7 +1422,7 @@ var accountLabels = {
   sw: "Akaunti yangu",
   af: "My rekening"
 };
-function defineLocale(locale, messageKey, directButton, directPlaceholder, invitingButton, invitingPlaceholder, dir = "ltr") {
+function defineLocale(locale, messageKey, directButton, emailLabel, invitingButton, dir = "ltr") {
   const shared = sharedMessages[messageKey];
   return Object.freeze({
     locale,
@@ -1432,14 +1432,14 @@ function defineLocale(locale, messageKey, directButton, directPlaceholder, invit
       direct: Object.freeze({
         ...shared,
         button: directButton,
-        placeholder: directPlaceholder,
-        emailLabel: directPlaceholder
+        placeholder: ENGLISH_FOOTER_COPY.direct.placeholder,
+        emailLabel
       }),
       inviting: Object.freeze({
         ...shared,
         button: invitingButton,
-        placeholder: invitingPlaceholder,
-        emailLabel: directPlaceholder
+        placeholder: ENGLISH_FOOTER_COPY.inviting.placeholder,
+        emailLabel
       }),
       ...messageKey === "en" ? Object.fromEntries(Object.entries(ENGLISH_FOOTER_COPY).map(([key, copy]) => [key, Object.freeze({
         ...shared,
@@ -1450,67 +1450,67 @@ function defineLocale(locale, messageKey, directButton, directPlaceholder, invit
   });
 }
 var FOOTER_LOCALES = Object.freeze({
-  en: defineLocale("en", "en", "Subscribe", "Email address", "Sign me up", "Where should updates land?"),
-  "en-US": defineLocale("en-US", "en", "Subscribe", "Your email address", "Sign me up", "Where should updates land?"),
-  "en-GB": defineLocale("en-GB", "en", "Subscribe", "Your email address", "Keep me in the loop", "Email for the latest"),
-  "en-AU": defineLocale("en-AU", "en", "Get updates", "Your email address", "Keep me posted", "Send the latest to this email"),
-  "en-IN": defineLocale("en-IN", "en", "Subscribe", "Email address", "Send me updates", "Your email for what’s new"),
-  "en-SG": defineLocale("en-SG", "en", "Get updates", "Email address", "Keep me in the loop", "Email for new things"),
-  "es-ES": defineLocale("es-ES", "es", "Suscribirme", "Tu correo electrónico", "Quiero enterarme", "Tu correo para las novedades"),
-  "es-MX": defineLocale("es-MX", "es", "Suscribirme", "Tu correo electrónico", "Quiero las novedades", "¿A qué correo te escribimos?"),
-  "es-AR": defineLocale("es-AR", "es-AR", "Suscribite", "Tu correo electrónico", "Avisame qué viene", "Dejanos tu mail"),
-  "es-CL": defineLocale("es-CL", "es", "Suscribirme", "Tu correo electrónico", "Avísenme las novedades", "Tu correo para estar al día"),
-  "es-CO": defineLocale("es-CO", "es", "Recibir novedades", "Tu correo electrónico", "Quiero estar al día", "¿Dónde te enviamos lo nuevo?"),
-  "es-PR": defineLocale("es-PR", "es", "Suscribirme", "Tu email", "Quiero enterarme", "Tu email para lo nuevo"),
-  "fr-FR": defineLocale("fr-FR", "fr", "S’abonner", "Votre adresse e-mail", "Je m’inscris", "Les nouveautés, à quelle adresse ?"),
-  "fr-CA": defineLocale("fr-CA", "fr-CA", "M’abonner", "Votre adresse courriel", "Je veux des nouvelles", "Votre courriel pour la suite"),
-  "pt-BR": defineLocale("pt-BR", "pt-BR", "Inscreva-se", "Seu e-mail", "Quero novidades", "Qual e-mail recebe as novidades?"),
-  "pt-PT": defineLocale("pt-PT", "pt-PT", "Subscrever", "O seu e-mail", "Quero ficar a par", "O seu e-mail para as novidades"),
-  "de-DE": defineLocale("de-DE", "de", "Abonnieren", "Deine E-Mail-Adresse", "Halt mich auf dem Laufenden", "Wohin dürfen die Neuigkeiten?"),
-  "de-CH": defineLocale("de-CH", "de", "Abonnieren", "Deine E-Mail-Adresse", "Ich will Neues erfahren", "Deine E-Mail für Neuigkeiten"),
-  "nl-NL": defineLocale("nl-NL", "nl", "Aanmelden", "Je e-mailadres", "Houd me op de hoogte", "Waar mogen de nieuwtjes heen?"),
-  "nl-BE": defineLocale("nl-BE", "nl", "Inschrijven", "Je e-mailadres", "Hou me op de hoogte", "Je e-mail voor het laatste nieuws"),
-  "it-IT": defineLocale("it-IT", "it", "Iscrivimi", "La tua email", "Tienimi al corrente", "Dove ti mandiamo le novità?"),
-  "ca-ES": defineLocale("ca-ES", "ca", "Subscriu-m’hi", "El teu correu electrònic", "Vull estar al dia", "On t’enviem les novetats?"),
-  "sv-SE": defineLocale("sv-SE", "sv", "Prenumerera", "Din e-postadress", "Håll mig uppdaterad", "Vart ska vi skicka nyheterna?"),
-  "da-DK": defineLocale("da-DK", "da", "Tilmeld mig", "Din e-mailadresse", "Hold mig opdateret", "Hvor skal vi sende nyt hen?"),
-  "nb-NO": defineLocale("nb-NO", "nb", "Abonner", "E-postadressen din", "Hold meg oppdatert", "Hvor skal vi sende nytt?"),
-  "fi-FI": defineLocale("fi-FI", "fi", "Tilaa uutiset", "Sähköpostiosoitteesi", "Pidä minut ajan tasalla", "Mihin lähetämme uutiset?"),
-  "pl-PL": defineLocale("pl-PL", "pl", "Zapisz mnie", "Twój adres e-mail", "Chcę być na bieżąco", "Gdzie wysyłać nowości?"),
-  "cs-CZ": defineLocale("cs-CZ", "cs", "Odebírat novinky", "Tvůj e-mail", "Chci vědět, co je nového", "Kam ti pošleme novinky?"),
-  "sk-SK": defineLocale("sk-SK", "sk", "Odoberať novinky", "Tvoj e-mail", "Chcem vedieť, čo je nové", "Kam ti pošleme novinky?"),
-  "hu-HU": defineLocale("hu-HU", "hu", "Feliratkozom", "Az e-mail-címed", "Kérem az újdonságokat", "Hová küldhetjük a híreket?"),
-  "ro-RO": defineLocale("ro-RO", "ro", "Abonează-mă", "Adresa ta de e-mail", "Vreau noutăți", "Unde îți trimitem noutățile?"),
-  "el-GR": defineLocale("el-GR", "el", "Εγγραφή", "Το email σου", "Θέλω να μαθαίνω τα νέα", "Πού να στέλνουμε τα νέα;"),
-  "bg-BG": defineLocale("bg-BG", "bg", "Абонирай ме", "Твоят имейл", "Искам да научавам новостите", "Къде да изпращаме новините?"),
-  "hr-HR": defineLocale("hr-HR", "hr", "Pretplati me", "Tvoja e-adresa", "Želim čuti novosti", "Kamo šaljemo novosti?"),
-  "sl-SI": defineLocale("sl-SI", "sl", "Naroči me", "Tvoj e-naslov", "Želim biti na tekočem", "Kam naj pošljemo novosti?"),
-  "sr-Latn-RS": defineLocale("sr-Latn-RS", "sr-Latn", "Prijavi me", "Tvoja imejl adresa", "Želim da čujem novosti", "Gde da šaljemo novosti?"),
-  "sr-Cyrl-RS": defineLocale("sr-Cyrl-RS", "sr-Cyrl", "Пријави ме", "Твоја имејл адреса", "Желим да чујем новости", "Где да шаљемо новости?"),
-  "uk-UA": defineLocale("uk-UA", "uk", "Підписатися", "Твоя електронна адреса", "Хочу знати, що нового", "Куди надсилати новини?"),
-  "ru-RU": defineLocale("ru-RU", "ru", "Подписаться", "Твоя электронная почта", "Хочу быть в курсе", "Куда присылать новости?"),
-  "tr-TR": defineLocale("tr-TR", "tr", "Abone ol", "E-posta adresin", "Yeniliklerden haberim olsun", "Haberleri hangi adrese gönderelim?"),
-  ar: defineLocale("ar", "ar", "اشترك", "بريدك الإلكتروني", "أرسلوا لي الجديد", "أين نرسل لك الأخبار؟", "rtl"),
-  "ar-EG": defineLocale("ar-EG", "ar", "اشترك", "بريدك الإلكتروني", "أرسلوا لي الأخبار", "بريدك لتصلك الأخبار", "rtl"),
-  "ar-SA": defineLocale("ar-SA", "ar", "اشترك", "بريدك الإلكتروني", "أريد معرفة الجديد", "بريدك لآخر المستجدات", "rtl"),
-  "he-IL": defineLocale("he-IL", "he", "הרשמה לעדכונים", "כתובת האימייל שלך", "אשמח להתעדכן", "לאן לשלוח את החדשות?", "rtl"),
-  "fa-IR": defineLocale("fa-IR", "fa", "دریافت خبرها", "نشانی ایمیل شما", "من را هم باخبر کنید", "خبرها را به کدام ایمیل بفرستیم؟", "rtl"),
-  "hi-IN": defineLocale("hi-IN", "hi", "अपडेट पाएँ", "आपका ईमेल पता", "मुझे भी बताते रहें", "नई खबरें किस ईमेल पर भेजें?"),
-  "bn-BD": defineLocale("bn-BD", "bn", "আপডেট পেতে চাই", "আপনার ইমেইল", "আমাকেও জানাবেন", "নতুন খবর কোন ইমেইলে পাঠাব?"),
-  "ta-IN": defineLocale("ta-IN", "ta", "புதிய தகவல்களைப் பெற", "உங்கள் மின்னஞ்சல்", "எனக்கும் தெரியப்படுத்துங்கள்", "எந்த மின்னஞ்சலுக்கு அனுப்பலாம்?"),
-  "ur-PK": defineLocale("ur-PK", "ur", "اپ ڈیٹس حاصل کریں", "آپ کا ای میل پتہ", "مجھے بھی باخبر رکھیں", "نئی خبریں کس ای میل پر بھیجیں؟", "rtl"),
-  "id-ID": defineLocale("id-ID", "id", "Berlangganan", "Alamat email kamu", "Kabari aku, ya", "Email untuk kabar terbaru"),
-  "ms-MY": defineLocale("ms-MY", "ms", "Langgan", "Alamat e-mel anda", "Saya mahu berita terkini", "E-mel untuk berita terkini"),
-  "vi-VN": defineLocale("vi-VN", "vi", "Đăng ký nhận tin", "Email của bạn", "Cho mình biết nhé", "Gửi tin mới đến email nào?"),
-  "th-TH": defineLocale("th-TH", "th", "รับข่าวสาร", "อีเมลของคุณ", "มีอะไรใหม่ บอกกันด้วย", "ส่งข่าวใหม่ไปที่อีเมลไหน?"),
-  "fil-PH": defineLocale("fil-PH", "fil", "Tumanggap ng updates", "Email mo", "Gusto ko ng balita", "Saan namin ipapadala ang balita?"),
-  "ja-JP": defineLocale("ja-JP", "ja", "ニュースを受け取る", "メールアドレス", "新着情報を届けて", "お届け先のメールアドレス"),
-  "ko-KR": defineLocale("ko-KR", "ko", "구독하기", "이메일 주소", "새 소식 받을래요", "소식 받을 이메일을 알려 주세요"),
-  "zh-Hans-CN": defineLocale("zh-Hans-CN", "zh-Hans", "订阅更新", "你的邮箱地址", "有新消息告诉我", "新消息发到哪个邮箱？"),
-  "zh-Hant-TW": defineLocale("zh-Hant-TW", "zh-Hant-TW", "訂閱電子報", "你的電子信箱", "有新消息，告訴我", "新消息寄到哪個信箱？"),
-  "zh-Hant-HK": defineLocale("zh-Hant-HK", "zh-Hant-HK", "訂閱最新消息", "你的電郵地址", "有新消息，通知我", "接收最新消息的電郵"),
-  "sw-KE": defineLocale("sw-KE", "sw", "Pokea taarifa", "Barua pepe yako", "Nijulishe mapya", "Tutume habari kwenye barua pepe ipi?"),
-  "af-ZA": defineLocale("af-ZA", "af", "Teken in", "Jou e-posadres", "Hou my op hoogte", "Waarheen stuur ons die nuus?")
+  en: defineLocale("en", "en", "Subscribe", "Email address", "Sign me up"),
+  "en-US": defineLocale("en-US", "en", "Subscribe", "Your email address", "Sign me up"),
+  "en-GB": defineLocale("en-GB", "en", "Subscribe", "Your email address", "Keep me in the loop"),
+  "en-AU": defineLocale("en-AU", "en", "Get updates", "Your email address", "Keep me posted"),
+  "en-IN": defineLocale("en-IN", "en", "Subscribe", "Email address", "Send me updates"),
+  "en-SG": defineLocale("en-SG", "en", "Get updates", "Email address", "Keep me in the loop"),
+  "es-ES": defineLocale("es-ES", "es", "Suscribirme", "Tu correo electrónico", "Quiero enterarme"),
+  "es-MX": defineLocale("es-MX", "es", "Suscribirme", "Tu correo electrónico", "Quiero las novedades"),
+  "es-AR": defineLocale("es-AR", "es-AR", "Suscribite", "Tu correo electrónico", "Avisame qué viene"),
+  "es-CL": defineLocale("es-CL", "es", "Suscribirme", "Tu correo electrónico", "Avísenme las novedades"),
+  "es-CO": defineLocale("es-CO", "es", "Recibir novedades", "Tu correo electrónico", "Quiero estar al día"),
+  "es-PR": defineLocale("es-PR", "es", "Suscribirme", "Tu email", "Quiero enterarme"),
+  "fr-FR": defineLocale("fr-FR", "fr", "S’abonner", "Votre adresse e-mail", "Je m’inscris"),
+  "fr-CA": defineLocale("fr-CA", "fr-CA", "M’abonner", "Votre adresse courriel", "Je veux des nouvelles"),
+  "pt-BR": defineLocale("pt-BR", "pt-BR", "Inscreva-se", "Seu e-mail", "Quero novidades"),
+  "pt-PT": defineLocale("pt-PT", "pt-PT", "Subscrever", "O seu e-mail", "Quero ficar a par"),
+  "de-DE": defineLocale("de-DE", "de", "Abonnieren", "Deine E-Mail-Adresse", "Halt mich auf dem Laufenden"),
+  "de-CH": defineLocale("de-CH", "de", "Abonnieren", "Deine E-Mail-Adresse", "Ich will Neues erfahren"),
+  "nl-NL": defineLocale("nl-NL", "nl", "Aanmelden", "Je e-mailadres", "Houd me op de hoogte"),
+  "nl-BE": defineLocale("nl-BE", "nl", "Inschrijven", "Je e-mailadres", "Hou me op de hoogte"),
+  "it-IT": defineLocale("it-IT", "it", "Iscrivimi", "La tua email", "Tienimi al corrente"),
+  "ca-ES": defineLocale("ca-ES", "ca", "Subscriu-m’hi", "El teu correu electrònic", "Vull estar al dia"),
+  "sv-SE": defineLocale("sv-SE", "sv", "Prenumerera", "Din e-postadress", "Håll mig uppdaterad"),
+  "da-DK": defineLocale("da-DK", "da", "Tilmeld mig", "Din e-mailadresse", "Hold mig opdateret"),
+  "nb-NO": defineLocale("nb-NO", "nb", "Abonner", "E-postadressen din", "Hold meg oppdatert"),
+  "fi-FI": defineLocale("fi-FI", "fi", "Tilaa uutiset", "Sähköpostiosoitteesi", "Pidä minut ajan tasalla"),
+  "pl-PL": defineLocale("pl-PL", "pl", "Zapisz mnie", "Twój adres e-mail", "Chcę być na bieżąco"),
+  "cs-CZ": defineLocale("cs-CZ", "cs", "Odebírat novinky", "Tvůj e-mail", "Chci vědět, co je nového"),
+  "sk-SK": defineLocale("sk-SK", "sk", "Odoberať novinky", "Tvoj e-mail", "Chcem vedieť, čo je nové"),
+  "hu-HU": defineLocale("hu-HU", "hu", "Feliratkozom", "Az e-mail-címed", "Kérem az újdonságokat"),
+  "ro-RO": defineLocale("ro-RO", "ro", "Abonează-mă", "Adresa ta de e-mail", "Vreau noutăți"),
+  "el-GR": defineLocale("el-GR", "el", "Εγγραφή", "Το email σου", "Θέλω να μαθαίνω τα νέα"),
+  "bg-BG": defineLocale("bg-BG", "bg", "Абонирай ме", "Твоят имейл", "Искам да научавам новостите"),
+  "hr-HR": defineLocale("hr-HR", "hr", "Pretplati me", "Tvoja e-adresa", "Želim čuti novosti"),
+  "sl-SI": defineLocale("sl-SI", "sl", "Naroči me", "Tvoj e-naslov", "Želim biti na tekočem"),
+  "sr-Latn-RS": defineLocale("sr-Latn-RS", "sr-Latn", "Prijavi me", "Tvoja imejl adresa", "Želim da čujem novosti"),
+  "sr-Cyrl-RS": defineLocale("sr-Cyrl-RS", "sr-Cyrl", "Пријави ме", "Твоја имејл адреса", "Желим да чујем новости"),
+  "uk-UA": defineLocale("uk-UA", "uk", "Підписатися", "Твоя електронна адреса", "Хочу знати, що нового"),
+  "ru-RU": defineLocale("ru-RU", "ru", "Подписаться", "Твоя электронная почта", "Хочу быть в курсе"),
+  "tr-TR": defineLocale("tr-TR", "tr", "Abone ol", "E-posta adresin", "Yeniliklerden haberim olsun"),
+  ar: defineLocale("ar", "ar", "اشترك", "بريدك الإلكتروني", "أرسلوا لي الجديد", "rtl"),
+  "ar-EG": defineLocale("ar-EG", "ar", "اشترك", "بريدك الإلكتروني", "أرسلوا لي الأخبار", "rtl"),
+  "ar-SA": defineLocale("ar-SA", "ar", "اشترك", "بريدك الإلكتروني", "أريد معرفة الجديد", "rtl"),
+  "he-IL": defineLocale("he-IL", "he", "הרשמה לעדכונים", "כתובת האימייל שלך", "אשמח להתעדכן", "rtl"),
+  "fa-IR": defineLocale("fa-IR", "fa", "دریافت خبرها", "نشانی ایمیل شما", "من را هم باخبر کنید", "rtl"),
+  "hi-IN": defineLocale("hi-IN", "hi", "अपडेट पाएँ", "आपका ईमेल पता", "मुझे भी बताते रहें"),
+  "bn-BD": defineLocale("bn-BD", "bn", "আপডেট পেতে চাই", "আপনার ইমেইল", "আমাকেও জানাবেন"),
+  "ta-IN": defineLocale("ta-IN", "ta", "புதிய தகவல்களைப் பெற", "உங்கள் மின்னஞ்சல்", "எனக்கும் தெரியப்படுத்துங்கள்"),
+  "ur-PK": defineLocale("ur-PK", "ur", "اپ ڈیٹس حاصل کریں", "آپ کا ای میل پتہ", "مجھے بھی باخبر رکھیں", "rtl"),
+  "id-ID": defineLocale("id-ID", "id", "Berlangganan", "Alamat email kamu", "Kabari aku, ya"),
+  "ms-MY": defineLocale("ms-MY", "ms", "Langgan", "Alamat e-mel anda", "Saya mahu berita terkini"),
+  "vi-VN": defineLocale("vi-VN", "vi", "Đăng ký nhận tin", "Email của bạn", "Cho mình biết nhé"),
+  "th-TH": defineLocale("th-TH", "th", "รับข่าวสาร", "อีเมลของคุณ", "มีอะไรใหม่ บอกกันด้วย"),
+  "fil-PH": defineLocale("fil-PH", "fil", "Tumanggap ng updates", "Email mo", "Gusto ko ng balita"),
+  "ja-JP": defineLocale("ja-JP", "ja", "ニュースを受け取る", "メールアドレス", "新着情報を届けて"),
+  "ko-KR": defineLocale("ko-KR", "ko", "구독하기", "이메일 주소", "새 소식 받을래요"),
+  "zh-Hans-CN": defineLocale("zh-Hans-CN", "zh-Hans", "订阅更新", "你的邮箱地址", "有新消息告诉我"),
+  "zh-Hant-TW": defineLocale("zh-Hant-TW", "zh-Hant-TW", "訂閱電子報", "你的電子信箱", "有新消息，告訴我"),
+  "zh-Hant-HK": defineLocale("zh-Hant-HK", "zh-Hant-HK", "訂閱最新消息", "你的電郵地址", "有新消息，通知我"),
+  "sw-KE": defineLocale("sw-KE", "sw", "Pokea taarifa", "Barua pepe yako", "Nijulishe mapya"),
+  "af-ZA": defineLocale("af-ZA", "af", "Teken in", "Jou e-posadres", "Hou my op hoogte")
 });
 var languageDefaults = Object.freeze({
   en: "en",
@@ -2331,4 +2331,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=440D725D02A432A064756E2164756E21
+//# debugId=2F0C2A67AB73BF2F64756E2164756E21
