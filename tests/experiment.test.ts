@@ -23,10 +23,10 @@ test("validates explicit static variants", () => {
 test("keeps compact assignments button-only and rejects historical or untranslated recipes", () => {
   const enrollment = { version: 1 as const, token, assignment: {
     id, locale: "en", layout: "button" as const, copyStyle: "goblin" as const, color: "green" as const,
-    shimmer: false, cohort: "explore" as const, policyVersion: "footer-v2-compact",
+    shimmer: false, cohort: "explore" as const, policyVersion: "footer-v3-compact",
   } };
   expect(parseFooterEnrollment(enrollment)).not.toBeNull();
-  const wideInline = { ...enrollment, assignment: { ...enrollment.assignment, layout: "inline" as const, policyVersion: "footer-v2-wide" } };
+  const wideInline = { ...enrollment, assignment: { ...enrollment.assignment, layout: "inline" as const, policyVersion: "footer-v3-wide" } };
   expect(isFooterEnrollmentEligible(wideInline, "en", "wide", false)).toBeFalse();
   expect(isFooterEnrollmentEligible(wideInline, "en", "wide", true)).toBeTrue();
   expect(isFooterEnrollmentEligible(enrollment, "en", "compact")).toBeTrue();
@@ -34,6 +34,8 @@ test("keeps compact assignments button-only and rejects historical or untranslat
   expect(isFooterEnrollmentEligible({ ...enrollment, assignment: { ...enrollment.assignment, color: "blue" } }, "en", "compact")).toBeFalse();
   expect(isFooterEnrollmentEligible({ ...enrollment, assignment: { ...enrollment.assignment, layout: "inline" } }, "en", "compact")).toBeFalse();
   expect(isFooterEnrollmentEligible({ ...enrollment, assignment: { ...enrollment.assignment, policyVersion: "footer-v1" } }, "en", "wide")).toBeFalse();
+  expect(isFooterEnrollmentEligible({ ...enrollment, assignment: { ...enrollment.assignment, policyVersion: "footer-v2-compact" } }, "en", "compact")).toBeFalse();
+  expect(isFooterEnrollmentEligible({ ...wideInline, assignment: { ...wideInline.assignment, policyVersion: "footer-v2-wide" } }, "en", "wide")).toBeFalse();
   expect(isFooterEnrollmentEligible({ ...enrollment, assignment: { ...enrollment.assignment, locale: "es-AR" } }, "es-AR", "compact")).toBeFalse();
 });
 
@@ -43,7 +45,7 @@ test("enrollment explicitly requests presentation version and viewport cohort wi
   globalThis.fetch = (async (_input, init) => { request = init; return new Response(null, { status: 204 }); }) as typeof fetch;
   try {
     await requestFooterEnrollment("hraness", "en", new AbortController().signal, "compact");
-    expect(JSON.parse(String(request?.body))).toEqual({ action: "assign", audience: "hraness", locale: "en", presentationVersion: 2, viewport: "compact" });
+    expect(JSON.parse(String(request?.body))).toEqual({ action: "assign", audience: "hraness", locale: "en", presentationVersion: 3, viewport: "compact" });
     expect(request?.credentials).toBe("omit");
   } finally { globalThis.fetch = previous; }
 });

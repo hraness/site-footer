@@ -39,11 +39,14 @@ The four sequential contexts are `idle`, `pending`, `accepted`, and `error`. Eac
 
 Do not add state setters or alternate footer markup to make a run pass. Read [the signup-state map](references/features/signup-states.md) when changing state coverage and [the responsive-layout map](references/features/responsive-layout.md) when changing geometry rules.
 
-A fifth signup context requests a synthetic version 2 inline enrollment through
+A fifth signup context requests a synthetic version 3 inline enrollment through
 the real Accounts browser port, then repeats all four widths. The wide samples
 require the complete disclosure panel to match the form height and remain inside
 the footer. Compact reassignment must produce the button arm. The manifest retains
-the actual named rectangles and experiment requests.
+the actual named rectangles and experiment requests. It then checks compact
+click/keyboard opening, synchronous email focus, Close and Escape, preserved
+input, a stable trigger footprint, localized accessible names, quieter open
+styling, 16px input text, and an attached 4–6px popup gap at 390px and 320px.
 
 A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all five link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and four social links.
 

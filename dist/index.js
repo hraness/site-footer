@@ -243,17 +243,33 @@ var styles = {
     kVQacm: "xb3r6kr",
     kg5iWk: "xlyipyv",
     kJVvJu: "xvpgqt4",
-    k1xSpc: "x3nfvp2 x1i5lizr",
+    k1xSpc: "xwz0xwf x1i5lizr",
+    kC13JO: "xrbltni",
+    kAPf3g: "x1o2pa38",
+    kKwaWg: "x1qewxgh xwi9c3o xhobzj1",
+    kVAM5u: "x9r1u3d x1xggt0h x1ylmb6m",
+    kMwMTN: "x1g4142m x1rhhl84",
+    $$css: true
+  },
+  triggerClosed: {
+    kJuA4N: "xxwd7sb",
+    k33iCy: "xnpuxes x12yxz85",
+    $$css: true
+  },
+  triggerOpen: {
+    kJuA4N: "xxwd7sb",
+    k63SB2: "xk50ysn",
+    k33iCy: "xlshs6z x16dnoq8",
     $$css: true
   },
   disclosurePanel: {
     kVAEAm: "x10l6tqk",
-    kctUWg: "x1byf6of",
+    kctUWg: "xr04doy x12aoker",
     ka7YqC: "xe89of6 x1vbotui",
     kULEZF: "x1487r7q",
     k2kXS: "x1ljtl1n",
-    kF3gjK: "xo0yzjp",
-    kJVvJu: "x1ryrjj2",
+    kF3gjK: "x18g2hj5",
+    kJVvJu: "x97vtpp",
     kaIpWk: "x116uinm",
     kY2c9j: "xzkaem6",
     kWkggS: "x1hhhz6w",
@@ -575,7 +591,7 @@ var styles = {
   mailingInput: {
     kULEZF: "xiuoait",
     kdYMnH: "xesnm00",
-    kGuDYH: "x1dcheo9",
+    kGuDYH: "x1dcheo9 xgbju11",
     krdFHd: "x1olvaoz",
     kfmiAY: "x1ga7v0g",
     kT0f0o: "x16uus16",
@@ -675,8 +691,12 @@ function className(hook, ...recipes) {
   return `${hook} ${props(...recipes).className ?? ""}`.trim();
 }
 var footerClasses = {
-  disclosure: className("hraness-site-footer__disclosure", styles.disclosure),
+  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${{
+    className: "x1gmlqhs"
+  }.className}`,
   disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focus, styles.motion),
+  triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
+  triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
@@ -733,15 +753,15 @@ var FOOTER_COPY_STYLES = ["direct", "inviting", "goblin", "cosmic", "chaos", "se
 var ENGLISH_FOOTER_COPY = Object.freeze({
   direct: {
     button: "Send me things",
-    placeholder: "your inbox, but weirder"
+    placeholder: "Your email"
   },
   inviting: {
     button: "I'm curious",
-    placeholder: "where should the plot thicken?"
+    placeholder: "curious@plot.twist"
   },
   goblin: {
     button: "Feed the goblin",
-    placeholder: "goblin delivery address"
+    placeholder: "goblin@snack.club"
   },
   cosmic: {
     button: "Beam me up",
@@ -749,11 +769,11 @@ var ENGLISH_FOOTER_COPY = Object.freeze({
   },
   chaos: {
     button: "Push the button",
-    placeholder: "put the internet in here"
+    placeholder: "chaos@inbox.party"
   },
   secret: {
     button: "Let me in",
-    placeholder: "your secret inbox lair"
+    placeholder: "agent@secret.lair"
   }
 });
 function isFooterCopyStyle(value) {
@@ -1705,7 +1725,10 @@ function renderMailingList(mailingList, state, presentation) {
   const classes = disclosureClassNames(variant.layout);
   const open = state.kind === "idle" ? "" : ' open=""';
   const label = escapeAttribute(copy.button);
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary aria-label="${escapeAttribute(copy.button)}, ${escapeAttribute(copy.openLabel)}" data-foil="" class="${classes.trigger}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}</summary><div class="${classes.panel}">${form}</div></details>`;
+  const closeText = escapeAttribute(/^en(?:-|$)/u.test(locale.locale) ? "Close" : copy.closeLabel);
+  const closedLabel = `<span class="${footerClasses.triggerClosed}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}<span class="${footerClasses.visuallyHidden}">, ${escapeAttribute(copy.openLabel)}</span></span>`;
+  const openLabel = `<span class="${footerClasses.triggerOpen}"><span aria-hidden="true">${closeText}</span><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.closeLabel)}</span></span>`;
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
@@ -1743,4 +1766,4 @@ export {
   HRANESS_HOME_URL
 };
 
-//# debugId=6749847A221C598664756E2164756E21
+//# debugId=F0C8C69506C3321F64756E2164756E21

@@ -303,9 +303,10 @@ test("inline recipes retain one native mobile disclosure and one uniquely labell
   const disclosure = document.querySelector('[data-slot="hraness-mailing-disclosure"]');
   expect(disclosure?.tagName).toBe("DETAILS");
   expect(disclosure?.hasAttribute("open")).toBeFalse();
-  expect(disclosure?.querySelector("summary")?.textContent).toBe("Feed the goblin");
-  expect(disclosure?.querySelector("summary")?.getAttribute("aria-label")).toContain("Subscribe by email");
+  expect(disclosure?.querySelector(".hraness-site-footer__disclosure-closed-label")?.textContent).toBe("Feed the goblin, Subscribe by email");
+  expect(disclosure?.querySelector("summary")?.hasAttribute("aria-label")).toBeFalse();
+  expect(disclosure?.querySelector(".hraness-site-footer__disclosure-open-label")?.textContent).toBe("CloseClose email signup");
   expect(document.querySelectorAll("form")).toHaveLength(1);
-  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("goblin delivery address");
+  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("goblin@snack.club");
   expect(document.querySelector('input[name="email"]')?.closest("label")?.textContent).toBe("Email address");
 });

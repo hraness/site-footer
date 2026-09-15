@@ -1,7 +1,13 @@
+import * as stylex from "@stylexjs/stylex";
 import type { FooterVariant } from "./experiment.js";
+export declare const disclosureMarker: Readonly<{
+    readonly marker: stylex.StyleXClassNameFor<"marker", symbol>;
+}>;
 export declare const footerClasses: {
     disclosure: string;
     disclosureTrigger: string;
+    triggerClosed: string;
+    triggerOpen: string;
     disclosurePanel: string;
     shimmer: string;
     brand: string;

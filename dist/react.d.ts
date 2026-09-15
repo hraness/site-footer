@@ -30,6 +30,8 @@ export declare function HranessSiteFooter({ locale: localeInput, experiment, pla
     };
     onClick: (event: {
         target: EventTarget | null;
+        defaultPrevented: boolean;
+        preventDefault: () => void;
     }) => void;
     onSubmit: (event: FormEvent<HTMLElement>) => void;
     onPointerDownCapture: () => void;

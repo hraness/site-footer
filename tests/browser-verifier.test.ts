@@ -8,6 +8,7 @@ import {
 
 import {
   assertAgentBrowserSocketBudget,
+  assertDisclosureSnapshot,
   assertFontCascade,
   browserConsoleErrors,
   createLayoutContract,
@@ -39,6 +40,12 @@ function parsedSample() {
 }
 
 describe("site-footer browser verifier", () => {
+  test("checks the native summary's name and expanded state independently of the submit button", () => {
+    expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Feed the goblin , Subscribe by email" [expanded=false]' }, false, "Feed the goblin, Subscribe by email")).not.toThrow();
+    expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Close email signup" [expanded=true]' }, true, "Close email signup")).not.toThrow();
+    expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Feed the goblin" [expanded=true]\n- button "Close email signup"' }, true, "Close email signup")).toThrow();
+    expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Close email signup" [expanded=false]' }, true, "Close email signup")).toThrow();
+  });
   test("requires independent child palettes and inherited language on the real control samples", () => {
     const inherited = { language: '"TRK"', palette: "light" };
     const sample = {

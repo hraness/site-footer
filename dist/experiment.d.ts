@@ -18,7 +18,7 @@ export interface FooterEnrollment {
 }
 export type FooterViewport = "compact" | "wide";
 export declare const FOOTER_WIDE_QUERY = "(min-width: 47.5rem)";
-export declare const FOOTER_PRESENTATION_VERSION = 2;
+export declare const FOOTER_PRESENTATION_VERSION = 3;
 /** Never attribute a CSS-constrained layout or untranslated copy to another arm. */
 export declare function isFooterEnrollmentEligible(enrollment: FooterEnrollment, locale: string, viewport: FooterViewport, inlineSupported?: boolean): boolean;
 export declare const FOOTER_EXPERIMENT_URL = "https://account.hraness.com/api/mailing/experiment";
