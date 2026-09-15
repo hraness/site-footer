@@ -268,9 +268,9 @@ serves an evidence-qualified recipe to the remaining traffic; PostHog receives
 only anonymous enrollment events and confirmed double-opt-in conversions.
 
 English copy tests six stable, deliberately different paired hypotheses: “Send me
-things” / “Your email”; “I'm curious” / “curious@plot.twist”;
-“Feed the goblin” / “goblin@snack.club”; “Beam me up” / “earthling@probably.earth”;
-“Push the button” / “chaos@inbox.party”; and “Let me in” / “agent@secret.lair”.
+things” / “sjobs@apple.com”; “I'm curious” / “billg@microsoft.com”;
+“Feed the goblin” / “chunkylover53@aol.com”; “Beam me up” / “tom@myspace.com”;
+“Push the button” / “neo@metacortex.com”; and “Let me in” / “satoshin@gmx.com”.
 Other locales retain their two localized styles. Programmatic labels still say
 email signup, independently of the playful visible copy.
 

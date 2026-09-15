@@ -192,7 +192,7 @@ describe("Hraness site footer", () => {
     expect(form?.getAttribute("data-color")).toBe("orange");
     expect(form?.getAttribute("data-shimmer")).toBe("true");
     expect(summary?.textContent).toContain("Avisame");
-    expect(form?.querySelector('input[name="email"]')?.getAttribute("placeholder")).toContain("mail");
+    expect(form?.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("billg@microsoft.com");
     expect(form?.querySelector(".hraness-site-footer__shimmer")).not.toBeNull();
   });
 
@@ -307,6 +307,6 @@ test("inline recipes retain one native mobile disclosure and one uniquely labell
   expect(disclosure?.querySelector("summary")?.hasAttribute("aria-label")).toBeFalse();
   expect(disclosure?.querySelector(".hraness-site-footer__disclosure-open-label")?.textContent).toBe("CloseClose email signup");
   expect(document.querySelectorAll("form")).toHaveLength(1);
-  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("goblin@snack.club");
+  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("chunkylover53@aol.com");
   expect(document.querySelector('input[name="email"]')?.closest("label")?.textContent).toBe("Email address");
 });

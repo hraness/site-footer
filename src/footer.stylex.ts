@@ -64,7 +64,7 @@ const styles = stylex.create({
   experimentBorder: {
     borderColor: { default: "var(--hraness-site-footer-field-line, var(--hraness-site-footer-line))", "@media (forced-colors: active)": "ButtonText" },
   },
-  disclosure: { position: { default: "static", "@media (min-width: 47.5rem)": "relative" }, gridArea: "mailing", "min-inline-size": 0, "max-inline-size": { default: "12rem", "@media (min-width: 47.5rem)": "26rem" } },
+  disclosure: { position: { default: "static", "@media (min-width: 47.5rem)": "relative" }, gridArea: "mailing", "min-inline-size": 0, "max-inline-size": { default: "12rem", "@media (min-width: 47.5rem)": "20rem" } },
   disclosureInline: {
     // Keep one native form: on wide screens the same closed disclosure becomes
     // the inline experiment arm. Modern details hides via content-visibility.
@@ -104,7 +104,7 @@ const styles = stylex.create({
   disclosurePanel: {
     position: "absolute", "inset-block-end": { default: "calc(100% + 0.375rem)", "@media (min-width: 47.5rem)": "calc(100% + var(--hraness-site-footer-padding-block) + 0.375rem)" },
     "inset-inline-start": { default: "1rem", "@media (min-width: 47.5rem)": 0 },
-    "inline-size": "min(26rem, calc(100vw - 2rem))", "max-inline-size": "calc(100vw - 2rem)",
+    "inline-size": "min(20rem, calc(100vw - 2rem))", "max-inline-size": "calc(100vw - 2rem)",
     "padding-block": "0.5rem", "padding-inline": "0.5rem", borderRadius: "0.5rem", zIndex: 3,
     backgroundColor: "var(--hraness-site-footer-background)",
   },
@@ -177,7 +177,7 @@ const styles = stylex.create({
   },
   innerSignup: {
     gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(12rem, 26rem) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
     gridTemplateRows: "var(--hraness-site-footer-content-block-size)",
   },
   innerAccount: {
@@ -265,7 +265,7 @@ const styles = stylex.create({
   },
   consentLink: { color: "var(--hraness-site-footer-foreground)" },
   mailingGeometry: {
-    gridArea: "mailing", "inline-size": "min(100%, 26rem)", "min-inline-size": 0,
+    gridArea: "mailing", "inline-size": "min(100%, 18rem)", "min-inline-size": 0,
     "block-size": "var(--hraness-site-footer-form-block-size)", margin: 0,
   },
   mailing: { position: "relative", display: "grid", gridTemplateRows: "var(--hraness-site-footer-control-block-size)" },

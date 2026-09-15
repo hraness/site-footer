@@ -28,9 +28,9 @@ test("English hypotheses pair distinct short CTAs with explicit email placeholde
   const copies = Object.values(ENGLISH_FOOTER_COPY);
   expect(new Set(copies.map(copy => copy.button)).size).toBe(6);
   expect(new Set(copies.map(copy => copy.placeholder)).size).toBe(6);
-  expect(ENGLISH_FOOTER_COPY.direct.placeholder).toBe("Your email");
+  expect(ENGLISH_FOOTER_COPY.direct.placeholder).toBe("sjobs@apple.com");
   for (const copy of copies) {
-    expect(copy.placeholder === "Your email" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(copy.placeholder)).toBeTrue();
+    expect(/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(copy.placeholder)).toBeTrue();
   }
   for (const locale of Object.values(FOOTER_LOCALES).filter(locale => locale.locale.startsWith("en"))) {
     for (const key of Object.keys(ENGLISH_FOOTER_COPY) as Array<keyof typeof ENGLISH_FOOTER_COPY>) {

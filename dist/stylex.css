@@ -600,16 +600,16 @@
     inline-size: fit-content;
   }
 
-  .x1gx0lkv {
-    inline-size: min(100%, 26rem);
+  .xgybh9h {
+    inline-size: min(100%, 18rem);
   }
 
   .x146urod {
     inline-size: min(18rem, 100vw - 2rem);
   }
 
-  .x1487r7q {
-    inline-size: min(26rem, 100vw - 2rem);
+  .xzm6ek {
+    inline-size: min(20rem, 100vw - 2rem);
   }
 
   .x175cv4s {
@@ -971,8 +971,8 @@
       grid-template-columns: auto minmax(0,max-content) auto minmax(var(--hraness-site-footer-social-target),1fr);
     }
 
-    .xvdon42.xvdon42 {
-      grid-template-columns: auto minmax(12rem,26rem) auto minmax(var(--hraness-site-footer-social-target),1fr);
+    .xoysss2.xoysss2 {
+      grid-template-columns: auto minmax(10rem,18rem) auto minmax(var(--hraness-site-footer-social-target),1fr);
     }
 
     .x1cd001l.x1cd001l {
@@ -987,8 +987,8 @@
       inset-inline-start: 0;
     }
 
-    .x1s7ke32.x1s7ke32 {
-      max-inline-size: 26rem;
+    .x3jboi5.x3jboi5 {
+      max-inline-size: 20rem;
     }
 
     .x1nmvtcz.x1nmvtcz {
