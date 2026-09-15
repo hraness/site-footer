@@ -39,7 +39,10 @@ const MAX_AUDIENCE_LENGTH = 24;
 const MAX_SOCIAL_HREF_LENGTH = 200;
 const MAX_SOCIAL_LABEL_LENGTH = 64;
 const AUDIENCE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-const SOCIAL_LABEL_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} .'+/-]{0,62}$/u;
+const SOCIAL_LABEL_PATTERN = new RegExp(
+  "^[\\p{L}\\p{N}][\\p{L}\\p{N} .'+/-]{0,62}$",
+  "u",
+);
 const SOCIAL_HREF_HOSTS: Readonly<Record<HranessSocialPlatform, string>> = {
   github: "github.com",
   linkedin: "www.linkedin.com",
@@ -379,7 +382,7 @@ function renderMailingList(
   return `<details class="${footerClasses.disclosure}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary aria-label="${escapeAttribute(copy.openLabel)}" class="${footerClasses.disclosureTrigger}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}</summary><div class="${footerClasses.disclosurePanel}">${form}</div></details>`;
 }
 
-const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice — no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 
 export function renderHranessSiteFooterInnerHtml(
   showBrand: boolean,
