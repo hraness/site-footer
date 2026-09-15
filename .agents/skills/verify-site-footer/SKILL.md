@@ -39,6 +39,12 @@ The four sequential contexts are `idle`, `pending`, `accepted`, and `error`. Eac
 
 Do not add state setters or alternate footer markup to make a run pass. Read [the signup-state map](references/features/signup-states.md) when changing state coverage and [the responsive-layout map](references/features/responsive-layout.md) when changing geometry rules.
 
+A fifth signup context requests a synthetic version 2 inline enrollment through
+the real Accounts browser port, then repeats all four widths. The wide samples
+require the complete disclosure panel to match the form height and remain inside
+the footer. Compact reassignment must produce the button arm. The manifest retains
+the actual named rectangles and experiment requests.
+
 A final separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all five link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and four social links.
 
 ## Evidence
@@ -51,6 +57,7 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - exact repository source-content identity before drive, after drive, and after cleanup;
 - wide brand, mailing, and social centerlines within 1 CSS pixel;
 - equal input and submit heights;
+- wide inline outer panel height equal to its form and complete containment inside the footer;
 - an absolute hidden idle status that does not enlarge its form row;
 - four social targets at wide widths and a visible priority prefix beginning with Substack at compact widths;
 - an icon-only home link;

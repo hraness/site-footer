@@ -71,7 +71,10 @@ const styles = stylex.create({
   panelInline: {
     display: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "block" } },
     position: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "static" } },
-    padding: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
+    // Match the panel's logical axes so the conditional reset shares their
+    // compiled priority layer; a padding shorthand loses to those longhands.
+    "padding-block": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
+    "padding-inline": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
     borderWidth: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
     "inline-size": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "100%" } },
   },

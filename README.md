@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.10.0
+bun add github:hraness/site-footer#v0.10.1
 ```
 
 Start with the network footer and no mailing form:
@@ -253,6 +253,9 @@ pointer-following glint for fine mouse hover, with one coalesced animation frame
 per pointer update and no idle loop, filters, canvas or React rerenders. Reduced
 motion, coarse pointers and forced colors disable this enhancement.
 
+Version 0.10.1 fixes the desktop inline panel's logical padding reset so its
+opaque surface stays within the single footer row. The browser gate measures
+that outer panel for both the default recipe and a version 2 assignment.
 Version 0.9.1 halves the footer's resting height: a 1.75rem control row,
 28px fine-pointer social targets (44px stays for coarse pointers), smaller
 icons, tighter padding, and an 0.875rem text size.
@@ -330,7 +333,9 @@ signup.
 | TypeScript, generated artifacts, all tests, and package boundary | `bun run check` |
 
 The browser verifier uses the real React adapter with a synthetic Accounts
-boundary on loopback. It proves the package state path and declared
+boundary on loopback. It also requests a version 2 inline enrollment and checks
+that the entire desktop disclosure panel matches the form height and remains
+inside the footer, including the 760px breakpoint. It proves the package state path and declared
 geometry, but not either live provider or overall visual quality. Inspect its
 wide and compact screenshots before making a design judgment.
 It compiles the real source with the same public collector and checks every

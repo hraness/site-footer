@@ -3,7 +3,7 @@
 ## Sub-features
 
 - One aligned wide row at 1280 by 900.
-- Two-row compact composition at 390 by 844.
+- One-row compact composition with a native disclosure at 390 by 844.
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
 - One row at both widths; compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
@@ -11,6 +11,7 @@
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.
 - Equal email and submit heights.
+- Desktop inline panel height equal to its form and outer bounds inside the footer, including a real v2 enrollment at 1280px and 760px.
 - Non-reserving idle status surface.
 - Minimum visible target sizes, viewport containment, no compact overflow, and settled geometry.
 - Independently cascaded control font palettes and inherited font language.
@@ -39,5 +40,5 @@ so that state requires both control samples to be absent.
 
 - The non-idle status surface intentionally overlays above the in-flow footer row. It must clear its top border rather than sit inside it.
 - A passing rectangle contract does not prove typography, contrast, prominence, or rhythm. Review both screenshots.
-- Fine-pointer controls are checked at the package's 40 CSS pixel baseline. The existing stylesheet test separately protects the 44 CSS pixel coarse-pointer override.
+- Fine-pointer controls are checked at the package's 28 CSS pixel baseline. The existing stylesheet test separately protects the 44 CSS pixel coarse-pointer override.
 - A zero inset in the Chromium fixture proves the ordinary-screen spacing contract, not a physical mobile device or a forced nonzero inset. Retain the measured inset in the evidence.

@@ -174,6 +174,7 @@ interface ViewportEvidence {
   readonly geometry: ManualGeometry;
   readonly spacing: FooterSpacing;
   readonly layout: Readonly<{
+    samples: readonly unknown[];
     ok: boolean;
     ruleCount: number;
     violations: readonly unknown[];
@@ -348,7 +349,7 @@ export function createLayoutContract(
       tolerance: 0.25,
     });
   }
-  for (const name of ["brand", "mailing", "socials"] as const) {
+  for (const name of ["brand", "mailing", "socials", ...(viewport === "wide" ? ["panel"] : [])]) {
     if (names.has(name)) {
       add({
         id: `${viewport}.${name}.inside`,
@@ -1135,6 +1136,15 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     rect("mailing", mailing),
     rect("socials", socials),
   ];
+  const panel = document.querySelector(".hraness-site-footer__disclosure-panel");
+  if (!compact && panel instanceof HTMLElement && panel.checkVisibility()) {
+    const panelBox = panel.getBoundingClientRect();
+    const formBox = mailing.getBoundingClientRect();
+    if (Math.abs(panelBox.height - formBox.height) > 0.5) {
+      throw new Error("The wide inline disclosure panel adds height around the form.");
+    }
+    boxes.push(rect("panel", panel));
+  }
   const controls = document.querySelector(".hraness-site-footer__mailing-controls");
   const input = document.querySelector(".hraness-site-footer__mailing-input");
   const submit = document.querySelector(".hraness-site-footer__mailing-submit");
@@ -1432,6 +1442,7 @@ async function sampleViewport(options: {
     geometry,
     spacing,
     layout: Object.freeze({
+      samples: [first.value, second.value],
       ok: validation.ok,
       ruleCount: contract.value.rules.length,
       violations: validation.violations,
@@ -1509,14 +1520,25 @@ async function driveState(options: {
   readonly browser: BrowserDriver;
   readonly runDirectory: string;
   readonly state: FixtureState;
+  readonly experiment?: "inline";
 }): Promise<ScenarioEvidence> {
   const context = await options.browser.run(["tab", "new"]);
   await options.browser.run(["set", "viewport", "1280", "900"]);
   await options.browser.run([
     "open",
-    `${DEFAULT_BASE_URL}/?state=${encodeURIComponent(options.state)}`,
+    `${DEFAULT_BASE_URL}/?state=${encodeURIComponent(options.state)}${options.experiment === "inline" ? "&experiment=inline" : ""}`,
   ]);
   await options.browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
+  const waitForEnrollment = async () => {
+    if (options.experiment !== "inline") return;
+    await options.browser.run(["wait", "--fn", `(() => {
+      const form = document.querySelector('form[data-copy-variant="goblin"]');
+      const layout = window.matchMedia('(min-width: 47.5rem)').matches ? 'inline' : 'button';
+      return form?.getAttribute('data-layout') === layout
+        && form.querySelector('input[name="experimentToken"]')?.value === '${"a".repeat(64)}';
+    })()`, "--timeout", "5000"]);
+  };
+  await waitForEnrollment();
   await options.browser.evaluate(SETTLE_EXPRESSION);
   if (options.state === "pending" || options.state === "accepted" || options.state === "error") {
     await options.browser.run(["fill", 'input[name="email"]', TEST_EMAIL]);
@@ -1542,7 +1564,7 @@ async function driveState(options: {
         const honeypot = document.querySelector('input[name="website"]');
         return button instanceof HTMLButtonElement
           && !button.disabled
-          && button.textContent === "Send me things"
+          && button.textContent === ${JSON.stringify(options.experiment === "inline" ? "Feed the goblin" : "Send me things")}
           && honeypot instanceof HTMLInputElement
           && honeypot.value === ""
           && honeypot.getAttribute("aria-hidden") === "true"
@@ -1565,12 +1587,15 @@ async function driveState(options: {
   }
   const wide = await sampleViewport({ ...options, kind: "wide" });
   await options.browser.run(["set", "viewport", "390", "844"]);
+  await waitForEnrollment();
   const compact = await sampleViewport({ ...options, kind: "compact" });
   const additionalWidths: ViewportEvidence[] = [];
   for (const width of [320, 760]) {
     await options.browser.run(["set", "viewport", String(width), "844"]);
+    await waitForEnrollment();
     additionalWidths.push(await sampleViewport({ ...options, kind: width < 760 ? "compact" : "wide" }));
   }
+  const experimentRequests = await options.browser.evaluate("window.__siteFooterFixture.experimentSnapshot()");
   const browserErrors = await options.browser.run(["errors"]);
   const pageErrors = browserPageErrors(browserErrors);
   if (pageErrors.length > 0) {
@@ -1617,6 +1642,8 @@ async function driveState(options: {
     compact,
     context,
     fixture,
+    experiment: options.experiment ?? "none",
+    experimentRequests,
     postCloseInventory,
     preCloseInventory,
     returnToBootstrap,
@@ -1794,6 +1821,10 @@ async function runVerifier(): Promise<string> {
         state,
       }));
     }
+    const inlineDirectory = join(artifacts.runDirectory, "inline-enrollment");
+    await mkdir(inlineDirectory, { recursive: true });
+    console.log("Verifying version 2 inline enrollment and outer panel bounds");
+    evidence.push(await driveState({ bootstrapTabId, browser, runDirectory: inlineDirectory, state: "idle", experiment: "inline" }));
     assertCrossStateGeometry(evidence);
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     finalInventory = await browser.run(["tab"]);
@@ -1831,7 +1862,7 @@ async function runVerifier(): Promise<string> {
     allowedDomains: ALLOWED_DOMAINS,
     backend: "local-chromium",
     baseUrl: DEFAULT_BASE_URL,
-    batchSize: fixtureStates.length,
+    batchSize: evidence.length,
     bootstrapInventory,
     cleanup: { browser: finalClose, server: serverCleanup },
     driver: { name: "agent-browser", version: BROWSER_VERSION },

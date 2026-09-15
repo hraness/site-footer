@@ -192,3 +192,19 @@ describe("site-footer browser verifier", () => {
       .toThrow("messages array");
   });
 });
+
+test("wide layout rejects a padded inline panel even when its inner form remains aligned", () => {
+  const contract = parseDirectNamedLayoutContract(createLayoutContract("wide", [...boxes.map(({ name }) => name), "panel"]));
+  expect(contract.ok).toBeTrue();
+  if (!contract.ok) return;
+  for (const padded of [false, true]) {
+    const sample = parseDirectNamedLayoutSample({
+      boxes: [...boxes, { name: "panel", width: 416, height: padded ? 64 : 40, x: 432, y: padded ? 839 : 851 }],
+      schema: "direct.named-layout-sample/v1",
+      viewport: { height: 900, width: 1_280 },
+    });
+    expect(sample.ok).toBeTrue();
+    if (!sample.ok) return;
+    expect(validateDirectNamedLayout(contract.value, [sample.value, sample.value]).ok).toBe(!padded);
+  }
+});
