@@ -24,14 +24,6 @@
   .x1717udv {
     padding: 0;
   }
-
-  @supports selector(::details-content) {
-    @media (width >= 47.5rem) {
-      .x1jfe6dx.x1jfe6dx.x1jfe6dx {
-        padding: 0;
-      }
-    }
-  }
 }
 
 @layer components.hraness-site-footer.priority3 {
@@ -167,6 +159,14 @@
     @media (width >= 47.5rem) {
       .x1pdywdg.x1pdywdg.x1pdywdg {
         border-width: 0;
+      }
+
+      .xv2k6yj.xv2k6yj.xv2k6yj {
+        padding-block: 0;
+      }
+
+      .xyo0no0.xyo0no0.xyo0no0 {
+        padding-inline: 0;
       }
     }
   }

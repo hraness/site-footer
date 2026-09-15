@@ -226,7 +226,8 @@ var styles = {
   panelInline: {
     k1xSpc: "xpbngvy",
     kVAEAm: "xe6w1w2",
-    kmVPX3: "x1jfe6dx",
+    kF3gjK: "xv2k6yj",
+    kJVvJu: "xyo0no0",
     kMzoRj: "x1pdywdg",
     kULEZF: "x9uf5pp",
     $$css: true
@@ -722,7 +723,7 @@ function disclosureClassNames(layout) {
       className: "xb0i1br"
     }.className : ""}`.trim(),
     panel: `${footerClasses.disclosurePanel} ${layout === "inline" ? {
-      className: "xpbngvy xe6w1w2 x1jfe6dx x1pdywdg x9uf5pp"
+      className: "xpbngvy xe6w1w2 xv2k6yj xyo0no0 x1pdywdg x9uf5pp"
     }.className : ""}`.trim()
   };
 }
@@ -1742,4 +1743,4 @@ export {
   HRANESS_HOME_URL
 };
 
-//# debugId=D15E96276E8764AF64756E2164756E21
+//# debugId=6749847A221C598664756E2164756E21

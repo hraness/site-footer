@@ -5,6 +5,7 @@ import { HranessSiteFooter } from "../../../../src/react.js";
 import "../../../../styles.css";
 import "./fixture.css";
 
+const EXPERIMENT_URL = "https://account.hraness.com/api/mailing/experiment";
 const MAILING_URL = "https://account.hraness.com/api/mailing/subscribe";
 const CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 const TEST_EMAIL = "footer-fixture@example.test";
@@ -41,6 +42,7 @@ declare global {
   interface Window {
     __siteFooterFixture?: Readonly<{
       snapshot: () => FixtureSnapshot;
+      experimentSnapshot: () => readonly unknown[];
     }>;
   }
 }
@@ -60,6 +62,8 @@ const selectedState = selectedFixtureState();
 const pageParams = new URL(window.location.href).searchParams;
 const signupEnabled = pageParams.get("mailing") !== "none";
 const consentRequired = pageParams.get("consent") === "required";
+const experimentEnabled = pageParams.get("experiment") === "inline";
+const experimentRequests: unknown[] = [];
 const errors: string[] = [];
 const requests: RecordedRequest[] = [];
 
@@ -74,6 +78,23 @@ window.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
   const url = input instanceof Request ? input.url : String(input);
   if (url === CONSENT_REGION_URL) {
     return Response.json({ region: null, required: consentRequired });
+  }
+  if (url === EXPERIMENT_URL && experimentEnabled) {
+    const body: unknown = JSON.parse(String(init?.body));
+    if (!body || typeof body !== "object" || Array.isArray(body)
+      || init?.method !== "POST" || init.credentials !== "omit") throw new Error("Invalid synthetic experiment request.");
+    const request = body as Record<string, unknown>;
+    experimentRequests.push(body);
+    if (request.action === "expose" && request.token === "a".repeat(64)) return new Response(null, { status: 202 });
+    if (request.action !== "assign" || request.audience !== "footer-fixture" || request.locale !== "en"
+      || request.presentationVersion !== 2 || (request.viewport !== "wide" && request.viewport !== "compact")) {
+      throw new Error("The fixture requires an explicit version 2 viewport assignment.");
+    }
+    return Response.json({ version: 1, token: "a".repeat(64), assignment: {
+      id: "123e4567-e89b-42d3-a456-426614174000", locale: "en",
+      layout: request.viewport === "wide" ? "inline" : "button", copyStyle: "goblin",
+      color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v2-${request.viewport}`,
+    } });
   }
   if (url !== MAILING_URL) {
     throw new Error(`The footer fixture blocked an unexpected request: ${url}`);
@@ -104,6 +125,7 @@ function readDomState(): string {
 }
 
 window.__siteFooterFixture = Object.freeze({
+  experimentSnapshot: () => Object.freeze([...experimentRequests]),
   snapshot: () => Object.freeze({
     domState: readDomState(),
     errors: Object.freeze([...errors]),
@@ -139,7 +161,8 @@ function Fixture() {
         // Keep the verifier's page shell in normal flow; production consumers
         // use the default sticky placement.
         placement="flow"
-        experiment={false}
+        experiment={experimentEnabled}
+        locale="en"
         mailingList={signupEnabled ? {
           audience: "footer-fixture",
           kind: "signup",
