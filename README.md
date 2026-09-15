@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.10.1
+bun add github:hraness/site-footer#v0.10.2
 ```
 
 Start with the network footer and no mailing form:
@@ -230,11 +230,11 @@ both. Do not add another footer bar, viewport spacer, or blank padding after it 
 consumer layout. Product navigation belongs with the page navigation.
 
 The React adapter requests a short-lived Accounts enrollment and exposes it
-only after the visible footer settles. Presentation version 2 isolates compact and
+only after the visible footer settles. Presentation version 3 isolates compact and
 wide cohorts: compact assignments always use the button and are never counted
 as inline exposures. Crossing the breakpoint invalidates attribution; active
 email text is preserved. The native form carries the same eligible enrollment
-capability as enhanced submission. Version 2 tests copy and wide-screen layout;
+capability as enhanced submission. Version 3 tests copy and wide-screen layout;
 its holographic treatment is fixed (`color: green`, `shimmer: false`) so cosmetic
 arms do not dilute the results. Legacy recipes retain bounded color and shimmer
 support. Accounts keeps a randomized exploration stream and
@@ -242,9 +242,9 @@ serves an evidence-qualified recipe to the remaining traffic; PostHog receives
 only anonymous enrollment events and confirmed double-opt-in conversions.
 
 English copy tests six stable, deliberately different paired hypotheses: “Send me
-things” / “your inbox, but weirder”; “I'm curious” / “where should the plot thicken?”;
-“Feed the goblin” / “goblin delivery address”; “Beam me up” / “earthling@probably.earth”;
-“Push the button” / “put the internet in here”; and “Let me in” / “your secret inbox lair”.
+things” / “Your email”; “I'm curious” / “curious@plot.twist”;
+“Feed the goblin” / “goblin@snack.club”; “Beam me up” / “earthling@probably.earth”;
+“Push the button” / “chaos@inbox.party”; and “Let me in” / “agent@secret.lair”.
 Other locales retain their two localized styles. Programmatic labels still say
 email signup, independently of the playful visible copy.
 
@@ -252,6 +252,13 @@ The CTA has a static holographic border in both renderers. React adds a
 pointer-following glint for fine mouse hover, with one coalesced animation frame
 per pointer update and no idle loop, filters, canvas or React rerenders. Reduced
 motion, coarse pointers and forced colors disable this enhancement.
+
+Version 0.10.2 makes every English placeholder explicit email guidance, keeps
+the popup close to its footer, and changes the open trigger to a quiet Close
+action without shifting its footprint. React focuses the email field during
+opening, and compact/touch inputs use 16px text to avoid focus zoom. Native
+disclosure labels and styling also work without JavaScript. Presentation
+version 3 keeps these changes separate from earlier experiment results.
 
 Version 0.10.1 fixes the desktop inline panel's logical padding reset so its
 opaque surface stays within the single footer row. The browser gate measures
@@ -333,7 +340,7 @@ signup.
 | TypeScript, generated artifacts, all tests, and package boundary | `bun run check` |
 
 The browser verifier uses the real React adapter with a synthetic Accounts
-boundary on loopback. It also requests a version 2 inline enrollment and checks
+boundary on loopback. It also requests a version 3 inline enrollment and checks
 that the entire desktop disclosure panel matches the form height and remains
 inside the footer, including the 760px breakpoint. It proves the package state path and declared
 geometry, but not either live provider or overall visual quality. Inspect its

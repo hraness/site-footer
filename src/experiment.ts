@@ -21,7 +21,7 @@ export interface FooterEnrollment {
 
 export type FooterViewport = "compact" | "wide";
 export const FOOTER_WIDE_QUERY = "(min-width: 47.5rem)";
-export const FOOTER_PRESENTATION_VERSION = 2;
+export const FOOTER_PRESENTATION_VERSION = 3;
 
 /** Never attribute a CSS-constrained layout or untranslated copy to another arm. */
 export function isFooterEnrollmentEligible(enrollment: FooterEnrollment, locale: string, viewport: FooterViewport, inlineSupported = true): boolean {
@@ -29,7 +29,7 @@ export function isFooterEnrollmentEligible(enrollment: FooterEnrollment, locale:
     && (viewport === "wide" || enrollment.assignment.layout === "button")
     && (inlineSupported || enrollment.assignment.layout === "button")
     && supportsFooterCopyStyle(locale, enrollment.assignment.copyStyle)
-    && new RegExp(`^footer-v2-${viewport}(?:-\\d{1,16})?$`, "u").test(enrollment.assignment.policyVersion)
+    && new RegExp(`^footer-v3-${viewport}(?:-\\d{1,16})?$`, "u").test(enrollment.assignment.policyVersion)
     && enrollment.assignment.color === "green" && !enrollment.assignment.shimmer;
 }
 

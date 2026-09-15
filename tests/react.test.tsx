@@ -558,7 +558,7 @@ test("eligible enrollment survives native submission but resize removes stale at
       requests.push(body);
       return Response.json({ version: 1, token, assignment: {
         id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "goblin",
-        color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v2-${body.viewport}`,
+        color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v3-${body.viewport}`,
       } });
     }) as typeof fetch,
   };
@@ -574,10 +574,10 @@ test("eligible enrollment survives native submission but resize removes stale at
     await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
     const email = container.querySelector<HTMLInputElement>('input[name="email"]')!;
     const nativeToken = container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!;
-    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 2, viewport: "compact" }]);
+    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 3, viewport: "compact" }]);
     expect(nativeToken.value).toBe(token);
     expect(nativeToken.disabled).toBeFalse();
-    expect(container.querySelector("summary")?.textContent).toBe("Feed the goblin");
+    expect(container.querySelector(".hraness-site-footer__disclosure-closed-label")?.textContent).toBe("Feed the goblin, Subscribe by email");
     email.value = "do-not-erase@example.test";
     await act(async () => { email.dispatchEvent(new window.Event("focusin", { bubbles: true })); });
     await act(async () => { media.matches = true; changes.forEach(fn => fn()); });

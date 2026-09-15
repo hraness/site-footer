@@ -1,18 +1,25 @@
 import { describe, expect, test } from "bun:test";
+import * as stylex from "@stylexjs/stylex";
 import { createStylexTransformCollector, readStylexPackageManifest } from "@hraness/ui/stylex-build";
 import { resolve } from "node:path";
 import {
-  disclosureClassNames, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, socialItemClassName,
+  disclosureClassNames, disclosureMarker, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, socialItemClassName,
 } from "../src/footer.stylex.js";
 import { assertPresentationBoundary, assertSourceBoundary } from "../scripts/check-stylex-artifacts.js";
 
 const repository = resolve(import.meta.dir, "..");
 const manifest = await readStylexPackageManifest(resolve(repository, "dist/stylex-manifest.json"), repository);
 const rules = new Map(manifest.rules.map(([key, value]) => [key, value.ltr]));
+const disclosureMarkerClass = stylex.props(disclosureMarker).className;
 function cssFor(classes: string): string {
   const atomic = classes.split(/\s+/u).filter((name) => name.startsWith("x"));
   expect(atomic.length).toBeGreaterThan(0);
   return atomic.map((name) => {
+    // A marker names an ancestor rather than owning a declaration rule.
+    if (name === disclosureMarkerClass) {
+      expect([...rules.values()].some(rule => rule.includes(`.${name}[open]`))).toBeTrue();
+      return "";
+    }
     expect(rules.has(name)).toBeTrue();
     return rules.get(name) ?? "";
   }).join("\n").replace(/\s+/gu, "");
@@ -24,7 +31,7 @@ function contains(classes: string, declaration: string): void {
 describe("compiled footer presentation", () => {
   test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.10.1");
+    expect(pkg.version).toBe("0.10.2");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -93,6 +100,12 @@ describe("compiled footer presentation", () => {
     contains(disclosureClassNames("inline").trigger, "display:none");
     contains(disclosureClassNames("inline").panel, "padding-block:0");
     contains(disclosureClassNames("inline").panel, "padding-inline:0");
+    contains(footerClasses.disclosureTrigger, "[open]");
+    contains(footerClasses.disclosureTrigger, "background-image:none");
+    contains(footerClasses.triggerClosed, "visibility:hidden");
+    contains(footerClasses.triggerOpen, "visibility:visible");
+    contains(footerClasses.disclosurePanel, "calc(100% + .375rem)");
+    contains(footerClasses.mailingInput, "font-size:max(1rem,16px)");
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("animation-name");
   });
 

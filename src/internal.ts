@@ -383,7 +383,12 @@ function renderMailingList(
   const classes = disclosureClassNames(variant.layout);
   const open = state.kind === "idle" ? "" : " open=\"\"";
   const label = escapeAttribute(copy.button);
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary aria-label="${escapeAttribute(copy.button)}, ${escapeAttribute(copy.openLabel)}" data-foil="" class="${classes.trigger}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}</summary><div class="${classes.panel}">${form}</div></details>`;
+  const closeText = escapeAttribute(/^en(?:-|$)/u.test(locale.locale) ? "Close" : copy.closeLabel);
+  // Visibility follows native details[open], retaining the trigger's footprint
+  // and exposing only the current action to assistive technology without JS.
+  const closedLabel = `<span class="${footerClasses.triggerClosed}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}<span class="${footerClasses.visuallyHidden}">, ${escapeAttribute(copy.openLabel)}</span></span>`;
+  const openLabel = `<span class="${footerClasses.triggerOpen}"><span aria-hidden="true">${closeText}</span><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.closeLabel)}</span></span>`;
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
 
 const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;

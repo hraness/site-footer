@@ -43,6 +43,7 @@ declare global {
     __siteFooterFixture?: Readonly<{
       snapshot: () => FixtureSnapshot;
       experimentSnapshot: () => readonly unknown[];
+      disclosureSnapshot: () => readonly unknown[];
     }>;
   }
 }
@@ -66,6 +67,19 @@ const experimentEnabled = pageParams.get("experiment") === "inline";
 const experimentRequests: unknown[] = [];
 const errors: string[] = [];
 const requests: RecordedRequest[] = [];
+const disclosureActivations: unknown[] = [];
+
+// Observe focus before the activation event returns, not after a timer/frame.
+document.addEventListener("click", event => {
+  if (!(event.target instanceof Element)) return;
+  const summary = event.target.closest('[data-slot="hraness-mailing-disclosure"] > summary');
+  if (summary === null) return;
+  disclosureActivations.push({
+    open: summary.parentElement?.hasAttribute("open"),
+    emailFocused: document.activeElement?.matches('input[name="email"]') === true,
+    trusted: event.isTrusted,
+  });
+});
 
 window.addEventListener("error", (event) => {
   errors.push(boundedError(event.error ?? event.message));
@@ -87,13 +101,13 @@ window.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     experimentRequests.push(body);
     if (request.action === "expose" && request.token === "a".repeat(64)) return new Response(null, { status: 202 });
     if (request.action !== "assign" || request.audience !== "footer-fixture" || request.locale !== "en"
-      || request.presentationVersion !== 2 || (request.viewport !== "wide" && request.viewport !== "compact")) {
-      throw new Error("The fixture requires an explicit version 2 viewport assignment.");
+      || request.presentationVersion !== 3 || (request.viewport !== "wide" && request.viewport !== "compact")) {
+      throw new Error("The fixture requires an explicit version 3 viewport assignment.");
     }
     return Response.json({ version: 1, token: "a".repeat(64), assignment: {
       id: "123e4567-e89b-42d3-a456-426614174000", locale: "en",
       layout: request.viewport === "wide" ? "inline" : "button", copyStyle: "goblin",
-      color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v2-${request.viewport}`,
+      color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v3-${request.viewport}`,
     } });
   }
   if (url !== MAILING_URL) {
@@ -125,6 +139,7 @@ function readDomState(): string {
 }
 
 window.__siteFooterFixture = Object.freeze({
+  disclosureSnapshot: () => Object.freeze([...disclosureActivations]),
   experimentSnapshot: () => Object.freeze([...experimentRequests]),
   snapshot: () => Object.freeze({
     domState: readDomState(),

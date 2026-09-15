@@ -5,6 +5,10 @@
     grid-area: brand;
   }
 
+  .xxwd7sb {
+    grid-area: label;
+  }
+
   .xt33hwp {
     grid-area: links;
   }
@@ -99,6 +103,10 @@
     grid-template-areas: "brand mailing links";
   }
 
+  .xrbltni {
+    grid-template-areas: "label";
+  }
+
   .x17y0mx6 {
     inset-inline: 0;
   }
@@ -115,12 +123,12 @@
     padding-block: .35rem;
   }
 
-  .x13eudtd {
-    padding-block: .625rem;
+  .x18g2hj5 {
+    padding-block: .5rem;
   }
 
-  .xo0yzjp {
-    padding-block: .75rem;
+  .x13eudtd {
+    padding-block: .625rem;
   }
 
   .x97vtpp {
@@ -137,6 +145,10 @@
 
   .x1hl2dhg {
     text-decoration: none;
+  }
+
+  .x1xggt0h.x1xggt0h:where(.x1gmlqhs[open] *) {
+    border-color: var(--hraness-site-footer-line);
   }
 
   @media (forced-colors: active) {
@@ -436,6 +448,10 @@
     display: inline-flex;
   }
 
+  .xwz0xwf {
+    display: inline-grid;
+  }
+
   .xt0psk2 {
     display: inline;
   }
@@ -524,6 +540,10 @@
     font-variation-settings: inherit;
   }
 
+  .xk50ysn {
+    font-weight: 500;
+  }
+
   .xh88oxj {
     font-weight: 550;
   }
@@ -600,6 +620,10 @@
     inset-block-end: 0;
   }
 
+  .xr04doy {
+    inset-block-end: calc(100% + .375rem);
+  }
+
   .x1smivkc {
     inset-block-end: calc(100% + .5rem);
   }
@@ -630,6 +654,10 @@
 
   .x13a6bvl {
     justify-content: flex-end;
+  }
+
+  .x1o2pa38 {
+    justify-items: center;
   }
 
   .x1qab1bc {
@@ -812,6 +840,14 @@
     z-index: 40;
   }
 
+  .xwi9c3o.xwi9c3o:where(.x1gmlqhs[open] *) {
+    background-image: none;
+  }
+
+  .x1rhhl84.x1rhhl84:where(.x1gmlqhs[open] *) {
+    color: var(--hraness-site-footer-muted);
+  }
+
   .xxuwnm0:focus-visible {
     outline-color: var(--hraness-site-footer-focus);
   }
@@ -826,6 +862,14 @@
 
   .x784prv:focus-visible {
     outline-width: 2px;
+  }
+
+  .x12yxz85.x12yxz85:where(.x1gmlqhs[open] *) {
+    visibility: hidden;
+  }
+
+  .x16dnoq8.x16dnoq8:where(.x1gmlqhs[open] *) {
+    visibility: visible;
   }
 
   .xjb0foi:disabled {
@@ -894,7 +938,15 @@
     .x7odbza.x7odbza {
       font-size: .8125rem;
     }
+  }
 
+  @media (width <= 47.499rem), (pointer: coarse) {
+    .xgbju11.xgbju11 {
+      font-size: max(1rem, 16px);
+    }
+  }
+
+  @media (width >= 47.5rem) {
     .xr0yb7.xr0yb7 {
       grid-column-end: consent;
     }
@@ -921,6 +973,10 @@
 
     .x1cd001l.x1cd001l {
       inset-block-end: auto;
+    }
+
+    .x12aoker.x12aoker {
+      inset-block-end: calc(100% + var(--hraness-site-footer-padding-block) + .375rem);
     }
 
     .x1vbotui.x1vbotui {

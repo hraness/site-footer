@@ -313,9 +313,20 @@ export function HranessSiteFooter({
     id: HRANESS_FOOTER_SLOT,
     // The HTML is composed only from validated package-owned constants and state.
     dangerouslySetInnerHTML: innerHtmlProp,
-    onClick: (event: { target: EventTarget | null }) => {
+    onClick: (event: { target: EventTarget | null; defaultPrevented: boolean; preventDefault: () => void }) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
+      const summary = target.closest('[data-slot="hraness-mailing-disclosure"] > summary');
+      if (summary !== null && !event.defaultPrevented) {
+        const disclosure = summary.parentElement as HTMLDetailsElement;
+        event.preventDefault();
+        disclosure.open = !disclosure.open;
+        // Focus in the activation event itself so mobile keyboards may open.
+        // Deferring to toggle, an effect or a frame loses that user gesture.
+        if (disclosure.open) disclosure.querySelector<HTMLInputElement>('input[name="email"]')?.focus({ preventScroll: true });
+        else (summary as HTMLElement).focus({ preventScroll: true });
+        return;
+      }
       if (target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`) === null) return;
       try {
         window.localStorage.setItem(HRANESS_CONSENT_STORAGE_KEY, "accepted");

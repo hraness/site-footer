@@ -1515,6 +1515,89 @@ function browserPageErrors(input: unknown): readonly unknown[] {
   return Object.freeze([...record.errors]);
 }
 
+export function assertDisclosureSnapshot(input: unknown, expanded: boolean, expectedName: string): void {
+  if (!isRecord(input) || typeof input.snapshot !== "string") throw new Error("Missing native disclosure accessibility snapshot.");
+  const summaries = input.snapshot.split("\n").filter(line => line.includes("- DisclosureTriangle "));
+  const summary = summaries[0]?.match(/- DisclosureTriangle "(.*)" \[expanded=(true|false)\]/u);
+  // Chromium separates adjacent text runs with spaces, including before commas.
+  const name = summary?.[1]?.replace(/\s+,/gu, ",").replace(/\s+/gu, " ").trim();
+  if (summaries.length !== 1 || name !== expectedName || summary?.[2] !== String(expanded)) {
+    throw new Error(`Native summary has the wrong accessible name or expanded state: ${summaries.join("; ")}`);
+  }
+}
+
+async function verifyDisclosure(browser: BrowserDriver, runDirectory: string): Promise<readonly unknown[]> {
+  const summary = '[data-slot="hraness-mailing-disclosure"] > summary';
+  const inspect = async (open: boolean, preserved = false) => {
+    const value = await browser.evaluate(`(() => {
+      const disclosure = document.querySelector('[data-slot="hraness-mailing-disclosure"]');
+      const summary = disclosure.querySelector('summary');
+      const panel = disclosure.querySelector('.hraness-site-footer__disclosure-panel');
+      const input = disclosure.querySelector('input[name="email"]');
+      const footer = document.querySelector('.hraness-site-footer__inner');
+      const closedLabel = summary.querySelector('.hraness-site-footer__disclosure-closed-label');
+      const openLabel = summary.querySelector('.hraness-site-footer__disclosure-open-label');
+      const box = summary.getBoundingClientRect();
+      const panelBox = panel.getBoundingClientRect();
+      const gap = footer.getBoundingClientRect().top - panelBox.bottom;
+      const isOpen = disclosure.hasAttribute('open');
+      if (isOpen !== ${String(open)}) throw new Error('Disclosure state did not follow activation.');
+      if (getComputedStyle(closedLabel).visibility !== (isOpen ? 'hidden' : 'visible')
+        || getComputedStyle(openLabel).visibility !== (isOpen ? 'visible' : 'hidden')) throw new Error('Disclosure action labels did not switch.');
+      if (${String(preserved)} && input.value !== ${JSON.stringify(TEST_EMAIL)}) throw new Error('Disclosure lost the typed email.');
+      if (isOpen) {
+        if (document.activeElement !== input) throw new Error('Opening did not focus email.');
+        if (parseFloat(getComputedStyle(input).fontSize) < 16) throw new Error('Compact email may zoom on focus.');
+        if (gap < 4 || gap > 6 || panelBox.height > 76) throw new Error('Disclosure panel is detached or oversized: ' + gap + 'px gap, ' + panelBox.height + 'px height.');
+        if (panelBox.left < 0 || panelBox.right > innerWidth + 0.5) throw new Error('Disclosure panel overflows.');
+        if (getComputedStyle(summary).backgroundImage !== 'none') throw new Error('Open trigger still competes with submit.');
+        if (!getComputedStyle(disclosure.querySelector('button[type="submit"]')).backgroundImage.includes('conic-gradient')) throw new Error('Submit lost its foil border.');
+      } else if (!getComputedStyle(summary).backgroundImage.includes('conic-gradient')) throw new Error('Closed trigger lost its foil border.');
+      return { open: isOpen, width: box.width, height: box.height, gap, panelHeight: panelBox.height, inputFontSize: getComputedStyle(input).fontSize };
+    })()`);
+    if (!isRecord(value) || typeof value.width !== "number") throw new Error("Invalid disclosure geometry evidence.");
+    return value;
+  };
+  const requireSynchronousFocus = async () => {
+    const value = await browser.evaluate("window.__siteFooterFixture.disclosureSnapshot().at(-1)");
+    if (!isRecord(value) || value.open !== true || value.emailFocused !== true || value.trusted !== true) {
+      throw new Error("Email was not focused synchronously during trusted summary activation.");
+    }
+  };
+  const initialFocus = await browser.evaluate("document.activeElement?.matches('input[name=\"email\"]') === true");
+  if (initialFocus === true) throw new Error("Idle disclosure stole email focus.");
+  const closed = await inspect(false);
+  await browser.run(["click", summary]);
+  await requireSynchronousFocus();
+  const opened = await inspect(true);
+  if (Math.abs(Number(closed.width) - Number(opened.width)) > 0.5) throw new Error("Opening shifted the trigger footprint.");
+  const openAccessibility = await browser.run(["snapshot"]);
+  await writeJsonAtomically(join(runDirectory, "disclosure-open-accessibility.json"), openAccessibility);
+  assertDisclosureSnapshot(openAccessibility, true, "Close email signup");
+  await screenshot(browser, join(runDirectory, "disclosure-open-390.png"));
+  await browser.run(["fill", 'input[name="email"]', TEST_EMAIL]);
+  await browser.run(["click", summary]);
+  const reclosed = await inspect(false, true);
+  await browser.run(["press", "Enter"]);
+  await requireSynchronousFocus();
+  await inspect(true, true);
+  await browser.run(["press", "Escape"]);
+  await inspect(false, true);
+  const escapeFocus = await browser.evaluate(`document.activeElement?.matches(${JSON.stringify(summary)}) === true`);
+  if (escapeFocus !== true) throw new Error("Escape did not restore summary focus.");
+  await browser.run(["press", "Space"]);
+  await requireSynchronousFocus();
+  await browser.run(["set", "viewport", "320", "844"]);
+  const compact = await inspect(true, true);
+  await screenshot(browser, join(runDirectory, "disclosure-open-320.png"));
+  await browser.run(["press", "Escape"]);
+  await inspect(false, true);
+  const closedAccessibility = await browser.run(["snapshot"]);
+  await writeJsonAtomically(join(runDirectory, "disclosure-closed-accessibility.json"), closedAccessibility);
+  assertDisclosureSnapshot(closedAccessibility, false, "Feed the goblin, Subscribe by email");
+  return [closed, opened, reclosed, compact, { openAccessibility, closedAccessibility }];
+}
+
 async function driveState(options: {
   readonly bootstrapTabId: string;
   readonly browser: BrowserDriver;
@@ -1595,6 +1678,12 @@ async function driveState(options: {
     await waitForEnrollment();
     additionalWidths.push(await sampleViewport({ ...options, kind: width < 760 ? "compact" : "wide" }));
   }
+  let disclosure: readonly unknown[] = [];
+  if (options.experiment === "inline") {
+    await options.browser.run(["set", "viewport", "390", "844"]);
+    await waitForEnrollment();
+    disclosure = await verifyDisclosure(options.browser, options.runDirectory);
+  }
   const experimentRequests = await options.browser.evaluate("window.__siteFooterFixture.experimentSnapshot()");
   const browserErrors = await options.browser.run(["errors"]);
   const pageErrors = browserPageErrors(browserErrors);
@@ -1640,6 +1729,7 @@ async function driveState(options: {
     browserErrors,
     closeAttempt,
     compact,
+    disclosure,
     context,
     fixture,
     experiment: options.experiment ?? "none",
@@ -1823,7 +1913,7 @@ async function runVerifier(): Promise<string> {
     }
     const inlineDirectory = join(artifacts.runDirectory, "inline-enrollment");
     await mkdir(inlineDirectory, { recursive: true });
-    console.log("Verifying version 2 inline enrollment and outer panel bounds");
+    console.log("Verifying version 3 inline enrollment and outer panel bounds");
     evidence.push(await driveState({ bootstrapTabId, browser, runDirectory: inlineDirectory, state: "idle", experiment: "inline" }));
     assertCrossStateGeometry(evidence);
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);

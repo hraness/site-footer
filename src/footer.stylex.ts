@@ -1,6 +1,9 @@
 import * as stylex from "@stylexjs/stylex";
 import type { FooterVariant } from "./experiment.js";
 
+export const disclosureMarker = stylex.defineMarker();
+const holographicBackgroundImage = "linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), #ffffff 0%, #ffffff00 65%), conic-gradient(from var(--footer-foil-angle, 135deg), #ff86d7, #af96ff, #73e8ff, #8cffba, #fff29b, #ffaf85, #ff86d7)";
+
 // Same direction, spread, and timing as Hraness.com's token support control.
 const textShimmer = stylex.keyframes({
   from: { backgroundPosition: "100% center" },
@@ -84,13 +87,25 @@ const styles = stylex.create({
     fontSize: { default: "0.75rem", "@media (min-width: 47.5rem)": "0.8125rem" },
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
     "padding-inline": "0.625rem",
-    display: { default: "inline-flex", "::-webkit-details-marker": "none" },
+    display: { default: "inline-grid", "::-webkit-details-marker": "none" },
+    gridTemplateAreas: '"label"', justifyItems: "center",
+    backgroundImage: { default: holographicBackgroundImage, [stylex.when.ancestor("[open]", disclosureMarker)]: "none", "@media (forced-colors: active)": "none" },
+    borderColor: { default: "transparent", [stylex.when.ancestor("[open]", disclosureMarker)]: "var(--hraness-site-footer-line)", "@media (forced-colors: active)": "ButtonText" },
+    color: { default: "var(--hraness-site-footer-foreground)", [stylex.when.ancestor("[open]", disclosureMarker)]: "var(--hraness-site-footer-muted)" },
+  },
+  triggerClosed: {
+    gridArea: "label",
+    visibility: { default: "visible", [stylex.when.ancestor("[open]", disclosureMarker)]: "hidden" },
+  },
+  triggerOpen: {
+    gridArea: "label", fontWeight: 500,
+    visibility: { default: "hidden", [stylex.when.ancestor("[open]", disclosureMarker)]: "visible" },
   },
   disclosurePanel: {
-    position: "absolute", "inset-block-end": "calc(100% + 0.75rem)",
+    position: "absolute", "inset-block-end": { default: "calc(100% + 0.375rem)", "@media (min-width: 47.5rem)": "calc(100% + var(--hraness-site-footer-padding-block) + 0.375rem)" },
     "inset-inline-start": { default: "1rem", "@media (min-width: 47.5rem)": 0 },
     "inline-size": "min(26rem, calc(100vw - 2rem))", "max-inline-size": "calc(100vw - 2rem)",
-    "padding-block": "0.75rem", "padding-inline": "0.75rem", borderRadius: "0.5rem", zIndex: 3,
+    "padding-block": "0.5rem", "padding-inline": "0.5rem", borderRadius: "0.5rem", zIndex: 3,
     backgroundColor: "var(--hraness-site-footer-background)",
   },
   holographic: {
@@ -99,7 +114,7 @@ const styles = stylex.create({
     backgroundColor: "var(--hraness-site-footer-background)",
     color: "var(--hraness-site-footer-foreground)",
     backgroundImage: {
-      default: "linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), #ffffff 0%, #ffffff00 65%), conic-gradient(from var(--footer-foil-angle, 135deg), #ff86d7, #af96ff, #73e8ff, #8cffba, #fff29b, #ffaf85, #ff86d7)",
+      default: holographicBackgroundImage,
       "@media (forced-colors: active)": "none",
     },
     backgroundOrigin: "padding-box, border-box, border-box",
@@ -255,7 +270,8 @@ const styles = stylex.create({
     fontOpticalSizing: "inherit", fontVariationSettings: "inherit",
   },
   mailingInput: {
-    "inline-size": "100%", "min-inline-size": 0, fontSize: "0.8125rem",
+    "inline-size": "100%", "min-inline-size": 0,
+    fontSize: { default: "0.8125rem", "@media (max-width: 47.499rem), (pointer: coarse)": "max(1rem, 16px)" },
     borderStartStartRadius: "0.375rem", borderStartEndRadius: 0, borderEndEndRadius: 0, borderEndStartRadius: "0.375rem",
     backgroundColor: "var(--hraness-site-footer-field-background)",
     color: { default: "var(--hraness-site-footer-foreground)", "::placeholder": "var(--hraness-site-footer-muted)" },
@@ -298,8 +314,10 @@ function className(hook: string, ...recipes: Array<(typeof styles)[keyof typeof 
 }
 
 export const footerClasses = {
-  disclosure: className("hraness-site-footer__disclosure", styles.disclosure),
+  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${stylex.props(disclosureMarker).className}`,
   disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focus, styles.motion),
+  triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
+  triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),

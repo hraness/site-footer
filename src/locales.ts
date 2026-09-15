@@ -9,12 +9,12 @@ export type LocalizedFooterCopyStyle = "direct" | "inviting";
 
 /** Paired hypotheses stay stable within an enrollment; never randomize each render. */
 export const ENGLISH_FOOTER_COPY = Object.freeze({
-  direct: { button: "Send me things", placeholder: "your inbox, but weirder" },
-  inviting: { button: "I'm curious", placeholder: "where should the plot thicken?" },
-  goblin: { button: "Feed the goblin", placeholder: "goblin delivery address" },
+  direct: { button: "Send me things", placeholder: "Your email" },
+  inviting: { button: "I'm curious", placeholder: "curious@plot.twist" },
+  goblin: { button: "Feed the goblin", placeholder: "goblin@snack.club" },
   cosmic: { button: "Beam me up", placeholder: "earthling@probably.earth" },
-  chaos: { button: "Push the button", placeholder: "put the internet in here" },
-  secret: { button: "Let me in", placeholder: "your secret inbox lair" },
+  chaos: { button: "Push the button", placeholder: "chaos@inbox.party" },
+  secret: { button: "Let me in", placeholder: "agent@secret.lair" },
 } as const);
 
 export function isFooterCopyStyle(value: unknown): value is FooterCopyStyle {

@@ -11,7 +11,7 @@
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.
 - Equal email and submit heights.
-- Desktop inline panel height equal to its form and outer bounds inside the footer, including a real v2 enrollment at 1280px and 760px.
+- Desktop inline panel height equal to its form and outer bounds inside the footer, including a real v3 enrollment at 1280px and 760px.
 - Non-reserving idle status surface.
 - Minimum visible target sizes, viewport containment, no compact overflow, and settled geometry.
 - Independently cascaded control font palettes and inherited font language.
@@ -42,3 +42,9 @@ so that state requires both control samples to be absent.
 - A passing rectangle contract does not prove typography, contrast, prominence, or rhythm. Review both screenshots.
 - Fine-pointer controls are checked at the package's 28 CSS pixel baseline. The existing stylesheet test separately protects the 44 CSS pixel coarse-pointer override.
 - A zero inset in the Chromium fixture proves the ordinary-screen spacing contract, not a physical mobile device or a forced nonzero inset. Retain the measured inset in the evidence.
+
+The v3 context also opens the compact disclosure by click, Enter and Space. It
+observes email focus during the trusted click event, verifies no initial focus
+steal, tests Close and Escape with typed text preserved, and checks the stable
+trigger width, localized accessible names, quiet open styling, 16px email font,
+4–6px panel gap and bounded panel at 390px and 320px.
