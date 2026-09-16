@@ -1,3 +1,5 @@
+import type { SupportProfile } from "@hraness/support-foundation";
+export type { SupportProfile } from "@hraness/support-foundation";
 import { type FooterVariant } from "./experiment.js";
 export { resolveFooterLocale } from "./locales.js";
 export type { FooterLocale, FooterMessages, FooterCopyStyle } from "./locales.js";
@@ -10,6 +12,8 @@ export { HRANESS_MAILING_SUBSCRIBE_URL, HRANESS_ACCOUNT_URL };
 export declare const hranessSocialLinks: ReadonlyArray<HranessSocialLink>;
 export type { HranessMailingListConfig, HranessSocialConfig, HranessSocialLink, HranessSocialLinkOverride, HranessSocialPlatform, };
 export interface HranessSiteFooterOptions {
+    /** Explicit Accounts product identity. Omit to render no paid-support control. */
+    readonly support?: SupportProfile;
     readonly locale?: string | readonly string[];
     readonly placement?: "sticky" | "flow";
     /** A server may provide a checked experiment assignment; static rendering makes no analytics request. */
@@ -25,5 +29,5 @@ export interface HranessSiteFooterOptions {
     readonly social?: HranessSocialConfig;
 }
 /** Render the complete framework-neutral Hraness network footer. */
-export declare function renderHranessSiteFooter({ locale: localeInput, placement, variant, mailingList: mailingListInput, showBrand, social: socialInput, }: HranessSiteFooterOptions): string;
+export declare function renderHranessSiteFooter({ locale: localeInput, placement, variant, mailingList: mailingListInput, showBrand, social: socialInput, support, }: HranessSiteFooterOptions): string;
 //# sourceMappingURL=index.d.ts.map

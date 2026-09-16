@@ -523,6 +523,38 @@ var styles = {
     kg5iWk: "xlyipyv",
     $$css: true
   },
+  innerSupport: {
+    kC13JO: "x7p9kbz xhlquvd",
+    kumcoG: "x170cel8 x1dt6ssw",
+    $$css: true
+  },
+  innerSignupSupport: {
+    kC13JO: "x1y8t5ps x1g31hlq",
+    kumcoG: "x186f4cn xda7s4a",
+    $$css: true
+  },
+  innerAccountSupport: {
+    kC13JO: "x1y8t5ps x1g31hlq",
+    kumcoG: "x186f4cn xb02ptd",
+    $$css: true
+  },
+  support: {
+    kJuA4N: "x2ga2k1",
+    k1xSpc: "x3nfvp2",
+    kGNEyG: "x6s0dn4",
+    kjj79g: "xl56j7k",
+    kdYMnH: "xyc0pis",
+    kJVvJu: "x18a9hih",
+    kaIpWk: "x6i6fhv",
+    kMwMTN: "xj5idha",
+    kGuDYH: "x1dcheo9",
+    k63SB2: "xk50ysn",
+    kLWn49: "xo5v014",
+    kybGjl: "x1bvjpef",
+    kcSHmL: "x1ohr1zr",
+    khDVqt: "xuxw1ft",
+    $$css: true
+  },
   flexCenter: {
     k1xSpc: "x78zum5",
     kGNEyG: "x6s0dn4",
@@ -837,6 +869,7 @@ function className(hook, ...recipes) {
 }
 var footerClasses = {
   account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focus),
+  support: className("hraness-site-footer__support", styles.box, styles.control, styles.support, styles.focus),
   disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${{
     className: "x1gmlqhs"
   }.className}`,
@@ -870,9 +903,9 @@ var footerClasses = {
 function footerClassName(signup, sticky = true) {
   return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
 }
-function footerInnerClassName(signup, sticky = true, color = "green", account = false) {
+function footerInnerClassName(signup, sticky = true, color = "green", account = false, support = false) {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, sticky && styles.stickyBar, signup && colorStyle);
 }
 function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
@@ -1750,6 +1783,56 @@ var Linkedin01Icon = [
 var NewTwitterIcon = [
   ["path", { d: "M3 21L10.5484 13.4516M21 3L13.4516 10.5484M13.4516 10.5484L8 3H3L10.5484 13.4516M13.4516 10.5484L21 21H16L10.5484 13.4516", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", key: "0" }]
 ];
+// node_modules/@hraness/support-foundation/dist/index.js
+var SOURCES = ["cli", "agent", "web", "desktop", "skill"];
+var ACCOUNT_ORIGIN = "https://account.hraness.com";
+var UNSAFE_TEXT = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function plainText(value, max) {
+  return typeof value === "string" && value.length > 0 && value.length <= max && value.trim() === value && !UNSAFE_TEXT.test(value);
+}
+function parseSupportProfile(value) {
+  if (!isRecord(value) || Object.keys(value).sort().join(",") !== "id,name,updates,valueProposition" || typeof value.id !== "string" || !/^[a-z][a-z0-9-]{0,47}$/.test(value.id) || !plainText(value.name, 80) || !plainText(value.valueProposition, 240) || typeof value.updates !== "boolean")
+    return null;
+  return Object.freeze({
+    id: value.id,
+    name: value.name,
+    valueProposition: value.valueProposition,
+    updates: value.updates
+  });
+}
+function createSupportOffer(profile, source) {
+  const parsed = parseSupportProfile(profile);
+  if (parsed === null || !SOURCES.includes(source)) {
+    throw new TypeError("Invalid support profile or source.");
+  }
+  const destination = new URL("/support", ACCOUNT_ORIGIN);
+  destination.searchParams.set("product", parsed.id);
+  destination.searchParams.set("source", source);
+  const actions = [];
+  if (parsed.updates) {
+    actions.push(Object.freeze({
+      kind: "updates",
+      label: `Get free ${parsed.name} product updates`,
+      url: `${destination.href}#updates`
+    }));
+  }
+  actions.push(Object.freeze({
+    kind: "support",
+    label: "Explore optional paid support",
+    url: `${destination.href}#support`
+  }));
+  return Object.freeze({
+    schemaVersion: "hraness-support-offer-v1",
+    optional: true,
+    product: Object.freeze({ id: parsed.id, name: parsed.name }),
+    valueProposition: parsed.valueProposition,
+    actions: Object.freeze(actions)
+  });
+}
+
 // src/internal.ts
 var DEFAULT_FOOTER_PRESENTATION = {
   locale: resolveFooterLocale(),
@@ -1976,9 +2059,24 @@ function renderMailingList(mailingList, state, presentation) {
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+function resolveSupportLink(profile) {
+  if (profile === undefined)
+    return null;
+  const offer = createSupportOffer(profile, "web");
+  const action = offer.actions.find((candidate) => candidate.kind === "support");
+  if (action === undefined)
+    throw new TypeError("Support offer has no support destination.");
+  return Object.freeze({
+    href: action.url,
+    label: `Support ${offer.product.name}: optional paid membership`,
+    title: `${offer.valueProposition} Review optional paid membership.`
+  });
+}
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
+  const supportLink = resolveSupportLink(presentation.support);
+  const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">Support</a>`;
   const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/react.tsx
@@ -1998,9 +2096,11 @@ function HranessSiteFooter({
   placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
-  social: socialInput
+  social: socialInput,
+  support
 }) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const supportLink = resolveSupportLink(support);
   const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState(IDLE_STATE);
@@ -2263,11 +2363,37 @@ function HranessSiteFooter({
     sticky: placement === "sticky",
     ...experimentToken ? {
       experimentToken
-    } : {}
+    } : {},
+    ...support === undefined ? {} : {
+      support
+    }
   }), [mailingListKey, renderState, showBrand, socialKey, presentationKey]);
   const innerHtmlProp = useMemo(() => ({
     __html: innerHtml
   }), [innerHtml]);
+  useLayoutEffect(() => {
+    const inner = footer.current?.querySelector(".hraness-site-footer__inner");
+    if (!inner)
+      return;
+    let link = inner.querySelector('[data-slot="hraness-support-link"]');
+    if (supportLink === null)
+      link?.remove();
+    else {
+      if (!link) {
+        link = inner.ownerDocument.createElement("a");
+        link.className = footerClasses.support;
+        link.dataset.slot = "hraness-support-link";
+        link.lang = "en";
+        link.dir = "ltr";
+        link.textContent = "Support";
+        inner.insertBefore(link, inner.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`));
+      }
+      link.setAttribute("href", supportLink.href);
+      link.setAttribute("aria-label", supportLink.label);
+      link.setAttribute("title", supportLink.title);
+    }
+    inner.className = footerInnerClassName(mailingList.kind === "signup", placement === "sticky", variant.color, mailingList.kind === "account", supportLink !== null);
+  }, [innerHtml, JSON.stringify(supportLink)]);
   useEffect(() => {
     if (footer.current === null || mailingList.kind !== "signup")
       return;
@@ -2369,4 +2495,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=E7AC286ABCA120DC64756E2164756E21
+//# debugId=B66CE6CBEC648DE464756E2164756E21

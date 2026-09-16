@@ -179,6 +179,8 @@ function Fixture() {
         placement="flow"
         experiment={experimentEnabled}
         locale="en"
+        support={{ id: "soundfish", name: "Soundfish", updates: true,
+          valueProposition: "Support ongoing development of browser music tools." }}
         mailingList={accountEnabled ? { kind: "account" } : signupEnabled ? {
           audience: "footer-fixture",
           kind: "signup",

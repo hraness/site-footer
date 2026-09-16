@@ -7,8 +7,10 @@ import {
 
 import { DEFAULT_FOOTER_VARIANT, type FooterVariant } from "./experiment.js";
 import { resolveFooterLocale, type FooterLocale } from "./locales.js";
+import { createSupportOffer, type SupportProfile } from "@hraness/support-foundation";
 
 export interface FooterPresentation {
+  readonly support?: SupportProfile;
   readonly locale: FooterLocale;
   readonly variant: FooterVariant;
   readonly sticky: boolean;
@@ -397,6 +399,18 @@ function renderMailingList(
 
 const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 
+export function resolveSupportLink(profile: SupportProfile | undefined) {
+  if (profile === undefined) return null;
+  const offer = createSupportOffer(profile, "web");
+  const action = offer.actions.find(candidate => candidate.kind === "support");
+  if (action === undefined) throw new TypeError("Support offer has no support destination.");
+  return Object.freeze({
+    href: action.url,
+    label: `Support ${offer.product.name}: optional paid membership`,
+    title: `${offer.valueProposition} Review optional paid membership.`,
+  });
+}
+
 export function renderHranessSiteFooterInnerHtml(
   showBrand: boolean,
   mailingList: HranessMailingListConfig,
@@ -404,6 +418,9 @@ export function renderHranessSiteFooterInnerHtml(
   socialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS,
   presentation: FooterPresentation = DEFAULT_FOOTER_PRESENTATION,
 ): string {
+  const supportLink = resolveSupportLink(presentation.support);
+  const supportHtml = supportLink === null ? ""
+    : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">Support</a>`;
   const mailingHtml = mailingList.kind === "none"
     ? ""
     : mailingList.kind === "account"
@@ -415,5 +432,5 @@ export function renderHranessSiteFooterInnerHtml(
         : MAILING_IDLE_STATE,
       presentation,
     );
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account")}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
