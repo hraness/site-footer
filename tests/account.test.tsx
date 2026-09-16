@@ -3,7 +3,7 @@ import { parseHTML } from "linkedom";
 import { act, useLayoutEffect } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { HranessSiteFooter } from "../src/react.js";
-import { HRANESS_ACCOUNT_URL, renderHranessSiteFooter } from "../src/index.js";
+import { HRANESS_ACCOUNT_URL, renderHranessSiteFooter, type SupportProfile } from "../src/index.js";
 import { FOOTER_LOCALES } from "../src/locales.js";
 
 const signup = { kind: "signup", audience: "soundfish" } as const;
@@ -39,7 +39,7 @@ test("account state is a localized native link without any signup presentation",
 async function withFooter(run: (context: {
   container: HTMLElement;
   window: ReturnType<typeof parseHTML>["window"];
-  render: (mode: "signup" | "account" | "none", experiment?: boolean) => Promise<void>;
+  render: (mode: "signup" | "account" | "none", experiment?: boolean, support?: SupportProfile) => Promise<void>;
   requests: Array<{ url: string; init: RequestInit; body: Record<string, unknown> | null }>;
   visible: () => void;
   queuedResize: () => void;
@@ -80,8 +80,8 @@ async function withFooter(run: (context: {
   const root = createRoot(container);
   try {
     await run({ container, window, requests,
-      render: async (mode, experiment = true) => { await act(async () => root.render(
-        <HranessSiteFooter mailingList={mode === "signup" ? signup : { kind: mode }} locale="en" experiment={experiment} />,
+      render: async (mode, experiment = true, support) => { await act(async () => root.render(
+        <HranessSiteFooter mailingList={mode === "signup" ? signup : { kind: mode }} locale="en" experiment={experiment} {...(support === undefined ? {} : { support })} />,
       )); },
       queuedResize: () => mediaCallbacks.forEach(callback => callback()),
       visible: () => intersect?.([{ isIntersecting: true, intersectionRatio: 1 } as IntersectionObserverEntry], {} as IntersectionObserver),
@@ -184,5 +184,30 @@ test("keyed unmount cancels tracking during commit before passive cleanup", asyn
     });
     await new Promise(resolve => setTimeout(resolve, 450));
     expect(requests).toHaveLength(2);
+  });
+});
+
+
+test("support-only updates preserve the active native signup form and disclosure", async () => {
+  await withFooter(async ({ render, requests, container }) => {
+    await render("signup", false);
+    const input = container.querySelector<HTMLInputElement>('input[name="email"]')!;
+    const disclosure = container.querySelector<HTMLElement>('[data-slot="hraness-mailing-disclosure"]')!;
+    input.value = "keep@example.test";
+    disclosure.setAttribute("open", "");
+    const profile: SupportProfile = { id: "soundfish", name: "Soundfish", updates: true, valueProposition: "Support browser music tools." };
+    for (const next of [profile, { ...profile, valueProposition: "Fund ongoing music-tool development." }, { ...profile, id: "wrench", name: "Ghostget" }, undefined]) {
+      await render("signup", false, next);
+      expect(container.querySelector('input[name="email"]')).toBe(input);
+      expect(input.value).toBe("keep@example.test");
+      expect(container.querySelector('[data-slot="hraness-mailing-disclosure"]')).toBe(disclosure);
+      expect(disclosure.hasAttribute("open")).toBe(true);
+      const link = container.querySelector('[data-slot="hraness-support-link"]');
+      if (next) {
+        expect(link?.getAttribute("href")).toBe(`https://account.hraness.com/support?product=${next.id}&source=web#support`);
+        expect(link?.getAttribute("title")).toContain(next.valueProposition);
+      } else expect(link).toBeNull();
+    }
+    expect(requests).toHaveLength(0);
   });
 });

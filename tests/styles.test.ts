@@ -38,13 +38,13 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(false, true, "green", true), 'grid-template-areas:"brand mailing links"');
     expect(cssFor(footerInnerClassName(false, true, "green", true))).not.toContain("#166534");
   });
-  test("binds the fail-fast compiler without widening standalone runtime dependencies", async () => {
+  test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.11.3");
+    expect(pkg.version).toBe("0.12.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
-    expect(pkg.dependencies).toBeUndefined();
+    expect(pkg.dependencies).toEqual({ "@hraness/support-foundation": "github:hraness/support-foundation#2d034b357680353574411217d68b02b6755b07ed" });
     expect(manifest.compiler.transform.propertyValidationMode).toBe("throw");
     expect(manifest.compilerSha256).toBe("9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   });

@@ -1,4 +1,6 @@
 import { footerClassName } from "./footer.stylex.js";
+import type { SupportProfile } from "@hraness/support-foundation";
+export type { SupportProfile } from "@hraness/support-foundation";
 import { resolveFooterLocale } from "./locales.js";
 import { DEFAULT_FOOTER_VARIANT, parseFooterVariant, type FooterVariant } from "./experiment.js";
 export { resolveFooterLocale } from "./locales.js";
@@ -36,6 +38,8 @@ export type {
 };
 
 export interface HranessSiteFooterOptions {
+  /** Explicit Accounts product identity. Omit to render no paid-support control. */
+  readonly support?: SupportProfile;
   readonly locale?: string | readonly string[];
   readonly placement?: "sticky" | "flow";
   /** A server may provide a checked experiment assignment; static rendering makes no analytics request. */
@@ -59,9 +63,10 @@ export function renderHranessSiteFooter({
   mailingList: mailingListInput,
   showBrand = true,
   social: socialInput,
+  support,
 }: HranessSiteFooterOptions): string {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
   variant = parseFooterVariant(variant);
   const socialLinks = resolveHranessSocialLinks(socialInput);
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, socialLinks, { locale: resolveFooterLocale(localeInput), variant, sticky: placement === "sticky" })}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, socialLinks, { locale: resolveFooterLocale(localeInput), variant, sticky: placement === "sticky", ...(support === undefined ? {} : { support }) })}</footer>`;
 }

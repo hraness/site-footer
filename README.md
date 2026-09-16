@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.11.3
+bun add github:hraness/site-footer#v0.12.0
 ```
 
 Start with the network footer and no mailing form:
@@ -165,6 +165,39 @@ can submit it. An interacted form remains unattributed after refresh; a fresh
 signup surface may receive a new enrollment. Switching to account or none aborts
 pending signup work and ignores late responses. The independent cookie-consent
 behavior and social links stay available in every mode.
+
+## Optional paid support
+
+Pass an explicit support profile to show a native **Support** link beside the
+signup or account control. Use the exact product ID accepted by Accounts; a
+repository rename does not change that ID. The shared support foundation builds
+the destination, with no email, token or session in its URL.
+
+```tsx
+<HranessSiteFooter
+  mailingList={{ audience: "soundfish", kind: "signup" }}
+  support={{
+    id: "soundfish",
+    name: "Soundfish",
+    updates: true,
+    valueProposition: "Support ongoing development of browser music tools.",
+  }}
+/>
+```
+
+Both renderers accept the same `support` profile. Its value proposition appears
+in the link's title; its accessible name identifies optional paid membership.
+The destination explains support and lets the person review current prices and
+confirm payment. Navigation works without JavaScript. Rendering the link never
+opens a browser, creates a session, submits signup or charges anyone.
+
+The support link is independent of `mailingList`: it also works with `none` or
+`account`. Omit `support` when the site has no appropriate support destination.
+An existing newsletter stays on its explicit audience, and a product without a
+public mailing list must use `updates: false` and `mailingList: { kind: "none" }`.
+The footer does not infer or create a newsletter from this profile. Upgrade and
+deploy each consumer to adopt this interface; publishing the package alone does
+not update any website.
 
 ## Retarget owned social destinations
 

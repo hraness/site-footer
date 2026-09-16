@@ -1,7 +1,8 @@
 "use client";
+import type { SupportProfile } from "@hraness/support-foundation";
 
 import { attachFooterFoil } from "./foil.js";
-import { footerClassName } from "./footer.stylex.js";
+import { footerClassName, footerClasses, footerInnerClassName } from "./footer.stylex.js";
 import { resolveFooterLocale } from "./locales.js";
 import { DEFAULT_FOOTER_VARIANT, FOOTER_WIDE_QUERY, isFooterEnrollmentEligible, exposeFooterEnrollment, requestFooterEnrollment, type FooterEnrollment, type FooterViewport } from "./experiment.js";
 
@@ -19,6 +20,7 @@ import {
   parseHranessMailingListConfig,
   renderHranessSiteFooterInnerHtml,
   resolveHranessSocialLinks,
+  resolveSupportLink,
   type HranessMailingListConfig,
   type HranessMailingListRenderState,
   type HranessSocialConfig,
@@ -35,6 +37,8 @@ import {
 } from "react";
 
 export interface HranessSiteFooterProps {
+  /** Explicit Accounts product identity. Omit to render no paid-support control. */
+  readonly support?: SupportProfile;
   /** Localize signup and account controls; defaults to browser language preferences after hydration. */
   readonly locale?: string | readonly string[];
   /** Accounts owns assignment and confirmed-subscription analytics. Disable for fixtures or an intentional holdback. */
@@ -70,8 +74,10 @@ export function HranessSiteFooter({
   mailingList: mailingListInput,
   showBrand = true,
   social: socialInput,
+  support,
 }: HranessSiteFooterProps) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const supportLink = resolveSupportLink(support);
   const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
@@ -313,11 +319,35 @@ export function HranessSiteFooter({
       mailingList,
       renderState,
       socialLinks,
-      { locale, variant, sticky: placement === "sticky", ...(experimentToken ? { experimentToken } : {}) },
+      { locale, variant, sticky: placement === "sticky", ...(experimentToken ? { experimentToken } : {}), ...(support === undefined ? {} : { support }) },
     ),
+    // Support-only updates patch their own link below, preserving an active
+    // native form, disclosure, focus, and in-flight request.
     [mailingListKey, renderState, showBrand, socialKey, presentationKey],
   );
   const innerHtmlProp = useMemo(() => ({ __html: innerHtml }), [innerHtml]);
+
+  useLayoutEffect(() => {
+    const inner = footer.current?.querySelector<HTMLElement>(".hraness-site-footer__inner");
+    if (!inner) return;
+    let link = inner.querySelector<HTMLAnchorElement>('[data-slot="hraness-support-link"]');
+    if (supportLink === null) link?.remove();
+    else {
+      if (!link) {
+        link = inner.ownerDocument.createElement("a");
+        link.className = footerClasses.support;
+        link.dataset.slot = "hraness-support-link";
+        link.lang = "en";
+        link.dir = "ltr";
+        link.textContent = "Support";
+        inner.insertBefore(link, inner.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`));
+      }
+      link.setAttribute("href", supportLink.href);
+      link.setAttribute("aria-label", supportLink.label);
+      link.setAttribute("title", supportLink.title);
+    }
+    inner.className = footerInnerClassName(mailingList.kind === "signup", placement === "sticky", variant.color, mailingList.kind === "account", supportLink !== null);
+  }, [innerHtml, JSON.stringify(supportLink)]);
 
   useEffect(() => {
     if (footer.current === null || mailingList.kind !== "signup") return;

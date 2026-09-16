@@ -17,6 +17,10 @@
     grid-area: mailing;
   }
 
+  .x2ga2k1 {
+    grid-area: support;
+  }
+
   .xkdpibf {
     margin: -1px;
   }
@@ -103,6 +107,14 @@
     grid-template-areas: "brand mailing links";
   }
 
+  .x1y8t5ps {
+    grid-template-areas: "brand mailing support links";
+  }
+
+  .x7p9kbz {
+    grid-template-areas: "brand support links";
+  }
+
   .xrbltni {
     grid-template-areas: "label";
   }
@@ -131,6 +143,10 @@
     padding-block: .625rem;
   }
 
+  .x18a9hih {
+    padding-inline: .375rem;
+  }
+
   .x97vtpp {
     padding-inline: .5rem;
   }
@@ -145,6 +161,10 @@
 
   .x1hl2dhg {
     text-decoration: none;
+  }
+
+  .x1bvjpef {
+    text-decoration: underline;
   }
 
   .x1xggt0h.x1xggt0h:where(.x1gmlqhs[open] *) {
@@ -164,6 +184,14 @@
 
     .xy48kin.xy48kin {
       grid-template-areas: "brand mailing consent links";
+    }
+
+    .x1g31hlq.x1g31hlq {
+      grid-template-areas: "brand mailing support consent links";
+    }
+
+    .xhlquvd.xhlquvd {
+      grid-template-areas: "brand support consent links";
     }
   }
 
@@ -568,8 +596,16 @@
     grid-column-start: 1;
   }
 
+  .x170cel8 {
+    grid-template-columns: auto auto minmax(var(--hraness-site-footer-social-target),1fr);
+  }
+
   .x1rkzygb {
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .x186f4cn {
+    grid-template-columns: auto minmax(0,max-content) auto minmax(var(--hraness-site-footer-social-target),1fr);
   }
 
   .xo69rmz {
@@ -752,6 +788,10 @@
     min-inline-size: 0;
   }
 
+  .xyc0pis {
+    min-inline-size: 2.75rem;
+  }
+
   .xart1r9 {
     min-inline-size: var(--hraness-site-footer-control-block-size);
   }
@@ -814,6 +854,10 @@
 
   .xlyipyv {
     text-overflow: ellipsis;
+  }
+
+  .x1ohr1zr {
+    text-underline-offset: .2em;
   }
 
   .xlshs6z {
@@ -975,12 +1019,24 @@
       grid-row-start: consent;
     }
 
+    .x1dt6ssw.x1dt6ssw {
+      grid-template-columns: auto auto auto minmax(var(--hraness-site-footer-social-target),1fr);
+    }
+
     .xxwuxvk.xxwuxvk {
       grid-template-columns: auto auto minmax(0, 1fr);
     }
 
+    .xb02ptd.xb02ptd {
+      grid-template-columns: auto minmax(0,max-content) auto auto minmax(var(--hraness-site-footer-social-target),1fr);
+    }
+
     .x1drxdiy.x1drxdiy {
       grid-template-columns: auto minmax(0,max-content) auto minmax(var(--hraness-site-footer-social-target),1fr);
+    }
+
+    .xda7s4a.xda7s4a {
+      grid-template-columns: auto minmax(10rem,18rem) auto auto minmax(var(--hraness-site-footer-social-target),1fr);
     }
 
     .xoysss2.xoysss2 {

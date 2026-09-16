@@ -1,6 +1,9 @@
+import type { SupportProfile } from "@hraness/support-foundation";
 import { type HranessMailingListConfig, type HranessSocialConfig } from "./internal.js";
 import { type FormEvent } from "react";
 export interface HranessSiteFooterProps {
+    /** Explicit Accounts product identity. Omit to render no paid-support control. */
+    readonly support?: SupportProfile;
     /** Localize signup and account controls; defaults to browser language preferences after hydration. */
     readonly locale?: string | readonly string[];
     /** Accounts owns assignment and confirmed-subscription analytics. Disable for fixtures or an intentional holdback. */
@@ -18,7 +21,7 @@ export interface HranessSiteFooterProps {
     readonly social?: HranessSocialConfig;
 }
 /** Progressively enhance the canonical native mailing-list form when JavaScript is available. */
-export declare function HranessSiteFooter({ locale: localeInput, experiment, placement, mailingList: mailingListInput, showBrand, social: socialInput, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
+export declare function HranessSiteFooter({ locale: localeInput, experiment, placement, mailingList: mailingListInput, showBrand, social: socialInput, support, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
     "aria-label": string;
     className: string;
     "data-brand": string;

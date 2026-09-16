@@ -49,3 +49,5 @@ observes email focus during the trusted click event, verifies no initial focus
 steal, tests Close and Escape with typed text preserved, and checks the stable
 trigger width, localized accessible names, quiet open styling, 16px email font,
 4–6px panel gap and bounded panel at 390px and 320px.
+
+Every fixture also enables the native optional Support link. Signup samples check its exact product/source destination, value proposition, containment, minimum target and separation from the other controls. No-signup and account contexts include it in geometry and keyboard-focus coverage. All scenarios remain synthetic and never navigate to Accounts.

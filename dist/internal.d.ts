@@ -1,6 +1,8 @@
 import { type FooterVariant } from "./experiment.js";
 import { type FooterLocale } from "./locales.js";
+import { type SupportProfile } from "@hraness/support-foundation";
 export interface FooterPresentation {
+    readonly support?: SupportProfile;
     readonly locale: FooterLocale;
     readonly variant: FooterVariant;
     readonly sticky: boolean;
@@ -79,5 +81,10 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
 export declare function parseHranessMailingListConfig(value: HranessMailingListConfig): HranessMailingListConfig;
 export declare function parseHranessSocialConfig(value: HranessSocialConfig | undefined): HranessSocialConfig;
 export declare function resolveHranessSocialLinks(value: HranessSocialConfig | undefined): ReadonlyArray<HranessSocialLink>;
+export declare function resolveSupportLink(profile: SupportProfile | undefined): Readonly<{
+    href: string;
+    label: `Support ${string}: optional paid membership`;
+    title: `${string} Review optional paid membership.`;
+}> | null;
 export declare function renderHranessSiteFooterInnerHtml(showBrand: boolean, mailingList: HranessMailingListConfig, state?: HranessMailingListRenderState, socialLinks?: ReadonlyArray<HranessSocialLink>, presentation?: FooterPresentation): string;
 //# sourceMappingURL=internal.d.ts.map

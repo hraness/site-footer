@@ -349,7 +349,7 @@ export function createLayoutContract(
       tolerance: 0.25,
     });
   }
-  for (const name of ["brand", "mailing", "socials", ...(viewport === "wide" ? ["panel"] : [])]) {
+  for (const name of ["brand", "mailing", "support", "socials", ...(viewport === "wide" ? ["panel"] : [])]) {
     if (names.has(name)) {
       add({
         id: `${viewport}.${name}.inside`,
@@ -410,6 +410,12 @@ export function createLayoutContract(
     minimumHeight: 28,
     minimumWidth: 80,
   });
+  if (names.has("support")) {
+    add({ box: "support", id: `${viewport}.support.minimum`, kind: "minimum-size", minimumHeight: 28, minimumWidth: 44 });
+    for (const second of ["brand", "mailing", "socials"]) add({
+      first: "support", second, id: `${viewport}.support-${second}.clear`, kind: "no-overlap", tolerance: 0,
+    });
+  }
   for (const name of boxNames.filter((name) => name.startsWith("social."))) {
     add({
       box: name,
@@ -1116,6 +1122,11 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   const compact = !window.matchMedia("(min-width: 47.5rem)").matches;
   const mailing = (compact ? document.querySelector(".hraness-site-footer__disclosure-trigger") : document.querySelector(".hraness-site-footer__mailing"))
     ?? required(".hraness-site-footer__mailing-confirmation", "Footer mailing surface");
+  const support = required('[data-slot="hraness-support-link"]', "Optional support link");
+  if (!(support instanceof HTMLAnchorElement) || support.href !== 'https://account.hraness.com/support?product=soundfish&source=web#support'
+    || support.textContent !== 'Support' || support.target || !support.title.includes('Support ongoing development')) {
+    throw new Error("Support link lost its product handoff or optional value proposition.");
+  }
   const socials = required(".hraness-site-footer__socials", "Footer social group");
   const socialLinks = [...document.querySelectorAll(".hraness-site-footer__social-link")];
   if (socialLinks.length !== 4 || brand.textContent.trim() !== "") {
@@ -1134,6 +1145,7 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     rect("inner", inner),
     rect("brand", brand),
     rect("mailing", mailing),
+    rect("support", support),
     rect("socials", socials),
   ];
   const panel = document.querySelector(".hraness-site-footer__disclosure-panel");
@@ -1173,7 +1185,7 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const inner = document.querySelector(".hraness-site-footer__inner");
   if (!(inner instanceof HTMLElement)) throw new Error("Footer inner is missing.");
   const content = [...inner.querySelectorAll([
-    ".hraness-site-footer__brand", ".hraness-site-footer__social-link",
+    ".hraness-site-footer__brand", ".hraness-site-footer__social-link", ".hraness-site-footer__support",
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
     ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger", ".hraness-site-footer__account",
   ].join(","))].filter(element => element.checkVisibility()).map(element => element.getBoundingClientRect())
@@ -1825,7 +1837,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       const brand = footer.querySelector('.hraness-site-footer__brand');
       const links = [...footer.querySelectorAll('a')]
         .filter(link => link.closest('[data-slot="hraness-cookie-consent"]') === null);
-      if (links.length !== ${account ? 6 : 5} || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
+      if (links.length !== ${account ? 7 : 6} || brand.textContent.trim() !== '') throw new Error('Unexpected footer identity or social count.');
       if (footer.querySelector('form, input, script, [data-foil], [data-copy-variant], .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();
       if (state.requests.length || state.errors.length || window.__siteFooterFixture.experimentSnapshot().length) throw new Error('No-signup footer used a signup or experiment boundary.');
@@ -1854,7 +1866,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
     evidence.push({ geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   await browser.run(["press", "Tab"]);
-  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
+  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Support Soundfish: optional paid membership", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
     const focused = await browser.evaluate(`(() => {
       const element = document.activeElement;
       return { name: element?.getAttribute('aria-label') ?? element?.textContent, outline: element ? getComputedStyle(element).outlineStyle : null };

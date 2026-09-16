@@ -1,6 +1,6 @@
 {
   "name": "@hraness/site-footer",
-  "version": "0.11.4",
+  "version": "0.12.0",
   "description": "The canonical Hraness network footer for React and static websites.",
   "license": "MIT",
   "type": "module",
@@ -89,5 +89,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@hraness/support-foundation": "github:hraness/support-foundation#2d034b357680353574411217d68b02b6755b07ed"
   }
 }

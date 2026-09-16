@@ -59,12 +59,18 @@ const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).hr
       | { kind: "none" }
       | { kind: "account" };
     showBrand?: boolean;
+    support?: { id: string; name: string; updates: boolean; valueProposition: string };
     social?: Readonly<Partial<Record<"github" | "linkedin" | "substack" | "x", {
       href: string;
       label?: string;
     }>>>;
   }) => string;
 };
+const supportHtml = root.renderHranessSiteFooter?.({
+  mailingList: { kind: "none" },
+  support: { id: "wrench", name: "Ghostget", updates: true, valueProposition: "Support ongoing development of precise web tools for agents." },
+});
+assert.ok(supportHtml?.includes('href="https://account.hraness.com/support?product=wrench&amp;source=web#support"'), "Packed root must retain the product support handoff");
 const html = root.renderHranessSiteFooter?.({
   mailingList: {
     audience: "package-smoke",
