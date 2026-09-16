@@ -26,7 +26,10 @@ test("the idle React adapter renders identically to the static renderer", () => 
   const signupHtml = renderToStaticMarkup(
     <HranessSiteFooter mailingList={mailingList} showBrand={false} />,
   );
-  expect(signupHtml).toBe(renderHranessSiteFooter({
+  // The experiment veil is React-only progressive enhancement; the static
+  // handoff stays visible for environments that never hydrate.
+  expect(signupHtml).toContain('data-experiment="arming"');
+  expect(signupHtml.replace(' data-experiment="arming"', "")).toBe(renderHranessSiteFooter({
     mailingList,
     showBrand: false,
   }));

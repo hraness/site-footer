@@ -25,6 +25,7 @@ export declare function HranessSiteFooter({ locale: localeInput, experiment, pla
     "aria-label": string;
     className: string;
     "data-brand": string;
+    "data-experiment": string | undefined;
     "data-mailing-list": "none" | "signup" | "account";
     "data-slot": string;
     id: string;

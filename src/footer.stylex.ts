@@ -2,7 +2,8 @@ import * as stylex from "@stylexjs/stylex";
 import type { FooterVariant } from "./experiment.js";
 
 export const disclosureMarker = stylex.defineMarker();
-const holographicBackgroundImage = "linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(64% + var(--footer-foil-glow, 0) * 28%), transparent) 0%, #ffffff00 46%), conic-gradient(from var(--footer-foil-angle, 135deg), #ffd7f2, #d2dcff, #c8f3e4, #fdf2c0, #ffdcc9, #e9d9ff, #ffd7f2)";
+export const rootMarker = stylex.defineMarker();
+const holographicBackgroundImage = "linear-gradient(var(--hraness-site-footer-holo-surface, var(--hraness-site-footer-background)), var(--hraness-site-footer-holo-surface, var(--hraness-site-footer-background))), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(64% + var(--footer-foil-glow, 0) * 28%), transparent) 0%, #ffffff00 46%), conic-gradient(from var(--footer-foil-angle, 135deg), #ffd7f2, #d2dcff, #c8f3e4, #fdf2c0, #ffdcc9, #e9d9ff, #ffd7f2)";
 const holographicBackgroundClip = "padding-box, border-box, border-box";
 
 // Same direction, spread, and timing as Hraness.com's token support control.
@@ -50,20 +51,21 @@ const styles = stylex.create({
   green: {
     "--hraness-site-footer-action-background": "light-dark(#166534, #86efac)",
     "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #052e16)",
-    "--hraness-site-footer-field-line": "light-dark(#166534, #86efac)",
   },
   orange: {
     "--hraness-site-footer-action-background": "light-dark(#9a3412, #fdba74)",
     "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #431407)",
-    "--hraness-site-footer-field-line": "light-dark(#9a3412, #fdba74)",
   },
   blue: {
     "--hraness-site-footer-action-background": "light-dark(#1e40af, #93c5fd)",
     "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #172554)",
-    "--hraness-site-footer-field-line": "light-dark(#1e40af, #93c5fd)",
   },
-  experimentBorder: {
-    borderColor: { default: "var(--hraness-site-footer-field-line, var(--hraness-site-footer-line))", "@media (forced-colors: active)": "ButtonText" },
+  experimentArm: {
+    opacity: { default: 1, [stylex.when.ancestor('[data-experiment="arming"]', rootMarker)]: { "@media (scripting: enabled)": 0 } },
+    visibility: { default: "visible", [stylex.when.ancestor('[data-experiment="arming"]', rootMarker)]: { "@media (scripting: enabled)": "hidden" } },
+    transitionProperty: { default: null, "@media (prefers-reduced-motion: no-preference)": "opacity, visibility" },
+    transitionDuration: { default: null, "@media (prefers-reduced-motion: no-preference)": "200ms" },
+    transitionTimingFunction: { default: null, "@media (prefers-reduced-motion: no-preference)": "ease-out" },
   },
   disclosure: { position: { default: "static", "@media (min-width: 47.5rem)": "relative" }, gridArea: "mailing", "min-inline-size": 0, "max-inline-size": { default: "12rem", "@media (min-width: 47.5rem)": "20rem" } },
   disclosureInline: {
@@ -114,7 +116,7 @@ const styles = stylex.create({
     "--footer-foil-glow": { default: "0", "@media (hover: hover)": { ":hover:not(:disabled)": "1" } },
     borderWidth: "2px",
     borderColor: { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
-    backgroundColor: "var(--hraness-site-footer-background)",
+    backgroundColor: "var(--hraness-site-footer-holo-surface, var(--hraness-site-footer-background))",
     color: "var(--hraness-site-footer-foreground)",
     backgroundImage: {
       default: holographicBackgroundImage,
@@ -155,6 +157,17 @@ const styles = stylex.create({
       ":focus-visible": { default: "var(--hraness-site-footer-focus)", "@media (forced-colors: active)": "Highlight" },
     },
     outlineOffset: { default: null, ":focus-visible": "3px" },
+  },
+  // Bordered controls draw the ring inside their border box so joined edges
+  // (the mailing field and submit pair) never collide with a neighbor's edge.
+  focusInset: {
+    outlineWidth: { default: null, ":focus-visible": "2px" },
+    outlineStyle: { default: null, ":focus-visible": "solid" },
+    outlineColor: {
+      default: null,
+      ":focus-visible": { default: "var(--hraness-site-footer-focus)", "@media (forced-colors: active)": "Highlight" },
+    },
+    outlineOffset: { default: null, ":focus-visible": "-3px" },
   },
   motion: {
     transitionProperty: { default: null, "@media (prefers-reduced-motion: no-preference)": "color, background-color, opacity" },
@@ -303,6 +316,7 @@ const styles = stylex.create({
     fontOpticalSizing: "inherit", fontVariationSettings: "inherit",
   },
   mailingInput: {
+    "--hraness-site-footer-holo-surface": "var(--hraness-site-footer-field-background)",
     "inline-size": "100%", "min-inline-size": 0,
     fontSize: { default: "0.8125rem", "@media (max-width: 47.499rem), (pointer: coarse)": "max(1rem, 16px)" },
     borderStartStartRadius: "0.375rem", borderStartEndRadius: 0, borderEndEndRadius: 0, borderEndStartRadius: "0.375rem",
@@ -311,7 +325,7 @@ const styles = stylex.create({
     opacity: { default: null, "::placeholder": 1 }, "padding-inline": "0.625rem",
   },
   mailingSubmit: {
-    alignItems: "center", display: "inline-flex", justifyContent: "center", lineHeight: 1, "margin-inline-start": "-1px",
+    alignItems: "center", display: "inline-flex", justifyContent: "center", lineHeight: 1, "margin-inline-start": "-2px",
     borderStartStartRadius: 0, borderStartEndRadius: "0.375rem", borderEndEndRadius: "0.375rem", borderEndStartRadius: 0,
     backgroundColor: { default: "var(--hraness-site-footer-action-background)", "@media (forced-colors: active)": "ButtonText" },
     color: { default: "var(--hraness-site-footer-action-foreground)", "@media (forced-colors: active)": "ButtonFace" },
@@ -347,10 +361,10 @@ function className(hook: string, ...recipes: Array<(typeof styles)[keyof typeof 
 }
 
 export const footerClasses = {
-  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focus),
+  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focusInset),
   support: className("hraness-site-footer__support", styles.box, styles.control, styles.support, styles.focus),
-  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${stylex.props(disclosureMarker).className}`,
-  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focus, styles.motion),
+  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure, styles.experimentArm)} ${stylex.props(disclosureMarker).className}`,
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
   triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
@@ -372,14 +386,14 @@ export const footerClasses = {
   honeypot: className("hraness-site-footer__honeypot", styles.visuallyHidden),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
-  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
-  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focus, styles.motion),
-  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focus),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.holographic, styles.focusInset),
+  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focusInset, styles.motion),
+  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focusInset),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden),
 };
 
 export function footerClassName(signup: boolean, sticky = true): string {
-  return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
+  return `${className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint)} ${stylex.props(rootMarker).className}`;
 }
 
 export function footerInnerClassName(signup: boolean, sticky = true, color: FooterVariant["color"] = "green", account = false, support = false): string {
@@ -393,7 +407,7 @@ export function socialItemClassName(index = 0): string {
 }
 
 export function mailingStatusClassName(state: string): string {
-  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus,
+  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focusInset,
     state !== "idle" && styles.statusVisible,
     state === "error" && styles.statusError);
 }

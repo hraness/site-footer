@@ -289,7 +289,11 @@ both. Do not add another footer bar, viewport spacer, or blank padding after it 
 consumer layout. Product navigation belongs with the page navigation.
 
 The React adapter requests a short-lived Accounts enrollment and exposes it
-only after the visible footer settles. Presentation version 3 isolates compact and
+only after the visible footer settles. Until an assignment resolves, the signup
+presentation stays veiled instead of showing the default recipe; the chosen arm
+then fades in, so a variant never follows a visible control swap. The veil
+applies only where scripting can resolve it, leaving static and no-JavaScript
+handoffs visible, and reduced motion reveals immediately. Presentation version 3 isolates compact and
 wide cohorts: compact assignments always use the button and are never counted
 as inline exposures. Crossing the breakpoint invalidates attribution; active
 email text is preserved. The native form carries the same eligible enrollment
@@ -307,7 +311,10 @@ things” / “sjobs@apple.com”; “I'm curious” / “billg@microsoft.com”
 Other locales retain their two localized styles. Programmatic labels still say
 email signup, independently of the playful visible copy.
 
-The CTA has a static holographic border in both renderers. React adds a
+The joined email field and CTA share one static holographic border treatment in
+both renderers. Bordered controls draw the keyboard focus ring inside their own
+border box, so joined edges never collide with a neighbor's edge; borderless
+links keep the outside ring. React adds a
 damped pointer-following sheen and hue-shifting glow for mouse, pen, and touch
 contact anywhere on the page: the spectral ring turns toward the pointer like a
 light source while the sheen slides along the border, easing into place over a

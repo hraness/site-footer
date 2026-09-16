@@ -3,6 +3,9 @@ import type { FooterVariant } from "./experiment.js";
 export declare const disclosureMarker: Readonly<{
     readonly marker: stylex.StyleXClassNameFor<"marker", symbol>;
 }>;
+export declare const rootMarker: Readonly<{
+    readonly marker: stylex.StyleXClassNameFor<"marker", symbol>;
+}>;
 export declare const footerClasses: {
     account: string;
     support: string;
