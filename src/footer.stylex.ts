@@ -168,7 +168,7 @@ const styles = stylex.create({
     "max-inline-size": "none", "min-inline-size": 0, alignContent: "center", alignItems: "center",
     columnGap: "clamp(0.5rem, 2vw, 1rem)", rowGap: "var(--hraness-site-footer-row-gap)",
     "border-block-start-width": "1px", "border-block-start-style": "solid",
-    "border-block-start-color": { default: "var(--hraness-site-footer-line)", "@media (forced-colors: active)": "ButtonText" },
+    "border-block-start-color": { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
     backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
     "padding-block-start": "var(--hraness-site-footer-padding-block)",
     "padding-block-end": "calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px))",
