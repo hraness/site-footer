@@ -1,4 +1,4 @@
-import type { SupportProfile } from "@hraness/support-foundation";
+import type { SupportProfile } from "./internal.js";
 import { type HranessMailingListConfig, type HranessSocialConfig } from "./internal.js";
 import { type FormEvent } from "react";
 export interface HranessSiteFooterProps {
