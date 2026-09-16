@@ -3,6 +3,7 @@ import { parseHTML } from "linkedom";
 
 import {
   HRANESS_MAILING_SUBSCRIBE_URL,
+  hranessAttribution,
   renderHranessSiteFooter,
 } from "../src/index.js";
 
@@ -65,7 +66,7 @@ describe("README product contract", () => {
 
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
     expect(normalizedReadme).toContain(
-      "one Hraness home link, four specifically named social links, and one hidden geo-gated cookie-consent note",
+      "one Hraness home link, the shared “Built by Hraness” attribution, four specifically named social links, and one hidden geo-gated cookie-consent note",
     );
     expect(normalizedReadme).toContain(
       "The first render issues no request, sets no cookie, and writes no local storage",
@@ -73,8 +74,19 @@ describe("README product contract", () => {
     expect(document.querySelector("form")).toBeNull();
     expect(document.querySelector("script")).toBeNull();
     expect(document.querySelectorAll("a")).toHaveLength(6);
+    expect(document.querySelector('[data-slot="hraness-attribution"]')?.textContent)
+      .toBe(`${hranessAttribution.title}${hranessAttribution.subtitle}`);
     expect(document.querySelector('[data-slot="hraness-cookie-consent"]')?.hasAttribute("hidden"))
       .toBeTrue();
+  });
+
+  test("documents the organization-owned attribution copy and its reveal", () => {
+    expect(readme).toContain("**Built by Hraness**");
+    expect(normalizedReadme).toContain(hranessAttribution.subtitle);
+    expect(normalizedReadme).toContain("attribution is package-owned");
+    expect(normalizedReadme).not.toMatch(/Ben Guo|Built by Ben/u);
+    expect(readme).toContain("`hranessAttribution`");
+    expect(readme).toContain("Version 0.13.0");
   });
 
   test("documents the shared Hraness.com signup experiment", () => {

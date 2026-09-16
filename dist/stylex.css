@@ -1,6 +1,10 @@
 @layer base, components;
 @layer components.hraness-site-footer.legacy, components.hraness-site-footer.priority1, components.hraness-site-footer.priority2, components.hraness-site-footer.priority3, components.hraness-site-footer.priority4, components.hraness-site-footer.priority5;
 @layer components.hraness-site-footer.priority2 {
+  .xr5g6j7 {
+    grid-area: attribution;
+  }
+
   .x1pmbb8p {
     grid-area: brand;
   }
@@ -31,6 +35,24 @@
 
   .x1717udv {
     padding: 0;
+  }
+
+  @media (width >= 47.5rem) {
+    .xd2up6j.xd2up6j {
+      margin: 0;
+    }
+  }
+
+  @container hraness-attribution (width >= 40rem) {
+    .x7pvybn.x7pvybn {
+      margin: 0;
+    }
+  }
+
+  @container hraness-attribution (width >= 7rem) {
+    .x1ueb4aj.x1ueb4aj {
+      margin: 0;
+    }
   }
 }
 
@@ -174,20 +196,20 @@
   }
 
   @media (width >= 47.5rem) {
-    .x1l0kwu7.x1l0kwu7 {
-      grid-template-areas: "brand consent links";
+    .x3wcxyl.x3wcxyl {
+      grid-template-areas: "brand attribution consent links";
     }
 
-    .xy48kin.xy48kin {
-      grid-template-areas: "brand mailing consent links";
+    .xny3lfc.xny3lfc {
+      grid-template-areas: "brand mailing attribution consent links";
     }
 
-    .x1g31hlq.x1g31hlq {
-      grid-template-areas: "brand mailing support consent links";
+    .x591f.x591f {
+      grid-template-areas: "brand mailing support attribution consent links";
     }
 
-    .xhlquvd.xhlquvd {
-      grid-template-areas: "brand support consent links";
+    .x1baczq1.x1baczq1 {
+      grid-template-areas: "brand support attribution consent links";
     }
   }
 
@@ -448,6 +470,10 @@
     column-gap: clamp(.5rem, 2vw, 1rem);
   }
 
+  .x1s8d77d {
+    container-name: hraness-attribution;
+  }
+
   .x12e8u3k {
     container-name: hraness-footer;
   }
@@ -544,6 +570,10 @@
     font-size-adjust: inherit;
   }
 
+  .x12lo8hy {
+    font-size: .6875rem;
+  }
+
   .xboafo0 {
     font-size: .75rem;
   }
@@ -572,12 +602,20 @@
     font-variation-settings: inherit;
   }
 
+  .xo1l8bm {
+    font-weight: 400;
+  }
+
   .xk50ysn {
     font-weight: 500;
   }
 
   .xh88oxj {
     font-weight: 550;
+  }
+
+  .x1s688f {
+    font-weight: 600;
   }
 
   .x19s9jnd {
@@ -706,6 +744,14 @@
 
   .x130jcwj {
     letter-spacing: -.018em;
+  }
+
+  .xjat59b {
+    letter-spacing: -.01em;
+  }
+
+  .x1u7k74 {
+    line-height: 1.2;
   }
 
   .x132q4wb {
@@ -980,7 +1026,15 @@
     .xhobzj1.xhobzj1 {
       background-image: none;
     }
+  }
 
+  @media (width >= 47.5rem) {
+    .xndyzjf.xndyzjf {
+      block-size: var(--hraness-site-footer-control-block-size);
+    }
+  }
+
+  @media (forced-colors: active) {
     .x1np48w9.x1np48w9 {
       border-block-start-color: buttontext;
     }
@@ -988,7 +1042,19 @@
     .xwaqzdf.xwaqzdf {
       box-shadow: none;
     }
+  }
 
+  @media (width >= 47.5rem) {
+    .x1n80tlv.x1n80tlv {
+      clip-path: none;
+    }
+
+    .x16wtv6w.x16wtv6w {
+      clip: auto;
+    }
+  }
+
+  @media (forced-colors: active) {
     .x1q5838n.x1q5838n {
       color: buttonface;
     }
@@ -1023,28 +1089,32 @@
       grid-row-start: consent;
     }
 
-    .x1dt6ssw.x1dt6ssw {
-      grid-template-columns: auto auto auto minmax(var(--hraness-site-footer-social-target),1fr);
+    .xm233bm.xm233bm {
+      grid-template-columns: auto auto minmax(0,1fr) auto var(--hraness-site-footer-socials-inline-size);
     }
 
-    .xxwuxvk.xxwuxvk {
-      grid-template-columns: auto auto minmax(0, 1fr);
+    .x1f352t7.x1f352t7 {
+      grid-template-columns: auto minmax(0,1fr) auto var(--hraness-site-footer-socials-inline-size);
     }
 
-    .xb02ptd.xb02ptd {
-      grid-template-columns: auto minmax(0,max-content) auto auto minmax(var(--hraness-site-footer-social-target),1fr);
+    .x1bwds13.x1bwds13 {
+      grid-template-columns: auto minmax(0,max-content) auto minmax(0,1fr) auto var(--hraness-site-footer-socials-inline-size);
     }
 
-    .x1drxdiy.x1drxdiy {
-      grid-template-columns: auto minmax(0,max-content) auto minmax(var(--hraness-site-footer-social-target),1fr);
+    .xufqkxc.xufqkxc {
+      grid-template-columns: auto minmax(0,max-content) minmax(0,1fr) auto var(--hraness-site-footer-socials-inline-size);
     }
 
-    .xda7s4a.xda7s4a {
-      grid-template-columns: auto minmax(10rem,18rem) auto auto minmax(var(--hraness-site-footer-social-target),1fr);
+    .xclxa5l.xclxa5l {
+      grid-template-columns: auto minmax(10rem,18rem) auto minmax(0,1fr) auto var(--hraness-site-footer-socials-inline-size);
     }
 
-    .xoysss2.xoysss2 {
-      grid-template-columns: auto minmax(10rem,18rem) auto minmax(var(--hraness-site-footer-social-target),1fr);
+    .x1jzffwg.x1jzffwg {
+      grid-template-columns: auto minmax(10rem,18rem) minmax(0,1fr) auto var(--hraness-site-footer-socials-inline-size);
+    }
+
+    .xigrdhh.xigrdhh {
+      inline-size: 100%;
     }
 
     .x1cd001l.x1cd001l {
@@ -1137,6 +1207,66 @@
   @media (scripting: enabled) {
     .x3vhtta.x3vhtta.x3vhtta:where(.x12mkk0b[data-experiment="arming"] *) {
       visibility: hidden;
+    }
+  }
+
+  @container hraness-attribution (width >= 40rem) {
+    .xtwxsh8.xtwxsh8 {
+      block-size: auto;
+    }
+  }
+
+  @container hraness-attribution (width >= 7rem) {
+    .x12i4dyp.x12i4dyp {
+      block-size: auto;
+    }
+  }
+
+  @container hraness-attribution (width >= 40rem) {
+    .xrjiuty.xrjiuty {
+      clip-path: none;
+    }
+  }
+
+  @container hraness-attribution (width >= 7rem) {
+    .x476m55.x476m55 {
+      clip-path: none;
+    }
+  }
+
+  @container hraness-attribution (width >= 40rem) {
+    .x2zcbfh.x2zcbfh {
+      clip: auto;
+    }
+  }
+
+  @container hraness-attribution (width >= 7rem) {
+    .x1wwhqdb.x1wwhqdb {
+      clip: auto;
+    }
+  }
+
+  @container hraness-attribution (width >= 40rem) {
+    .x1avr2du.x1avr2du {
+      inline-size: auto;
+    }
+  }
+
+  @container hraness-attribution (width >= 7rem) {
+    .xchcyfu.xchcyfu {
+      inline-size: auto;
+    }
+  }
+
+  @container hraness-attribution (width >= 40rem) {
+    .x6q5gjv.x6q5gjv {
+      position: static;
+    }
+  }
+
+  @container hraness-attribution (width >= 7rem) {
+    .x10f8xno.x10f8xno {
+      position: static;
     }
   }
 
@@ -1357,6 +1487,10 @@
 
 .xtq98z5 {
   --hraness-site-footer-social-target: 1.75rem;
+}
+
+.x2o8lmk {
+  --hraness-site-footer-socials-inline-size: calc(4 * var(--hraness-site-footer-social-target) + .375rem);
 }
 
 .x4sry57 {

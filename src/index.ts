@@ -8,6 +8,7 @@ export type { FooterLocale, FooterMessages, FooterCopyStyle } from "./locales.js
 export { parseFooterEnrollment, parseFooterVariant } from "./experiment.js";
 export type { FooterEnrollment, FooterVariant } from "./experiment.js";
 import {
+  HRANESS_ATTRIBUTION,
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
@@ -28,6 +29,9 @@ export { HRANESS_MAILING_SUBSCRIBE_URL, HRANESS_ACCOUNT_URL };
 
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export const hranessSocialLinks: ReadonlyArray<HranessSocialLink> = HRANESS_SOCIAL_LINKS;
+
+/** Organization-owned attribution rendered by every Hraness footer. */
+export const hranessAttribution: Readonly<{ title: string; subtitle: string }> = HRANESS_ATTRIBUTION;
 
 export type {
   HranessMailingListConfig,

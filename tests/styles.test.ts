@@ -45,7 +45,7 @@ describe("compiled footer presentation", () => {
   });
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.12.2");
+    expect(pkg.version).toBe("0.13.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -71,9 +71,9 @@ describe("compiled footer presentation", () => {
     contains(root, "min-block-size:var(--hraness-site-footer-bar-block-size)");
     expect(cssFor(root)).not.toMatch(/[{;]block-size:/u);
     contains(footerInnerClassName(false), "position:fixed");
-    contains(footerInnerClassName(false), 'grid-template-areas:"brand consent links"');
+    contains(footerInnerClassName(false), 'grid-template-areas:"brand attribution consent links"');
     contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing links"');
-    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing consent links"');
+    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing attribution consent links"');
     contains(footerInnerClassName(true), "@media (min-width:47.5rem)");
     contains(signup, "--hraness-site-footer-mailing-overlay-clearance:0rem");
     contains(signup, "--hraness-site-footer-content-block-size:max(var(--hraness-site-footer-social-target),var(--hraness-site-footer-form-block-size))");
@@ -104,6 +104,60 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.brand, "min-inline-size:var(--hraness-site-footer-control-block-size)");
     contains(footerClasses.brand, "min-block-size:var(--hraness-site-footer-control-block-size)");
     contains(footerClassName(false), "font-size:.875rem");
+  });
+
+  test("keeps the organization attribution inside the single row and reveals it as its track permits", () => {
+    const wide = "@media (min-width:47.5rem)";
+    // Compact bars keep their exact composition: the block is out of flow and
+    // visually hidden, never display:none, so assistive technology still reads it.
+    contains(footerClasses.attribution, "grid-area:attribution");
+    contains(footerClasses.attribution, "position:absolute");
+    contains(footerClasses.attribution, "clip-path:inset(50%)");
+    contains(footerClasses.attribution, "inline-size:1px");
+    contains(footerClasses.attribution, wide);
+    contains(footerClasses.attribution, "position:static");
+    contains(footerClasses.attribution, "inline-size:100%");
+    contains(footerClasses.attribution, "block-size:var(--hraness-site-footer-control-block-size)");
+    contains(footerClasses.attribution, "container-name:hraness-attribution");
+    contains(footerClasses.attribution, "container-type:inline-size");
+    contains(footerClasses.attribution, "overflow:hidden");
+    contains(footerClasses.attribution, "white-space:nowrap");
+    contains(footerClasses.attribution, "line-height:1.2");
+    for (const classes of [footerClasses.attribution, footerClasses.attributionTitle, footerClasses.attributionSubtitle]) {
+      expect(cssFor(classes)).not.toContain("display:none");
+      expect(cssFor(classes)).not.toContain("visibility:hidden");
+    }
+    // Title first at 7rem, then the subtitle once 40rem fits it whole; a wider
+    // host font degrades to an ellipsis rather than a third line.
+    contains(footerClasses.attributionTitle, "@container hraness-attribution (min-width:7rem)");
+    contains(footerClasses.attributionTitle, "position:static");
+    contains(footerClasses.attributionTitle, "text-overflow:ellipsis");
+    contains(footerClasses.attributionTitle, "font-size:.75rem");
+    contains(footerClasses.attributionTitle, "font-weight:600");
+    contains(footerClasses.attributionTitle, "color:var(--hraness-site-footer-foreground)");
+    contains(footerClasses.attributionSubtitle, "@container hraness-attribution (min-width:40rem)");
+    contains(footerClasses.attributionSubtitle, "position:static");
+    contains(footerClasses.attributionSubtitle, "text-overflow:ellipsis");
+    contains(footerClasses.attributionSubtitle, "font-size:.6875rem");
+    contains(footerClasses.attributionSubtitle, "color:var(--hraness-site-footer-muted)");
+    expect(cssFor(footerClasses.attributionSubtitle)).not.toContain("(min-width:7rem)");
+    // The wide row reserves exactly four social targets so the attribution
+    // track, not the social group, absorbs the remaining space.
+    contains(footerClassName(false), "--hraness-site-footer-socials-inline-size:calc(4 * var(--hraness-site-footer-social-target) + .375rem)");
+    for (const [inner, columns] of [
+      [footerInnerClassName(false), "auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+      [footerInnerClassName(true), "auto minmax(10rem, 18rem) minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+      [footerInnerClassName(false, true, "green", true), "auto minmax(0, max-content) minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+      [footerInnerClassName(false, true, "green", false, true), "auto auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+      [footerInnerClassName(true, true, "green", false, true), "auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+      [footerInnerClassName(false, true, "green", true, true), "auto minmax(0, max-content) auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+    ] as const) contains(inner, `grid-template-columns:${columns}`);
+    for (const inner of [footerInnerClassName(false), footerInnerClassName(true), footerInnerClassName(false, true, "green", true)]) {
+      // Compact templates never gain an attribution column or gap.
+      expect(cssFor(inner)).toMatch(/grid-template-areas:"brand(?:mailing)?links"/u);
+    }
+    contains(footerInnerClassName(true, true, "green", false, true), 'grid-template-areas:"brand mailing support attribution consent links"');
+    contains(footerInnerClassName(false, true, "green", false, true), 'grid-template-areas:"brand support attribution consent links"');
   });
 
   test("shares a static holographic border and responsive native disclosure", () => {

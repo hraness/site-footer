@@ -7,6 +7,7 @@ import { resolveFooterLocale } from "./locales.js";
 import { DEFAULT_FOOTER_VARIANT, FOOTER_WIDE_QUERY, isFooterEnrollmentEligible, exposeFooterEnrollment, requestFooterEnrollment, type FooterEnrollment, type FooterViewport } from "./experiment.js";
 
 import {
+  HRANESS_ATTRIBUTION_SLOT,
   HRANESS_CONSENT_ACCEPT_SLOT,
   HRANESS_CONSENT_REGION_URL,
   HRANESS_CONSENT_SLOT,
@@ -357,7 +358,7 @@ export function HranessSiteFooter({
         link.lang = "en";
         link.dir = "ltr";
         link.textContent = "Support";
-        inner.insertBefore(link, inner.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`));
+        inner.insertBefore(link, inner.querySelector(`[data-slot="${HRANESS_ATTRIBUTION_SLOT}"]`));
       }
       link.setAttribute("href", supportLink.href);
       link.setAttribute("aria-label", supportLink.label);
