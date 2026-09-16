@@ -1634,7 +1634,7 @@ var NewTwitterIcon = [
 // node_modules/@hraness/support-foundation/dist/index.js
 var SOURCES = ["cli", "agent", "web", "desktop", "skill"];
 var ACCOUNT_ORIGIN = "https://account.hraness.com";
-var UNSAFE_TEXT = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
+var UNSAFE_TEXT = new RegExp("[\\p{Cc}\\p{Cf}\\p{Zl}\\p{Zp}]", "u");
 function isRecord(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -1960,4 +1960,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=E0F2B392F153B9EC64756E2164756E21
+//# debugId=9888DF93BCA820E664756E2164756E21

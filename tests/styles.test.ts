@@ -45,12 +45,12 @@ describe("compiled footer presentation", () => {
   });
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.12.1");
+    expect(pkg.version).toBe("0.12.2");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
     expect(pkg.dependencies ?? {}).toEqual({});
-    expect(pkg.devDependencies["@hraness/support-foundation"]).toBe("github:hraness/support-foundation#2d034b357680353574411217d68b02b6755b07ed");
+    expect(pkg.devDependencies["@hraness/support-foundation"]).toBe("github:hraness/support-foundation#ed89e584c2c420e3e0547bbe8f32baf8e3a2ae4d");
     expect(manifest.compiler.transform.propertyValidationMode).toBe("throw");
     expect(manifest.compilerSha256).toBe("9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   });
