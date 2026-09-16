@@ -4,7 +4,7 @@
 function attachFooterFoil(root) {
   if (typeof window.matchMedia !== "function" || typeof requestAnimationFrame !== "function")
     return () => {};
-  const preference = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)");
+  const preference = window.matchMedia("(prefers-reduced-motion: no-preference) and (forced-colors: none)");
   let target = null;
   let bounds = null;
   let frame = 0;
@@ -33,10 +33,10 @@ function attachFooterFoil(root) {
     const py = Math.max(0, Math.min(100, (y - bounds.top) / Math.max(1, bounds.height) * 100));
     target.style.setProperty("--footer-foil-x", `${px.toFixed(1)}%`);
     target.style.setProperty("--footer-foil-y", `${py.toFixed(1)}%`);
-    target.style.setProperty("--footer-foil-angle", `${(90 + px * 1.8).toFixed(1)}deg`);
+    target.style.setProperty("--footer-foil-angle", `${(px * 3.6).toFixed(1)}deg`);
   };
   const move = (event) => {
-    if (!preference.matches || event.pointerType !== "mouse") {
+    if (!preference.matches) {
       reset();
       return;
     }
@@ -54,10 +54,20 @@ function attachFooterFoil(root) {
     if (!frame)
       frame = requestAnimationFrame(paint);
   };
+  const release = (event) => {
+    if (event.pointerType === "touch")
+      reset();
+  };
   const invalidate = () => {
     bounds = null;
   };
   root.addEventListener("pointermove", move, {
+    passive: true
+  });
+  root.addEventListener("pointerdown", move, {
+    passive: true
+  });
+  root.addEventListener("pointerup", release, {
     passive: true
   });
   root.addEventListener("pointerleave", reset);
@@ -73,6 +83,8 @@ function attachFooterFoil(root) {
   return () => {
     reset();
     root.removeEventListener("pointermove", move);
+    root.removeEventListener("pointerdown", move);
+    root.removeEventListener("pointerup", release);
     root.removeEventListener("pointerleave", reset);
     root.removeEventListener("pointercancel", reset);
     window.removeEventListener("resize", invalidate);
@@ -329,7 +341,8 @@ var styles = {
     k1xSpc: "xwz0xwf x1i5lizr",
     kC13JO: "xrbltni",
     kAPf3g: "x1o2pa38",
-    kKwaWg: "x1qewxgh xwi9c3o xhobzj1",
+    kKwaWg: "x1p057h8 xwi9c3o xhobzj1",
+    kGVxlE: "xeygwf3",
     kVAM5u: "x9r1u3d x1xggt0h x1ylmb6m",
     kMwMTN: "x1g4142m x1rhhl84",
     $$css: true
@@ -359,13 +372,15 @@ var styles = {
     $$css: true
   },
   holographic: {
-    kMzoRj: "xvndefy",
+    "--footer-foil-glow": "x1kjo3z2 xs2bqyq",
+    kMzoRj: "xdh2fpr",
     kVAM5u: "x9r1u3d x1ylmb6m",
     kWkggS: "x1hhhz6w",
     kMwMTN: "x1g4142m",
-    kKwaWg: "x1qewxgh xhobzj1",
-    kl9DO0: "xao3s5b",
-    kHypHr: "x188zq58",
+    kKwaWg: "x1p057h8 xhobzj1",
+    kl9DO0: "x1gqfdwy",
+    kHypHr: "xxdbvd8",
+    kGVxlE: "x1l86a5m xwaqzdf",
     $$css: true
   },
   compactConfirmation: {
@@ -722,7 +737,7 @@ var styles = {
     kWkggS: "x1ujht2g x1tt9vl1",
     kMwMTN: "xaazplj x1q5838n",
     kkrTdU: "x1ypdohk xjb0foi",
-    kSiTet: "xo3u330 x7sp37k",
+    kSiTet: "xo3u330",
     k63SB2: "x19s9jnd",
     kGuDYH: "x1dcheo9",
     kJVvJu: "xvpgqt4",
@@ -2331,4 +2346,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=6D6A7748EF18818664756E2164756E21
+//# debugId=E8938A1D9CA25FA964756E2164756E21

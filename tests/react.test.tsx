@@ -599,3 +599,48 @@ test("eligible enrollment survives native submission but resize removes stale at
     }
   }
 });
+
+test("wide inline enrollment paints the experiment form with its attribution token", async () => {
+  const { window } = parseHTML('<div id="root"></div>');
+  const changes = new Set<() => void>();
+  const media = { matches: true, addEventListener: (_type: string, fn: () => void) => changes.add(fn), removeEventListener: (_type: string, fn: () => void) => changes.delete(fn) };
+  Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => query === "(min-width: 47.5rem)" ? media : { matches: true, addEventListener() {}, removeEventListener() {} } });
+  Object.defineProperty(window, "localStorage", { configurable: true, value: { getItem: () => "accepted" } });
+  const requests: Array<{ action: string; audience?: string; locale?: string; presentationVersion?: number; viewport?: string }> = [];
+  const token = "a".repeat(64);
+  const overrides = {
+    Comment: window.Comment, document: window.document, Element: window.Element, Event: window.Event,
+    HTMLElement: window.HTMLElement, HTMLInputElement: window.HTMLInputElement, MutationObserver: window.MutationObserver,
+    navigator: window.navigator, Node: window.Node, Text: window.Text, window, IS_REACT_ACT_ENVIRONMENT: true,
+    CSS: { supports: () => true },
+    fetch: (async (_input: unknown, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body));
+      requests.push(body);
+      return Response.json({ version: 1, token, assignment: {
+        id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "inline", copyStyle: "goblin",
+        color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v3-${body.viewport}`,
+      } });
+    }) as typeof fetch,
+  };
+  const previous = new Map<string, PropertyDescriptor | undefined>();
+  for (const [key, value] of Object.entries(overrides)) {
+    previous.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
+    Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
+  }
+  const { createRoot } = await import("react-dom/client");
+  const container = window.document.querySelector<HTMLElement>("#root")!;
+  const root = createRoot(container);
+  try {
+    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
+    const form = container.querySelector('form[data-copy-variant="goblin"]');
+    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 3, viewport: "wide" }]);
+    expect(form?.getAttribute("data-layout")).toBe("inline");
+    expect(form?.querySelector<HTMLInputElement>('input[name="experimentToken"]')?.value).toBe(token);
+  } finally {
+    await act(async () => { root.unmount(); });
+    for (const [key, descriptor] of previous) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else Reflect.deleteProperty(globalThis, key);
+    }
+  }
+});

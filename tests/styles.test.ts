@@ -137,7 +137,7 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.mailingSubmit, ":disabled");
     contains(footerClasses.mailingSubmit, "opacity:.62");
     contains(footerClasses.mailingSubmit, ":hover:not(:disabled)");
-    contains(footerClasses.mailingSubmit, "opacity:.82");
+    contains(footerClasses.mailingSubmit, "--footer-foil-glow:1");
     contains(footerClasses.mailingInput, "::placeholder");
     for (const classes of [footerClasses.brand, footerClasses.socialLink, footerClasses.mailingSubmit]) {
       contains(classes, "@media (hover:hover)");
@@ -181,7 +181,10 @@ describe("compiled footer presentation", () => {
       expect(cssFor(classes)).not.toContain("font-palette:");
       contains(classes, "background-image:none");
       if (classes === footerClasses.mailingInput) contains(classes, "background-origin:padding-box");
-      else contains(classes, "background-origin:padding-box,border-box,border-box");
+      else {
+        contains(classes, "background-origin:border-box");
+        contains(classes, "background-clip:border-box,padding-box,padding-box,border-box,border-box");
+      }
       contains(classes, "border-image-source:none");
     }
     contains(footerClasses.mailingInput, "border-start-start-radius:.375rem");

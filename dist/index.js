@@ -246,7 +246,8 @@ var styles = {
     k1xSpc: "xwz0xwf x1i5lizr",
     kC13JO: "xrbltni",
     kAPf3g: "x1o2pa38",
-    kKwaWg: "x1qewxgh xwi9c3o xhobzj1",
+    kKwaWg: "x1p057h8 xwi9c3o xhobzj1",
+    kGVxlE: "xeygwf3",
     kVAM5u: "x9r1u3d x1xggt0h x1ylmb6m",
     kMwMTN: "x1g4142m x1rhhl84",
     $$css: true
@@ -276,13 +277,15 @@ var styles = {
     $$css: true
   },
   holographic: {
-    kMzoRj: "xvndefy",
+    "--footer-foil-glow": "x1kjo3z2 xs2bqyq",
+    kMzoRj: "xdh2fpr",
     kVAM5u: "x9r1u3d x1ylmb6m",
     kWkggS: "x1hhhz6w",
     kMwMTN: "x1g4142m",
-    kKwaWg: "x1qewxgh xhobzj1",
-    kl9DO0: "xao3s5b",
-    kHypHr: "x188zq58",
+    kKwaWg: "x1p057h8 xhobzj1",
+    kl9DO0: "x1gqfdwy",
+    kHypHr: "xxdbvd8",
+    kGVxlE: "x1l86a5m xwaqzdf",
     $$css: true
   },
   compactConfirmation: {
@@ -639,7 +642,7 @@ var styles = {
     kWkggS: "x1ujht2g x1tt9vl1",
     kMwMTN: "xaazplj x1q5838n",
     kkrTdU: "x1ypdohk xjb0foi",
-    kSiTet: "xo3u330 x7sp37k",
+    kSiTet: "xo3u330",
     k63SB2: "x19s9jnd",
     kGuDYH: "x1dcheo9",
     kJVvJu: "xvpgqt4",
@@ -1844,4 +1847,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=E61FC50AB08B61C264756E2164756E21
+//# debugId=75B5ED5E16D78C0664756E2164756E21
