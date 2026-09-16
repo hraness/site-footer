@@ -1656,6 +1656,53 @@ async function driveState(options: {
     );
     if (ready !== true) throw new Error("Idle signup is not immediately usable with a hidden honeypot.");
   }
+  let foilEvidence: unknown;
+  // Synthetic pointerdown marks the form interacted, which correctly suppresses
+  // enrollment rebuilds on later viewport changes, so the probe runs only in
+  // the non-experiment idle scenario.
+  if (options.state === "idle" && options.experiment !== "inline") {
+    const foil = await options.browser.evaluate(`(async () => {
+      const button = document.querySelector('button[type="submit"]');
+      if (!(button instanceof HTMLElement)) throw new Error('Idle signup lost its foil submit.');
+      const enhanced = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)').matches;
+      const settle = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const vars = () => [
+        button.style.getPropertyValue('--footer-foil-x'),
+        button.style.getPropertyValue('--footer-foil-y'),
+        button.style.getPropertyValue('--footer-foil-angle'),
+      ];
+      const rect = button.getBoundingClientRect();
+      const fire = (type, offset, pointerType) => button.dispatchEvent(new PointerEvent(type, {
+        bubbles: true, clientX: rect.left + rect.width * offset, clientY: rect.top + rect.height / 2, pointerType,
+      }));
+      fire('pointermove', 0.2, 'mouse');
+      await settle();
+      const mouseNear = vars();
+      fire('pointermove', 0.8, 'mouse');
+      await settle();
+      const mouseFar = vars();
+      fire('pointerdown', 0.5, 'touch');
+      await settle();
+      const touch = vars();
+      fire('pointerup', 0.5, 'touch');
+      const released = vars();
+      const expectNear = (sample, x) => Math.abs(parseFloat(sample[0]) - x) < 1;
+      if (!enhanced) {
+        if ([...mouseNear, ...mouseFar, ...touch].some(value => value !== '')) throw new Error('Foil painted without the motion and color fallbacks.');
+        return { enhanced, mouseNear, mouseFar, touch, released };
+      }
+      if (!expectNear(mouseNear, 20) || !expectNear(mouseFar, 80) || !expectNear(touch, 50)) {
+        throw new Error('Foil did not track mouse and touch position: ' + JSON.stringify({ mouseNear, mouseFar, touch }));
+      }
+      if (mouseNear[2] === mouseFar[2]) throw new Error('Foil angle did not follow pointer position.');
+      if (released.some(value => value !== '')) throw new Error('Foil kept its pointer state after touch release.');
+      return { enhanced, mouseNear, mouseFar, touch, released };
+    })()`);
+    if (!isRecord(foil) || foil.enhanced !== true) {
+      throw new Error(`Foil enhancement probe could not run: ${renderUnknown(foil)}`);
+    }
+    foilEvidence = foil;
+  }
   if (options.state === "pending" || options.state === "accepted") {
     const focused = await options.browser.evaluate(
       "document.activeElement?.matches('[data-slot=\"hraness-mailing-list-status\"]') === true",
@@ -1734,6 +1781,7 @@ async function driveState(options: {
     fixture,
     experiment: options.experiment ?? "none",
     experimentRequests,
+    foil: foilEvidence ?? null,
     postCloseInventory,
     preCloseInventory,
     returnToBootstrap,

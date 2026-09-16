@@ -2,7 +2,7 @@ import * as stylex from "@stylexjs/stylex";
 import type { FooterVariant } from "./experiment.js";
 
 export const disclosureMarker = stylex.defineMarker();
-const holographicBackgroundImage = "linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), #ffffff 0%, #ffffff00 65%), conic-gradient(from var(--footer-foil-angle, 135deg), #ff86d7, #af96ff, #73e8ff, #8cffba, #fff29b, #ffaf85, #ff86d7)";
+const holographicBackgroundImage = "radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(38% + var(--footer-foil-glow, 0) * 26%), transparent) 0%, #ffffff00 58%), conic-gradient(from calc(360deg - var(--footer-foil-angle, 135deg)), #ff86d724, #af96ff24, #73e8ff24, #8cffba24, #fff29b24, #ffaf8524, #ff86d724), linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(70% + var(--footer-foil-glow, 0) * 30%), transparent) 0%, #ffffff00 42%), conic-gradient(from var(--footer-foil-angle, 135deg), #ff86d7, #af96ff, #73e8ff, #8cffba, #fff29b, #ffaf85, #ff86d7)";
 
 // Same direction, spread, and timing as Hraness.com's token support control.
 const textShimmer = stylex.keyframes({
@@ -90,6 +90,7 @@ const styles = stylex.create({
     display: { default: "inline-grid", "::-webkit-details-marker": "none" },
     gridTemplateAreas: '"label"', justifyItems: "center",
     backgroundImage: { default: holographicBackgroundImage, [stylex.when.ancestor("[open]", disclosureMarker)]: "none", "@media (forced-colors: active)": "none" },
+    boxShadow: { [stylex.when.ancestor("[open]", disclosureMarker)]: "none" },
     borderColor: { default: "transparent", [stylex.when.ancestor("[open]", disclosureMarker)]: "var(--hraness-site-footer-line)", "@media (forced-colors: active)": "ButtonText" },
     color: { default: "var(--hraness-site-footer-foreground)", [stylex.when.ancestor("[open]", disclosureMarker)]: "var(--hraness-site-footer-muted)" },
   },
@@ -109,7 +110,8 @@ const styles = stylex.create({
     backgroundColor: "var(--hraness-site-footer-background)",
   },
   holographic: {
-    borderWidth: "1.5px",
+    "--footer-foil-glow": { default: "0", "@media (hover: hover)": { ":hover:not(:disabled)": "1" } },
+    borderWidth: "2px",
     borderColor: { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
     backgroundColor: "var(--hraness-site-footer-background)",
     color: "var(--hraness-site-footer-foreground)",
@@ -117,8 +119,9 @@ const styles = stylex.create({
       default: holographicBackgroundImage,
       "@media (forced-colors: active)": "none",
     },
-    backgroundOrigin: "padding-box, border-box, border-box",
-    backgroundClip: "padding-box, border-box, border-box",
+    backgroundOrigin: "border-box",
+    backgroundClip: "border-box, padding-box, padding-box, border-box, border-box",
+    boxShadow: { default: "0 0 0.5rem hsl(var(--footer-foil-angle, 135deg) 85% 72% / 0.5)", "@media (forced-colors: active)": "none" },
   },
   compactConfirmation: { fontSize: "0.75rem", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" },
   shimmer: {
@@ -294,7 +297,7 @@ const styles = stylex.create({
     backgroundColor: { default: "var(--hraness-site-footer-action-background)", "@media (forced-colors: active)": "ButtonText" },
     color: { default: "var(--hraness-site-footer-action-foreground)", "@media (forced-colors: active)": "ButtonFace" },
     cursor: { default: "pointer", ":disabled": "wait" },
-    opacity: { default: null, ":disabled": 0.62, "@media (hover: hover)": { ":hover:not(:disabled)": 0.82 } },
+    opacity: { default: null, ":disabled": 0.62 },
     fontWeight: 650, fontSize: "0.8125rem", "padding-inline": "0.625rem", "max-inline-size": "55%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center",
   },
   mailingStatus: {

@@ -275,9 +275,10 @@ Other locales retain their two localized styles. Programmatic labels still say
 email signup, independently of the playful visible copy.
 
 The CTA has a static holographic border in both renderers. React adds a
-pointer-following glint for fine mouse hover, with one coalesced animation frame
-per pointer update and no idle loop, filters, canvas or React rerenders. Reduced
-motion, coarse pointers and forced colors disable this enhancement.
+pointer-following sheen, counter-rotating wash, and hue-shifting glow for mouse,
+pen, and touch contact, with one coalesced animation frame per pointer update
+and no idle loop, filters, canvas or React rerenders. Reduced motion and forced
+colors disable this enhancement.
 
 Version 0.10.2 makes every English placeholder explicit email guidance, keeps
 the popup close to its footer, and changes the open trigger to a quiet Close
