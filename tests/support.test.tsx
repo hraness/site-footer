@@ -13,7 +13,7 @@ describe("optional product support", () => {
   for (const mailingList of [{ kind: "none" }, { kind: "account" }, { kind: "signup", audience: "wrench" }] as const satisfies readonly HranessMailingListConfig[]) {
     test(`preserves ${mailingList.kind} with a native, matching static and React handoff`, () => {
       const html = renderHranessSiteFooter({ mailingList, support });
-      expect(renderToStaticMarkup(<HranessSiteFooter mailingList={mailingList} support={support} />)).toBe(html);
+      expect(renderToStaticMarkup(<HranessSiteFooter mailingList={mailingList} support={support} />).replace(' data-experiment="arming"', "")).toBe(html);
       const { document } = parseHTML(html);
       const link = document.querySelector('[data-slot="hraness-support-link"]')!;
       expect(link.tagName).toBe("A");

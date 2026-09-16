@@ -189,23 +189,24 @@ var styles = {
   green: {
     "--hraness-site-footer-action-background": "x3l4yik",
     "--hraness-site-footer-action-foreground": "x1izjwho",
-    "--hraness-site-footer-field-line": "x5yw2eo",
     $$css: true
   },
   orange: {
     "--hraness-site-footer-action-background": "x1mq49gw",
     "--hraness-site-footer-action-foreground": "x1lf6uaq",
-    "--hraness-site-footer-field-line": "x1phg1r4",
     $$css: true
   },
   blue: {
     "--hraness-site-footer-action-background": "x18vkaze",
     "--hraness-site-footer-action-foreground": "x1e6emja",
-    "--hraness-site-footer-field-line": "x14kbr3y",
     $$css: true
   },
-  experimentBorder: {
-    kVAM5u: "xveg7hp x1ylmb6m",
+  experimentArm: {
+    kSiTet: "x1hc1fzr xtekp7u",
+    k33iCy: "xnpuxes x3vhtta",
+    k1ekBW: "x1xje8t6",
+    kIyJzY: "x17shmjf",
+    kAMwcw: "x2nlg2u",
     $$css: true
   },
   disclosure: {
@@ -246,7 +247,7 @@ var styles = {
     k1xSpc: "xwz0xwf x1i5lizr",
     kC13JO: "xrbltni",
     kAPf3g: "x1o2pa38",
-    kKwaWg: "x1nc9quo xwi9c3o xhobzj1",
+    kKwaWg: "xpfzi7p xwi9c3o xhobzj1",
     kGVxlE: "xeygwf3",
     kVAM5u: "x9r1u3d x1xggt0h x1ylmb6m",
     kMwMTN: "x1g4142m x1rhhl84",
@@ -280,9 +281,9 @@ var styles = {
     "--footer-foil-glow": "x1kjo3z2 xs2bqyq",
     kMzoRj: "xdh2fpr",
     kVAM5u: "x9r1u3d x1ylmb6m",
-    kWkggS: "x1hhhz6w",
+    kWkggS: "x1lxeszl",
     kMwMTN: "x1g4142m",
-    kKwaWg: "x1nc9quo xhobzj1",
+    kKwaWg: "xpfzi7p xhobzj1",
     kl9DO0: "x1gqfdwy",
     kHypHr: "x188zq58",
     kGVxlE: "x6q3fwq xwaqzdf",
@@ -339,6 +340,13 @@ var styles = {
     k3XXqK: "x9v5kkp",
     kjBf7l: "xxuwnm0 xz4eswf",
     kInvED: "xj3ae5l",
+    $$css: true
+  },
+  focusInset: {
+    kMeerF: "x784prv",
+    k3XXqK: "x9v5kkp",
+    kjBf7l: "xxuwnm0 xz4eswf",
+    kInvED: "xhfxdjs",
     $$css: true
   },
   motion: {
@@ -648,6 +656,7 @@ var styles = {
     $$css: true
   },
   mailingInput: {
+    "--hraness-site-footer-holo-surface": "x1m0uuso",
     kULEZF: "xiuoait",
     kdYMnH: "xesnm00",
     kGuDYH: "x1dcheo9 xgbju11",
@@ -666,7 +675,7 @@ var styles = {
     k1xSpc: "x3nfvp2",
     kjj79g: "xl56j7k",
     kLWn49: "xo5v014",
-    kImiAN: "x1hb08if",
+    kImiAN: "xe9ewy2",
     krdFHd: "x15mokao",
     kfmiAY: "xjp8vmc",
     kT0f0o: "x5g0mfp",
@@ -750,12 +759,12 @@ function className(hook, ...recipes) {
   return `${hook} ${props(...recipes).className ?? ""}`.trim();
 }
 var footerClasses = {
-  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focus),
+  account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focusInset),
   support: className("hraness-site-footer__support", styles.box, styles.control, styles.support, styles.focus),
-  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${{
+  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure, styles.experimentArm)} ${{
     className: "x1gmlqhs"
   }.className}`,
-  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focus, styles.motion),
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
   triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
@@ -777,13 +786,15 @@ var footerClasses = {
   honeypot: className("hraness-site-footer__honeypot", styles.visuallyHidden),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
-  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.mailingInput, styles.focus),
-  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.experimentBorder, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focus, styles.motion),
-  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focus),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.holographic, styles.focusInset),
+  mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focusInset, styles.motion),
+  mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focusInset),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden)
 };
 function footerClassName(signup, sticky = true) {
-  return className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint);
+  return `${className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint)} ${{
+    className: "x12mkk0b"
+  }.className}`;
 }
 function footerInnerClassName(signup, sticky = true, color = "green", account = false, support = false) {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
@@ -793,7 +804,7 @@ function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
 }
 function mailingStatusClassName(state) {
-  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focus, state !== "idle" && styles.statusVisible, state === "error" && styles.statusError);
+  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focusInset, state !== "idle" && styles.statusVisible, state === "error" && styles.statusError);
 }
 function disclosureClassNames(layout) {
   return {
@@ -1884,7 +1895,7 @@ function renderMailingList(mailingList, state, presentation) {
   const statusCopy = state.kind === "pending" ? copy.submitting : state.kind === "error" ? copy.requestError : "";
   const honeypot = `<input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value="">`;
   const experimentField = presentation.experimentToken && /^[0-9a-f]{64}$/u.test(presentation.experimentToken) ? `<input name="experimentToken" type="hidden" value="${presentation.experimentToken}">` : "";
-  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${experimentField}<div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-foil="" aria-label="${escapeAttribute(copy.button)}, ${escapeAttribute(copy.formLabel)}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${honeypot}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
+  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${experimentField}<div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" data-foil="" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-foil="" aria-label="${escapeAttribute(copy.button)}, ${escapeAttribute(copy.formLabel)}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${honeypot}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
   const classes = disclosureClassNames(variant.layout);
   const open = state.kind === "idle" ? "" : ' open=""';
   const label = escapeAttribute(copy.button);
@@ -1949,4 +1960,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=E26B8BA8409E54F764756E2164756E21
+//# debugId=E0F2B392F153B9EC64756E2164756E21

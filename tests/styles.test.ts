@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 import { createStylexTransformCollector, readStylexPackageManifest } from "@hraness/ui/stylex-build";
 import { resolve } from "node:path";
 import {
-  disclosureClassNames, disclosureMarker, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, socialItemClassName,
+  disclosureClassNames, disclosureMarker, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, rootMarker, socialItemClassName,
 } from "../src/footer.stylex.js";
 import { assertPresentationBoundary, assertSourceBoundary } from "../scripts/check-stylex-artifacts.js";
 
@@ -11,6 +11,7 @@ const repository = resolve(import.meta.dir, "..");
 const manifest = await readStylexPackageManifest(resolve(repository, "dist/stylex-manifest.json"), repository);
 const rules = new Map(manifest.rules.map(([key, value]) => [key, value.ltr]));
 const disclosureMarkerClass = stylex.props(disclosureMarker).className;
+const rootMarkerClass = stylex.props(rootMarker).className;
 function cssFor(classes: string): string {
   const atomic = classes.split(/\s+/u).filter((name) => name.startsWith("x"));
   expect(atomic.length).toBeGreaterThan(0);
@@ -18,6 +19,10 @@ function cssFor(classes: string): string {
     // A marker names an ancestor rather than owning a declaration rule.
     if (name === disclosureMarkerClass) {
       expect([...rules.values()].some(rule => rule.includes(`.${name}[open]`))).toBeTrue();
+      return "";
+    }
+    if (name === rootMarkerClass) {
+      expect([...rules.values()].some(rule => rule.includes(`.${name}[data-experiment="arming"]`))).toBeTrue();
       return "";
     }
     expect(rules.has(name)).toBeTrue();
@@ -119,6 +124,26 @@ describe("compiled footer presentation", () => {
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("animation-name");
   });
 
+  test("shares the holographic treatment with the joined mailing field", () => {
+    for (const declaration of ["conic-gradient(", "var(--footer-foil-x,50%)", "border-width:2px", "border-color:transparent"]) {
+      contains(footerClasses.mailingInput, declaration);
+      contains(footerClasses.mailingSubmit, declaration);
+    }
+    contains(footerClasses.mailingInput, "--hraness-site-footer-holo-surface:var(--hraness-site-footer-field-background)");
+    contains(footerClasses.mailingInput, "background-color:var(--hraness-site-footer-holo-surface");
+  });
+
+  test("keeps experiment presentation veiled until the assignment settles", () => {
+    contains(footerClasses.disclosure, '[data-experiment="arming"]');
+    contains(footerClasses.disclosure, "@media (scripting: enabled)");
+    contains(footerClasses.disclosure, "opacity:0");
+    contains(footerClasses.disclosure, "visibility:hidden");
+    contains(footerClasses.disclosure, "@media (prefers-reduced-motion:no-preference)");
+    contains(footerClasses.disclosure, "transition-property:opacity,visibility");
+    contains(footerClasses.disclosure, "transition-duration:.2s");
+    expect(cssFor(footerClassName(true)).length).toBeGreaterThan(0);
+  });
+
   test("reserves matching visual padding plus the device safe area in both layouts", () => {
     for (const signup of [false, true]) {
       contains(footerInnerClassName(signup), "padding-block-start:var(--hraness-site-footer-padding-block)");
@@ -128,11 +153,20 @@ describe("compiled footer presentation", () => {
   });
 
   test("preserves native focus, hover, disabled, reduced-motion, and forced-color behavior", () => {
-    for (const classes of [footerClasses.brand, footerClasses.socialLink, footerClasses.mailingInput,
-      footerClasses.mailingSubmit, footerClasses.mailingConfirmation, mailingStatusClassName("idle")]) {
+    for (const classes of [footerClasses.brand, footerClasses.socialLink]) {
       contains(classes, ":focus-visible");
       contains(classes, "outline-width:2px");
       contains(classes, "outline-offset:3px");
+      contains(classes, "outline-color:Highlight");
+    }
+    // Bordered controls draw the ring inside their border box so joined edges
+    // never collide with a neighbor's edge.
+    for (const classes of [footerClasses.account, footerClasses.disclosureTrigger,
+      footerClasses.mailingInput, footerClasses.mailingSubmit,
+      footerClasses.mailingConfirmation, mailingStatusClassName("idle")]) {
+      contains(classes, ":focus-visible");
+      contains(classes, "outline-width:2px");
+      contains(classes, "outline-offset:-3px");
       contains(classes, "outline-color:Highlight");
     }
     contains(footerClasses.mailingSubmit, ":disabled");
@@ -181,16 +215,13 @@ describe("compiled footer presentation", () => {
       // font-language-override, a separately cascaded child palette must survive.
       expect(cssFor(classes)).not.toContain("font-palette:");
       contains(classes, "background-image:none");
-      if (classes === footerClasses.mailingInput) contains(classes, "background-origin:padding-box");
-      else {
-        contains(classes, "background-origin:border-box");
-        contains(classes, "background-clip:padding-box,border-box,border-box");
-      }
+      contains(classes, "background-origin:border-box");
+      contains(classes, "background-clip:padding-box,border-box,border-box");
       contains(classes, "border-image-source:none");
     }
     contains(footerClasses.mailingInput, "border-start-start-radius:.375rem");
     contains(footerClasses.mailingSubmit, "border-start-end-radius:.375rem");
-    contains(footerClasses.mailingSubmit, "margin-inline-start:-1px");
+    contains(footerClasses.mailingSubmit, "margin-inline-start:-2px");
     contains(footerClasses.visuallyHidden, "clip-path:inset(50%)");
   });
 });

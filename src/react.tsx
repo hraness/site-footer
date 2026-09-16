@@ -84,6 +84,9 @@ export function HranessSiteFooter({
   const [consentPending, setConsentPending] = useState(false);
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   const [enrollment, setEnrollment] = useState<FooterEnrollment | null>(null);
+  // The signup presentation stays invisible until the experiment settles, so an
+  // assigned arm fades in without the default arm ever being observed.
+  const [armed, setArmed] = useState(() => experiment && mailingList.kind === "signup");
   const interacted = useRef(false);
   const exposedEnrollment = useRef<string | null>(null);
   const enrollmentViewport = useRef<FooterViewport | null>(null);
@@ -118,6 +121,7 @@ export function HranessSiteFooter({
     enrollmentKey.current = null;
     enrollmentToken.current = null;
     exposedEnrollment.current = null;
+    setArmed(experiment && mailingList.kind === "signup");
     const token = footer.current?.querySelector<HTMLInputElement>('input[name="experimentToken"]');
     if (token) { token.disabled = true; token.value = ""; }
     if (modeChanged) {
@@ -188,7 +192,20 @@ export function HranessSiteFooter({
             enrollmentToken.current = result.token;
             setEnrollment(result);
           }
-        }).finally(() => { if (enrollmentRequest.current === controller && timeout) clearTimeout(timeout); });
+        }).finally(() => {
+          if (enrollmentRequest.current !== controller) return;
+          if (timeout) clearTimeout(timeout);
+          // Let the resolved markup paint once under the arming veil before the
+          // attribute flips, so the reveal is a fade rather than a swap.
+          const finish = () => {
+            if (mounted.current && activeContext.current === context) setArmed(false);
+          };
+          if (typeof requestAnimationFrame === "function") {
+            requestAnimationFrame(() => requestAnimationFrame(finish));
+          } else {
+            finish();
+          }
+        });
     };
     assign();
     query?.addEventListener("change", assign);
@@ -393,6 +410,7 @@ export function HranessSiteFooter({
     "aria-label": HRANESS_FOOTER_LABEL,
     className: footerClassName(mailingList.kind === "signup", placement === "sticky"),
     "data-brand": showBrand ? "visible" : "hidden",
+    "data-experiment": experiment && mailingList.kind === "signup" ? (armed ? "arming" : "settled") : undefined,
     "data-mailing-list": mailingList.kind,
     "data-slot": HRANESS_FOOTER_SLOT,
     id: HRANESS_FOOTER_SLOT,
