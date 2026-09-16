@@ -447,7 +447,7 @@ var styles = {
     khm7nJ: "x1lfezxm",
     kT8eP4: "x1b1eqt9",
     kmc9e2: "x3so8kt",
-    kpvK8V: "x1hdm9tg x1np48w9",
+    kpvK8V: "x1gz0dqr x1np48w9",
     kWkggS: "x1hhhz6w x9yvj25",
     kS5dFF: "x1bhgv95",
     kgDt7k: "xpcvst1",
@@ -2331,4 +2331,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=2F0C2A67AB73BF2F64756E2164756E21
+//# debugId=6D6A7748EF18818664756E2164756E21
