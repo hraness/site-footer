@@ -183,7 +183,7 @@ describe("compiled footer presentation", () => {
       if (classes === footerClasses.mailingInput) contains(classes, "background-origin:padding-box");
       else {
         contains(classes, "background-origin:border-box");
-        contains(classes, "background-clip:border-box,padding-box,padding-box,border-box,border-box");
+        contains(classes, "background-clip:padding-box,border-box,border-box");
       }
       contains(classes, "border-image-source:none");
     }

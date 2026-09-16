@@ -1665,12 +1665,21 @@ async function driveState(options: {
       const button = document.querySelector('button[type="submit"]');
       if (!(button instanceof HTMLElement)) throw new Error('Idle signup lost its foil submit.');
       const enhanced = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)').matches;
-      const settle = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const vars = () => [
         button.style.getPropertyValue('--footer-foil-x'),
         button.style.getPropertyValue('--footer-foil-y'),
         button.style.getPropertyValue('--footer-foil-angle'),
       ];
+      const settle = async () => {
+        // Damped easing converges over several frames; wait until readings hold.
+        let last = '';
+        for (let i = 0; i < 90; i++) {
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          const now = vars().join('|');
+          if (now === last) return;
+          last = now;
+        }
+      };
       const rect = button.getBoundingClientRect();
       const fire = (type, offset, pointerType) => button.dispatchEvent(new PointerEvent(type, {
         bubbles: true, clientX: rect.left + rect.width * offset, clientY: rect.top + rect.height / 2, pointerType,
@@ -1681,6 +1690,11 @@ async function driveState(options: {
       fire('pointermove', 0.8, 'mouse');
       await settle();
       const mouseFar = vars();
+      document.body.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true, clientX: 8, clientY: 8, pointerType: 'mouse',
+      }));
+      await settle();
+      const offElement = vars();
       fire('pointerdown', 0.5, 'touch');
       await settle();
       const touch = vars();
@@ -1688,15 +1702,16 @@ async function driveState(options: {
       const released = vars();
       const expectNear = (sample, x) => Math.abs(parseFloat(sample[0]) - x) < 1;
       if (!enhanced) {
-        if ([...mouseNear, ...mouseFar, ...touch].some(value => value !== '')) throw new Error('Foil painted without the motion and color fallbacks.');
-        return { enhanced, mouseNear, mouseFar, touch, released };
+        if ([...mouseNear, ...mouseFar, ...offElement, ...touch].some(value => value !== '')) throw new Error('Foil painted without the motion and color fallbacks.');
+        return { enhanced, mouseNear, mouseFar, offElement, touch, released };
       }
       if (!expectNear(mouseNear, 20) || !expectNear(mouseFar, 80) || !expectNear(touch, 50)) {
         throw new Error('Foil did not track mouse and touch position: ' + JSON.stringify({ mouseNear, mouseFar, touch }));
       }
       if (mouseNear[2] === mouseFar[2]) throw new Error('Foil angle did not follow pointer position.');
+      if (!(parseFloat(offElement[0]) < 0) || offElement[2] === '') throw new Error('Foil ignored pointer movement outside the control: ' + JSON.stringify(offElement));
       if (released.some(value => value !== '')) throw new Error('Foil kept its pointer state after touch release.');
-      return { enhanced, mouseNear, mouseFar, touch, released };
+      return { enhanced, mouseNear, mouseFar, offElement, touch, released };
     })()`);
     if (!isRecord(foil) || foil.enhanced !== true) {
       throw new Error(`Foil enhancement probe could not run: ${renderUnknown(foil)}`);

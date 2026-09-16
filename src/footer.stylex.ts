@@ -2,7 +2,8 @@ import * as stylex from "@stylexjs/stylex";
 import type { FooterVariant } from "./experiment.js";
 
 export const disclosureMarker = stylex.defineMarker();
-const holographicBackgroundImage = "radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(38% + var(--footer-foil-glow, 0) * 26%), transparent) 0%, #ffffff00 58%), conic-gradient(from calc(360deg - var(--footer-foil-angle, 135deg)), #ff86d724, #af96ff24, #73e8ff24, #8cffba24, #fff29b24, #ffaf8524, #ff86d724), linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(70% + var(--footer-foil-glow, 0) * 30%), transparent) 0%, #ffffff00 42%), conic-gradient(from var(--footer-foil-angle, 135deg), #ff86d7, #af96ff, #73e8ff, #8cffba, #fff29b, #ffaf85, #ff86d7)";
+const holographicBackgroundImage = "linear-gradient(var(--hraness-site-footer-background), var(--hraness-site-footer-background)), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(64% + var(--footer-foil-glow, 0) * 28%), transparent) 0%, #ffffff00 46%), conic-gradient(from var(--footer-foil-angle, 135deg), #ffd7f2, #d2dcff, #c8f3e4, #fdf2c0, #ffdcc9, #e9d9ff, #ffd7f2)";
+const holographicBackgroundClip = "padding-box, border-box, border-box";
 
 // Same direction, spread, and timing as Hraness.com's token support control.
 const textShimmer = stylex.keyframes({
@@ -120,8 +121,8 @@ const styles = stylex.create({
       "@media (forced-colors: active)": "none",
     },
     backgroundOrigin: "border-box",
-    backgroundClip: "border-box, padding-box, padding-box, border-box, border-box",
-    boxShadow: { default: "0 0 0.5rem hsl(var(--footer-foil-angle, 135deg) 85% 72% / 0.5)", "@media (forced-colors: active)": "none" },
+    backgroundClip: holographicBackgroundClip,
+    boxShadow: { default: "0 0 0.375rem hsl(var(--footer-foil-angle, 135deg) 55% 75% / 0.3)", "@media (forced-colors: active)": "none" },
   },
   compactConfirmation: { fontSize: "0.75rem", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" },
   shimmer: {
