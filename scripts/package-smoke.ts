@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -184,6 +184,18 @@ try {
   for (const file of requiredFiles) assert.ok(existsSync(resolve(packed, file)), `Packed artifact is missing: ${file}`);
   assert.ok(!existsSync(resolve(packed, "node_modules")));
   assert.ok(!existsSync(resolve(packed, ".agents")));
+  const packedPackage = JSON.parse(await readFile(resolve(packed, "package.json"), "utf8"));
+  assert.deepEqual(packedPackage.dependencies ?? {}, {}, "Portable footer has no runtime dependencies");
+  await writeFile(resolve(consumer, "consumer.mts"), `
+    import { renderHranessSiteFooter, type SupportProfile } from "./package/dist/index.js";
+    const support: SupportProfile = { id: "wrench", name: "Ghostget", updates: true, valueProposition: "Support development." };
+    renderHranessSiteFooter({ mailingList: { kind: "none" }, support });
+  `);
+  await writeFile(resolve(consumer, "tsconfig.json"), JSON.stringify({
+    compilerOptions: { strict: true, noEmit: true, skipLibCheck: false, target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", types: [] },
+    files: ["consumer.mts"],
+  }));
+  run([resolve(repository, "node_modules/.bin/tsc"), "--project", resolve(consumer, "tsconfig.json")], consumer);
   const packedManifest = await readStylexPackageManifest(resolve(packed, "dist/stylex-manifest.json"), packed);
   run([process.execPath, "-e", `
     const { renderHranessSiteFooter } = await import(${JSON.stringify(pathToFileURL(resolve(packed, "dist/index.js")).href)});
@@ -201,7 +213,7 @@ try {
       assert.ok(packedCss.includes(selector), `Packed CSS omits atomic class ${key}`);
     }
   }
-  console.log("Packed SiteFooter renders without React or compiler dependencies and resolves every CSS rule");
+  console.log("Packed SiteFooter types and renders without foundation, React, or compiler dependencies and resolves every CSS rule");
 } finally {
   await rm(temporary, { force: true, recursive: true });
 }

@@ -1,6 +1,14 @@
 import { type FooterVariant } from "./experiment.js";
 import { type FooterLocale } from "./locales.js";
-import { type SupportProfile } from "@hraness/support-foundation";
+/** Portable public shape, checked against the bundled foundation by the release gate. */
+export type SupportProfile = Readonly<{
+    /** Exact public product ID accepted by the Accounts support page. */
+    id: string;
+    name: string;
+    valueProposition: string;
+    /** True only when Accounts has a public mailing list for this product. */
+    updates: boolean;
+}>;
 export interface FooterPresentation {
     readonly support?: SupportProfile;
     readonly locale: FooterLocale;

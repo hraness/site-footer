@@ -1,5 +1,5 @@
 "use client";
-import type { SupportProfile } from "@hraness/support-foundation";
+import type { SupportProfile } from "./internal.js";
 
 import { attachFooterFoil } from "./foil.js";
 import { footerClassName, footerClasses, footerInnerClassName } from "./footer.stylex.js";

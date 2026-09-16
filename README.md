@@ -14,7 +14,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.12.0
+bun add github:hraness/site-footer#v0.12.1
 ```
 
 Start with the network footer and no mailing form:
@@ -488,3 +488,8 @@ repository gate:
 bun install --frozen-lockfile
 bun run check
 ```
+
+The published footer bundles the portable support implementation and ships self-contained
+profile declarations. Consumers do not install a transitive support-foundation package;
+CLI products can depend directly on the foundation independently. The release gate checks that
+the public profile shape matches the exact reviewed foundation version.

@@ -1,5 +1,5 @@
-import type { SupportProfile } from "@hraness/support-foundation";
-export type { SupportProfile } from "@hraness/support-foundation";
+import type { SupportProfile } from "./internal.js";
+export type { SupportProfile } from "./internal.js";
 import { type FooterVariant } from "./experiment.js";
 export { resolveFooterLocale } from "./locales.js";
 export type { FooterLocale, FooterMessages, FooterCopyStyle } from "./locales.js";

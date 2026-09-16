@@ -7,7 +7,17 @@ import {
 
 import { DEFAULT_FOOTER_VARIANT, type FooterVariant } from "./experiment.js";
 import { resolveFooterLocale, type FooterLocale } from "./locales.js";
-import { createSupportOffer, type SupportProfile } from "@hraness/support-foundation";
+import { createSupportOffer } from "@hraness/support-foundation";
+
+/** Portable public shape, checked against the bundled foundation by the release gate. */
+export type SupportProfile = Readonly<{
+  /** Exact public product ID accepted by the Accounts support page. */
+  id: string;
+  name: string;
+  valueProposition: string;
+  /** True only when Accounts has a public mailing list for this product. */
+  updates: boolean;
+}>;
 
 export interface FooterPresentation {
   readonly support?: SupportProfile;
