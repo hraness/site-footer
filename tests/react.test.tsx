@@ -639,6 +639,8 @@ test("wide inline enrollment paints the experiment form with its attribution tok
     expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 3, viewport: "wide" }]);
     expect(form?.getAttribute("data-layout")).toBe("inline");
     expect(form?.querySelector<HTMLInputElement>('input[name="experimentToken"]')?.value).toBe(token);
+    // The arm's markup is already in place; the veil lifts once the assignment settles.
+    expect(container.querySelector("footer")?.getAttribute("data-experiment")).toBe("settled");
   } finally {
     await act(async () => { root.unmount(); });
     for (const [key, descriptor] of previous) {
