@@ -15,7 +15,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.14.0
+bun add github:hraness/site-footer#v0.15.0
 ```
 
 Start with the network footer and no mailing form:
@@ -343,6 +343,14 @@ few frames instead of snapping. There is no idle loop, filters, canvas or React
 rerenders, and touch contact releases its state on lift. Reduced motion and
 forced colors disable this enhancement.
 
+Version 0.15.0 moves the signup foil treatment onto the shared Hraness foil
+contract from `@hraness/design-kit`: the same six-stop `--hraness-foil-*`
+spectrum (with the deeper dark-mode palette), the bounded pointer inputs
+`attachFooterFoil` now writes under their shared names, and a new
+`--hraness-foil-surface` seam behind the legacy
+`--hraness-site-footer-holo-surface` override. Pin
+`github:hraness/site-footer#v0.15.0` to adopt it.
+
 Version 0.14.0 folds the organization attribution into the home link, which now
 reads the Ra mark followed by “by Hraness” in every mailing mode and at every
 width, and removes the standalone attribution block and the `hranessAttribution`
@@ -402,6 +410,14 @@ the generated `x*` classes are private build output. Products can override
 `--hraness-site-footer-action-foreground` on the footer hook in their own CSS.
 Existing `--plain-*`, common theme variables, and footer sizing properties retain
 their meanings. Keep values compatible with their original color or length type.
+
+The signup controls share the Hraness foil contract with marketing surfaces:
+`--hraness-foil-surface` retints the control face (the legacy
+`--hraness-site-footer-holo-surface` override still wins when set),
+`--hraness-foil-1` through `--hraness-foil-6` replace the six spectrum stops,
+and `--hraness-foil-halo-alpha` scales the resting glow. Products that import
+`@hraness/design-kit` get the same palette on `.hraness-foil` surfaces for free;
+the pointer position itself stays internal to the `attachFooterFoil` controller.
 
 Package builds use the published `@hraness/ui/stylex-build` compiler at v0.5.12
 with StyleX 0.19.0, collect static and React entrypoints serially, and seal their

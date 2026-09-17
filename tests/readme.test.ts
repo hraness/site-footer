@@ -83,7 +83,7 @@ describe("README product contract", () => {
     expect(readme).toContain("**by Hraness**");
     expect(normalizedReadme).toContain("lockup is package-owned");
     expect(normalizedReadme).not.toMatch(/Ben Guo|Built by Ben/u);
-    expect(readme).toContain("Version 0.14.0");
+    expect(readme).toContain("Version 0.15.0");
     expect(readme).toContain("Version 0.13.0");
   });
 
