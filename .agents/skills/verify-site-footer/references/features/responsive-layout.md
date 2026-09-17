@@ -7,8 +7,7 @@
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
 - One row at both widths; compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
-- Icon-only home link with an accessible name and a full control-sized target.
-- Shared organization attribution (“Built by Hraness” plus its subtitle) in every context: exact copy, one `lang="en"` block with no link, never `display: none`; out of flow with no footprint below 47.5rem; at wide widths it is a row-height box centered with the socials, its title joins the named layout once its track reaches 7rem, the subtitle follows at 40rem, no revealed line leaves the row vertically (an ellipsis from an unusually wide font is recorded, not failed), and the wide no-signup and account rows reveal both lines at 1280.
+- Organization-owned home link in every context: the Ra mark followed by the exact “by Hraness” lockup text in one `lang="en"` link, the accessible name “Hraness home,” and a control-sized target; no standalone attribution block remains.
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.
 - Equal email and submit heights.

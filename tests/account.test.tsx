@@ -206,10 +206,11 @@ test("support-only updates preserve the active native signup form and disclosure
       if (next) {
         expect(link?.getAttribute("href")).toBe(`https://account.hraness.com/support?product=${next.id}&source=web#support`);
         expect(link?.getAttribute("title")).toContain(next.valueProposition);
-        // The patched link keeps the static document order: support precedes the attribution.
-        expect(link?.nextElementSibling?.getAttribute("data-slot")).toBe("hraness-attribution");
+        expect(link?.querySelector('svg[data-slot="hraness-support-icon"]')).not.toBeNull();
+        // The patched link keeps the static document order: support precedes the consent note.
+        expect(link?.nextElementSibling?.getAttribute("data-slot")).toBe("hraness-cookie-consent");
       } else expect(link).toBeNull();
-      expect(container.querySelector('[data-slot="hraness-attribution"]')?.textContent).toContain("Built by Hraness");
+      expect(container.querySelector(".hraness-site-footer__brand")?.textContent).toContain("by Hraness");
     }
     expect(requests).toHaveLength(0);
   });

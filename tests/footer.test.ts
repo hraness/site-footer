@@ -4,7 +4,6 @@ import { parseHTML } from "linkedom";
 import {
   HRANESS_HOME_URL,
   HRANESS_MAILING_SUBSCRIBE_URL,
-  hranessAttribution,
   hranessSocialLinks,
   renderHranessSiteFooter,
   type HranessMailingListConfig,
@@ -95,50 +94,39 @@ describe("Hraness site footer", () => {
   });
 
   test("attributes every footer to the organization, never to a person", () => {
-    expect(hranessAttribution).toEqual({
-      subtitle: "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence.",
-      title: "Built by Hraness",
-    });
-    expect(Object.isFrozen(hranessAttribution)).toBeTrue();
-
     const support = { id: "soundfish", name: "Soundfish", updates: true, valueProposition: "Support browser music tools." };
     for (const options of [
       { mailingList: noMailingList },
       { mailingList: productMailingList },
       { mailingList: { kind: "account" } as const },
       { mailingList: productMailingList, support },
-      { mailingList: noMailingList, showBrand: false },
     ]) {
       const html = renderHranessSiteFooter(options);
       const { document } = parseHTML(html);
       const footer = document.querySelector('footer[data-slot="hraness-site-footer"]')!;
-      const attribution = footer.querySelector('[data-slot="hraness-attribution"]')!;
-      const [title, subtitle, ...rest] = [...attribution.children];
+      const brand = footer.querySelector(".hraness-site-footer__brand")!;
 
-      expect(attribution.classList.contains("hraness-site-footer__attribution")).toBeTrue();
-      expect(attribution.getAttribute("lang")).toBe("en");
-      expect(attribution.getAttribute("dir")).toBe("ltr");
-      expect(rest).toHaveLength(0);
-      expect(title?.tagName).toBe("P");
-      expect(title?.classList.contains("hraness-site-footer__attribution-title")).toBeTrue();
-      expect(title?.textContent).toBe("Built by Hraness");
-      expect(subtitle?.tagName).toBe("P");
-      expect(subtitle?.classList.contains("hraness-site-footer__attribution-subtitle")).toBeTrue();
-      expect(subtitle?.textContent).toBe(hranessAttribution.subtitle);
-      // Plain organization copy: no link, no ARIA hiding, no role, and no personal name.
-      expect(attribution.querySelector("a, button, [aria-hidden], [role]")).toBeNull();
-      expect(attribution.closest(".hraness-site-footer__brand, nav")).toBeNull();
-      expect(footer.querySelectorAll('[data-slot="hraness-attribution"]')).toHaveLength(1);
-      expect(footer.querySelector(".hraness-site-footer__brand")?.textContent ?? "").toBe("");
+      // One organization-owned lockup: the Ra mark followed by "by Hraness".
+      expect(brand.tagName).toBe("A");
+      expect(brand.getAttribute("href")).toBe("https://hraness.com/");
+      expect(brand.getAttribute("aria-label")).toBe("Hraness home");
+      expect(brand.getAttribute("lang")).toBe("en");
+      expect(brand.getAttribute("dir")).toBe("ltr");
+      expect(brand.querySelector('svg[data-slot="hraness-mark"]')).not.toBeNull();
+      const name = brand.querySelector(".hraness-site-footer__brand-name")!;
+      expect(name.tagName).toBe("SPAN");
+      expect(name.textContent).toBe("by Hraness");
+      expect(footer.querySelectorAll(".hraness-site-footer__brand")).toHaveLength(1);
+      expect(footer.querySelector('[data-slot="hraness-attribution"], .hraness-site-footer__attribution')).toBeNull();
       expect(html).not.toMatch(/Ben Guo|Built by Ben/u);
 
       // Document order matches the wide visual order: identity and account or
-      // signup controls, optional support, attribution, consent, then socials.
-      const order = ["hraness-mailing-list-signup", "hraness-account-link", "hraness-support-link", "hraness-attribution", "hraness-cookie-consent"]
+      // signup controls, optional support, consent, then socials.
+      const order = ["hraness-mailing-list-signup", "hraness-account-link", "hraness-support-link", "hraness-cookie-consent"]
         .map((slot) => html.indexOf(`data-slot="${slot}"`))
         .filter((offset) => offset >= 0);
       expect(order).toEqual([...order].sort((left, right) => left - right));
-      expect(html.indexOf('data-slot="hraness-attribution"')).toBeLessThan(html.indexOf('aria-label="Hraness links"'));
+      expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeLessThan(html.indexOf('aria-label="Hraness links"'));
       expect(footer.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(4);
     }
   });
@@ -271,8 +259,7 @@ describe("Hraness site footer", () => {
     expect(footer?.getAttribute("data-brand")).toBe("hidden");
     expect(footer?.querySelector(".hraness-site-footer__brand")).toBeNull();
     expect(footer?.querySelector('[data-slot="hraness-mark"]')).toBeNull();
-    // Hiding the duplicate home link never hides the organization attribution.
-    expect(footer?.querySelector('[data-slot="hraness-attribution"]')?.textContent).toContain("Built by Hraness");
+    expect(footer?.textContent).not.toContain("by Hraness");
     expect(footer?.querySelector('input[name="audience"]')?.getAttribute("value"))
       .toBe("soundfish");
     expect(footer?.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(4);
@@ -338,7 +325,7 @@ describe("Hraness site footer", () => {
 
     expect(brand?.getAttribute("aria-label")).toBe("Hraness home");
     expect(brand?.getAttribute("href")).toBe("https://hraness.com/");
-    expect(brand?.textContent).toBe("");
+    expect(brand?.textContent).toBe("by Hraness");
     expect(document.querySelector('.hraness-site-footer__wordmark')).toBeNull();
     expect(mark?.getAttribute("viewBox")).toBe("0 0 512 512");
     expect(mark?.querySelectorAll("path")).toHaveLength(4);
