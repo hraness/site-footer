@@ -1,6 +1,6 @@
 # @hraness/site-footer
 
-Add the same Hraness identity, organization attribution, accessible network
+Add the same Hraness identity, accessible network
 links, and optional product-scoped email signup or signed-in account access to a
 React or static website. One package owns the markup, attribution copy, link
 order, mailing action, response states, and responsive layout. Each product
@@ -15,7 +15,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.13.0
+bun add github:hraness/site-footer#v0.14.0
 ```
 
 Start with the network footer and no mailing form:
@@ -36,8 +36,8 @@ export function ProductLayout({
 }
 ```
 
-That render has the stable `id="hraness-site-footer"`, one Hraness home link,
-the shared “Built by Hraness” attribution, four specifically named social
+That render has the stable `id="hraness-site-footer"`, one Hraness home link
+reading “by Hraness”, four specifically named social
 links, and one hidden geo-gated cookie-consent note linking to the Hraness
 privacy policy. The consent note stays hidden
 without client-side JavaScript; after hydration the React adapter asks the
@@ -170,8 +170,10 @@ behavior and social links stay available in every mode.
 
 ## Optional paid support
 
-Pass an explicit support profile to show a native **Support** link beside the
-signup or account control. Use the exact product ID accepted by Accounts; a
+Pass an explicit support profile to show a muted icon-only **support** link
+beside the signup or account control. The link renders the bundled
+question-mark vector and shares the social targets' size, muted color, and
+hover treatment. Use the exact product ID accepted by Accounts; a
 repository rename does not change that ID. The shared support foundation builds
 the destination, with no email, token or session in its URL.
 
@@ -188,7 +190,8 @@ the destination, with no email, token or session in its URL.
 ```
 
 Both renderers accept the same `support` profile. Its value proposition appears
-in the link's title; its accessible name identifies optional paid membership.
+in the link's title; its accessible name identifies optional paid membership
+while the visible glyph stays the shared question icon.
 The destination explains support and lets the person review current prices and
 confirm payment. Navigation works without JavaScript. Rendering the link never
 opens a browser, creates a session, submits signup or charges anyone.
@@ -234,44 +237,28 @@ name “Hraness on LinkedIn.”
 
 ## Organization attribution
 
-Every footer attributes the site to the organization, never to a person. Both
-renderers emit one `data-slot="hraness-attribution"` block in every mailing
-mode and with or without the home link:
+Every footer attributes the site to the organization, never to a person. The
+Hraness home link is one organization-owned lockup at the start of the bar:
+the Ra mark followed by the text **by Hraness**, marked `lang="en" dir="ltr"`
+so it is independent of the signup locale, and keeping the accessible name
+“Hraness home.”
 
-- Primary line: **Built by Hraness**
-- Subtitle: Hraness is an advanced software research organization dedicated to
-  advancing the frontier of machine intelligence.
-
-The copy is English organization text marked `lang="en" dir="ltr"`, so it is
-independent of the signup locale. It contains no link, so the link contract is
-unchanged; the Ra home link keeps its accessible name and stays icon-only. The
-same strings are exported as `hranessAttribution` from the framework-neutral
-root for tests and page copy that must match the footer.
-
-The attribution is package-owned. Products cannot rename, reword, translate,
-link, hide, or reorder it, and there is no prop for a product- or person-level
-maker credit. Its two lines share the existing one-row bar: below `47.5rem` the
-block stays out of flow and visually hidden while assistive technology still
-reads it, so compact layouts keep their exact composition. At wider widths it
-fills the space left after the identity, signup or account control, optional
-support link, consent note, and the social group's four targets. The title
-appears when that track reaches `7rem`; the subtitle appears beneath it once
-the track reaches `40rem`, which fits the sentence in common system fonts, and
-an unusually wide host font degrades to an ellipsis rather than a third line.
-Neither line ever uses `display: none`, so the footer's accessible text is
-identical at every width.
+The lockup is package-owned. Products cannot rename, reword, translate, or
+reorder it, and there is no prop for a product- or person-level maker credit.
+Hosts that already supply the same Hraness identity may omit the whole lockup
+with `showBrand={false}`.
 
 ## Ownership boundary
 
 | Package-owned | Consumer-owned |
 | --- | --- |
-| Ra mark, Hraness home destination, “Built by Hraness” attribution and organization description, four social platforms, default destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand`; optional `href` and `label` overrides for owned platforms |
+| Ra mark, Hraness home destination, the “by Hraness” lockup, four social platforms, default destinations, accessible names, icon vectors, and order | Whether the host already supplies Hraness identity through `showBrand`; optional `href` and `label` overrides for owned platforms |
 | Form action, field names, `source=hraness-site-footer`, copy, semantics, and response states | One stable product audience or an explicit no-mailing-list choice |
 | Static and React markup, honeypot field, and the fixed Accounts action | Accounts rate limits, double opt-in, delivery, and retention |
 | Responsive CSS, document-flow placement, coarse-pointer targets, focus treatment, and forced-color handling | Product theme variables and CSP `form-action`/`connect-src` allowlist |
 | Configuration parsing for audience and social-override bounds | Accounts delivery configuration, provider retention, consent, and operational monitoring |
 
-Consumers must not fork the package action, source, copy, attribution, social
+Consumers must not fork the package action, source, copy, social
 platforms, vector mark, order, semantics, or interaction behavior. A product can
 choose its audience, retarget owned social destinations, and set visual
 variables without creating another footer contract.
@@ -312,9 +299,9 @@ Below `47.5rem`, every recipe presents a compact native disclosure button; openi
 it reveals the email form above the bar. At wider widths the layout experiment
 selects that button or an inline form. Substack always remains visible; X,
 LinkedIn and GitHub appear in that order as the social group's available space permits. At and above `47.5rem` the social group grows to its four
-targets before the organization attribution receives any width, then the
-attribution takes the remainder and reveals its title and then its subtitle
-as that width permits; a starved row still sheds icons in priority order. The home link shows only the Ra icon and
+targets before the row's flexible gap receives any width, then the
+gap takes the remainder; a starved row still sheds icons in priority order.
+The home link shows the Ra icon followed by “by Hraness” and
 keeps the accessible name “Hraness home.”
 
 The footer keeps matching top and bottom padding around its controls and adds
@@ -355,6 +342,14 @@ light source while the sheen slides along the border, easing into place over a
 few frames instead of snapping. There is no idle loop, filters, canvas or React
 rerenders, and touch contact releases its state on lift. Reduced motion and
 forced colors disable this enhancement.
+
+Version 0.14.0 folds the organization attribution into the home link, which now
+reads the Ra mark followed by “by Hraness” in every mailing mode and at every
+width, and removes the standalone attribution block and the `hranessAttribution`
+export. The optional Support destination becomes a muted icon-only link that
+renders the bundled question-mark vector at the shared social-target size;
+its accessible name and product destination are unchanged. Pin
+`github:hraness/site-footer#v0.14.0` to adopt it.
 
 Version 0.13.0 adds the shared organization attribution: the primary line
 “Built by Hraness” and the subtitle “Hraness is an advanced software research
@@ -512,7 +507,7 @@ confirmation states.
 <summary>When should I hide the Hraness brand?</summary>
 
 Use `showBrand={false}` only when the host page already supplies the same
-Hraness identity. Mailing configuration, the organization attribution, and
+Hraness identity. Mailing configuration and
 network links remain unchanged.
 
 </details>
@@ -520,7 +515,7 @@ network links remain unchanged.
 <details>
 <summary>Can a product credit its own maker in the footer?</summary>
 
-No. The footer attributes every site to Hraness with one shared block, and
+No. The footer attributes every site to Hraness with one shared lockup, and
 there is no prop for a product or personal maker credit. Put product-specific
 credits in the page content that the product owns.
 

@@ -30,12 +30,6 @@ export declare const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/a
 export declare const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 export declare const HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 export declare const HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
-export declare const HRANESS_ATTRIBUTION_SLOT = "hraness-attribution";
-/** Organization-owned attribution copy shared by every Hraness website. */
-export declare const HRANESS_ATTRIBUTION: Readonly<{
-    title: "Built by Hraness";
-    subtitle: "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence.";
-}>;
 export type HranessMailingListConfig = Readonly<{
     audience: string;
     kind: "signup";
@@ -95,6 +89,8 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
 export declare function parseHranessMailingListConfig(value: HranessMailingListConfig): HranessMailingListConfig;
 export declare function parseHranessSocialConfig(value: HranessSocialConfig | undefined): HranessSocialConfig;
 export declare function resolveHranessSocialLinks(value: HranessSocialConfig | undefined): ReadonlyArray<HranessSocialLink>;
+/** Question-mark vector rendered inside the optional Accounts support link. */
+export declare const HRANESS_SUPPORT_ICON_HTML: string;
 export declare function resolveSupportLink(profile: SupportProfile | undefined): Readonly<{
     href: string;
     label: `Support ${string}: optional paid membership`;

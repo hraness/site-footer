@@ -9,6 +9,7 @@ export declare const rootMarker: Readonly<{
 export declare const footerClasses: {
     account: string;
     support: string;
+    supportIcon: string;
     disclosure: string;
     disclosureTrigger: string;
     triggerClosed: string;
@@ -16,14 +17,12 @@ export declare const footerClasses: {
     disclosurePanel: string;
     shimmer: string;
     brand: string;
+    brandName: string;
     mark: string;
     links: string;
     socials: string;
     socialLink: string;
     socialIcon: string;
-    attribution: string;
-    attributionTitle: string;
-    attributionSubtitle: string;
     consent: string;
     consentAccept: string;
     consentSeparator: string;

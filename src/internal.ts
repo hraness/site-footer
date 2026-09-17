@@ -1,5 +1,6 @@
 import { disclosureClassNames, footerClasses, footerInnerClassName, mailingStatusClassName, socialItemClassName } from "./footer.stylex.js";
 import {
+  CircleQuestionMarkIcon,
   GithubIcon,
   Linkedin01Icon,
   NewTwitterIcon,
@@ -33,7 +34,7 @@ export const DEFAULT_FOOTER_PRESENTATION: FooterPresentation = {
 
 type IconAttributeValue = boolean | number | string;
 type IconAttributes = Readonly<Record<string, IconAttributeValue>>;
-type IconDefinition = ReadonlyArray<readonly ["path", IconAttributes]>;
+type IconDefinition = ReadonlyArray<readonly ["path" | "circle", IconAttributes]>;
 
 export const HRANESS_FOOTER_LABEL = "Hraness network";
 export const HRANESS_FOOTER_CLASS_NAME = "hraness-site-footer";
@@ -48,13 +49,6 @@ export const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/conse
 export const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 export const HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 export const HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
-export const HRANESS_ATTRIBUTION_SLOT = "hraness-attribution";
-
-/** Organization-owned attribution copy shared by every Hraness website. */
-export const HRANESS_ATTRIBUTION = Object.freeze({
-  title: "Built by Hraness",
-  subtitle: "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence.",
-});
 
 const MAX_AUDIENCE_LENGTH = 24;
 const MAX_SOCIAL_HREF_LENGTH = 200;
@@ -164,9 +158,12 @@ const ICONS: Readonly<Record<HranessSocialPlatform, IconDefinition>> = {
 };
 
 const ATTRIBUTE_NAMES: Readonly<Record<string, string>> = {
+  cx: "cx",
+  cy: "cy",
   d: "d",
   fill: "fill",
   fillRule: "fill-rule",
+  r: "r",
   stroke: "stroke",
   strokeLinecap: "stroke-linecap",
   strokeLinejoin: "stroke-linejoin",
@@ -330,7 +327,7 @@ export function resolveHranessSocialLinks(
 
 function renderIconPaths(icon: IconDefinition): string {
   return icon.map(([tag, attributes]) => {
-    if (tag !== "path") {
+    if (tag !== "path" && tag !== "circle") {
       throw new TypeError(`Unsupported Hraness footer icon element: ${tag}`);
     }
 
@@ -345,7 +342,7 @@ function renderIconPaths(icon: IconDefinition): string {
       })
       .join(" ");
 
-    return `<path ${renderedAttributes}></path>`;
+    return `<${tag} ${renderedAttributes}></${tag}>`;
   }).join("");
 }
 
@@ -353,9 +350,14 @@ function renderSocialIcon(platform: HranessSocialPlatform): string {
   return `<svg aria-hidden="true" class="${footerClasses.socialIcon}" data-slot="social-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(ICONS[platform])}</svg>`;
 }
 
+const SUPPORT_ICON = CircleQuestionMarkIcon as unknown as IconDefinition;
+
+/** Question-mark vector rendered inside the optional Accounts support link. */
+export const HRANESS_SUPPORT_ICON_HTML = `<svg aria-hidden="true" class="${footerClasses.supportIcon}" data-slot="hraness-support-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(SUPPORT_ICON)}</svg>`;
+
 const RA_MARK = `<svg aria-hidden="true" class="${footerClasses.mark}" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle></svg>`;
 
-const HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/">${RA_MARK}</a>`;
+const HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/" lang="en" dir="ltr">${RA_MARK}<span class="${footerClasses.brandName}">by Hraness</span></a>`;
 
 function renderHranessSocialLinksHtml(
   socialLinks: ReadonlyArray<HranessSocialLink>,
@@ -414,10 +416,6 @@ function renderMailingList(
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
 
-// The attribution is English organization copy, independent of the signup
-// locale, so it declares its own language and direction like the support link.
-const HRANESS_ATTRIBUTION_HTML = `<div class="${footerClasses.attribution}" data-slot="${HRANESS_ATTRIBUTION_SLOT}" lang="en" dir="ltr"><p class="${footerClasses.attributionTitle}">${escapeAttribute(HRANESS_ATTRIBUTION.title)}</p><p class="${footerClasses.attributionSubtitle}">${escapeAttribute(HRANESS_ATTRIBUTION.subtitle)}</p></div>`;
-
 const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 
 export function resolveSupportLink(profile: SupportProfile | undefined) {
@@ -441,7 +439,7 @@ export function renderHranessSiteFooterInnerHtml(
 ): string {
   const supportLink = resolveSupportLink(presentation.support);
   const supportHtml = supportLink === null ? ""
-    : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">Support</a>`;
+    : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">${HRANESS_SUPPORT_ICON_HTML}</a>`;
   const mailingHtml = mailingList.kind === "none"
     ? ""
     : mailingList.kind === "account"
@@ -453,7 +451,6 @@ export function renderHranessSiteFooterInnerHtml(
         : MAILING_IDLE_STATE,
       presentation,
     );
-  // Document order matches the wide visual order; the attribution renders in
-  // every mode and with or without the home link.
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_ATTRIBUTION_HTML}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  // Document order matches the wide visual order.
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }

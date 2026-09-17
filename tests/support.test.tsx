@@ -18,7 +18,11 @@ describe("optional product support", () => {
       const link = document.querySelector('[data-slot="hraness-support-link"]')!;
       expect(link.tagName).toBe("A");
       expect(link.getAttribute("href")).toBe("https://account.hraness.com/support?product=wrench&source=web#support");
-      expect(link.textContent).toBe("Support");
+      expect(link.textContent).toBe("");
+      const icon = link.querySelector('svg[data-slot="hraness-support-icon"]')!;
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+      expect(icon.getAttribute("viewBox")).toBe("0 0 24 24");
+      expect(icon.classList.contains("hraness-site-footer__support-icon")).toBeTrue();
       expect(link.getAttribute("aria-label")).toBe("Support Ghostget: optional paid membership");
       expect(link.getAttribute("title")).toContain(support.valueProposition);
       expect(link.getAttribute("target")).toBeNull();
@@ -44,6 +48,8 @@ describe("optional product support", () => {
     const link = document.querySelector('[data-slot="hraness-support-link"]')!;
     expect(link.getAttribute("aria-label")).toBe('Support Tools " & <Studio>: optional paid membership');
     expect(link.getAttribute("title")).toContain('Support "our" <tools> & updates.');
-    expect(link.children).toHaveLength(0);
+    // Only the package-owned question icon renders inside the link.
+    expect(link.children).toHaveLength(1);
+    expect(link.firstElementChild?.getAttribute("data-slot")).toBe("hraness-support-icon");
   });
 });

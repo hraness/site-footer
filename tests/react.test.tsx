@@ -23,8 +23,11 @@ test("the idle React adapter renders identically to the static renderer", () => 
   );
   expect(reactHtml).toBe(renderHranessSiteFooter({ mailingList: noMailingList }));
   expect(reactHtml.match(/id="hraness-site-footer"/gu)).toHaveLength(1);
-  expect(reactHtml).toContain(">Built by Hraness</p>");
-  expect(reactHtml).toContain("dedicated to advancing the frontier of machine intelligence.</p>");
+  expect(reactHtml).toContain('data-slot="hraness-mark"');
+  expect(reactHtml).toContain(">by Hraness</span>");
+  expect(reactHtml).not.toContain("Built by Hraness");
+  expect(reactHtml).not.toContain("hraness-attribution");
+  expect(reactHtml).not.toContain("machine intelligence");
   expect(reactHtml).not.toContain("Ben Guo");
   const signupHtml = renderToStaticMarkup(
     <HranessSiteFooter mailingList={mailingList} showBrand={false} />,

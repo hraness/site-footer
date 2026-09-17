@@ -68,8 +68,7 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - wide inline outer panel height equal to its form and complete containment inside the footer;
 - an absolute hidden idle status that does not enlarge its form row;
 - four social targets at wide widths and a visible priority prefix beginning with Substack at compact widths;
-- an icon-only home link;
-- the exact “Built by Hraness” attribution and subtitle in one row-height block at wide widths, with no compact footprint and no removal from the accessibility tree;
+- the exact “by Hraness” organization lockup on the home link in every context, with no standalone attribution block;
 - positive computed top padding and bottom padding equal to that padding plus an independently measured device safe-area inset;
 - actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;
 - an in-flow footer row whose visible status surfaces clear its top edge;

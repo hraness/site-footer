@@ -10,11 +10,6 @@ export declare const HRANESS_HOME_URL = "https://hraness.com/";
 export { HRANESS_MAILING_SUBSCRIBE_URL, HRANESS_ACCOUNT_URL };
 /** Canonical, immutable social-profile order shared by every Hraness website. */
 export declare const hranessSocialLinks: ReadonlyArray<HranessSocialLink>;
-/** Organization-owned attribution rendered by every Hraness footer. */
-export declare const hranessAttribution: Readonly<{
-    title: string;
-    subtitle: string;
-}>;
 export type { HranessMailingListConfig, HranessSocialConfig, HranessSocialLink, HranessSocialLinkOverride, HranessSocialPlatform, };
 export interface HranessSiteFooterOptions {
     /** Explicit Accounts product identity. Omit to render no paid-support control. */

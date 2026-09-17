@@ -480,7 +480,7 @@ var styles = {
     k9g6sI: "x12h1iku",
     kVAEAm: "x1n2onr6",
     k1xSpc: "xrvj5dj",
-    kC13JO: "x182hbjg x3wcxyl",
+    kC13JO: "x182hbjg x196kgno",
     kumcoG: "x1rkzygb x1qs5i8y",
     k9llMU: "xv7uhgh",
     kULEZF: "xiuoait",
@@ -503,13 +503,13 @@ var styles = {
     $$css: true
   },
   innerSignup: {
-    kC13JO: "x1m6ayzh xny3lfc",
+    kC13JO: "x1m6ayzh x12d2mci",
     kumcoG: "xo69rmz xjgecxr",
     k9llMU: "x42z6zh",
     $$css: true
   },
   innerAccount: {
-    kC13JO: "x1m6ayzh xny3lfc",
+    kC13JO: "x1m6ayzh x12d2mci",
     kumcoG: "xo69rmz x1t3gk10",
     $$css: true
   },
@@ -533,70 +533,18 @@ var styles = {
     $$css: true
   },
   innerSupport: {
-    kC13JO: "x7p9kbz x1baczq1",
+    kC13JO: "x7p9kbz xa4jtz2",
     kumcoG: "x170cel8 x1yi829s",
     $$css: true
   },
   innerSignupSupport: {
-    kC13JO: "x1y8t5ps x591f",
+    kC13JO: "x1y8t5ps x11qbbop",
     kumcoG: "x186f4cn xjnp55e",
     $$css: true
   },
   innerAccountSupport: {
-    kC13JO: "x1y8t5ps x591f",
+    kC13JO: "x1y8t5ps x11qbbop",
     kumcoG: "x186f4cn xzi2blw",
-    $$css: true
-  },
-  attribution: {
-    kJuA4N: "xr5g6j7",
-    kVAEAm: "x10l6tqk x18obxus",
-    kULEZF: "xi8173g xigrdhh",
-    kLWsYc: "xpoyz9m xndyzjf",
-    kogj98: "xkdpibf xd2up6j",
-    kMcinP: "xeh89do x16wtv6w",
-    kz4h6p: "x1hyvwdk x1n80tlv",
-    kmVPX3: "x1717udv",
-    kVQacm: "xb3r6kr",
-    kdYMnH: "xesnm00",
-    kanfag: "x1s8d77d",
-    k9g6sI: "x12h1iku",
-    k1xSpc: "xrvj5dj",
-    kfiyM8: "xc26acl",
-    khDVqt: "xuxw1ft",
-    kLWn49: "x1u7k74",
-    $$css: true
-  },
-  attributionTitle: {
-    kVAEAm: "x10l6tqk x10f8xno",
-    kULEZF: "xi8173g xchcyfu",
-    kLWsYc: "xpoyz9m x12i4dyp",
-    kogj98: "xkdpibf x1ueb4aj",
-    kMcinP: "xeh89do x1wwhqdb",
-    kz4h6p: "x1hyvwdk x476m55",
-    kmVPX3: "x1717udv",
-    kVQacm: "xb3r6kr",
-    kdYMnH: "xesnm00",
-    kg5iWk: "xlyipyv",
-    kMwMTN: "x1g4142m",
-    kGuDYH: "xboafo0",
-    k63SB2: "x1s688f",
-    kb6lSQ: "xjat59b",
-    $$css: true
-  },
-  attributionSubtitle: {
-    kVAEAm: "x10l6tqk x6q5gjv",
-    kULEZF: "xi8173g x1avr2du",
-    kLWsYc: "xpoyz9m xtwxsh8",
-    kogj98: "xkdpibf x7pvybn",
-    kMcinP: "xeh89do x2zcbfh",
-    kz4h6p: "x1hyvwdk xrjiuty",
-    kmVPX3: "x1717udv",
-    kVQacm: "xb3r6kr",
-    kdYMnH: "xesnm00",
-    kg5iWk: "xlyipyv",
-    kMwMTN: "xj5idha",
-    kGuDYH: "x12lo8hy",
-    k63SB2: "xo1l8bm",
     $$css: true
   },
   support: {
@@ -604,16 +552,15 @@ var styles = {
     k1xSpc: "x3nfvp2",
     kGNEyG: "x6s0dn4",
     kjj79g: "xl56j7k",
-    kdYMnH: "xyc0pis",
-    kJVvJu: "x18a9hih",
-    kaIpWk: "x6i6fhv",
-    kMwMTN: "xj5idha",
-    kGuDYH: "x1dcheo9",
-    k63SB2: "xk50ysn",
-    kLWn49: "xo5v014",
-    kybGjl: "x1bvjpef",
-    kcSHmL: "x1ohr1zr",
-    khDVqt: "xuxw1ft",
+    kULEZF: "x175cv4s",
+    kLWsYc: "x1bxml6c",
+    kdYMnH: "xesnm00",
+    kVQ08L: "x159srwy",
+    kaIpWk: "x1e6avla",
+    kMwMTN: "xj5idha xxeg0yr",
+    kWkggS: "x1voprv7",
+    kVAM5u: "x1ylmb6m",
+    kybGjl: "x1hl2dhg",
     $$css: true
   },
   flexCenter: {
@@ -634,11 +581,20 @@ var styles = {
     kdYMnH: "xart1r9",
     kVQ08L: "xeuuy2l",
     kaIpWk: "x6i6fhv",
+    k1C7PZ: "x1d3i0y6",
     kMwMTN: "x1heor9g xxeg0yr",
     k63SB2: "x19s9jnd",
     kb6lSQ: "x130jcwj",
     kLWn49: "xo5v014",
     kybGjl: "x1hl2dhg",
+    $$css: true
+  },
+  brandName: {
+    kMwMTN: "xj5idha",
+    kGuDYH: "x1dcheo9",
+    k63SB2: "xk50ysn",
+    kb6lSQ: "x1i21sxh",
+    khDVqt: "xuxw1ft",
     $$css: true
   },
   mark: {
@@ -931,7 +887,8 @@ function className(hook, ...recipes) {
 }
 var footerClasses = {
   account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focusInset),
-  support: className("hraness-site-footer__support", styles.box, styles.control, styles.support, styles.focus),
+  support: className("hraness-site-footer__support", styles.box, styles.support, styles.focus, styles.motion),
+  supportIcon: className("hraness-site-footer__support-icon", styles.socialIcon),
   disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure, styles.experimentArm)} ${{
     className: "x1gmlqhs"
   }.className}`,
@@ -941,14 +898,12 @@ var footerClasses = {
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
+  brandName: className("hraness-site-footer__brand-name", styles.brandName),
   mark: className("hraness-site-footer__mark", styles.fixedFlex, styles.mark),
   links: className("hraness-site-footer__links", styles.flexCenter, styles.links),
   socials: className("hraness-site-footer__socials", styles.socials),
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
-  attribution: className("hraness-site-footer__attribution", styles.box, styles.attribution),
-  attributionTitle: className("hraness-site-footer__attribution-title", styles.box, styles.attributionTitle),
-  attributionSubtitle: className("hraness-site-footer__attribution-subtitle", styles.box, styles.attributionSubtitle),
   consent: className("hraness-site-footer__consent", styles.box, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentSeparator: className("hraness-site-footer__consent-separator", styles.consentSeparator),
@@ -1834,6 +1789,12 @@ async function exposeFooterEnrollment(token, signal) {
     return false;
   }
 }
+// node_modules/@hugeicons/core-free-icons/dist/esm/CircleQuestionMarkIcon.js
+var CircleQuestionMarkIcon = [
+  ["circle", { cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", key: "0" }],
+  ["path", { d: "M9.5 9.5C9.5 8.11929 10.6193 7 12 7C13.3807 7 14.5 8.11929 14.5 9.5C14.5 10.3569 14.0689 11.1131 13.4117 11.5636C12.7283 12.0319 12 12.6716 12 13.5", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", key: "1" }],
+  ["path", { d: "M12.125 16.75H12M12.25 16.75C12.25 16.8881 12.1381 17 12 17C11.8619 17 11.75 16.8881 11.75 16.75C11.75 16.6119 11.8619 16.5 12 16.5C12.1381 16.5 12.25 16.6119 12.25 16.75Z", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", key: "2" }]
+];
 // node_modules/@hugeicons/core-free-icons/dist/esm/GithubIcon.js
 var GithubIcon = [
   ["path", { d: "M10 20.5675C6.57143 21.7248 3.71429 20.5675 2 17", stroke: "currentColor", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "1.5", key: "0" }],
@@ -1918,11 +1879,6 @@ var HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region
 var HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
-var HRANESS_ATTRIBUTION_SLOT = "hraness-attribution";
-var HRANESS_ATTRIBUTION = Object.freeze({
-  title: "Built by Hraness",
-  subtitle: "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence."
-});
 var MAX_AUDIENCE_LENGTH = 24;
 var MAX_SOCIAL_HREF_LENGTH = 200;
 var MAX_SOCIAL_LABEL_LENGTH = 64;
@@ -1973,9 +1929,12 @@ var ICONS = {
   github: GithubIcon
 };
 var ATTRIBUTE_NAMES = {
+  cx: "cx",
+  cy: "cy",
   d: "d",
   fill: "fill",
   fillRule: "fill-rule",
+  r: "r",
   stroke: "stroke",
   strokeLinecap: "stroke-linecap",
   strokeLinejoin: "stroke-linejoin",
@@ -2075,7 +2034,7 @@ function resolveHranessSocialLinks(value) {
 }
 function renderIconPaths(icon) {
   return icon.map(([tag, attributes]) => {
-    if (tag !== "path") {
+    if (tag !== "path" && tag !== "circle") {
       throw new TypeError(`Unsupported Hraness footer icon element: ${tag}`);
     }
     const renderedAttributes = Object.entries(attributes).filter(([name]) => name !== "key").map(([name, value]) => {
@@ -2085,14 +2044,16 @@ function renderIconPaths(icon) {
       }
       return `${attributeName}="${escapeAttribute(value)}"`;
     }).join(" ");
-    return `<path ${renderedAttributes}></path>`;
+    return `<${tag} ${renderedAttributes}></${tag}>`;
   }).join("");
 }
 function renderSocialIcon(platform) {
   return `<svg aria-hidden="true" class="${footerClasses.socialIcon}" data-slot="social-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(ICONS[platform])}</svg>`;
 }
+var SUPPORT_ICON = CircleQuestionMarkIcon;
+var HRANESS_SUPPORT_ICON_HTML = `<svg aria-hidden="true" class="${footerClasses.supportIcon}" data-slot="hraness-support-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(SUPPORT_ICON)}</svg>`;
 var RA_MARK = `<svg aria-hidden="true" class="${footerClasses.mark}" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle></svg>`;
-var HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/">${RA_MARK}</a>`;
+var HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/" lang="en" dir="ltr">${RA_MARK}<span class="${footerClasses.brandName}">by Hraness</span></a>`;
 function renderHranessSocialLinksHtml(socialLinks) {
   return `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${socialLinks.map((link, index) => `<li class="${socialItemClassName(index)}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
 }
@@ -2130,7 +2091,6 @@ function renderMailingList(mailingList, state, presentation) {
   const openLabel = `<span class="${footerClasses.triggerOpen}"><span aria-hidden="true">${closeText}</span><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.closeLabel)}</span></span>`;
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
-var HRANESS_ATTRIBUTION_HTML = `<div class="${footerClasses.attribution}" data-slot="${HRANESS_ATTRIBUTION_SLOT}" lang="en" dir="ltr"><p class="${footerClasses.attributionTitle}">${escapeAttribute(HRANESS_ATTRIBUTION.title)}</p><p class="${footerClasses.attributionSubtitle}">${escapeAttribute(HRANESS_ATTRIBUTION.subtitle)}</p></div>`;
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function resolveSupportLink(profile) {
   if (profile === undefined)
@@ -2147,9 +2107,9 @@ function resolveSupportLink(profile) {
 }
 function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILING_IDLE_STATE, socialLinks = HRANESS_SOCIAL_LINKS, presentation = DEFAULT_FOOTER_PRESENTATION) {
   const supportLink = resolveSupportLink(presentation.support);
-  const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">Support</a>`;
+  const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">${HRANESS_SUPPORT_ICON_HTML}</a>`;
   const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_ATTRIBUTION_HTML}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/react.tsx
@@ -2471,8 +2431,8 @@ function HranessSiteFooter({
         link.dataset.slot = "hraness-support-link";
         link.lang = "en";
         link.dir = "ltr";
-        link.textContent = "Support";
-        inner.insertBefore(link, inner.querySelector(`[data-slot="${HRANESS_ATTRIBUTION_SLOT}"]`));
+        link.innerHTML = HRANESS_SUPPORT_ICON_HTML;
+        inner.insertBefore(link, inner.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`));
       }
       link.setAttribute("href", supportLink.href);
       link.setAttribute("aria-label", supportLink.label);
@@ -2582,4 +2542,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=B1D3CE7C3A11A04C64756E2164756E21
+//# debugId=4678FF0F090EA78964756E2164756E21
