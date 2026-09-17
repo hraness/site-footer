@@ -349,7 +349,7 @@ export function createLayoutContract(
       tolerance: 0.25,
     });
   }
-  for (const name of ["brand", "mailing", "support", "socials", ...(viewport === "wide" ? ["panel"] : [])]) {
+  for (const name of ["brand", "mailing", "support", "socials", ...(viewport === "wide" ? ["panel", "attribution"] : [])]) {
     if (names.has(name)) {
       add({
         id: `${viewport}.${name}.inside`,
@@ -455,6 +455,15 @@ export function createLayoutContract(
         second: "submit",
         tolerance: 0.5,
       });
+    }
+    if (names.has("attribution")) {
+      // The revealed attribution shares the control row and never touches a
+      // control: it fills only the width the other columns leave behind.
+      add({ box: "attribution", id: "wide.attribution.minimum", kind: "minimum-size", minimumHeight: 28, minimumWidth: 100 });
+      add({ first: "brand", id: "wide.brand-attribution.center-y", kind: "center-y", second: "attribution", tolerance: 1 });
+      for (const second of ["brand", "mailing", "support", "socials"]) {
+        if (names.has(second)) add({ first: "attribution", id: `wide.attribution-${second}.clear`, kind: "no-overlap", second, tolerance: 0 });
+      }
     }
   } else {
     for (const second of ["mailing", "socials"]) add({
@@ -1097,6 +1106,73 @@ const SETTLE_EXPRESSION = `(async () => {
   return true;
 })()`;
 
+// The verifier states the expected organization copy itself rather than
+// importing it, so a source change to the attribution is caught here.
+const ATTRIBUTION_TITLE = "Built by Hraness";
+const ATTRIBUTION_SUBTITLE = "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence.";
+
+// Browser-side statements shared by every context. They bind `attribution`
+// and `attributionSample`, and throw when the block loses its exact copy,
+// leaves the single wide row, or gains any compact footprint.
+const ATTRIBUTION_STATEMENTS = `
+  const attribution = document.querySelector('[data-slot="hraness-attribution"]');
+  const attributionTitle = attribution?.querySelector(".hraness-site-footer__attribution-title");
+  const attributionSubtitle = attribution?.querySelector(".hraness-site-footer__attribution-subtitle");
+  if (
+    !(attribution instanceof HTMLElement) || !(attributionTitle instanceof HTMLElement) || !(attributionSubtitle instanceof HTMLElement)
+    || attributionTitle.textContent !== ${JSON.stringify(ATTRIBUTION_TITLE)}
+    || attributionSubtitle.textContent !== ${JSON.stringify(ATTRIBUTION_SUBTITLE)}
+    || attribution.children.length !== 2 || attribution.getAttribute("lang") !== "en" || attribution.getAttribute("dir") !== "ltr"
+    || attribution.querySelector("a, button, [aria-hidden], [role]") !== null
+    || attribution.closest(".hraness-site-footer__brand, nav") !== null
+    || document.querySelectorAll('[data-slot="hraness-attribution"]').length !== 1
+    || /Ben Guo|Built by Ben/u.test(document.querySelector("#hraness-site-footer").textContent)
+  ) {
+    throw new Error("Footer attribution lost its exact organization copy.");
+  }
+  for (const element of [attribution, attributionTitle, attributionSubtitle]) {
+    const style = getComputedStyle(element);
+    if (style.display === "none" || style.visibility === "hidden") {
+      throw new Error("Footer attribution left the accessibility tree.");
+    }
+  }
+  const attributionStyle = getComputedStyle(attribution);
+  const attributionBox = attribution.getBoundingClientRect();
+  // An ellipsized line is the documented fallback for unusually wide host
+  // fonts; it is recorded as evidence, while vertical overflow is a failure.
+  const attributionSample = {
+    height: attributionBox.height,
+    position: attributionStyle.position,
+    subtitleEllipsized: attributionSubtitle.scrollWidth > attributionSubtitle.clientWidth,
+    subtitleVisible: getComputedStyle(attributionSubtitle).position === "static",
+    titleEllipsized: attributionTitle.scrollWidth > attributionTitle.clientWidth,
+    titleVisible: getComputedStyle(attributionTitle).position === "static",
+    width: attributionBox.width,
+  };
+  if (window.matchMedia("(min-width: 47.5rem)").matches) {
+    const row = document.querySelector(".hraness-site-footer__socials").getBoundingClientRect();
+    if (
+      attributionStyle.position !== "static"
+      || Math.abs(attributionBox.height - row.height) > 0.5
+      || Math.abs((attributionBox.top + attributionBox.height / 2) - (row.top + row.height / 2)) > 1
+    ) {
+      throw new Error("Footer attribution left the single wide row.");
+    }
+    for (const line of [attributionTitle, attributionSubtitle]) {
+      const box = line.getBoundingClientRect();
+      if (getComputedStyle(line).position === "static"
+        && (box.top < attributionBox.top - 0.5 || box.bottom > attributionBox.bottom + 0.5)) {
+        throw new Error("A revealed attribution line overflows its row.");
+      }
+    }
+    if (attributionSample.subtitleVisible && !attributionSample.titleVisible) {
+      throw new Error("The attribution subtitle cannot appear without its title.");
+    }
+  } else if (attributionStyle.position !== "absolute" || attributionBox.width > 1 || attributionBox.height > 1) {
+    throw new Error("Footer attribution must have no compact footprint.");
+  }
+`;
+
 const FIXTURE_SNAPSHOT_EXPRESSION = `(() => {
   const fixture = window.__siteFooterFixture;
   if (!fixture || typeof fixture.snapshot !== "function") {
@@ -1132,6 +1208,7 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   if (socialLinks.length !== 4 || brand.textContent.trim() !== "") {
     throw new Error("Footer must show the Ra icon without a wordmark and exactly four social links.");
   }
+  ${ATTRIBUTION_STATEMENTS}
   const substack = socialLinks[0];
   if (
     !(substack instanceof HTMLAnchorElement)
@@ -1157,6 +1234,9 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     }
     boxes.push(rect("panel", panel));
   }
+  // The attribution joins the wide named layout once its track reveals the
+  // title; a starved track leaves it out rather than sampling an empty box.
+  if (!compact && attributionSample.titleVisible) boxes.push(rect("attribution", attribution));
   const controls = document.querySelector(".hraness-site-footer__mailing-controls");
   const input = document.querySelector(".hraness-site-footer__mailing-input");
   const submit = document.querySelector(".hraness-site-footer__mailing-submit");
@@ -1184,11 +1264,15 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
 const FOOTER_SPACING_EXPRESSION = `(() => {
   const inner = document.querySelector(".hraness-site-footer__inner");
   if (!(inner instanceof HTMLElement)) throw new Error("Footer inner is missing.");
+  // The attribution counts as row content only while it is in flow; its
+  // compact state is an out-of-flow, visually hidden box.
   const content = [...inner.querySelectorAll([
     ".hraness-site-footer__brand", ".hraness-site-footer__social-link", ".hraness-site-footer__support",
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
     ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger", ".hraness-site-footer__account",
-  ].join(","))].filter(element => element.checkVisibility()).map(element => element.getBoundingClientRect())
+    ".hraness-site-footer__attribution",
+  ].join(","))].filter(element => element.checkVisibility() && getComputedStyle(element).position !== "absolute")
+    .map(element => element.getBoundingClientRect())
     .filter(box => box.width > 0 && box.height > 0 && box.top >= inner.getBoundingClientRect().top);
   if (content.length < 2) {
     throw new Error("Footer spacing requires visible content targets.");
@@ -1849,6 +1933,11 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
         if (!footer.querySelector('.hraness-site-footer__social-link').checkVisibility()) throw new Error('Account mode lost Substack.');
       }
       if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('No-signup footer overflows.');
+      ${ATTRIBUTION_STATEMENTS}
+      // Without a signup form the wide row has room for the whole attribution.
+      if (innerWidth >= 1280 && !(attributionSample.titleVisible && attributionSample.subtitleVisible)) {
+        throw new Error('The wide no-signup footer must reveal both attribution lines.');
+      }
       const boxes = links.filter(link => link.checkVisibility()).map(link => {
         const rect = link.getBoundingClientRect();
         if (rect.width < 28 || rect.height < 28 || rect.left < 0 || rect.right > innerWidth + 0.5) throw new Error('Footer target is clipped or too small.');
@@ -1856,7 +1945,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       });
       const centers = boxes.map(box => box.y + box.height / 2);
       if (Math.max(...centers) - Math.min(...centers) > 1) throw new Error('Footer links must stay in one centered row.');
-      return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes };
+      return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes, attribution: attributionSample };
     })()`);
     const spacing = assertFooterSpacing(
       await browser.evaluate(FOOTER_SPACING_EXPRESSION), `${scenario}/${String(width)}`,

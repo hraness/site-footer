@@ -155,6 +155,7 @@ var styles = {
     "--hraness-site-footer-action-foreground": "x1munjs5",
     "--hraness-site-footer-field-background": "xsctza4",
     "--hraness-site-footer-social-target": "xtq98z5 x1w6jg7m",
+    "--hraness-site-footer-socials-inline-size": "x3luoqq",
     "--hraness-site-footer-control-block-size": "x1xgbxbt x9cmhvv",
     "--hraness-site-footer-status-block-size": "x4sry57",
     "--hraness-site-footer-form-block-size": "xys6ka6",
@@ -361,8 +362,8 @@ var styles = {
     k9g6sI: "x12h1iku",
     kVAEAm: "x1n2onr6",
     k1xSpc: "xrvj5dj",
-    kC13JO: "x182hbjg x1l0kwu7",
-    kumcoG: "x1rkzygb xxwuxvk",
+    kC13JO: "x182hbjg x3wcxyl",
+    kumcoG: "x1rkzygb x1qs5i8y",
     k9llMU: "xv7uhgh",
     kULEZF: "xiuoait",
     kLWsYc: "xzlj3eo",
@@ -384,14 +385,14 @@ var styles = {
     $$css: true
   },
   innerSignup: {
-    kC13JO: "x1m6ayzh xy48kin",
-    kumcoG: "xo69rmz xoysss2",
+    kC13JO: "x1m6ayzh xny3lfc",
+    kumcoG: "xo69rmz xjgecxr",
     k9llMU: "x42z6zh",
     $$css: true
   },
   innerAccount: {
-    kC13JO: "x1m6ayzh xy48kin",
-    kumcoG: "xo69rmz x1drxdiy",
+    kC13JO: "x1m6ayzh xny3lfc",
+    kumcoG: "xo69rmz x1t3gk10",
     $$css: true
   },
   account: {
@@ -414,18 +415,70 @@ var styles = {
     $$css: true
   },
   innerSupport: {
-    kC13JO: "x7p9kbz xhlquvd",
-    kumcoG: "x170cel8 x1dt6ssw",
+    kC13JO: "x7p9kbz x1baczq1",
+    kumcoG: "x170cel8 x1yi829s",
     $$css: true
   },
   innerSignupSupport: {
-    kC13JO: "x1y8t5ps x1g31hlq",
-    kumcoG: "x186f4cn xda7s4a",
+    kC13JO: "x1y8t5ps x591f",
+    kumcoG: "x186f4cn xjnp55e",
     $$css: true
   },
   innerAccountSupport: {
-    kC13JO: "x1y8t5ps x1g31hlq",
-    kumcoG: "x186f4cn xb02ptd",
+    kC13JO: "x1y8t5ps x591f",
+    kumcoG: "x186f4cn xzi2blw",
+    $$css: true
+  },
+  attribution: {
+    kJuA4N: "xr5g6j7",
+    kVAEAm: "x10l6tqk x18obxus",
+    kULEZF: "xi8173g xigrdhh",
+    kLWsYc: "xpoyz9m xndyzjf",
+    kogj98: "xkdpibf xd2up6j",
+    kMcinP: "xeh89do x16wtv6w",
+    kz4h6p: "x1hyvwdk x1n80tlv",
+    kmVPX3: "x1717udv",
+    kVQacm: "xb3r6kr",
+    kdYMnH: "xesnm00",
+    kanfag: "x1s8d77d",
+    k9g6sI: "x12h1iku",
+    k1xSpc: "xrvj5dj",
+    kfiyM8: "xc26acl",
+    khDVqt: "xuxw1ft",
+    kLWn49: "x1u7k74",
+    $$css: true
+  },
+  attributionTitle: {
+    kVAEAm: "x10l6tqk x10f8xno",
+    kULEZF: "xi8173g xchcyfu",
+    kLWsYc: "xpoyz9m x12i4dyp",
+    kogj98: "xkdpibf x1ueb4aj",
+    kMcinP: "xeh89do x1wwhqdb",
+    kz4h6p: "x1hyvwdk x476m55",
+    kmVPX3: "x1717udv",
+    kVQacm: "xb3r6kr",
+    kdYMnH: "xesnm00",
+    kg5iWk: "xlyipyv",
+    kMwMTN: "x1g4142m",
+    kGuDYH: "xboafo0",
+    k63SB2: "x1s688f",
+    kb6lSQ: "xjat59b",
+    $$css: true
+  },
+  attributionSubtitle: {
+    kVAEAm: "x10l6tqk x6q5gjv",
+    kULEZF: "xi8173g x1avr2du",
+    kLWsYc: "xpoyz9m xtwxsh8",
+    kogj98: "xkdpibf x7pvybn",
+    kMcinP: "xeh89do x2zcbfh",
+    kz4h6p: "x1hyvwdk xrjiuty",
+    kmVPX3: "x1717udv",
+    kVQacm: "xb3r6kr",
+    kdYMnH: "xesnm00",
+    kg5iWk: "xlyipyv",
+    kMwMTN: "xj5idha",
+    kGuDYH: "x12lo8hy",
+    k63SB2: "xo1l8bm",
     $$css: true
   },
   support: {
@@ -775,6 +828,9 @@ var footerClasses = {
   socials: className("hraness-site-footer__socials", styles.socials),
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
+  attribution: className("hraness-site-footer__attribution", styles.box, styles.attribution),
+  attributionTitle: className("hraness-site-footer__attribution-title", styles.box, styles.attributionTitle),
+  attributionSubtitle: className("hraness-site-footer__attribution-subtitle", styles.box, styles.attributionSubtitle),
   consent: className("hraness-site-footer__consent", styles.box, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentSeparator: className("hraness-site-footer__consent-separator", styles.consentSeparator),
@@ -1697,6 +1753,11 @@ var HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 var HRANESS_MAILING_HONEYPOT_FIELD = "website";
 var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
+var HRANESS_ATTRIBUTION_SLOT = "hraness-attribution";
+var HRANESS_ATTRIBUTION = Object.freeze({
+  title: "Built by Hraness",
+  subtitle: "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence."
+});
 var MAX_AUDIENCE_LENGTH = 24;
 var MAX_SOCIAL_HREF_LENGTH = 200;
 var MAX_SOCIAL_LABEL_LENGTH = 64;
@@ -1904,6 +1965,7 @@ function renderMailingList(mailingList, state, presentation) {
   const openLabel = `<span class="${footerClasses.triggerOpen}"><span aria-hidden="true">${closeText}</span><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.closeLabel)}</span></span>`;
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
+var HRANESS_ATTRIBUTION_HTML = `<div class="${footerClasses.attribution}" data-slot="${HRANESS_ATTRIBUTION_SLOT}" lang="en" dir="ltr"><p class="${footerClasses.attributionTitle}">${escapeAttribute(HRANESS_ATTRIBUTION.title)}</p><p class="${footerClasses.attributionSubtitle}">${escapeAttribute(HRANESS_ATTRIBUTION.subtitle)}</p></div>`;
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function resolveSupportLink(profile) {
   if (profile === undefined)
@@ -1922,12 +1984,13 @@ function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILIN
   const supportLink = resolveSupportLink(presentation.support);
   const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">Support</a>`;
   const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_ATTRIBUTION_HTML}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/index.ts
 var HRANESS_HOME_URL = "https://hraness.com/";
 var hranessSocialLinks = HRANESS_SOCIAL_LINKS;
+var hranessAttribution = HRANESS_ATTRIBUTION;
 function renderHranessSiteFooter({
   locale: localeInput,
   placement = "sticky",
@@ -1955,9 +2018,10 @@ export {
   parseFooterVariant,
   parseFooterEnrollment,
   hranessSocialLinks,
+  hranessAttribution,
   HRANESS_MAILING_SUBSCRIBE_URL,
   HRANESS_HOME_URL,
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=9888DF93BCA820E664756E2164756E21
+//# debugId=573FA708AA4308DE64756E2164756E21

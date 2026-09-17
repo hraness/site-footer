@@ -48,6 +48,13 @@ export const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/conse
 export const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 export const HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 export const HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
+export const HRANESS_ATTRIBUTION_SLOT = "hraness-attribution";
+
+/** Organization-owned attribution copy shared by every Hraness website. */
+export const HRANESS_ATTRIBUTION = Object.freeze({
+  title: "Built by Hraness",
+  subtitle: "Hraness is an advanced software research organization dedicated to advancing the frontier of machine intelligence.",
+});
 
 const MAX_AUDIENCE_LENGTH = 24;
 const MAX_SOCIAL_HREF_LENGTH = 200;
@@ -407,6 +414,10 @@ function renderMailingList(
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
 }
 
+// The attribution is English organization copy, independent of the signup
+// locale, so it declares its own language and direction like the support link.
+const HRANESS_ATTRIBUTION_HTML = `<div class="${footerClasses.attribution}" data-slot="${HRANESS_ATTRIBUTION_SLOT}" lang="en" dir="ltr"><p class="${footerClasses.attributionTitle}">${escapeAttribute(HRANESS_ATTRIBUTION.title)}</p><p class="${footerClasses.attributionSubtitle}">${escapeAttribute(HRANESS_ATTRIBUTION.subtitle)}</p></div>`;
+
 const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 
 export function resolveSupportLink(profile: SupportProfile | undefined) {
@@ -442,5 +453,7 @@ export function renderHranessSiteFooterInnerHtml(
         : MAILING_IDLE_STATE,
       presentation,
     );
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  // Document order matches the wide visual order; the attribution renders in
+  // every mode and with or without the home link.
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_ATTRIBUTION_HTML}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }

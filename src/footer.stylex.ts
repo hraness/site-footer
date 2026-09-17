@@ -25,6 +25,11 @@ const styles = stylex.create({
     "--hraness-site-footer-action-foreground": "var(--plain-background, var(--background, Canvas))",
     "--hraness-site-footer-field-background": "color-mix(in srgb, var(--hraness-site-footer-foreground) 4%, var(--hraness-site-footer-background))",
     "--hraness-site-footer-social-target": { default: "1.75rem", "@media (pointer: coarse)": "44px" },
+    // Four social targets plus their three 0.125rem gaps. The wide social track
+    // grows to this before the attribution receives any space, and can still
+    // shrink under pressure. The px floor keeps the fourth-icon container
+    // threshold (182px on coarse pointers) satisfiable at any root font size.
+    "--hraness-site-footer-socials-inline-size": "calc(4 * var(--hraness-site-footer-social-target) + max(0.375rem, 6px))",
     "--hraness-site-footer-control-block-size": {
       default: "max(var(--hraness-site-footer-social-target), 1.75rem)",
       "@media (pointer: coarse)": "max(var(--hraness-site-footer-social-target), 2.25rem)",
@@ -178,8 +183,8 @@ const styles = stylex.create({
   inner: {
     containerName: "hraness-footer", containerType: "inline-size",
     position: "relative", display: "grid",
-    gridTemplateAreas: { default: '"brand links"', "@media (min-width: 47.5rem)": '"brand consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr)" },
+    gridTemplateAreas: { default: '"brand links"', "@media (min-width: 47.5rem)": '"brand attribution consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
     gridTemplateRows: "var(--hraness-site-footer-control-block-size)",
     "inline-size": "100%", "block-size": "auto", "min-block-size": "var(--hraness-site-footer-bar-block-size)",
     "max-inline-size": "none", "min-inline-size": 0, alignContent: "center", alignItems: "center",
@@ -193,13 +198,13 @@ const styles = stylex.create({
     "padding-inline-end": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right))",
   },
   innerSignup: {
-    gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing attribution consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
     gridTemplateRows: "var(--hraness-site-footer-content-block-size)",
   },
   innerAccount: {
-    gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing attribution consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   account: {
     gridArea: "mailing", display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -209,16 +214,53 @@ const styles = stylex.create({
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
   },
   innerSupport: {
-    gridTemplateAreas: { default: '"brand support links"', "@media (min-width: 47.5rem)": '"brand support consent links"' },
-    gridTemplateColumns: { default: "auto auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto auto auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateAreas: { default: '"brand support links"', "@media (min-width: 47.5rem)": '"brand support attribution consent links"' },
+    gridTemplateColumns: { default: "auto auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerSignupSupport: {
-    gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support attribution consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerAccountSupport: {
-    gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto auto minmax(var(--hraness-site-footer-social-target), 1fr)" },
+    gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support attribution consent links"' },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+  },
+  // Below the wide breakpoint the attribution is out of flow and visually
+  // hidden, so compact bars keep their exact composition while assistive
+  // technology still reads it. At wide widths it fills the leftover track.
+  attribution: {
+    gridArea: "attribution",
+    position: { default: "absolute", "@media (min-width: 47.5rem)": "static" },
+    "inline-size": { default: "1px", "@media (min-width: 47.5rem)": "100%" },
+    "block-size": { default: "1px", "@media (min-width: 47.5rem)": "var(--hraness-site-footer-control-block-size)" },
+    margin: { default: "-1px", "@media (min-width: 47.5rem)": 0 },
+    clip: { default: "rect(0 0 0 0)", "@media (min-width: 47.5rem)": "auto" },
+    clipPath: { default: "inset(50%)", "@media (min-width: 47.5rem)": "none" },
+    padding: 0, overflow: "hidden", "min-inline-size": 0,
+    containerName: "hraness-attribution", containerType: "inline-size",
+    display: "grid", alignContent: "center", whiteSpace: "nowrap", lineHeight: 1.2,
+  },
+  // Each line stays visually hidden until its track fits it in common system
+  // fonts; an unusually wide host font degrades to an ellipsis, never a third line.
+  attributionTitle: {
+    position: { default: "absolute", "@container hraness-attribution (min-width: 7rem)": "static" },
+    "inline-size": { default: "1px", "@container hraness-attribution (min-width: 7rem)": "auto" },
+    "block-size": { default: "1px", "@container hraness-attribution (min-width: 7rem)": "auto" },
+    margin: { default: "-1px", "@container hraness-attribution (min-width: 7rem)": 0 },
+    clip: { default: "rect(0 0 0 0)", "@container hraness-attribution (min-width: 7rem)": "auto" },
+    clipPath: { default: "inset(50%)", "@container hraness-attribution (min-width: 7rem)": "none" },
+    padding: 0, overflow: "hidden", "min-inline-size": 0, textOverflow: "ellipsis",
+    color: "var(--hraness-site-footer-foreground)", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "-0.01em",
+  },
+  attributionSubtitle: {
+    position: { default: "absolute", "@container hraness-attribution (min-width: 40rem)": "static" },
+    "inline-size": { default: "1px", "@container hraness-attribution (min-width: 40rem)": "auto" },
+    "block-size": { default: "1px", "@container hraness-attribution (min-width: 40rem)": "auto" },
+    margin: { default: "-1px", "@container hraness-attribution (min-width: 40rem)": 0 },
+    clip: { default: "rect(0 0 0 0)", "@container hraness-attribution (min-width: 40rem)": "auto" },
+    clipPath: { default: "inset(50%)", "@container hraness-attribution (min-width: 40rem)": "none" },
+    padding: 0, overflow: "hidden", "min-inline-size": 0, textOverflow: "ellipsis",
+    color: "var(--hraness-site-footer-muted)", fontSize: "0.6875rem", fontWeight: 400,
   },
   support: {
     gridArea: "support", display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -375,6 +417,9 @@ export const footerClasses = {
   socials: className("hraness-site-footer__socials", styles.socials),
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
+  attribution: className("hraness-site-footer__attribution", styles.box, styles.attribution),
+  attributionTitle: className("hraness-site-footer__attribution-title", styles.box, styles.attributionTitle),
+  attributionSubtitle: className("hraness-site-footer__attribution-subtitle", styles.box, styles.attributionSubtitle),
   consent: className("hraness-site-footer__consent", styles.box, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentSeparator: className("hraness-site-footer__consent-separator", styles.consentSeparator),

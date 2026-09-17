@@ -21,6 +21,9 @@ export declare const footerClasses: {
     socials: string;
     socialLink: string;
     socialIcon: string;
+    attribution: string;
+    attributionTitle: string;
+    attributionSubtitle: string;
     consent: string;
     consentAccept: string;
     consentSeparator: string;
