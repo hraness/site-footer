@@ -1708,9 +1708,9 @@ async function driveState(options: {
       if (!(button instanceof HTMLElement)) throw new Error('Idle signup lost its foil submit.');
       const enhanced = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)').matches;
       const vars = () => [
-        button.style.getPropertyValue('--footer-foil-x'),
-        button.style.getPropertyValue('--footer-foil-y'),
-        button.style.getPropertyValue('--footer-foil-angle'),
+        button.style.getPropertyValue('--hraness-foil-x'),
+        button.style.getPropertyValue('--hraness-foil-y'),
+        button.style.getPropertyValue('--hraness-foil-angle'),
       ];
       const settle = async () => {
         // Damped easing converges over several frames; wait until readings hold.

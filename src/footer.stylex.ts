@@ -3,8 +3,22 @@ import type { FooterVariant } from "./experiment.js";
 
 export const disclosureMarker = stylex.defineMarker();
 export const rootMarker = stylex.defineMarker();
-const holographicBackgroundImage = "linear-gradient(var(--hraness-site-footer-holo-surface, var(--hraness-site-footer-background)), var(--hraness-site-footer-holo-surface, var(--hraness-site-footer-background))), radial-gradient(circle at var(--footer-foil-x, 50%) var(--footer-foil-y, 50%), color-mix(in srgb, #ffffff calc(64% + var(--footer-foil-glow, 0) * 28%), transparent) 0%, #ffffff00 46%), conic-gradient(from var(--footer-foil-angle, 135deg), #ffd7f2, #d2dcff, #c8f3e4, #fdf2c0, #ffdcc9, #e9d9ff, #ffd7f2)";
+// The shared Hraness foil contract. Marketing roots may define the
+// --hraness-foil-* spectrum; the private --_hraness-foil-* stops resolve those
+// overrides or the same scheme-conditioned defaults, including the deeper dark
+// palette that keeps the pointer sheen visible.
+const holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
+const holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(circle at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(64% + var(--hraness-foil-glow, 0) * 28%), transparent) 0%, transparent 46%), conic-gradient(from var(--hraness-foil-angle, 135deg), var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6), var(--_hraness-foil-1))";
 const holographicBackgroundClip = "padding-box, border-box, border-box";
+const holographicStops = {
+  "--_hraness-foil-1": { default: "var(--hraness-foil-1, oklch(0.89 0.065 337))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-1, oklch(0.56 0.16 340))" },
+  "--_hraness-foil-2": { default: "var(--hraness-foil-2, oklch(0.875 0.05 277))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-2, oklch(0.52 0.15 285))" },
+  "--_hraness-foil-3": { default: "var(--hraness-foil-3, oklch(0.92 0.05 170))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-3, oklch(0.66 0.14 175))" },
+  "--_hraness-foil-4": { default: "var(--hraness-foil-4, oklch(0.95 0.045 96))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-4, oklch(0.72 0.13 100))" },
+  "--_hraness-foil-5": { default: "var(--hraness-foil-5, oklch(0.9 0.05 55))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-5, oklch(0.55 0.15 45))" },
+  "--_hraness-foil-6": { default: "var(--hraness-foil-6, oklch(0.875 0.06 305))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-6, oklch(0.62 0.16 305))" },
+  "--_hraness-foil-halo": { default: "var(--hraness-foil-halo-alpha, 0.3)", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-halo-alpha, 0.45)" },
+};
 
 // Same direction, spread, and timing as Hraness.com's token support control.
 const textShimmer = stylex.keyframes({
@@ -118,10 +132,11 @@ const styles = stylex.create({
     backgroundColor: "var(--hraness-site-footer-background)",
   },
   holographic: {
-    "--footer-foil-glow": { default: "0", "@media (hover: hover)": { ":hover:not(:disabled)": "1" } },
+    ...holographicStops,
+    "--hraness-foil-glow": { default: "0", "@media (hover: hover)": { ":hover:not(:disabled)": "1" } },
     borderWidth: "2px",
     borderColor: { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
-    backgroundColor: "var(--hraness-site-footer-holo-surface, var(--hraness-site-footer-background))",
+    backgroundColor: holographicSurface,
     color: "var(--hraness-site-footer-foreground)",
     backgroundImage: {
       default: holographicBackgroundImage,
@@ -129,7 +144,7 @@ const styles = stylex.create({
     },
     backgroundOrigin: "border-box",
     backgroundClip: holographicBackgroundClip,
-    boxShadow: { default: "0 0 0.375rem hsl(var(--footer-foil-angle, 135deg) 55% 75% / 0.3)", "@media (forced-colors: active)": "none" },
+    boxShadow: { default: "0 0 0.375rem hsl(var(--hraness-foil-angle, 135deg) 55% 75% / var(--_hraness-foil-halo))", "@media (forced-colors: active)": "none" },
   },
   compactConfirmation: { fontSize: "0.75rem", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" },
   shimmer: {

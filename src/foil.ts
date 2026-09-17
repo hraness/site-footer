@@ -24,9 +24,9 @@ export function attachFooterFoil(root: HTMLElement): () => void {
     if (frame) cancelAnimationFrame(frame);
     frame = 0;
     for (const target of states.keys()) {
-      target.style.removeProperty("--footer-foil-x");
-      target.style.removeProperty("--footer-foil-y");
-      target.style.removeProperty("--footer-foil-angle");
+      target.style.removeProperty("--hraness-foil-x");
+      target.style.removeProperty("--hraness-foil-y");
+      target.style.removeProperty("--hraness-foil-angle");
     }
     states.clear();
   };
@@ -59,9 +59,9 @@ export function attachFooterFoil(root: HTMLElement): () => void {
         state.y = ty;
         state.angle = ta;
       }
-      target.style.setProperty("--footer-foil-x", `${state.x.toFixed(1)}%`);
-      target.style.setProperty("--footer-foil-y", `${state.y.toFixed(1)}%`);
-      target.style.setProperty("--footer-foil-angle", `${state.angle.toFixed(1)}deg`);
+      target.style.setProperty("--hraness-foil-x", `${state.x.toFixed(1)}%`);
+      target.style.setProperty("--hraness-foil-y", `${state.y.toFixed(1)}%`);
+      target.style.setProperty("--hraness-foil-angle", `${state.angle.toFixed(1)}deg`);
     }
     if (!settled) frame = requestAnimationFrame(paint);
   };

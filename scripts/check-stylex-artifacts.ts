@@ -45,7 +45,7 @@ export function assertSourceBoundary(path: string, source: string): void {
         && ["setProperty", "removeProperty"].includes(node.parent.name.text)
         && ts.isCallExpression(call) && call.expression === node.parent
         && call.arguments[0] !== undefined && ts.isStringLiteral(call.arguments[0])
-        && ["--footer-foil-x", "--footer-foil-y", "--footer-foil-angle"].includes(call.arguments[0].text);
+        && ["--hraness-foil-x", "--hraness-foil-y", "--hraness-foil-angle"].includes(call.arguments[0].text);
       assert.ok(foilInput || !["style", "adoptedStyleSheets", "insertRule"].includes(node.name.text),
         `Owned runtime CSS mutation is forbidden: ${path}`);
     }

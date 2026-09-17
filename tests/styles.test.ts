@@ -45,7 +45,7 @@ describe("compiled footer presentation", () => {
   });
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.14.0");
+    expect(pkg.version).toBe("0.15.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -153,7 +153,7 @@ describe("compiled footer presentation", () => {
 
   test("shares a static holographic border and responsive native disclosure", () => {
     contains(footerClasses.disclosureTrigger, "conic-gradient(");
-    contains(footerClasses.disclosureTrigger, "var(--footer-foil-x,50%)");
+    contains(footerClasses.disclosureTrigger, "var(--hraness-foil-x,50%)");
     contains(disclosureClassNames("inline").root, "@supports selector(::details-content)");
     contains(disclosureClassNames("inline").trigger, "@supports selector(::details-content)");
     contains(disclosureClassNames("inline").root, "content-visibility:visible");
@@ -170,12 +170,26 @@ describe("compiled footer presentation", () => {
   });
 
   test("shares the holographic treatment with the joined mailing field", () => {
-    for (const declaration of ["conic-gradient(", "var(--footer-foil-x,50%)", "border-width:2px", "border-color:transparent"]) {
+    for (const declaration of ["conic-gradient(", "var(--hraness-foil-x,50%)", "border-width:2px", "border-color:transparent"]) {
       contains(footerClasses.mailingInput, declaration);
       contains(footerClasses.mailingSubmit, declaration);
     }
     contains(footerClasses.mailingInput, "--hraness-site-footer-holo-surface:var(--hraness-site-footer-field-background)");
     contains(footerClasses.mailingInput, "background-color:var(--hraness-site-footer-holo-surface");
+  });
+
+  test("reads the shared six-stop foil spectrum with the deeper dark palette", () => {
+    for (const stop of ["--_hraness-foil-1", "--_hraness-foil-2", "--_hraness-foil-3", "--_hraness-foil-4", "--_hraness-foil-5", "--_hraness-foil-6"]) {
+      contains(footerClasses.mailingSubmit, `var(${stop})`);
+      contains(footerClasses.mailingSubmit, `var(--hraness-foil-${stop.at(-1)},`);
+    }
+    contains(footerClasses.mailingSubmit, "@media(prefers-color-scheme:dark)");
+    contains(footerClasses.mailingSubmit, "var(--hraness-foil-halo-alpha,");
+    contains(footerClasses.mailingSubmit, "var(--_hraness-foil-halo)");
+    contains(footerClasses.mailingSubmit, "--hraness-foil-surface");
+    expect(cssFor(footerClasses.mailingSubmit)).not.toContain("--footer-foil-");
+    expect(cssFor(footerClasses.mailingSubmit)).not.toContain("lightningcss");
+    expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("--footer-foil-");
   });
 
   test("keeps experiment presentation veiled until the assignment settles", () => {
@@ -217,7 +231,7 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.mailingSubmit, ":disabled");
     contains(footerClasses.mailingSubmit, "opacity:.62");
     contains(footerClasses.mailingSubmit, ":hover:not(:disabled)");
-    contains(footerClasses.mailingSubmit, "--footer-foil-glow:1");
+    contains(footerClasses.mailingSubmit, "--hraness-foil-glow:1");
     contains(footerClasses.mailingInput, "::placeholder");
     for (const classes of [footerClasses.brand, footerClasses.support, footerClasses.socialLink, footerClasses.mailingSubmit]) {
       contains(classes, "@media (hover:hover)");
@@ -305,9 +319,9 @@ describe("presentation boundary negative controls", () => {
 
 
 test("runtime presentation exception only permits the foil controller's numeric inputs", () => {
-  expect(() => assertSourceBoundary("src/foil.ts", 'target.style.setProperty("--footer-foil-x", "50%");')).not.toThrow();
+  expect(() => assertSourceBoundary("src/foil.ts", 'target.style.setProperty("--hraness-foil-x", "50%");')).not.toThrow();
   for (const path of ["src/foil.ts", "src/react.tsx"]) {
     expect(() => assertSourceBoundary(path, 'target.style.setProperty("color", "red");')).toThrow();
   }
-  expect(() => assertSourceBoundary("src/react.tsx", 'target.style.setProperty("--footer-foil-x", "50%");')).toThrow();
+  expect(() => assertSourceBoundary("src/react.tsx", 'target.style.setProperty("--hraness-foil-x", "50%");')).toThrow();
 });

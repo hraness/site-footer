@@ -24,9 +24,9 @@ function attachFooterFoil(root) {
       cancelAnimationFrame(frame);
     frame = 0;
     for (const target of states.keys()) {
-      target.style.removeProperty("--footer-foil-x");
-      target.style.removeProperty("--footer-foil-y");
-      target.style.removeProperty("--footer-foil-angle");
+      target.style.removeProperty("--hraness-foil-x");
+      target.style.removeProperty("--hraness-foil-y");
+      target.style.removeProperty("--hraness-foil-angle");
     }
     states.clear();
   };
@@ -72,9 +72,9 @@ function attachFooterFoil(root) {
         state.y = ty;
         state.angle = ta;
       }
-      target.style.setProperty("--footer-foil-x", `${state.x.toFixed(1)}%`);
-      target.style.setProperty("--footer-foil-y", `${state.y.toFixed(1)}%`);
-      target.style.setProperty("--footer-foil-angle", `${state.angle.toFixed(1)}deg`);
+      target.style.setProperty("--hraness-foil-x", `${state.x.toFixed(1)}%`);
+      target.style.setProperty("--hraness-foil-y", `${state.y.toFixed(1)}%`);
+      target.style.setProperty("--hraness-foil-angle", `${state.angle.toFixed(1)}deg`);
     }
     if (!settled)
       frame = requestAnimationFrame(paint);
@@ -262,6 +262,8 @@ function props(...styles) {
 var env = Object.freeze({});
 
 // src/footer.stylex.ts
+var holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
+var holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(circle at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(64% + var(--hraness-foil-glow, 0) * 28%), transparent) 0%, transparent 46%), conic-gradient(from var(--hraness-foil-angle, 135deg), var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6), var(--_hraness-foil-1))";
 var styles = {
   root: {
     "--hraness-site-footer-foreground": "x1ktp55a",
@@ -366,7 +368,7 @@ var styles = {
     k1xSpc: "xwz0xwf x1i5lizr",
     kC13JO: "xrbltni",
     kAPf3g: "x1o2pa38",
-    kKwaWg: "xpfzi7p xwi9c3o xhobzj1",
+    kKwaWg: "xc1emh9 xwi9c3o xhobzj1",
     kGVxlE: "xeygwf3",
     kVAM5u: "x9r1u3d x1xggt0h x1ylmb6m",
     kMwMTN: "x1g4142m x1rhhl84",
@@ -397,15 +399,22 @@ var styles = {
     $$css: true
   },
   holographic: {
-    "--footer-foil-glow": "x1kjo3z2 xs2bqyq",
+    "--_hraness-foil-1": "x35j2r9 x1dscx4y",
+    "--_hraness-foil-2": "xmntjkq x14xjb22",
+    "--_hraness-foil-3": "x1xbl91z x1iiaa4z",
+    "--_hraness-foil-4": "x47qxf1 x1n6b76k",
+    "--_hraness-foil-5": "x13hwd88 x1z0t8xj",
+    "--_hraness-foil-6": "xx7v8hi x1bbyikp",
+    "--_hraness-foil-halo": "x1ciovt3 x11yejcl",
+    "--hraness-foil-glow": "x136ldfs x1a9zcsi",
     kMzoRj: "xdh2fpr",
     kVAM5u: "x9r1u3d x1ylmb6m",
-    kWkggS: "x1lxeszl",
+    kWkggS: "x1bvqrnj",
     kMwMTN: "x1g4142m",
-    kKwaWg: "xpfzi7p xhobzj1",
+    kKwaWg: "xc1emh9 xhobzj1",
     kl9DO0: "x1gqfdwy",
     kHypHr: "x188zq58",
-    kGVxlE: "x6q3fwq xwaqzdf",
+    kGVxlE: "xa67z0c xwaqzdf",
     $$css: true
   },
   compactConfirmation: {
@@ -2542,4 +2551,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=4678FF0F090EA78964756E2164756E21
+//# debugId=E2DB5ED2BBB4353764756E2164756E21
