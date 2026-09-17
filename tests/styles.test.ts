@@ -141,16 +141,19 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.attributionSubtitle, "font-size:.6875rem");
     contains(footerClasses.attributionSubtitle, "color:var(--hraness-site-footer-muted)");
     expect(cssFor(footerClasses.attributionSubtitle)).not.toContain("(min-width:7rem)");
-    // The wide row reserves exactly four social targets so the attribution
-    // track, not the social group, absorbs the remaining space.
-    contains(footerClassName(false), "--hraness-site-footer-socials-inline-size:calc(4 * var(--hraness-site-footer-social-target) + .375rem)");
+    // The wide social track grows to four targets before the attribution's
+    // flexible track receives anything, yet still shrinks (hiding icons in
+    // priority order) when the row is starved. The px floor keeps the coarse
+    // 182px fourth-icon threshold reachable at any root font size.
+    contains(footerClassName(false), "--hraness-site-footer-socials-inline-size:calc(4 * var(--hraness-site-footer-social-target) + max(.375rem, 6px))");
+    const socials = "minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))";
     for (const [inner, columns] of [
-      [footerInnerClassName(false), "auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
-      [footerInnerClassName(true), "auto minmax(10rem, 18rem) minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
-      [footerInnerClassName(false, true, "green", true), "auto minmax(0, max-content) minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
-      [footerInnerClassName(false, true, "green", false, true), "auto auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
-      [footerInnerClassName(true, true, "green", false, true), "auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
-      [footerInnerClassName(false, true, "green", true, true), "auto minmax(0, max-content) auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)"],
+      [footerInnerClassName(false), `auto minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(true), `auto minmax(10rem, 18rem) minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(false, true, "green", true), `auto minmax(0, max-content) minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(false, true, "green", false, true), `auto auto minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(true, true, "green", false, true), `auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(false, true, "green", true, true), `auto minmax(0, max-content) auto minmax(0, 1fr) auto ${socials}`],
     ] as const) contains(inner, `grid-template-columns:${columns}`);
     for (const inner of [footerInnerClassName(false), footerInnerClassName(true), footerInnerClassName(false, true, "green", true)]) {
       // Compact templates never gain an attribution column or gap.

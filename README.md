@@ -254,11 +254,12 @@ maker credit. Its two lines share the existing one-row bar: below `47.5rem` the
 block stays out of flow and visually hidden while assistive technology still
 reads it, so compact layouts keep their exact composition. At wider widths it
 fills the space left after the identity, signup or account control, optional
-support link, consent note, and four social targets. The title appears when
-that track reaches `7rem`; the subtitle appears beneath it once the track
-reaches `40rem`, and a wider host font degrades to an ellipsis rather than a
-third line. Neither line ever uses `display: none`, so the footer's accessible
-text is identical at every width.
+support link, consent note, and the social group's four targets. The title
+appears when that track reaches `7rem`; the subtitle appears beneath it once
+the track reaches `40rem`, which fits the sentence in common system fonts, and
+an unusually wide host font degrades to an ellipsis rather than a third line.
+Neither line ever uses `display: none`, so the footer's accessible text is
+identical at every width.
 
 ## Ownership boundary
 
@@ -310,9 +311,10 @@ layout and wants normal document flow. The signup footer always uses one aligned
 Below `47.5rem`, every recipe presents a compact native disclosure button; opening
 it reveals the email form above the bar. At wider widths the layout experiment
 selects that button or an inline form. Substack always remains visible; X,
-LinkedIn and GitHub appear in that order as the social group's available space permits. At and above `47.5rem` the row reserves exactly four
-social targets and hands the remaining width to the organization attribution,
-which reveals its title and then its subtitle as that width permits. The home link shows only the Ra icon and
+LinkedIn and GitHub appear in that order as the social group's available space permits. At and above `47.5rem` the social group grows to its four
+targets before the organization attribution receives any width, then the
+attribution takes the remainder and reveals its title and then its subtitle
+as that width permits; a starved row still sheds icons in priority order. The home link shows only the Ra icon and
 keeps the accessible name “Hraness home.”
 
 The footer keeps matching top and bottom padding around its controls and adds
@@ -360,7 +362,7 @@ organization dedicated to advancing the frontier of machine intelligence.”
 render in both renderers and every mailing mode, exported as
 `hranessAttribution`. The single-row bar, its computed height, the link
 contract, and mailing, consent, and theme behavior are unchanged; the wide row
-now pins the social group to four targets and gives the attribution the
+now grows the social group to four targets first and gives the attribution the
 remaining width. Pin `github:hraness/site-footer#v0.13.0` to adopt it.
 
 Version 0.10.2 makes every English placeholder explicit email guidance, keeps

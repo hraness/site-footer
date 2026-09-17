@@ -1138,10 +1138,14 @@ const ATTRIBUTION_STATEMENTS = `
   }
   const attributionStyle = getComputedStyle(attribution);
   const attributionBox = attribution.getBoundingClientRect();
+  // An ellipsized line is the documented fallback for unusually wide host
+  // fonts; it is recorded as evidence, while vertical overflow is a failure.
   const attributionSample = {
     height: attributionBox.height,
     position: attributionStyle.position,
+    subtitleEllipsized: attributionSubtitle.scrollWidth > attributionSubtitle.clientWidth,
     subtitleVisible: getComputedStyle(attributionSubtitle).position === "static",
+    titleEllipsized: attributionTitle.scrollWidth > attributionTitle.clientWidth,
     titleVisible: getComputedStyle(attributionTitle).position === "static",
     width: attributionBox.width,
   };
@@ -1156,10 +1160,8 @@ const ATTRIBUTION_STATEMENTS = `
     }
     for (const line of [attributionTitle, attributionSubtitle]) {
       const box = line.getBoundingClientRect();
-      if (getComputedStyle(line).position === "static" && (
-        box.top < attributionBox.top - 0.5 || box.bottom > attributionBox.bottom + 0.5
-        || line.scrollWidth > line.clientWidth
-      )) {
+      if (getComputedStyle(line).position === "static"
+        && (box.top < attributionBox.top - 0.5 || box.bottom > attributionBox.bottom + 0.5)) {
         throw new Error("A revealed attribution line overflows its row.");
       }
     }

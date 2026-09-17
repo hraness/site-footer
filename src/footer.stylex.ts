@@ -25,9 +25,11 @@ const styles = stylex.create({
     "--hraness-site-footer-action-foreground": "var(--plain-background, var(--background, Canvas))",
     "--hraness-site-footer-field-background": "color-mix(in srgb, var(--hraness-site-footer-foreground) 4%, var(--hraness-site-footer-background))",
     "--hraness-site-footer-social-target": { default: "1.75rem", "@media (pointer: coarse)": "44px" },
-    // Four social targets plus their three 0.125rem gaps: the wide row reserves
-    // exactly this much, so the attribution track receives the remaining space.
-    "--hraness-site-footer-socials-inline-size": "calc(4 * var(--hraness-site-footer-social-target) + 0.375rem)",
+    // Four social targets plus their three 0.125rem gaps. The wide social track
+    // grows to this before the attribution receives any space, and can still
+    // shrink under pressure. The px floor keeps the fourth-icon container
+    // threshold (182px on coarse pointers) satisfiable at any root font size.
+    "--hraness-site-footer-socials-inline-size": "calc(4 * var(--hraness-site-footer-social-target) + max(0.375rem, 6px))",
     "--hraness-site-footer-control-block-size": {
       default: "max(var(--hraness-site-footer-social-target), 1.75rem)",
       "@media (pointer: coarse)": "max(var(--hraness-site-footer-social-target), 2.25rem)",
@@ -182,7 +184,7 @@ const styles = stylex.create({
     containerName: "hraness-footer", containerType: "inline-size",
     position: "relative", display: "grid",
     gridTemplateAreas: { default: '"brand links"', "@media (min-width: 47.5rem)": '"brand attribution consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)" },
+    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
     gridTemplateRows: "var(--hraness-site-footer-control-block-size)",
     "inline-size": "100%", "block-size": "auto", "min-block-size": "var(--hraness-site-footer-bar-block-size)",
     "max-inline-size": "none", "min-inline-size": 0, alignContent: "center", alignItems: "center",
@@ -197,12 +199,12 @@ const styles = stylex.create({
   },
   innerSignup: {
     gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing attribution consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
     gridTemplateRows: "var(--hraness-site-footer-content-block-size)",
   },
   innerAccount: {
     gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing attribution consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   account: {
     gridArea: "mailing", display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -213,15 +215,15 @@ const styles = stylex.create({
   },
   innerSupport: {
     gridTemplateAreas: { default: '"brand support links"', "@media (min-width: 47.5rem)": '"brand support attribution consent links"' },
-    gridTemplateColumns: { default: "auto auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)" },
+    gridTemplateColumns: { default: "auto auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerSignupSupport: {
     gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support attribution consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerAccountSupport: {
     gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support attribution consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) auto var(--hraness-site-footer-socials-inline-size)" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   // Below the wide breakpoint the attribution is out of flow and visually
   // hidden, so compact bars keep their exact composition while assistive
@@ -238,8 +240,8 @@ const styles = stylex.create({
     containerName: "hraness-attribution", containerType: "inline-size",
     display: "grid", alignContent: "center", whiteSpace: "nowrap", lineHeight: 1.2,
   },
-  // Each line stays visually hidden until its own track can show it whole; a
-  // wider host font degrades to an ellipsis instead of a third line.
+  // Each line stays visually hidden until its track fits it in common system
+  // fonts; an unusually wide host font degrades to an ellipsis, never a third line.
   attributionTitle: {
     position: { default: "absolute", "@container hraness-attribution (min-width: 7rem)": "static" },
     "inline-size": { default: "1px", "@container hraness-attribution (min-width: 7rem)": "auto" },
