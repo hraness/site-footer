@@ -41,3 +41,17 @@ test("English hypotheses pair distinct short CTAs with explicit email placeholde
   }
   expect(FOOTER_LOCALES["es-AR"]?.styles.goblin).toBeUndefined();
 });
+
+test("stable signup copy separates presubmission benefit from accepted confirmation", async () => {
+  const { FOOTER_LOCALES, stableFooterMessages } = await import("../src/locales.js");
+  for (const locale of Object.values(FOOTER_LOCALES)) {
+    const copy = stableFooterMessages(locale, "hraness");
+    expect(copy.description).not.toBe(copy.accepted);
+    expect(copy.description.length).toBeGreaterThan(20);
+    expect(copy.placeholder).toBe("you@example.com");
+    expect(copy.button).not.toMatch(/goblin|Beam me|Push the button|Let me in/u);
+  }
+  const copy = stableFooterMessages(FOOTER_LOCALES.en!, "hraness");
+  expect(copy.description).toBe("Get new writing and updates on Hraness projects. Confirm your email to subscribe.");
+  expect(copy.submit).toBe("Subscribe");
+});

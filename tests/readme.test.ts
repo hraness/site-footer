@@ -87,9 +87,9 @@ describe("README product contract", () => {
     expect(readme).toContain("Version 0.13.0");
   });
 
-  test("documents the shared Hraness.com signup experiment", () => {
+  test("documents the stable Hraness.com signup and eligible attribution", () => {
     expect(normalizedReadme).toContain(
-      "Hraness.com uses the same shared `hraness` audience and experiment",
+      "Hraness.com uses the shared `hraness` audience",
     );
     expect(readme).toContain("mailingList={{ kind: \"none\" }}");
     expect(readme).toContain('audience: "hraness"');

@@ -767,3 +767,69 @@ export function resolveFooterLocale(preferred?: string | readonly string[]): Foo
   }
   return FOOTER_LOCALES.en!;
 }
+
+const stableDescriptions: Readonly<Record<string, string>> = {
+  en: "Receive updates by email. Confirm your address to subscribe.",
+  es: "Recibe novedades por correo. Confirma tu dirección para suscribirte.",
+  fr: "Recevez les nouveautés par e-mail. Confirmez votre adresse pour vous abonner.",
+  pt: "Receba novidades por e-mail. Confirme seu endereço para assinar.",
+  de: "Erhalte Neuigkeiten per E-Mail. Bestätige deine Adresse, um dich anzumelden.",
+  nl: "Ontvang nieuws per e-mail. Bevestig je adres om je aan te melden.",
+  it: "Ricevi novità via email. Conferma il tuo indirizzo per iscriverti.",
+  ca: "Rep novetats per correu. Confirma la teva adreça per subscriure-t'hi.",
+  sv: "Få nyheter via e-post. Bekräfta din adress för att prenumerera.",
+  da: "Få nyt via e-mail. Bekræft din adresse for at tilmelde dig.",
+  nb: "Få nyheter på e-post. Bekreft adressen din for å abonnere.",
+  fi: "Saa uutisia sähköpostitse. Vahvista osoitteesi tilataksesi.",
+  pl: "Otrzymuj nowości e-mailem. Potwierdź adres, aby się zapisać.",
+  cs: "Dostávejte novinky e-mailem. Pro odběr potvrďte svou adresu.",
+  sk: "Dostávajte novinky e-mailom. Na odber potvrďte svoju adresu.",
+  hu: "Kapj híreket e-mailben. A feliratkozáshoz erősítsd meg a címed.",
+  ro: "Primește noutăți prin e-mail. Confirmă adresa pentru a te abona.",
+  el: "Λάβετε νέα μέσω email. Επιβεβαιώστε τη διεύθυνσή σας για εγγραφή.",
+  bg: "Получавайте новини по имейл. Потвърдете адреса си, за да се абонирате.",
+  hr: "Primajte novosti e-poštom. Potvrdite adresu za pretplatu.",
+  sl: "Prejemajte novice po e-pošti. Za naročilo potrdite svoj naslov.",
+  "sr-Cyrl": "Примајте новости е-поштом. Потврдите адресу да бисте се претплатили.",
+  "sr-Latn": "Primajte novosti e-poštom. Potvrdite adresu da biste se pretplatili.",
+  uk: "Отримуйте новини електронною поштою. Підтвердьте адресу, щоб підписатися.",
+  ru: "Получайте новости по электронной почте. Подтвердите адрес, чтобы подписаться.",
+  tr: "Yenilikleri e-postayla alın. Abone olmak için adresinizi doğrulayın.",
+  ar: "تلقَّ المستجدات عبر البريد الإلكتروني. أكّد عنوانك للاشتراك.",
+  he: "קבלו עדכונים בדוא״ל. אשרו את הכתובת כדי להירשם.",
+  fa: "تازه‌ها را با ایمیل دریافت کنید. برای اشتراک، نشانی خود را تأیید کنید.",
+  hi: "ईमेल से नई जानकारी पाएँ। सदस्यता के लिए अपना पता सत्यापित करें।",
+  bn: "ইমেলে নতুন খবর পান। সদস্য হতে আপনার ঠিকানা নিশ্চিত করুন।",
+  ta: "புதிய தகவல்களை மின்னஞ்சலில் பெறுங்கள். சந்தா சேர உங்கள் முகவரியை உறுதிப்படுத்துங்கள்.",
+  ur: "تازہ معلومات ای میل سے حاصل کریں۔ رکنیت کے لیے اپنا پتا تصدیق کریں۔",
+  id: "Terima kabar terbaru lewat email. Konfirmasikan alamat Anda untuk berlangganan.",
+  ms: "Terima berita terkini melalui e-mel. Sahkan alamat anda untuk melanggan.",
+  vi: "Nhận tin mới qua email. Xác nhận địa chỉ để đăng ký.",
+  th: "รับข่าวสารทางอีเมล ยืนยันที่อยู่อีเมลเพื่อสมัครรับข่าวสาร",
+  fil: "Tumanggap ng balita sa email. Kumpirmahin ang iyong address para mag-subscribe.",
+  ja: "最新情報をメールで受け取れます。登録にはメールアドレスの確認が必要です。",
+  ko: "이메일로 새 소식을 받아보세요. 구독하려면 이메일 주소를 확인해 주세요.",
+  "zh-Hans": "通过电子邮件接收新消息。确认您的邮箱地址即可订阅。",
+  "zh-Hant": "透過電子郵件接收新消息。確認您的信箱地址即可訂閱。",
+  sw: "Pokea habari mpya kwa barua pepe. Thibitisha anwani yako ili kujisajili.",
+  af: "Ontvang nuus per e-pos. Bevestig jou adres om in te teken.",
+};
+
+/** Stable signup copy is independent of the historical experiment catalog. */
+export function stableFooterMessages(locale: FooterLocale, audience?: string) {
+  const copy = locale.styles.direct;
+  const english = /^en(?:-|$)/u.test(locale.locale);
+  const language = locale.locale.split("-")[0]!;
+  const key = language === "zh" ? (locale.locale.includes("Hant") ? "zh-Hant" : "zh-Hans")
+    : language === "sr" ? (locale.locale.includes("Latn") ? "sr-Latn" : "sr-Cyrl") : language;
+  return {
+    ...copy,
+    button: english ? "Get email updates" : copy.formLabel,
+    title: english ? "Get email updates" : copy.formLabel,
+    description: english && audience === "hraness"
+      ? "Get new writing and updates on Hraness projects. Confirm your email to subscribe."
+      : stableDescriptions[key] ?? stableDescriptions.en!,
+    submit: english ? "Subscribe" : copy.button,
+    placeholder: "you@example.com",
+  };
+}

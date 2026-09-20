@@ -1,6 +1,7 @@
 import { footerClassName } from "./footer.stylex.js";
 import type { SupportProfile } from "./internal.js";
 export type { SupportProfile } from "./internal.js";
+export type { HranessFooterConversionEvent, HranessFooterConversionStage, HranessFooterConversionReason } from "./internal.js";
 import { resolveFooterLocale } from "./locales.js";
 import { DEFAULT_FOOTER_VARIANT, parseFooterVariant, type FooterVariant } from "./experiment.js";
 export { resolveFooterLocale } from "./locales.js";

@@ -16,15 +16,8 @@ function cssFor(classes: string): string {
   const atomic = classes.split(/\s+/u).filter((name) => name.startsWith("x"));
   expect(atomic.length).toBeGreaterThan(0);
   return atomic.map((name) => {
-    // A marker names an ancestor rather than owning a declaration rule.
-    if (name === disclosureMarkerClass) {
-      expect([...rules.values()].some(rule => rule.includes(`.${name}[open]`))).toBeTrue();
-      return "";
-    }
-    if (name === rootMarkerClass) {
-      expect([...rules.values()].some(rule => rule.includes(`.${name}[data-experiment="arming"]`))).toBeTrue();
-      return "";
-    }
+    // Retained public markers may have no dependent rules in the stable surface.
+    if (name === disclosureMarkerClass || name === rootMarkerClass) return "";
     expect(rules.has(name)).toBeTrue();
     return rules.get(name) ?? "";
   }).join("\n").replace(/\s+/gu, "");
@@ -45,7 +38,7 @@ describe("compiled footer presentation", () => {
   });
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.15.0");
+    expect(pkg.version).toBe("0.16.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -137,10 +130,10 @@ describe("compiled footer presentation", () => {
     const socials = "minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))";
     for (const [inner, columns] of [
       [footerInnerClassName(false), `auto minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(true), `auto minmax(10rem, 18rem) minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(true), `auto minmax(0, max-content) minmax(0, 1fr) auto ${socials}`],
       [footerInnerClassName(false, true, "green", true), `auto minmax(0, max-content) minmax(0, 1fr) auto ${socials}`],
       [footerInnerClassName(false, true, "green", false, true), `auto auto minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(true, true, "green", false, true), `auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(true, true, "green", false, true), `auto minmax(0, max-content) auto minmax(0, 1fr) auto ${socials}`],
       [footerInnerClassName(false, true, "green", true, true), `auto minmax(0, max-content) auto minmax(0, 1fr) auto ${socials}`],
     ] as const) contains(inner, `grid-template-columns:${columns}`);
     for (const inner of [footerInnerClassName(false), footerInnerClassName(true), footerInnerClassName(false, true, "green", true)]) {
@@ -151,31 +144,29 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(false, true, "green", false, true), 'grid-template-areas:"brand support . consent links"');
   });
 
-  test("shares a static holographic border and responsive native disclosure", () => {
+  test("keeps one visible foil button and a scrollable native dialog at every width", () => {
     contains(footerClasses.disclosureTrigger, "conic-gradient(");
     contains(footerClasses.disclosureTrigger, "var(--hraness-foil-x,50%)");
-    contains(disclosureClassNames("inline").root, "@supports selector(::details-content)");
-    contains(disclosureClassNames("inline").trigger, "@supports selector(::details-content)");
-    contains(disclosureClassNames("inline").root, "content-visibility:visible");
-    contains(disclosureClassNames("inline").trigger, "display:none");
-    contains(disclosureClassNames("inline").panel, "padding-block:0");
-    contains(disclosureClassNames("inline").panel, "padding-inline:0");
-    contains(footerClasses.disclosureTrigger, "[open]");
-    contains(footerClasses.disclosureTrigger, "background-image:none");
-    contains(footerClasses.triggerClosed, "visibility:hidden");
-    contains(footerClasses.triggerOpen, "visibility:visible");
-    contains(footerClasses.disclosurePanel, "calc(100% + .375rem)");
+    expect(disclosureClassNames("inline")).toEqual(disclosureClassNames("button"));
+    expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("@supportsselector(::details-content)");
+    expect(cssFor(footerClasses.disclosure)).not.toContain("visibility:hidden");
+    contains(footerClasses.dialog, ":modal");
+    contains(footerClasses.dialog, "overflow-y:auto");
+    contains(footerClasses.dialog, "var(--hraness-signup-viewport-height,100dvh)");
+    contains(footerClasses.dialog, "::backdrop");
     contains(footerClasses.mailingInput, "font-size:max(1rem,16px)");
+    contains(footerClasses.mailingInput, "min-block-size:48px");
+    contains(footerClasses.dialogClose, "inline-size:44px");
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("animation-name");
   });
 
-  test("shares the holographic treatment with the joined mailing field", () => {
-    for (const declaration of ["conic-gradient(", "var(--hraness-foil-x,50%)", "border-width:2px", "border-color:transparent"]) {
-      contains(footerClasses.mailingInput, declaration);
-      contains(footerClasses.mailingSubmit, declaration);
-    }
-    contains(footerClasses.mailingInput, "--hraness-site-footer-holo-surface:var(--hraness-site-footer-field-background)");
-    contains(footerClasses.mailingInput, "background-color:var(--hraness-site-footer-holo-surface");
+  test("uses a quiet separate email field and foil submit with readable controls", () => {
+    expect(cssFor(footerClasses.mailingInput)).not.toContain("conic-gradient");
+    contains(footerClasses.mailingSubmit, "conic-gradient(");
+    contains(footerClasses.mailingSubmit, "min-block-size:48px");
+    contains(footerClasses.mailingControls, "display:grid");
+    contains(footerClasses.mailingControls, "gap:1rem");
+    contains(footerClasses.emailLabel, "display:block");
   });
 
   test("reads the shared six-stop foil spectrum with the deeper dark palette", () => {
@@ -192,14 +183,8 @@ describe("compiled footer presentation", () => {
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("--footer-foil-");
   });
 
-  test("keeps experiment presentation veiled until the assignment settles", () => {
-    contains(footerClasses.disclosure, '[data-experiment="arming"]');
-    contains(footerClasses.disclosure, "@media (scripting: enabled)");
-    contains(footerClasses.disclosure, "opacity:0");
-    contains(footerClasses.disclosure, "visibility:hidden");
-    contains(footerClasses.disclosure, "@media (prefers-reduced-motion:no-preference)");
-    contains(footerClasses.disclosure, "transition-property:opacity,visibility");
-    contains(footerClasses.disclosure, "transition-duration:.2s");
+  test("never hides signup while optional attribution is pending", () => {
+    expect(cssFor(footerClasses.disclosure)).not.toMatch(/arming|visibility:hidden|opacity:0/u);
     expect(cssFor(footerClassName(true)).length).toBeGreaterThan(0);
   });
 
@@ -243,25 +228,15 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(false), "background-color:Canvas");
   });
 
-  test("keeps status overlays outside the reserved mailing row", () => {
-    contains(mailingStatusClassName("idle"), "position:absolute");
-    contains(mailingStatusClassName("idle"), "opacity:0");
-    contains(mailingStatusClassName("idle"), "visibility:hidden");
-    for (const state of ["pending", "error"]) {
-      contains(mailingStatusClassName(state), "opacity:1");
-      contains(mailingStatusClassName(state), "visibility:visible");
-      expect(cssFor(mailingStatusClassName(state))).not.toContain("visibility:hidden");
+  test("keeps request status within the modal flow and outside the hidden accepted form", () => {
+    contains(mailingStatusClassName("idle"), "display:none");
+    for (const state of ["pending", "error", "accepted"]) {
+      contains(mailingStatusClassName(state), "display:block");
+      expect(cssFor(mailingStatusClassName(state))).not.toContain("position:absolute");
     }
-    contains(mailingStatusClassName("error"), "color:var(--hraness-site-footer-foreground)");
-    contains(mailingStatusClassName("pending"), "color:var(--hraness-site-footer-muted)");
-    contains(mailingStatusClassName("idle"), "inset-block-end:calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-row-gap))");
     contains(footerClasses.honeypot, "clip-path:inset(50%)");
     contains(footerClasses.honeypot, "inline-size:1px");
-    for (const classes of [footerClasses.mailing, footerClasses.mailingConfirmation]) {
-      contains(classes, "box-sizing:border-box");
-      contains(classes, "inline-size:min(100%,18rem)");
-      contains(classes, "block-size:var(--hraness-site-footer-form-block-size)");
-    }
+    contains(footerClasses.mailing, "inline-size:100%");
   });
 
   test("retains control shorthand resets and matching geometry", () => {
@@ -274,13 +249,10 @@ describe("compiled footer presentation", () => {
       // font-language-override, a separately cascaded child palette must survive.
       expect(cssFor(classes)).not.toContain("font-palette:");
       contains(classes, "background-image:none");
-      contains(classes, "background-origin:border-box");
-      contains(classes, "background-clip:padding-box,border-box,border-box");
       contains(classes, "border-image-source:none");
     }
-    contains(footerClasses.mailingInput, "border-start-start-radius:.375rem");
-    contains(footerClasses.mailingSubmit, "border-start-end-radius:.375rem");
-    contains(footerClasses.mailingSubmit, "margin-inline-start:-2px");
+    contains(footerClasses.mailingInput, "border-radius:.5rem");
+    contains(footerClasses.mailingSubmit, "border-radius:.5rem");
     contains(footerClasses.visuallyHidden, "clip-path:inset(50%)");
   });
 });
@@ -318,10 +290,23 @@ describe("presentation boundary negative controls", () => {
 });
 
 
-test("runtime presentation exception only permits the foil controller's numeric inputs", () => {
+test("runtime presentation exceptions remain limited to foil inputs and native modal viewport custody", () => {
   expect(() => assertSourceBoundary("src/foil.ts", 'target.style.setProperty("--hraness-foil-x", "50%");')).not.toThrow();
   for (const path of ["src/foil.ts", "src/react.tsx"]) {
     expect(() => assertSourceBoundary(path, 'target.style.setProperty("color", "red");')).toThrow();
   }
   expect(() => assertSourceBoundary("src/react.tsx", 'target.style.setProperty("--hraness-foil-x", "50%");')).toThrow();
+});
+
+test("native modal runtime exception rejects arbitrary root or dialog presentation", () => {
+  for (const source of [
+    'dialog.style.setProperty("--hraness-signup-viewport-height", "600px");',
+    'root.style.setProperty("overflow", "hidden");',
+    'root.style.getPropertyPriority("overflow");',
+  ]) expect(() => assertSourceBoundary("src/react.tsx", source)).not.toThrow();
+  for (const source of [
+    'dialog.style.setProperty("color", "red");',
+    'root.style.setProperty("display", "none");',
+    'target.style.setProperty("--hraness-signup-viewport-height", "600px");',
+  ]) expect(() => assertSourceBoundary("src/react.tsx", source)).toThrow();
 });

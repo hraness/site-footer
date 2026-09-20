@@ -204,39 +204,85 @@ var styles = {
     "--hraness-site-footer-action-foreground": "x1e6emja",
     $$css: true
   },
-  experimentArm: {
-    kSiTet: "x1hc1fzr xtekp7u",
-    k33iCy: "xnpuxes x3vhtta",
-    k1ekBW: "x1xje8t6",
-    kIyJzY: "x17shmjf",
-    kAMwcw: "x2nlg2u",
-    $$css: true
-  },
   disclosure: {
-    kVAEAm: "x1uhb9sk x1nmvtcz",
+    kVAEAm: "x1uhb9sk",
     kJuA4N: "x1qaspin",
     kdYMnH: "xesnm00",
-    k2kXS: "xmk4v7v x3jboi5",
+    k2kXS: "x1n9s1zj",
     $$css: true
   },
-  disclosureInline: {
-    kCygrm: "x1xyn927",
+  dialog: {
+    kVAEAm: "x10l6tqk x3g7vmf",
+    kUvb1J: "x92d9gd x1t8win8",
+    kctUWg: "x1smivkc x502hvl",
+    khdm6U: "x17y0mx6",
+    kogj98: "x1bpp3o7",
+    kULEZF: "x1y56ywe",
+    k2kXS: "x1ljtl1n",
+    kLO5vc: "x1pzgvly",
+    kORKVm: "x1odjw0f",
+    kZeWKH: "xish69e",
+    kZ7BSC: "x185mbhu",
+    kF3gjK: "xrfbana",
+    kJVvJu: "xk5lw23",
+    kMzoRj: "xc342km",
+    kaIpWk: "x3fmiap",
+    kWkggS: "x1hhhz6w x16vqh2n",
+    kMwMTN: "x1g4142m",
+    kGVxlE: "x165lju9",
+    kMv6JI: "xjb2p0i",
+    kGuDYH: "x1jchvi3",
+    kLWn49: "x1evy7pa",
     $$css: true
   },
-  triggerInline: {
-    k1xSpc: "xb0i1br",
+  dialogHeader: {
+    k1xSpc: "x78zum5",
+    kGNEyG: "x7a106z",
+    kOIVth: "x8fetqu",
+    kjj79g: "x1qughib",
     $$css: true
   },
-  panelInline: {
-    k1xSpc: "xpbngvy",
-    kVAEAm: "xe6w1w2",
-    kF3gjK: "xv2k6yj",
-    kJVvJu: "xyo0no0",
-    kMzoRj: "x1pdywdg",
-    kULEZF: "x9uf5pp",
+  dialogTitle: {
+    kogj98: "x1ghz6dp",
+    kGuDYH: "xngnso2",
+    k63SB2: "x19s9jnd",
+    kLWn49: "x1u7k74",
+    kN2L0X: "x1w2vvpw",
+    $$css: true
+  },
+  dialogDescription: {
+    keoZOQ: "xhj8ucd",
+    k1K539: "x1nhhxel",
+    kGuDYH: "x1jchvi3",
+    kLWn49: "x1evy7pa",
+    $$css: true
+  },
+  dialogClose: {
+    k1xSpc: "x3nfvp2 xvgho8r",
+    kGNEyG: "x6s0dn4",
+    kjj79g: "xl56j7k",
+    kmuXW: "x2lah0s",
+    kULEZF: "x1nwd19c",
+    kLWsYc: "x18h55qy",
+    keoZOQ: "x1bov10x",
+    k71WvV: "x1dpfygs",
+    kMzoRj: "xc342km",
+    kaIpWk: "x6i6fhv",
+    kWkggS: "xjbqb8w xgqpex1",
+    kMwMTN: "x1heor9g",
+    kkrTdU: "x1ypdohk",
+    $$css: true
+  },
+  emailLabel: {
+    k1xSpc: "x1lliihq",
+    k1K539: "xhbfen4",
+    kGuDYH: "x6u19be",
+    k63SB2: "x1s688f",
     $$css: true
   },
   disclosureTrigger: {
+    kkrTdU: "x1ypdohk",
+    k63SB2: "x1s688f",
     kH6xsr: "x3ct3a4",
     kULEZF: "x6n8wx1",
     k2kXS: "xgyk9h7",
@@ -250,10 +296,9 @@ var styles = {
     k1xSpc: "xwz0xwf x1i5lizr",
     kC13JO: "xrbltni",
     kAPf3g: "x1o2pa38",
-    kKwaWg: "xc1emh9 xwi9c3o xhobzj1",
-    kGVxlE: "xeygwf3",
-    kVAM5u: "x9r1u3d x1xggt0h x1ylmb6m",
-    kMwMTN: "x1g4142m x1rhhl84",
+    kKwaWg: "xc1emh9 xhobzj1",
+    kVAM5u: "x9r1u3d x1ylmb6m",
+    kMwMTN: "x1g4142m",
     $$css: true
   },
   triggerClosed: {
@@ -395,7 +440,7 @@ var styles = {
   },
   innerSignup: {
     kC13JO: "x1m6ayzh x12d2mci",
-    kumcoG: "xo69rmz xjgecxr",
+    kumcoG: "xo69rmz x1t3gk10",
     k9llMU: "x42z6zh",
     $$css: true
   },
@@ -430,7 +475,7 @@ var styles = {
   },
   innerSignupSupport: {
     kC13JO: "x1y8t5ps x11qbbop",
-    kumcoG: "x186f4cn xjnp55e",
+    kumcoG: "x186f4cn xzi2blw",
     $$css: true
   },
   innerAccountSupport: {
@@ -639,12 +684,14 @@ var styles = {
   },
   mailing: {
     kVAEAm: "x1n2onr6",
-    k1xSpc: "xrvj5dj",
-    k9llMU: "xv7uhgh",
+    k1xSpc: "x1lliihq xvgho8r",
+    kogj98: "x1ghz6dp",
+    kULEZF: "xiuoait",
     $$css: true
   },
   mailingControls: {
-    k1xSpc: "x78zum5",
+    k1xSpc: "xrvj5dj",
+    kOIVth: "x8fetqu",
     kdYMnH: "xesnm00",
     $$css: true
   },
@@ -674,70 +721,51 @@ var styles = {
     $$css: true
   },
   mailingInput: {
-    "--hraness-site-footer-holo-surface": "x1m0uuso",
     kULEZF: "xiuoait",
     kdYMnH: "xesnm00",
-    kGuDYH: "x1dcheo9 xgbju11",
-    krdFHd: "x1olvaoz",
-    kfmiAY: "x1ga7v0g",
-    kT0f0o: "x16uus16",
-    kVL7Gh: "xxahmv3",
+    kVQ08L: "x1ouqbbl",
+    kGuDYH: "xgt9wab",
+    kaIpWk: "x116uinm",
     kWkggS: "xo5clpu",
     kMwMTN: "x1g4142m xook0zr",
+    knGrYV: "x91417p",
     kSiTet: "x7xwk5j",
-    kJVvJu: "xvpgqt4",
+    kJVvJu: "x13s4r1c",
     $$css: true
   },
   mailingSubmit: {
     kGNEyG: "x6s0dn4",
     k1xSpc: "x3nfvp2",
     kjj79g: "xl56j7k",
-    kLWn49: "xo5v014",
-    kImiAN: "xe9ewy2",
-    krdFHd: "x15mokao",
-    kfmiAY: "xjp8vmc",
-    kT0f0o: "x5g0mfp",
-    kVL7Gh: "xbiv7yw",
+    kLWn49: "x1u7k74",
+    kaIpWk: "x116uinm",
+    kVQ08L: "x1ouqbbl",
+    kULEZF: "xiuoait",
     kWkggS: "x1ujht2g x1tt9vl1",
     kMwMTN: "xaazplj x1q5838n",
     kkrTdU: "x1ypdohk xjb0foi",
     kSiTet: "xo3u330",
     k63SB2: "x19s9jnd",
-    kGuDYH: "x1dcheo9",
-    kJVvJu: "xvpgqt4",
-    k2kXS: "x1j2h1tb",
-    khDVqt: "xuxw1ft",
-    kVQacm: "xb3r6kr",
-    kg5iWk: "xlyipyv",
+    kGuDYH: "x1jchvi3",
+    kJVvJu: "x13s4r1c",
     k9WMMc: "x2b8uid",
     $$css: true
   },
   mailingStatus: {
-    kVAEAm: "x10l6tqk",
-    kY2c9j: "xhtitgo",
-    kctUWg: "x3ppr4w",
-    khdm6U: "x17y0mx6",
-    kVQacm: "xb3r6kr",
+    keoZOQ: "xj1urod",
+    k1K539: "xat24cr",
     kdYMnH: "xesnm00",
-    kVQ08L: "x3c45ou",
-    kogj98: "x1ghz6dp",
-    kaIpWk: "x6i6fhv",
-    kWkggS: "x1hhhz6w x9yvj25",
-    kMwMTN: "xj5idha",
-    kGuDYH: "xkpwil5",
-    kLWn49: "x132q4wb",
-    kSiTet: "xg01cxk",
-    kF3gjK: "x1267ecw",
-    kJVvJu: "x97vtpp",
-    kfzvcC: "x47corl",
-    k33iCy: "xlshs6z",
+    kmVPX3: "x1717udv",
+    kMwMTN: "x1g4142m",
+    kGuDYH: "x1jchvi3",
+    kLWn49: "x1evy7pa",
+    k1xSpc: "x1s85apg",
     khDVqt: "xeaf4i8",
     kHjlTd: "xj0a0fe",
     $$css: true
   },
   statusVisible: {
-    kSiTet: "x1hc1fzr",
-    k33iCy: "xnpuxes",
+    k1xSpc: "x1lliihq",
     $$css: true
   },
   statusError: {
@@ -780,13 +808,19 @@ var footerClasses = {
   account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focusInset),
   support: className("hraness-site-footer__support", styles.box, styles.support, styles.focus, styles.motion),
   supportIcon: className("hraness-site-footer__support-icon", styles.socialIcon),
-  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure, styles.experimentArm)} ${{
+  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${{
     className: "x1gmlqhs"
   }.className}`,
-  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
   triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
+  dialog: className("hraness-site-footer__dialog", styles.box, styles.dialog),
+  dialogHeader: className("hraness-site-footer__dialog-header", styles.dialogHeader),
+  dialogTitle: className("hraness-site-footer__dialog-title", styles.dialogTitle),
+  dialogDescription: className("hraness-site-footer__dialog-description", styles.dialogDescription),
+  dialogClose: className("hraness-site-footer__dialog-close", styles.box, styles.dialogClose, styles.focusInset),
+  emailLabel: className("hraness-site-footer__email-label", styles.emailLabel),
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
   brandName: className("hraness-site-footer__brand-name", styles.brandName),
@@ -802,11 +836,11 @@ var footerClasses = {
   consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),
   consentLink: className("hraness-site-footer__consent-link", styles.consentLink, styles.focus, styles.motion),
-  mailing: className("hraness-site-footer__mailing", styles.box, styles.mailingGeometry, styles.mailing),
+  mailing: className("hraness-site-footer__mailing", styles.box, styles.mailing),
   honeypot: className("hraness-site-footer__honeypot", styles.visuallyHidden),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
-  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.holographic, styles.focusInset),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.focusInset),
   mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focusInset, styles.motion),
   mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focusInset),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden)
@@ -824,19 +858,13 @@ function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
 }
 function mailingStatusClassName(state) {
-  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focusInset, state !== "idle" && styles.statusVisible, state === "error" && styles.statusError);
+  return className("hraness-site-footer__mailing-status", styles.box, styles.mailingStatus, styles.focusInset, state !== "idle" && styles.statusVisible, state === "error" && styles.statusError);
 }
-function disclosureClassNames(layout) {
+function disclosureClassNames(_layout) {
   return {
-    root: `${footerClasses.disclosure} ${layout === "inline" ? {
-      className: "x1xyn927"
-    }.className : ""}`.trim(),
-    trigger: `${footerClasses.disclosureTrigger} ${layout === "inline" ? {
-      className: "xb0i1br"
-    }.className : ""}`.trim(),
-    panel: `${footerClasses.disclosurePanel} ${layout === "inline" ? {
-      className: "xpbngvy xe6w1w2 xv2k6yj xyo0no0 x1pdywdg x9uf5pp"
-    }.className : ""}`.trim()
+    root: footerClasses.disclosure,
+    trigger: footerClasses.disclosureTrigger,
+    panel: footerClasses.disclosurePanel
   };
 }
 
@@ -1593,6 +1621,66 @@ function resolveFooterLocale(preferred) {
   }
   return FOOTER_LOCALES.en;
 }
+var stableDescriptions = {
+  en: "Receive updates by email. Confirm your address to subscribe.",
+  es: "Recibe novedades por correo. Confirma tu dirección para suscribirte.",
+  fr: "Recevez les nouveautés par e-mail. Confirmez votre adresse pour vous abonner.",
+  pt: "Receba novidades por e-mail. Confirme seu endereço para assinar.",
+  de: "Erhalte Neuigkeiten per E-Mail. Bestätige deine Adresse, um dich anzumelden.",
+  nl: "Ontvang nieuws per e-mail. Bevestig je adres om je aan te melden.",
+  it: "Ricevi novità via email. Conferma il tuo indirizzo per iscriverti.",
+  ca: "Rep novetats per correu. Confirma la teva adreça per subscriure-t'hi.",
+  sv: "Få nyheter via e-post. Bekräfta din adress för att prenumerera.",
+  da: "Få nyt via e-mail. Bekræft din adresse for at tilmelde dig.",
+  nb: "Få nyheter på e-post. Bekreft adressen din for å abonnere.",
+  fi: "Saa uutisia sähköpostitse. Vahvista osoitteesi tilataksesi.",
+  pl: "Otrzymuj nowości e-mailem. Potwierdź adres, aby się zapisać.",
+  cs: "Dostávejte novinky e-mailem. Pro odběr potvrďte svou adresu.",
+  sk: "Dostávajte novinky e-mailom. Na odber potvrďte svoju adresu.",
+  hu: "Kapj híreket e-mailben. A feliratkozáshoz erősítsd meg a címed.",
+  ro: "Primește noutăți prin e-mail. Confirmă adresa pentru a te abona.",
+  el: "Λάβετε νέα μέσω email. Επιβεβαιώστε τη διεύθυνσή σας για εγγραφή.",
+  bg: "Получавайте новини по имейл. Потвърдете адреса си, за да се абонирате.",
+  hr: "Primajte novosti e-poštom. Potvrdite adresu za pretplatu.",
+  sl: "Prejemajte novice po e-pošti. Za naročilo potrdite svoj naslov.",
+  "sr-Cyrl": "Примајте новости е-поштом. Потврдите адресу да бисте се претплатили.",
+  "sr-Latn": "Primajte novosti e-poštom. Potvrdite adresu da biste se pretplatili.",
+  uk: "Отримуйте новини електронною поштою. Підтвердьте адресу, щоб підписатися.",
+  ru: "Получайте новости по электронной почте. Подтвердите адрес, чтобы подписаться.",
+  tr: "Yenilikleri e-postayla alın. Abone olmak için adresinizi doğrulayın.",
+  ar: "تلقَّ المستجدات عبر البريد الإلكتروني. أكّد عنوانك للاشتراك.",
+  he: "קבלו עדכונים בדוא״ל. אשרו את הכתובת כדי להירשם.",
+  fa: "تازه‌ها را با ایمیل دریافت کنید. برای اشتراک، نشانی خود را تأیید کنید.",
+  hi: "ईमेल से नई जानकारी पाएँ। सदस्यता के लिए अपना पता सत्यापित करें।",
+  bn: "ইমেলে নতুন খবর পান। সদস্য হতে আপনার ঠিকানা নিশ্চিত করুন।",
+  ta: "புதிய தகவல்களை மின்னஞ்சலில் பெறுங்கள். சந்தா சேர உங்கள் முகவரியை உறுதிப்படுத்துங்கள்.",
+  ur: "تازہ معلومات ای میل سے حاصل کریں۔ رکنیت کے لیے اپنا پتا تصدیق کریں۔",
+  id: "Terima kabar terbaru lewat email. Konfirmasikan alamat Anda untuk berlangganan.",
+  ms: "Terima berita terkini melalui e-mel. Sahkan alamat anda untuk melanggan.",
+  vi: "Nhận tin mới qua email. Xác nhận địa chỉ để đăng ký.",
+  th: "รับข่าวสารทางอีเมล ยืนยันที่อยู่อีเมลเพื่อสมัครรับข่าวสาร",
+  fil: "Tumanggap ng balita sa email. Kumpirmahin ang iyong address para mag-subscribe.",
+  ja: "最新情報をメールで受け取れます。登録にはメールアドレスの確認が必要です。",
+  ko: "이메일로 새 소식을 받아보세요. 구독하려면 이메일 주소를 확인해 주세요.",
+  "zh-Hans": "通过电子邮件接收新消息。确认您的邮箱地址即可订阅。",
+  "zh-Hant": "透過電子郵件接收新消息。確認您的信箱地址即可訂閱。",
+  sw: "Pokea habari mpya kwa barua pepe. Thibitisha anwani yako ili kujisajili.",
+  af: "Ontvang nuus per e-pos. Bevestig jou adres om in te teken."
+};
+function stableFooterMessages(locale, audience) {
+  const copy = locale.styles.direct;
+  const english = /^en(?:-|$)/u.test(locale.locale);
+  const language = locale.locale.split("-")[0];
+  const key = language === "zh" ? locale.locale.includes("Hant") ? "zh-Hant" : "zh-Hans" : language === "sr" ? locale.locale.includes("Latn") ? "sr-Latn" : "sr-Cyrl" : language;
+  return {
+    ...copy,
+    button: english ? "Get email updates" : copy.formLabel,
+    title: english ? "Get email updates" : copy.formLabel,
+    description: english && audience === "hraness" ? "Get new writing and updates on Hraness projects. Confirm your email to subscribe." : stableDescriptions[key] ?? stableDescriptions.en,
+    submit: english ? "Subscribe" : copy.button,
+    placeholder: "you@example.com"
+  };
+}
 
 // src/experiment.ts
 var DEFAULT_FOOTER_VARIANT = Object.freeze({
@@ -1906,34 +1994,18 @@ var MAILING_IDLE_STATE = {
 };
 function renderMailingList(mailingList, state, presentation) {
   const {
-    locale,
-    variant
+    locale
   } = presentation;
-  const copy = locale.styles[variant.copyStyle];
-  if (copy === undefined)
-    throw new TypeError("Footer copy style is not available in this locale.");
+  const copy = stableFooterMessages(locale, mailingList.audience);
   const localAttributes = ` lang="${escapeAttribute(locale.locale)}" dir="${locale.dir}"`;
-  const variantAttributes = ` data-layout="${variant.layout}" data-copy-variant="${variant.copyStyle}" data-color="${variant.color}" data-shimmer="${variant.shimmer}"`;
-  if (state.kind === "accepted") {
-    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1"${localAttributes}>${escapeAttribute(copy.accepted)}</div>`;
-  }
-  const stateKind = state.kind;
   const email = state.kind === "pending" || state.kind === "error" ? ` value="${escapeAttribute(state.email)}"` : "";
-  const pendingAttributes = state.kind === "pending" ? ' aria-busy="true"' : "";
-  const buttonAttributes = state.kind === "pending" ? ' aria-disabled="true" disabled=""' : "";
-  const buttonLabel = state.kind === "pending" ? copy.pending : copy.button;
-  const statusAttributes = state.kind === "error" ? ' aria-live="assertive" role="alert"' : ' aria-live="polite" role="status"';
-  const statusCopy = state.kind === "pending" ? copy.submitting : state.kind === "error" ? copy.requestError : "";
-  const honeypot = `<input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value="">`;
-  const experimentField = presentation.experimentToken && /^[0-9a-f]{64}$/u.test(presentation.experimentToken) ? `<input name="experimentToken" type="hidden" value="${presentation.experimentToken}">` : "";
-  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${experimentField}<div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" data-foil="" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-foil="" aria-label="${escapeAttribute(copy.button)}, ${escapeAttribute(copy.formLabel)}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${honeypot}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
-  const classes = disclosureClassNames(variant.layout);
-  const open = state.kind === "idle" ? "" : ' open=""';
-  const label = escapeAttribute(copy.button);
-  const closeText = escapeAttribute(/^en(?:-|$)/u.test(locale.locale) ? "Close" : copy.closeLabel);
-  const closedLabel = `<span class="${footerClasses.triggerClosed}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}<span class="${footerClasses.visuallyHidden}">, ${escapeAttribute(copy.openLabel)}</span></span>`;
-  const openLabel = `<span class="${footerClasses.triggerOpen}"><span aria-hidden="true">${closeText}</span><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.closeLabel)}</span></span>`;
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
+  const pending = state.kind === "pending";
+  const accepted = state.kind === "accepted";
+  const statusCopy = pending ? copy.submitting : accepted ? copy.accepted : state.kind === "error" ? copy.requestError : "";
+  const titleId = "hraness-mailing-dialog-title";
+  const descriptionId = "hraness-mailing-dialog-description";
+  const classes = disclosureClassNames("button");
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}">${escapeAttribute(copy.button)}</summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function resolveSupportLink(profile) {
@@ -1991,4 +2063,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=595F8A31925E19DC64756E2164756E21
+//# debugId=BE8BB7B038A025FC64756E2164756E21

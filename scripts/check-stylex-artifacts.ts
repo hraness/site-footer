@@ -46,7 +46,17 @@ export function assertSourceBoundary(path: string, source: string): void {
         && ts.isCallExpression(call) && call.expression === node.parent
         && call.arguments[0] !== undefined && ts.isStringLiteral(call.arguments[0])
         && ["--hraness-foil-x", "--hraness-foil-y", "--hraness-foil-angle"].includes(call.arguments[0].text);
-      assert.ok(foilInput || !["style", "adoptedStyleSheets", "insertRule"].includes(node.name.text),
+      // Native-dialog custody may supply two numeric viewport inputs and
+      // preserve/restore only the document root's overflow while it is modal.
+      const modalInput = path === "src/react.tsx" && node.name.text === "style"
+        && ts.isIdentifier(node.expression) && ts.isPropertyAccessExpression(node.parent)
+        && ts.isCallExpression(call) && call.expression === node.parent
+        && call.arguments[0] !== undefined && ts.isStringLiteral(call.arguments[0])
+        && ((node.expression.text === "dialog" && node.parent.name.text === "setProperty"
+          && ["--hraness-signup-viewport-height", "--hraness-signup-viewport-top"].includes(call.arguments[0].text))
+          || (node.expression.text === "root" && call.arguments[0].text === "overflow"
+            && ["getPropertyValue", "getPropertyPriority", "setProperty", "removeProperty"].includes(node.parent.name.text)));
+      assert.ok(foilInput || modalInput || !["style", "adoptedStyleSheets", "insertRule"].includes(node.name.text),
         `Owned runtime CSS mutation is forbidden: ${path}`);
     }
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {

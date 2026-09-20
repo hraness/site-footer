@@ -62,4 +62,21 @@ export declare const FOOTER_LOCALES: Readonly<Record<string, FooterLocale>>;
  * Unknown/malformed preferences are skipped, then deterministic English is used.
  */
 export declare function resolveFooterLocale(preferred?: string | readonly string[]): FooterLocale;
+/** Stable signup copy is independent of the historical experiment catalog. */
+export declare function stableFooterMessages(locale: FooterLocale, audience?: string): {
+    button: string;
+    title: string;
+    description: string;
+    submit: string;
+    placeholder: string;
+    emailLabel: string;
+    formLabel: string;
+    pending: string;
+    submitting: string;
+    requestError: string;
+    accepted: string;
+    openLabel: string;
+    closeLabel: string;
+    invalidEmail: string;
+};
 //# sourceMappingURL=locales.d.ts.map

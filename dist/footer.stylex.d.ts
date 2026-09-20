@@ -15,6 +15,12 @@ export declare const footerClasses: {
     triggerClosed: string;
     triggerOpen: string;
     disclosurePanel: string;
+    dialog: string;
+    dialogHeader: string;
+    dialogTitle: string;
+    dialogDescription: string;
+    dialogClose: string;
+    emailLabel: string;
     shimmer: string;
     brand: string;
     brandName: string;
@@ -43,7 +49,8 @@ export declare function footerClassName(signup: boolean, sticky?: boolean): stri
 export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"], account?: boolean, support?: boolean): string;
 export declare function socialItemClassName(index?: number): string;
 export declare function mailingStatusClassName(state: string): string;
-export declare function disclosureClassNames(layout: FooterVariant["layout"]): {
+/** Historical layout arguments no longer change the stable signup surface. */
+export declare function disclosureClassNames(_layout: FooterVariant["layout"]): {
     root: string;
     trigger: string;
     panel: string;

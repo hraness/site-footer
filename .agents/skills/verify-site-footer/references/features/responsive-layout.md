@@ -11,7 +11,7 @@
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.
 - Equal email and submit heights.
-- Desktop inline panel height equal to its form and outer bounds inside the footer, including a real v3 enrollment at 1280px and 760px.
+- Stable trigger at all widths, with a named native modal and fixed stable-modal-v1 attribution.
 - Non-reserving idle status surface.
 - Minimum visible target sizes, viewport containment, no compact overflow, and settled geometry.
 - Independently cascaded control font palettes and inherited font language.
@@ -34,20 +34,21 @@ canary sets both controls to `light` and `"SRB"`. The compiled `font: inherit`
 expansion must preserve the child palette while replacing its language with
 `"TRK"`. CSS Fonts 4 excludes `font-palette` from the shorthand's subproperties;
 `font-language-override` remains a reset-only subproperty. Unsupported properties
-fail the check rather than silently skipping it. Accepted replaces the controls,
-so that state requires both control samples to be absent.
+fail the check rather than silently skipping it. Accepted hides its form; that state excludes hidden controls from visible font samples.
 
 ## Gotchas
 
-- The non-idle status surface intentionally overlays above the in-flow footer row. It must clear its top border rather than sit inside it.
+- Request status appears in the modal flow; its geometry is independent of the footer row.
 - A passing rectangle contract does not prove typography, contrast, prominence, or rhythm. Review both screenshots.
 - Fine-pointer controls are checked at the package's 28 CSS pixel baseline. The existing stylesheet test separately protects the 44 CSS pixel coarse-pointer override.
 - A zero inset in the Chromium fixture proves the ordinary-screen spacing contract, not a physical mobile device or a forced nonzero inset. Retain the measured inset in the evidence.
 
-The v3 context also opens the compact disclosure by click, Enter and Space. It
-observes email focus during the trusted click event, verifies no initial focus
-steal, tests Close and Escape with typed text preserved, and checks the stable
-trigger width, localized accessible names, quiet open styling, 16px email font,
-4–6px panel gap and bounded panel at 390px and 320px.
+The fixed-attribution context opens the modal by click, Enter and Space. It
+observes email focus during trusted activation, tests Tab containment, Close and
+Escape with typed text preserved, and checks a stable trigger width and 16px
+email text at 1280px, 390px and 320px. A short 320×300 viewport must contain the
+scrollable dialog and permit the submit control to be reached. Unit regressions
+also cover visualViewport offset/height updates, interacted eligibility toggles,
+late/malformed attribution, callback churn, and duplicate submissions.
 
 Every fixture also enables the native optional Support link. Signup samples check its exact product/source destination, value proposition, containment, minimum target and separation from the other controls. No-signup and account contexts include it in geometry and keyboard-focus coverage. All scenarios remain synthetic and never navigate to Accounts.

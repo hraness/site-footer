@@ -1,3 +1,22 @@
+/** Optional, payload-bounded observations. No event contains visitor input. */
+export type HranessFooterConversionStage =
+  | "impression" | "open" | "close" | "input_started" | "validation_failed"
+  | "submit" | "accepted" | "error";
+
+export type HranessFooterConversionReason =
+  | "dismiss_button" | "escape" | "backdrop" | "invalid_email" | "required_email"
+  | "request_failed" | "network_error";
+
+export interface HranessFooterConversionEvent {
+  readonly stage: HranessFooterConversionStage;
+  readonly presentationVersion: "stable-modal-v1";
+  /** The explicitly configured, validated public mailing-list ID. */
+  readonly audience: string;
+  /** A canonical locale selected from the package's finite locale catalog. */
+  readonly locale: string;
+  readonly reason?: HranessFooterConversionReason;
+}
+
 import { disclosureClassNames, footerClasses, footerInnerClassName, mailingStatusClassName, socialItemClassName } from "./footer.stylex.js";
 import {
   CircleQuestionMarkIcon,
@@ -7,7 +26,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { DEFAULT_FOOTER_VARIANT, type FooterVariant } from "./experiment.js";
-import { resolveFooterLocale, type FooterLocale } from "./locales.js";
+import { resolveFooterLocale, stableFooterMessages, type FooterLocale } from "./locales.js";
 import { createSupportOffer } from "@hraness/support-foundation";
 
 /** Portable public shape, checked against the bundled foundation by the release gate. */
@@ -372,48 +391,19 @@ function renderMailingList(
   state: HranessMailingListRenderState,
   presentation: FooterPresentation,
 ): string {
-  const { locale, variant } = presentation;
-  const copy = locale.styles[variant.copyStyle];
-  if (copy === undefined) throw new TypeError("Footer copy style is not available in this locale.");
+  const { locale } = presentation;
+  const copy = stableFooterMessages(locale, mailingList.audience);
   const localAttributes = ` lang="${escapeAttribute(locale.locale)}" dir="${locale.dir}"`;
-  const variantAttributes = ` data-layout="${variant.layout}" data-copy-variant="${variant.copyStyle}" data-color="${variant.color}" data-shimmer="${variant.shimmer}"`;
-  if (state.kind === "accepted") {
-    return `<div aria-atomic="true" aria-live="polite" class="${footerClasses.mailingConfirmation}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="accepted" id="${HRANESS_MAILING_STATUS_SLOT}" role="status" tabindex="-1"${localAttributes}>${escapeAttribute(copy.accepted)}</div>`;
-  }
-
-  const stateKind = state.kind;
-  const email = state.kind === "pending" || state.kind === "error"
-    ? ` value="${escapeAttribute(state.email)}"`
-    : "";
-  const pendingAttributes = state.kind === "pending"
-    ? ' aria-busy="true"'
-    : "";
-  const buttonAttributes = state.kind === "pending"
-    ? ' aria-disabled="true" disabled=""'
-    : "";
-  const buttonLabel = state.kind === "pending" ? copy.pending : copy.button;
-  const statusAttributes = state.kind === "error"
-    ? ' aria-live="assertive" role="alert"'
-    : ' aria-live="polite" role="status"';
-  const statusCopy = state.kind === "pending"
-    ? copy.submitting
-    : state.kind === "error"
-    ? copy.requestError
-    : "";
-  const honeypot = `<input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value="">`;
-
-  const experimentField = presentation.experimentToken && /^[0-9a-f]{64}$/u.test(presentation.experimentToken)
-    ? `<input name="experimentToken" type="hidden" value="${presentation.experimentToken}">` : "";
-  const form = `<form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes}${variantAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${stateKind}" enctype="multipart/form-data" method="post"${pendingAttributes}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${experimentField}<div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" data-foil="" inputmode="email" name="email" placeholder="${escapeAttribute(copy.placeholder)}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}></label><button class="${footerClasses.mailingSubmit}" data-foil="" aria-label="${escapeAttribute(copy.button)}, ${escapeAttribute(copy.formLabel)}" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${buttonAttributes}>${variant.shimmer ? `<span class="${footerClasses.shimmer}" data-slot="hraness-mailing-button-label">${escapeAttribute(buttonLabel)}</span>` : escapeAttribute(buttonLabel)}</button></div>${honeypot}<p aria-atomic="true" class="${mailingStatusClassName(stateKind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1"${statusAttributes}>${escapeAttribute(statusCopy)}</p></form>`;
-  const classes = disclosureClassNames(variant.layout);
-  const open = state.kind === "idle" ? "" : " open=\"\"";
-  const label = escapeAttribute(copy.button);
-  const closeText = escapeAttribute(/^en(?:-|$)/u.test(locale.locale) ? "Close" : copy.closeLabel);
-  // Visibility follows native details[open], retaining the trigger's footprint
-  // and exposing only the current action to assistive technology without JS.
-  const closedLabel = `<span class="${footerClasses.triggerClosed}">${variant.shimmer ? `<span class="${footerClasses.shimmer}">${label}</span>` : label}<span class="${footerClasses.visuallyHidden}">, ${escapeAttribute(copy.openLabel)}</span></span>`;
-  const openLabel = `<span class="${footerClasses.triggerOpen}"><span aria-hidden="true">${closeText}</span><span class="${footerClasses.visuallyHidden}">${escapeAttribute(copy.closeLabel)}</span></span>`;
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes}${variantAttributes}${open}><summary data-foil="" class="${classes.trigger}">${closedLabel}${openLabel}</summary><div class="${classes.panel}">${form}</div></details>`;
+  const email = state.kind === "pending" || state.kind === "error" ? ` value="${escapeAttribute(state.email)}"` : "";
+  const pending = state.kind === "pending";
+  const accepted = state.kind === "accepted";
+  const statusCopy = pending ? copy.submitting : accepted ? copy.accepted : state.kind === "error" ? copy.requestError : "";
+  const titleId = "hraness-mailing-dialog-title";
+  const descriptionId = "hraness-mailing-dialog-description";
+  const classes = disclosureClassNames("button");
+  // An open, nonmodal dialog inside native details remains a usable disclosure
+  // without JavaScript. The React adapter upgrades this exact form to showModal.
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}">${escapeAttribute(copy.button)}</summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
 
 const HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;

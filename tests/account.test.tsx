@@ -9,9 +9,9 @@ import { FOOTER_LOCALES } from "../src/locales.js";
 const signup = { kind: "signup", audience: "soundfish" } as const;
 const account = { kind: "account" } as const;
 const token = "c".repeat(64);
-const enrollment = { version: 1, token, assignment: {
-  id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "goblin",
-  color: "green", shimmer: false, cohort: "explore", policyVersion: "footer-v3-compact",
+const enrollment = { version: 1, token, expiresAt: Date.now() + 48 * 60 * 60 * 1000, assignment: {
+  id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "direct",
+  color: "green", shimmer: false, cohort: "fixed", policyVersion: "stable-modal-v1", viewport: "compact",
 } };
 
 test("account state is a localized native link without any signup presentation", () => {
@@ -81,7 +81,7 @@ async function withFooter(run: (context: {
   try {
     await run({ container, window, requests,
       render: async (mode, experiment = true, support) => { await act(async () => root.render(
-        <HranessSiteFooter mailingList={mode === "signup" ? signup : { kind: mode }} locale="en" experiment={experiment} {...(support === undefined ? {} : { support })} />,
+        <HranessSiteFooter mailingList={mode === "signup" ? signup : { kind: mode }} locale="en" experiment={experiment} attribution={experiment} {...(support === undefined ? {} : { support })} />,
       )); },
       queuedResize: () => mediaCallbacks.forEach(callback => callback()),
       visible: () => intersect?.([{ isIntersecting: true, intersectionRatio: 1 } as IntersectionObserverEntry], {} as IntersectionObserver),
@@ -142,8 +142,9 @@ test("session refresh disables native attribution without replacing typed email 
     await render("signup", true);
     expect(container.querySelector('input[name="email"]')).toBe(email);
     expect(email.value).toBe("preserve@example.test");
-    expect(nativeToken.disabled).toBeTrue();
+    expect(nativeToken.disabled).toBeFalse();
     expect(requests).toHaveLength(1);
+    expect(container.querySelector("footer")?.hasAttribute("data-experiment")).toBeFalse();
     await render("account");
     expect(container.querySelector("input")).toBeNull();
   });
