@@ -360,7 +360,7 @@ export function createLayoutContract(
       });
     }
   }
-  if (names.has("status")) {
+  if (names.has("status") && !names.has("dialog")) {
     add({
       first: "status",
       id: `${viewport}.status-inner.clear`,
@@ -369,12 +369,12 @@ export function createLayoutContract(
       tolerance: 0,
     });
   }
-  if (viewport === "wide" && names.has("controls")) {
+  if (names.has("controls")) {
     add({
       id: `${viewport}.controls.inside`,
       inner: "controls",
       kind: "inside",
-      outer: "mailing",
+      outer: names.has("dialog") ? "dialog" : "mailing",
       tolerance: 0.5,
     });
   }
@@ -447,7 +447,7 @@ export function createLayoutContract(
       second: "socials",
       tolerance: 1,
     });
-    if (names.has("input") && names.has("submit")) {
+    if (names.has("input") && names.has("submit") && !names.has("dialog")) {
       add({
         first: "input",
         id: "wide.input-submit.center-y",
@@ -1146,8 +1146,7 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
   const inner = required(".hraness-site-footer__inner", "Footer inner");
   const brand = required(".hraness-site-footer__brand", "Footer brand");
   const compact = !window.matchMedia("(min-width: 47.5rem)").matches;
-  const mailing = (compact ? document.querySelector(".hraness-site-footer__disclosure-trigger") : document.querySelector(".hraness-site-footer__mailing"))
-    ?? required(".hraness-site-footer__mailing-confirmation", "Footer mailing surface");
+  const mailing = required(".hraness-site-footer__disclosure-trigger", "Stable signup trigger");
   const support = required('[data-slot="hraness-support-link"]', "Optional support link");
   const supportIcon = support.querySelector('svg[data-slot="hraness-support-icon"]');
   if (!(support instanceof HTMLAnchorElement) || support.href !== 'https://account.hraness.com/support?product=soundfish&source=web#support'
@@ -1177,15 +1176,8 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     rect("support", support),
     rect("socials", socials),
   ];
-  const panel = document.querySelector(".hraness-site-footer__disclosure-panel");
-  if (!compact && panel instanceof HTMLElement && panel.checkVisibility()) {
-    const panelBox = panel.getBoundingClientRect();
-    const formBox = mailing.getBoundingClientRect();
-    if (Math.abs(panelBox.height - formBox.height) > 0.5) {
-      throw new Error("The wide inline disclosure panel adds height around the form.");
-    }
-    boxes.push(rect("panel", panel));
-  }
+  const dialog = document.querySelector('[data-slot="hraness-mailing-dialog"]');
+  if (dialog instanceof HTMLDialogElement && dialog.open) boxes.push(rect("dialog", dialog));
   const controls = document.querySelector(".hraness-site-footer__mailing-controls");
   const input = document.querySelector(".hraness-site-footer__mailing-input");
   const submit = document.querySelector(".hraness-site-footer__mailing-submit");
@@ -1217,7 +1209,7 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
     ".hraness-site-footer__brand", ".hraness-site-footer__social-link", ".hraness-site-footer__support",
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
     ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger", ".hraness-site-footer__account",
-  ].join(","))].filter(element => element.checkVisibility() && getComputedStyle(element).position !== "absolute")
+  ].join(","))].filter(element => !element.closest("dialog") && element.checkVisibility() && getComputedStyle(element).position !== "absolute")
     .map(element => element.getBoundingClientRect())
     .filter(box => box.width > 0 && box.height > 0 && box.top >= inner.getBoundingClientRect().top);
   if (content.length < 2) {
@@ -1286,8 +1278,7 @@ const MANUAL_GEOMETRY_EXPRESSION = `(() => {
     : null;
   const footer = document.querySelector("#hraness-site-footer");
   const inner = document.querySelector(".hraness-site-footer__inner");
-  const mailing = document.querySelector(".hraness-site-footer__mailing")
-    ?? document.querySelector(".hraness-site-footer__mailing-confirmation");
+  const mailing = document.querySelector(".hraness-site-footer__disclosure-trigger");
   const controls = document.querySelector(".hraness-site-footer__mailing-controls");
   const input = document.querySelector(".hraness-site-footer__mailing-input");
   const submit = document.querySelector(".hraness-site-footer__mailing-submit");
@@ -1327,7 +1318,7 @@ const MANUAL_GEOMETRY_EXPRESSION = `(() => {
 const FONT_CASCADE_EXPRESSION = `(() => {
   const values = (selector) => {
     const element = document.querySelector(selector);
-    if (!(element instanceof HTMLElement)) return null;
+    if (!(element instanceof HTMLElement) || element.closest("form[hidden]")) return null;
     const computed = getComputedStyle(element);
     return {
       language: computed.getPropertyValue("font-language-override"),
@@ -1401,7 +1392,7 @@ function assertManualGeometry(
   if (geometry.visibleSocialTargets.some(({ height, width }) => height < 28 || width < 28)) {
     throw new Error(`${state}/${viewport} has a visible social target smaller than 28 CSS pixels.`);
   }
-  if (state !== "accepted" && !(state === "idle" && viewport === "compact")) {
+  if (state !== "accepted" && state !== "idle") {
     if (
       geometry.inputHeight === null
       || geometry.submitHeight === null
@@ -1417,16 +1408,7 @@ function assertManualGeometry(
       throw new Error(`${state}/${viewport} status content reserves form-row height.`);
     }
   }
-  if (state === "idle") {
-    if (
-      geometry.statusPosition !== "absolute"
-      || geometry.statusVisibility !== "hidden"
-      || geometry.statusOpacity === null
-      || geometry.statusOpacity > 0.01
-    ) {
-      throw new Error(`${viewport} idle status is not a hidden non-reserving overlay.`);
-    }
-  }
+
 }
 
 async function screenshot(
@@ -1570,74 +1552,82 @@ export function assertDisclosureSnapshot(input: unknown, expanded: boolean, expe
 
 async function verifyDisclosure(browser: BrowserDriver, runDirectory: string): Promise<readonly unknown[]> {
   const summary = '[data-slot="hraness-mailing-disclosure"] > summary';
+  const close = '[data-slot="hraness-mailing-close"]';
   const inspect = async (open: boolean, preserved = false) => {
     const value = await browser.evaluate(`(() => {
       const disclosure = document.querySelector('[data-slot="hraness-mailing-disclosure"]');
       const summary = disclosure.querySelector('summary');
-      const panel = disclosure.querySelector('.hraness-site-footer__disclosure-panel');
+      const dialog = disclosure.querySelector('dialog');
       const input = disclosure.querySelector('input[name="email"]');
-      const footer = document.querySelector('.hraness-site-footer__inner');
-      const closedLabel = summary.querySelector('.hraness-site-footer__disclosure-closed-label');
-      const openLabel = summary.querySelector('.hraness-site-footer__disclosure-open-label');
       const box = summary.getBoundingClientRect();
-      const panelBox = panel.getBoundingClientRect();
-      const gap = footer.getBoundingClientRect().top - panelBox.bottom;
-      const isOpen = disclosure.hasAttribute('open');
-      if (isOpen !== ${String(open)}) throw new Error('Disclosure state did not follow activation.');
-      if (getComputedStyle(closedLabel).visibility !== (isOpen ? 'hidden' : 'visible')
-        || getComputedStyle(openLabel).visibility !== (isOpen ? 'visible' : 'hidden')) throw new Error('Disclosure action labels did not switch.');
-      if (${String(preserved)} && input.value !== ${JSON.stringify(TEST_EMAIL)}) throw new Error('Disclosure lost the typed email.');
-      if (isOpen) {
+      const panel = dialog.getBoundingClientRect();
+      if (dialog.open !== ${String(open)} || disclosure.open !== ${String(open)}) throw new Error('Modal state did not follow activation.');
+      if (summary.textContent !== 'Get email updates' || !summary.checkVisibility()) throw new Error('Stable trigger changed or disappeared.');
+      if (${String(preserved)} && input.value !== ${JSON.stringify(TEST_EMAIL)}) throw new Error('Modal lost the typed email.');
+      if (dialog.open) {
+        if (!dialog.matches(':modal') || dialog.getAttribute('aria-labelledby') !== 'hraness-mailing-dialog-title') throw new Error('Signup lacks a named native modal.');
         if (document.activeElement !== input) throw new Error('Opening did not focus email.');
-        if (parseFloat(getComputedStyle(input).fontSize) < 16) throw new Error('Compact email may zoom on focus.');
-        if (gap < 4 || gap > 6 || panelBox.height > 76) throw new Error('Disclosure panel is detached or oversized: ' + gap + 'px gap, ' + panelBox.height + 'px height.');
-        if (panelBox.left < 0 || panelBox.right > innerWidth + 0.5) throw new Error('Disclosure panel overflows.');
-        if (getComputedStyle(summary).backgroundImage !== 'none') throw new Error('Open trigger still competes with submit.');
+        if (parseFloat(getComputedStyle(input).fontSize) < 16) throw new Error('Email may zoom on focus.');
+        if (panel.left < 0 || panel.right > innerWidth + .5 || panel.top < 0 || panel.bottom > innerHeight + .5) throw new Error('Modal overflows the viewport.');
+        if (document.documentElement.style.overflow !== 'hidden') throw new Error('Modal did not lock background scrolling.');
         if (!getComputedStyle(disclosure.querySelector('button[type="submit"]')).backgroundImage.includes('conic-gradient')) throw new Error('Submit lost its foil border.');
-      } else if (!getComputedStyle(summary).backgroundImage.includes('conic-gradient')) throw new Error('Closed trigger lost its foil border.');
-      return { open: isOpen, width: box.width, height: box.height, gap, panelHeight: panelBox.height, inputFontSize: getComputedStyle(input).fontSize };
+      }
+      return { open: dialog.open, width: box.width, height: box.height, panelHeight: panel.height, inputFontSize: getComputedStyle(input).fontSize };
     })()`);
-    if (!isRecord(value) || typeof value.width !== "number") throw new Error("Invalid disclosure geometry evidence.");
+    if (!isRecord(value) || typeof value.width !== "number") throw new Error("Invalid modal geometry evidence.");
     return value;
   };
-  const requireSynchronousFocus = async () => {
+  const synchronousFocus = async () => {
     const value = await browser.evaluate("window.__siteFooterFixture.disclosureSnapshot().at(-1)");
-    if (!isRecord(value) || value.open !== true || value.emailFocused !== true || value.trusted !== true) {
-      throw new Error("Email was not focused synchronously during trusted summary activation.");
-    }
+    if (!isRecord(value) || value.open !== true || value.emailFocused !== true || value.trusted !== true) throw new Error("Email did not focus during trusted activation.");
   };
-  const initialFocus = await browser.evaluate("document.activeElement?.matches('input[name=\"email\"]') === true");
-  if (initialFocus === true) throw new Error("Idle disclosure stole email focus.");
-  const closed = await inspect(false);
+  const evidence: unknown[] = [];
+  for (const width of [1280, 390, 320]) {
+    await browser.run(["set", "viewport", String(width), "844"]);
+    const closed = await inspect(false, width !== 1280);
+    await browser.run(["click", summary]);
+    await synchronousFocus();
+    const opened = await inspect(true, width !== 1280);
+    if (Math.abs(Number(closed.width) - Number(opened.width)) > .5) throw new Error("Opening shifted the trigger.");
+    await browser.run(["fill", 'input[name="email"]', TEST_EMAIL]);
+    // Browser-native Tab navigation must remain inside the top-layer dialog.
+    for (let i = 0; i < 5; i++) {
+      await browser.run(["press", "Tab"]);
+      if (await browser.evaluate("document.querySelector('dialog').contains(document.activeElement)") !== true) throw new Error("Keyboard focus escaped the modal.");
+    }
+    await screenshot(browser, join(runDirectory, `modal-open-${width}.png`));
+    await browser.run(["click", close]);
+    await inspect(false, true);
+    if (await browser.evaluate(`document.activeElement?.matches(${JSON.stringify(summary)})`) !== true) throw new Error("Dismiss did not restore trigger focus.");
+    await browser.run(["press", "Enter"]);
+    await synchronousFocus();
+    await inspect(true, true);
+    await browser.run(["press", "Escape"]);
+    await inspect(false, true);
+    await browser.run(["press", "Space"]);
+    await synchronousFocus();
+    await inspect(true, true);
+    await browser.run(["press", "Escape"]);
+    evidence.push({ width, closed, opened });
+  }
   await browser.run(["click", summary]);
-  await requireSynchronousFocus();
-  const opened = await inspect(true);
-  if (Math.abs(Number(closed.width) - Number(opened.width)) > 0.5) throw new Error("Opening shifted the trigger footprint.");
-  const openAccessibility = await browser.run(["snapshot"]);
-  await writeJsonAtomically(join(runDirectory, "disclosure-open-accessibility.json"), openAccessibility);
-  assertDisclosureSnapshot(openAccessibility, true, "Close email signup");
-  await screenshot(browser, join(runDirectory, "disclosure-open-390.png"));
-  await browser.run(["fill", 'input[name="email"]', TEST_EMAIL]);
-  await browser.run(["click", summary]);
-  const reclosed = await inspect(false, true);
-  await browser.run(["press", "Enter"]);
-  await requireSynchronousFocus();
+  await browser.run(["set", "viewport", "320", "300"]);
   await inspect(true, true);
+  const shrink = await browser.evaluate(`(() => {
+    const dialog = document.querySelector('dialog');
+    const submit = dialog.querySelector('button[type="submit"]');
+    submit.scrollIntoView({ block: 'nearest' });
+    const box = submit.getBoundingClientRect();
+    if (box.top < 0 || box.bottom > innerHeight + .5 || dialog.scrollHeight <= dialog.clientHeight) throw new Error('Short viewport cannot scroll to submit.');
+    return { height: dialog.clientHeight, scrollHeight: dialog.scrollHeight, submitBottom: box.bottom };
+  })()`);
+  await screenshot(browser, join(runDirectory, "modal-short-320.png"));
   await browser.run(["press", "Escape"]);
-  await inspect(false, true);
-  const escapeFocus = await browser.evaluate(`document.activeElement?.matches(${JSON.stringify(summary)}) === true`);
-  if (escapeFocus !== true) throw new Error("Escape did not restore summary focus.");
-  await browser.run(["press", "Space"]);
-  await requireSynchronousFocus();
-  await browser.run(["set", "viewport", "320", "844"]);
-  const compact = await inspect(true, true);
-  await screenshot(browser, join(runDirectory, "disclosure-open-320.png"));
-  await browser.run(["press", "Escape"]);
-  await inspect(false, true);
-  const closedAccessibility = await browser.run(["snapshot"]);
-  await writeJsonAtomically(join(runDirectory, "disclosure-closed-accessibility.json"), closedAccessibility);
-  assertDisclosureSnapshot(closedAccessibility, false, "Feed the goblin, Subscribe by email");
-  return [closed, opened, reclosed, compact, { openAccessibility, closedAccessibility }];
+  await browser.run(["set", "viewport", "390", "844"]);
+  const accessibility = await browser.run(["snapshot"]);
+  assertDisclosureSnapshot(accessibility, false, "Get email updates");
+  await writeJsonAtomically(join(runDirectory, "modal-closed-accessibility.json"), accessibility);
+  return [...evidence, { shrink, accessibility }];
 }
 
 async function driveState(options: {
@@ -1645,27 +1635,27 @@ async function driveState(options: {
   readonly browser: BrowserDriver;
   readonly runDirectory: string;
   readonly state: FixtureState;
-  readonly experiment?: "inline";
+  readonly experiment?: "stable";
 }): Promise<ScenarioEvidence> {
   const context = await options.browser.run(["tab", "new"]);
   await options.browser.run(["set", "viewport", "1280", "900"]);
   await options.browser.run([
     "open",
-    `${DEFAULT_BASE_URL}/?state=${encodeURIComponent(options.state)}${options.experiment === "inline" ? "&experiment=inline" : ""}`,
+    `${DEFAULT_BASE_URL}/?state=${encodeURIComponent(options.state)}${options.experiment === "stable" ? "&attribution=stable" : ""}`,
   ]);
   await options.browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
   const waitForEnrollment = async () => {
-    if (options.experiment !== "inline") return;
+    if (options.experiment !== "stable") return;
     await options.browser.run(["wait", "--fn", `(() => {
-      const form = document.querySelector('form[data-copy-variant="goblin"]');
-      const layout = window.matchMedia('(min-width: 47.5rem)').matches ? 'inline' : 'button';
-      return form?.getAttribute('data-layout') === layout
-        && form.querySelector('input[name="experimentToken"]')?.value === '${"a".repeat(64)}';
+      const form = document.querySelector('form');
+      return document.querySelector('summary')?.textContent === 'Get email updates'
+        && form?.querySelector('input[name="experimentToken"]')?.value === '${"a".repeat(64)}';
     })()`, "--timeout", "5000"]);
   };
   await waitForEnrollment();
   await options.browser.evaluate(SETTLE_EXPRESSION);
   if (options.state === "pending" || options.state === "accepted" || options.state === "error") {
+    await options.browser.run(["click", '[data-slot="hraness-mailing-disclosure"] > summary']);
     await options.browser.run(["fill", 'input[name="email"]', TEST_EMAIL]);
     await options.browser.run(["click", 'button[type="submit"]']);
   }
@@ -1689,7 +1679,7 @@ async function driveState(options: {
         const honeypot = document.querySelector('input[name="website"]');
         return button instanceof HTMLButtonElement
           && !button.disabled
-          && button.textContent === ${JSON.stringify(options.experiment === "inline" ? "Feed the goblin" : "Send me things")}
+          && button.textContent === "Subscribe"
           && honeypot instanceof HTMLInputElement
           && honeypot.value === ""
           && honeypot.getAttribute("aria-hidden") === "true"
@@ -1702,10 +1692,10 @@ async function driveState(options: {
   // Synthetic pointerdown marks the form interacted, which correctly suppresses
   // enrollment rebuilds on later viewport changes, so the probe runs only in
   // the non-experiment idle scenario.
-  if (options.state === "idle" && options.experiment !== "inline") {
+  if (options.state === "idle" && options.experiment !== "stable") {
     const foil = await options.browser.evaluate(`(async () => {
-      const button = document.querySelector('button[type="submit"]');
-      if (!(button instanceof HTMLElement)) throw new Error('Idle signup lost its foil submit.');
+      const button = document.querySelector('[data-slot="hraness-mailing-disclosure"] > summary');
+      if (!(button instanceof HTMLElement)) throw new Error('Idle signup lost its foil trigger.');
       const enhanced = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)').matches;
       const vars = () => [
         button.style.getPropertyValue('--hraness-foil-x'),
@@ -1760,7 +1750,7 @@ async function driveState(options: {
     }
     foilEvidence = foil;
   }
-  if (options.state === "pending" || options.state === "accepted") {
+  if (options.state === "accepted") {
     const focused = await options.browser.evaluate(
       "document.activeElement?.matches('[data-slot=\"hraness-mailing-list-status\"]') === true",
     );
@@ -1783,7 +1773,7 @@ async function driveState(options: {
     additionalWidths.push(await sampleViewport({ ...options, kind: width < 760 ? "compact" : "wide" }));
   }
   let disclosure: readonly unknown[] = [];
-  if (options.experiment === "inline") {
+  if (options.experiment === "stable") {
     await options.browser.run(["set", "viewport", "390", "844"]);
     await waitForEnrollment();
     disclosure = await verifyDisclosure(options.browser, options.runDirectory);
@@ -1855,7 +1845,7 @@ async function driveState(options: {
 async function driveNoSignup(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string, account = false): Promise<readonly unknown[]> {
   const scenario = account ? "account" : "no-signup";
   await browser.run(["tab", "new"]);
-  await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=${account ? "account&experiment=inline" : "none"}`]);
+  await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=${account ? "account&attribution=stable" : "none"}`]);
   await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
   const evidence: unknown[] = [];
   for (const width of [320, 390, 760, 1280]) {
@@ -2028,10 +2018,10 @@ async function runVerifier(): Promise<string> {
         state,
       }));
     }
-    const inlineDirectory = join(artifacts.runDirectory, "inline-enrollment");
+    const inlineDirectory = join(artifacts.runDirectory, "fixed-attribution");
     await mkdir(inlineDirectory, { recursive: true });
-    console.log("Verifying version 3 inline enrollment and outer panel bounds");
-    evidence.push(await driveState({ bootstrapTabId, browser, runDirectory: inlineDirectory, state: "idle", experiment: "inline" }));
+    console.log("Verifying stable modal, fixed attribution, keyboard focus and viewport shrink");
+    evidence.push(await driveState({ bootstrapTabId, browser, runDirectory: inlineDirectory, state: "idle", experiment: "stable" }));
     assertCrossStateGeometry(evidence);
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     accountEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId, true);

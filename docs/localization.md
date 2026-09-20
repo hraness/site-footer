@@ -6,7 +6,7 @@ These are translation and transcreation drafts reviewed as code. They are **not 
 
 ## Meaning and consent
 
-The action is an email-update request for the consumer's explicitly configured audience. Copy does not promise an account, payment, token purchase, upload, early access or membership. “Upload me” and equivalents are excluded because this form does not upload anything. “Get started” and bare “Join” are excluded because they obscure what happens next. Every playful English CTA keeps the form's explicit email-subscription accessible name.
+The action is an email-update request for the consumer's explicitly configured audience. Copy does not promise an account, payment, token purchase, upload, early access or membership. “Upload me” and equivalents are excluded because this form does not upload anything. “Get started” and bare “Join” are excluded because they obscure what happens next. The stable presentation uses explicit email-update copy, a visible email label, neutral `you@example.com`, and a plain subscribe action. Historical playful hypotheses remain in the legacy catalog only.
 
 Accepted means the server accepted a request. It does not claim a completed subscription or an account was created. English asks the visitor to check email to confirm; other packs ask them to check email for the next step. Verification and request failures have separate messages. Do not expose server errors or interpolate email addresses into analytics properties.
 
@@ -58,9 +58,21 @@ Other language packs are explicitly unreviewed drafts: Italian, Catalan, Swedish
 
 For editorial review, compare each pair for action clarity, idiomatic register, placeholder fit, regional vocabulary, script and gender assumptions. Review acceptance and verification messages with the same care as the CTA. Any copy change should carry a new experiment/copy version so historical results are not attributed to different wording. Pool sparse localities rather than claiming a separate winner from a handful of visits. Optimization should compare conversion for the same audience and locale context; it must not infer sensitive traits or invent local affiliation.
 
-## Presentation version 3
+## Stable modal presentation
 
-The Accounts request includes `presentationVersion: 3` and `viewport: compact | wide`. Its `footer-v3-<viewport>` policy separates these recipes from historical observations. Compact enrollment is button-only; it does not fold inline allocations into button analytics. Each copy pair remains stable for its enrollment. A breakpoint change suppresses exposure and conversion attribution from the prior viewport, including native form submission. No-JavaScript rendering uses the same responsive disclosure and email form.
+`stable-modal-v1` is the current default. It uses one button and a native modal at
+every width, with the same details/form as its no-JavaScript fallback. The English
+CTA is “Get email updates”; the form action is “Subscribe”. Hraness audience copy
+promises new writing and project updates without inventing cadence. Other
+supported locales use their explicit email-update title plus separate localized
+presubmission instructions. Acceptance copy is never used to describe an idle
+form. New descriptions remain reviewed-as-code drafts, not native-speaker proof.
+
+Fixed attribution is opt-in and cannot alter copy, layout, visibility or input.
+The stable envelope includes an expiry time and exact locale/viewport scope.
+Legacy v1–v3 schemas and wording remain historical; they are not selected by the
+new React presentation. Locale and direction still come from the canonical
+catalog. The deprecated experiment prop has no presentation effects.
 
 ## Account link
 

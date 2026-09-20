@@ -1,3 +1,15 @@
+/** Optional, payload-bounded observations. No event contains visitor input. */
+export type HranessFooterConversionStage = "impression" | "open" | "close" | "input_started" | "validation_failed" | "submit" | "accepted" | "error";
+export type HranessFooterConversionReason = "dismiss_button" | "escape" | "backdrop" | "invalid_email" | "required_email" | "request_failed" | "network_error";
+export interface HranessFooterConversionEvent {
+    readonly stage: HranessFooterConversionStage;
+    readonly presentationVersion: "stable-modal-v1";
+    /** The explicitly configured, validated public mailing-list ID. */
+    readonly audience: string;
+    /** A canonical locale selected from the package's finite locale catalog. */
+    readonly locale: string;
+    readonly reason?: HranessFooterConversionReason;
+}
 import { type FooterVariant } from "./experiment.js";
 import { type FooterLocale } from "./locales.js";
 /** Portable public shape, checked against the bundled foundation by the release gate. */

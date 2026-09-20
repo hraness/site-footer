@@ -15,7 +15,7 @@ audience by default.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.15.0
+bun add github:hraness/site-footer#v0.16.0
 ```
 
 Start with the network footer and no mailing form:
@@ -104,11 +104,12 @@ provide a stable lowercase product audience:
 />
 ```
 
-Hraness.com uses the same shared `hraness` audience and experiment:
+Hraness.com uses the shared `hraness` audience:
 
 ```tsx
 <HranessSiteFooter
-  experiment
+  attribution={measurementEligible}
+  onConversion={measurementEligible ? captureFooterConversion : undefined}
   mailingList={{ audience: "hraness", kind: "signup" }}
   showBrand={false}
 />
@@ -153,7 +154,7 @@ The static renderer supports the same state without JavaScript.
 
 The host owns authentication; the footer never reads session cookies or fetches
 identity. Use `none` while the initial session is unresolved or unavailable,
-`account` when signed in, and `signup` only after confirming signed-out status.
+`account` when signed in. Hosts may show the unmeasured stable `signup` during initial or unavailable session checks; enable attribution only after confirming signed-out status.
 These states are mutually exclusive and require no audience for account access.
 
 ```tsx
@@ -161,10 +162,9 @@ These states are mutually exclusive and require no audience for account access.
 ```
 
 During a background session refresh, a host may retain the current signup form
-and pass `experiment={false}` to preserve typed email while disabling all signup
+and pass `attribution={false}` and omit `onConversion` to preserve typed email while disabling all signup
 attribution. The existing native hidden token is disabled before another event
-can submit it. An interacted form remains unattributed after refresh; a fresh
-signup surface may receive a new enrollment. Switching to account or none aborts
+can submit it. A successful unchanged signed-out refresh may reuse an unexpired, same-scope in-memory token. Switching to account or none aborts
 pending signup work and ignores late responses. The independent cookie-consent
 behavior and social links stay available in every mode.
 
@@ -295,9 +295,12 @@ The stylesheet follows `--plain-*` or common product theme variables when
 present and falls back to system colors. The footer is sticky by default and reserves its own document footprint, so
 content is not obscured. Pass `placement="flow"` for a host that owns a full-height
 layout and wants normal document flow. The signup footer always uses one aligned row.
-Below `47.5rem`, every recipe presents a compact native disclosure button; opening
-it reveals the email form above the bar. At wider widths the layout experiment
-selects that button or an inline form. Substack always remains visible; X,
+At every width, one stable “Get email updates” button opens the same signup form.
+React upgrades its native disclosure to a named `dialog` with synchronous email
+focus, browser focus containment, Escape/dismiss return focus, and a scrollable
+viewport-bounded panel. The email field uses at least 16px text and both form
+controls are at least 48px tall. Without JavaScript, native details reveals the
+same functional POST form. Substack always remains visible; X,
 LinkedIn and GitHub appear in that order as the social group's available space permits. At and above `47.5rem` the social group grows to its four
 targets before the row's flexible gap receives any width, then the
 gap takes the remainder; a starved row still sheds icons in priority order.
@@ -309,39 +312,52 @@ the device's safe-area inset below that spacing. Its computed height includes
 both. Do not add another footer bar, viewport spacer, or blank padding after it in a
 consumer layout. Product navigation belongs with the page navigation.
 
-The React adapter requests a short-lived Accounts enrollment and exposes it
-only after the visible footer settles. Until an assignment resolves, the signup
-presentation stays veiled instead of showing the default recipe; the chosen arm
-then fades in, so a variant never follows a visible control swap. The veil
-applies only where scripting can resolve it, leaving static and no-JavaScript
-handoffs visible, and reduced motion reveals immediately. Presentation version 3 isolates compact and
-wide cohorts: compact assignments always use the button and are never counted
-as inline exposures. Crossing the breakpoint invalidates attribution; active
-email text is preserved. The native form carries the same eligible enrollment
-capability as enhanced submission. Version 3 tests copy and wide-screen layout;
-its holographic treatment is fixed (`color: green`, `shimmer: false`) so cosmetic
-arms do not dilute the results. Legacy recipes retain bounded color and shimmer
-support. Accounts keeps a randomized exploration stream and
-serves an evidence-qualified recipe to the remaining traffic; PostHog receives
-only anonymous enrollment events and confirmed double-opt-in conversions.
+The `stable-modal-v1` presentation never waits for a session check, feature flag,
+assignment, or telemetry. The deprecated `experiment` prop is accepted but inert.
+Copy and layout do not change after an attribution response. Pending, retryable
+error, dismissal/reopening, callback changes and attribution eligibility changes
+preserve the form and its input. Generic request acceptance hides the form inside
+the modal and says “Check your email to confirm”; the footer button remains.
 
-English copy tests six stable, deliberately different paired hypotheses: “Send me
-things” / “sjobs@apple.com”; “I'm curious” / “billg@microsoft.com”;
-“Feed the goblin” / “chunkylover53@aol.com”; “Beam me up” / “tom@myspace.com”;
-“Push the button” / “neo@metacortex.com”; and “Let me in” / “satoshin@gmx.com”.
-Other locales retain their two localized styles. Programmatic labels still say
-email signup, independently of the playful visible copy.
+The modal uses a visible email label, neutral `you@example.com` placeholder, and
+plain “Subscribe” submit. For the `hraness` audience, the benefit is new writing
+and Hraness project updates. Other audiences receive neutral email-update copy;
+no cadence or exclusive content is promised. Initial localized descriptions are
+presubmission instructions, separate from acceptance messages.
 
-The joined email field and CTA share one static holographic border treatment in
-both renderers. Bordered controls draw the keyboard focus ring inside their own
-border box, so joined edges never collide with a neighbor's edge; borderless
-links keep the outside ring. React adds a
-damped pointer-following sheen and hue-shifting glow for mouse, pen, and touch
-contact anywhere on the page: the spectral ring turns toward the pointer like a
-light source while the sheen slides along the border, easing into place over a
-few frames instead of snapping. There is no idle loop, filters, canvas or React
-rerenders, and touch contact releases its state on lift. Reduced motion and
-forced colors disable this enhancement.
+Optional `onConversion` receives only `{ stage, presentationVersion, audience,
+locale, reason? }`. Stages are `impression`, `open`, `close`, `input_started`,
+`validation_failed`, `submit`, `accepted`, and `error`. Reasons are the fixed
+`dismiss_button`, `escape`, `backdrop`, `invalid_email`, `required_email`,
+`request_failed`, or `network_error` values. Locale comes from the finite package
+catalog. No email, text length, freeform input, URL or enrollment token reaches
+the callback. Exceptions are isolated. Impression requires 50% visibility for
+400ms and is deduplicated; input-start is deduplicated, and duplicate pending
+submissions do not create another request or event. Omit the callback whenever
+measurement is ineligible. Adding/removing it never changes the UI. `accepted`
+means only a generic anti-enumeration request acceptance, including suppressed
+or honeypot cases; it is never a provider-delivery or confirmed-subscription event.
+
+`attribution` defaults to false. Eligible consumers may enable it to request the
+fixed Accounts `stable-modal-v1` token and attach that opaque capability to native
+and enhanced posts. The response never selects UI. Pending, failed and malformed
+responses leave the button usable. Ineligibility immediately disables the hidden
+token and aborts measurement requests. An unexpired same-origin, audience, locale
+and viewport token may be reused in memory after a successful session recheck,
+with a 60-second expiry margin; tokens are never persisted. A viewport change
+uses fresh scoped attribution while preserving the active form. Accounts alone
+records true double-opt-in confirmation through the existing challenge/outbox
+path. Historical randomized presentation versions remain distinct.
+
+The button and submit retain the shared static foil border, with optional bounded
+pointer enhancement and reduced-motion/forced-color fallbacks. The email field
+is quiet and separately labelled. All styling is compiled through StyleX. Native
+modal custody may write only two numeric viewport custom properties and preserve
+and restore the document root's overflow; it never injects a stylesheet.
+
+Version 0.16.0 introduces the stable modal and optional bounded lifecycle observations.
+
+### Historical releases
 
 Version 0.15.0 moves the signup foil treatment onto the shared Hraness foil
 contract from `@hraness/design-kit`: the same six-stop `--hraness-foil-*`
@@ -463,13 +479,9 @@ signup.
 | TypeScript, generated artifacts, all tests, and package boundary | `bun run check` |
 
 The browser verifier uses the real React adapter with a synthetic Accounts
-boundary on loopback. It also requests a version 3 inline enrollment and checks
-that the entire desktop disclosure panel matches the form height and remains
-inside the footer, including the 760px breakpoint. It proves the package state path and declared
-geometry, but not either live provider or overall visual quality. Inspect its
-wide and compact screenshots before making a design judgment.
-It compiles the real source with the same public collector and checks every
-extracted rule against the verified package manifest before launching a browser.
+boundary on loopback. It also requests fixed stable-modal-v1 attribution and verifies desktop/mobile
+native-modal opening, trusted synchronous focus, Tab containment, Escape,
+dismiss/reopen input preservation, and a short scrollable phone viewport.
 
 These deterministic checks do not prove a consumer's CSP, Accounts delivery,
 or provider retention. Verify those facts
@@ -514,7 +526,7 @@ variables, and CSP for everything else.
 
 Yes. The plain form posts directly to Accounts, which applies rate limiting
 and double opt-in and redirects to a confirmation page. The React adapter
-progressively enhances the same form with inline pending, error, and
+progressively enhances the same form with modal pending, error, and
 confirmation states.
 
 </details>

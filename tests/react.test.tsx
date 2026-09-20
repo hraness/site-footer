@@ -32,18 +32,13 @@ test("the idle React adapter renders identically to the static renderer", () => 
   const signupHtml = renderToStaticMarkup(
     <HranessSiteFooter mailingList={mailingList} showBrand={false} />,
   );
-  // The experiment veil is React-only progressive enhancement; the static
-  // handoff stays visible for environments that never hydrate.
-  expect(signupHtml).toContain('data-experiment="arming"');
-  expect(signupHtml.replace(' data-experiment="arming"', "")).toBe(renderHranessSiteFooter({
-    mailingList,
-    showBrand: false,
-  }));
+  expect(signupHtml).not.toContain("data-experiment");
+  expect(signupHtml).toBe(renderHranessSiteFooter({ mailingList, showBrand: false }));
   expect(signupHtml).not.toContain("turnstile");
   expect(signupHtml).not.toContain("challenges.cloudflare.com");
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
   expect(signupHtml).toContain('name="website"');
-  expect(signupHtml).toContain('type="submit">Send me things</button>');
+  expect(signupHtml).toContain('type="submit">Subscribe</button>');
   expect(signupHtml).not.toContain('data-slot="hraness-mark"');
   const social = {
     github: {
@@ -70,7 +65,7 @@ test("the idle React adapter renders identically to the static renderer", () => 
 test("the shared renderer bounds pending, accepted, and error states", () => {
   const idle = renderHranessSiteFooterInnerHtml(true, mailingList, { kind: "idle" });
   expect(idle).toContain('data-state="idle"');
-  expect(idle).not.toContain("disabled");
+  expect(parseHTML(idle).document.querySelector('button[type="submit"]')?.hasAttribute("disabled")).toBeFalse();
 
   const pending = renderHranessSiteFooterInnerHtml(true, mailingList, {
     audience: "soundfish",
@@ -88,7 +83,7 @@ test("the shared renderer bounds pending, accepted, and error states", () => {
     audience: "soundfish",
     kind: "accepted",
   });
-  expect(accepted).not.toContain("<form");
+  expect(parseHTML(accepted).document.querySelector("form")?.hasAttribute("hidden")).toBeTrue();
   expect(accepted).toContain('data-state="accepted"');
   expect(accepted).toContain('aria-atomic="true"');
   expect(accepted).toContain('role="status"');
@@ -469,8 +464,9 @@ test("the React adapter posts the native form, restores request focus, and confi
     expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled)
       .toBeFalse();
     expect(form?.querySelector<HTMLButtonElement>('button[type="submit"]')?.textContent)
-      .toBe("Send me things");
+      .toBe("Subscribe");
     expect(window.document.querySelectorAll("script")).toHaveLength(0);
+    await act(async () => { container!.querySelector("summary")!.dispatchEvent(new window.Event("click", { bubbles: true, cancelable: true })); });
     input!.value = "reader@example.com";
 
     await act(async () => {
@@ -524,8 +520,8 @@ test("the React adapter posts the native form, restores request focus, and confi
       await Promise.resolve();
     });
 
-    expect(container?.querySelector("form")).toBeNull();
-    expect(container?.querySelector('[data-state="accepted"]')?.textContent)
+    expect(container?.querySelector("form")?.hidden).toBeTrue();
+    expect(container?.querySelector('[data-slot="hraness-mailing-list-status"]')?.textContent)
       .toBe("Check your email to confirm");
   } finally {
     await act(async () => {
@@ -556,7 +552,7 @@ test("eligible enrollment survives native submission but resize removes stale at
   const media = { matches: false, addEventListener: (_type: string, fn: () => void) => changes.add(fn), removeEventListener: (_type: string, fn: () => void) => changes.delete(fn) };
   Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => query === "(min-width: 47.5rem)" ? media : { matches: false, addEventListener() {}, removeEventListener() {} } });
   Object.defineProperty(window, "localStorage", { configurable: true, value: { getItem: () => "accepted" } });
-  const requests: Array<{ action: string; audience?: string; locale?: string; presentationVersion?: number; viewport?: string }> = [];
+  const requests: Array<{ action: string; audience?: string; locale?: string; presentationVersion?: string; viewport?: string }> = [];
   const token = "b".repeat(64);
   const overrides = {
     Comment: window.Comment, document: window.document, Element: window.Element, Event: window.Event,
@@ -565,9 +561,9 @@ test("eligible enrollment survives native submission but resize removes stale at
     fetch: (async (_input: unknown, init?: RequestInit) => {
       const body = JSON.parse(String(init?.body));
       requests.push(body);
-      return Response.json({ version: 1, token, assignment: {
-        id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "goblin",
-        color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v3-${body.viewport}`,
+      return Response.json({ version: 1, token, expiresAt: Date.now() + 48 * 60 * 60 * 1000, assignment: {
+        id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "direct",
+        color: "green", shimmer: false, cohort: "fixed", policyVersion: "stable-modal-v1", viewport: body.viewport,
       } });
     }) as typeof fetch,
   };
@@ -580,26 +576,26 @@ test("eligible enrollment survives native submission but resize removes stale at
   const container = window.document.querySelector<HTMLElement>("#root")!;
   const root = createRoot(container);
   try {
-    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
+    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" attribution />); });
     const email = container.querySelector<HTMLInputElement>('input[name="email"]')!;
     const nativeToken = container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!;
-    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 3, viewport: "compact" }]);
+    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: "stable-modal-v1", viewport: "compact" }]);
     expect(nativeToken.value).toBe(token);
     expect(nativeToken.disabled).toBeFalse();
-    expect(container.querySelector(".hraness-site-footer__disclosure-closed-label")?.textContent).toBe("Feed the goblin, Subscribe by email");
+    expect(container.querySelector("summary")?.textContent).toBe("Get email updates");
     email.value = "do-not-erase@example.test";
     await act(async () => { email.dispatchEvent(new window.Event("focusin", { bubbles: true })); });
     await act(async () => { media.matches = true; changes.forEach(fn => fn()); });
     expect(container.querySelector('input[name="email"]')).toBe(email);
     expect(email.value).toBe("do-not-erase@example.test");
-    expect(nativeToken.disabled).toBeTrue();
-    expect(nativeToken.value).toBe("");
-    expect(requests).toHaveLength(1);
+    expect(nativeToken.disabled).toBeFalse();
+    expect(nativeToken.value).toBe(token);
+    expect(requests).toHaveLength(2);
     // A later parent render must not rebuild the now-unattributed active form.
-    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
+    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" attribution />); });
     expect(container.querySelector('input[name="email"]')).toBe(email);
     expect(email.value).toBe("do-not-erase@example.test");
-    expect(nativeToken.disabled).toBeTrue();
+    expect(nativeToken.disabled).toBeFalse();
   } finally {
     await act(async () => { root.unmount(); });
     for (const [key, descriptor] of previous) {
@@ -609,13 +605,13 @@ test("eligible enrollment survives native submission but resize removes stale at
   }
 });
 
-test("wide inline enrollment paints the experiment form with its attribution token", async () => {
+test("wide fixed attribution leaves the stable button visible with no arming veil", async () => {
   const { window } = parseHTML('<div id="root"></div>');
   const changes = new Set<() => void>();
   const media = { matches: true, addEventListener: (_type: string, fn: () => void) => changes.add(fn), removeEventListener: (_type: string, fn: () => void) => changes.delete(fn) };
   Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => query === "(min-width: 47.5rem)" ? media : { matches: true, addEventListener() {}, removeEventListener() {} } });
   Object.defineProperty(window, "localStorage", { configurable: true, value: { getItem: () => "accepted" } });
-  const requests: Array<{ action: string; audience?: string; locale?: string; presentationVersion?: number; viewport?: string }> = [];
+  const requests: Array<{ action: string; audience?: string; locale?: string; presentationVersion?: string; viewport?: string }> = [];
   const token = "a".repeat(64);
   const overrides = {
     Comment: window.Comment, document: window.document, Element: window.Element, Event: window.Event,
@@ -625,9 +621,9 @@ test("wide inline enrollment paints the experiment form with its attribution tok
     fetch: (async (_input: unknown, init?: RequestInit) => {
       const body = JSON.parse(String(init?.body));
       requests.push(body);
-      return Response.json({ version: 1, token, assignment: {
-        id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "inline", copyStyle: "goblin",
-        color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v3-${body.viewport}`,
+      return Response.json({ version: 1, token, expiresAt: Date.now() + 48 * 60 * 60 * 1000, assignment: {
+        id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "direct",
+        color: "green", shimmer: false, cohort: "fixed", policyVersion: "stable-modal-v1", viewport: body.viewport,
       } });
     }) as typeof fetch,
   };
@@ -640,13 +636,13 @@ test("wide inline enrollment paints the experiment form with its attribution tok
   const container = window.document.querySelector<HTMLElement>("#root")!;
   const root = createRoot(container);
   try {
-    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" />); });
-    const form = container.querySelector('form[data-copy-variant="goblin"]');
-    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: 3, viewport: "wide" }]);
-    expect(form?.getAttribute("data-layout")).toBe("inline");
+    await act(async () => { root.render(<HranessSiteFooter mailingList={mailingList} locale="en" attribution />); });
+    const form = container.querySelector("form");
+    expect(requests).toEqual([{ action: "assign", audience: "soundfish", locale: "en", presentationVersion: "stable-modal-v1", viewport: "wide" }]);
+    expect(container.querySelector("summary")?.textContent).toBe("Get email updates");
     expect(form?.querySelector<HTMLInputElement>('input[name="experimentToken"]')?.value).toBe(token);
-    // The arm's markup is already in place; the veil lifts once the assignment settles.
-    expect(container.querySelector("footer")?.getAttribute("data-experiment")).toBe("settled");
+    // Fixed attribution never hides or chooses the presentation.
+    expect(container.querySelector("footer")?.getAttribute("data-experiment")).toBeNull();
   } finally {
     await act(async () => { root.unmount(); });
     for (const [key, descriptor] of previous) {

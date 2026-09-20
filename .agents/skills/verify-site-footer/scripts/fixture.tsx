@@ -64,7 +64,7 @@ const pageParams = new URL(window.location.href).searchParams;
 const accountEnabled = pageParams.get("mailing") === "account";
 const signupEnabled = !accountEnabled && pageParams.get("mailing") !== "none";
 const consentRequired = pageParams.get("consent") === "required";
-const experimentEnabled = pageParams.get("experiment") === "inline";
+const experimentEnabled = pageParams.get("attribution") === "stable";
 const experimentRequests: unknown[] = [];
 const errors: string[] = [];
 const requests: RecordedRequest[] = [];
@@ -102,13 +102,13 @@ window.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     experimentRequests.push(body);
     if (request.action === "expose" && request.token === "a".repeat(64)) return new Response(null, { status: 202 });
     if (request.action !== "assign" || request.audience !== "footer-fixture" || request.locale !== "en"
-      || request.presentationVersion !== 3 || (request.viewport !== "wide" && request.viewport !== "compact")) {
-      throw new Error("The fixture requires an explicit version 3 viewport assignment.");
+      || request.presentationVersion !== "stable-modal-v1" || (request.viewport !== "wide" && request.viewport !== "compact")) {
+      throw new Error("The fixture requires an explicit fixed stable-modal-v1 attribution.");
     }
-    return Response.json({ version: 1, token: "a".repeat(64), assignment: {
+    return Response.json({ version: 1, token: "a".repeat(64), expiresAt: Date.now() + 48 * 60 * 60 * 1000, assignment: {
       id: "123e4567-e89b-42d3-a456-426614174000", locale: "en",
-      layout: request.viewport === "wide" ? "inline" : "button", copyStyle: "goblin",
-      color: "green", shimmer: false, cohort: "explore", policyVersion: `footer-v3-${request.viewport}`,
+      layout: "button", copyStyle: "direct",
+      color: "green", shimmer: false, cohort: "fixed", policyVersion: "stable-modal-v1", viewport: request.viewport,
     } });
   }
   if (url !== MAILING_URL) {
@@ -177,7 +177,7 @@ function Fixture() {
         // Keep the verifier's page shell in normal flow; production consumers
         // use the default sticky placement.
         placement="flow"
-        experiment={experimentEnabled}
+        attribution={experimentEnabled}
         locale="en"
         support={{ id: "soundfish", name: "Soundfish", updates: true,
           valueProposition: "Support ongoing development of browser music tools." }}

@@ -167,8 +167,8 @@ describe("Hraness site footer", () => {
     expect(footer?.querySelector("script")).toBeNull();
     expect(html).not.toContain("turnstile");
     expect(html).not.toContain("challenges.cloudflare.com");
-    expect(submit?.textContent).toBe("Send me things");
-    const status = form?.querySelector('[data-slot="hraness-mailing-list-status"]');
+    expect(submit?.textContent).toBe("Subscribe");
+    const status = footer?.querySelector('[data-slot="hraness-mailing-list-status"]');
     expect(status?.id).toBe("hraness-mailing-list-status");
     expect(status?.getAttribute("aria-atomic")).toBe("true");
     expect(status?.textContent).toBe("");
@@ -213,7 +213,7 @@ describe("Hraness site footer", () => {
     expect(document.querySelector("form")).toBeNull();
   });
 
-  test("renders localized button and inline experiment recipes", () => {
+  test("renders localized stable copy regardless of legacy variant inputs", () => {
     const html = renderHranessSiteFooter({
       mailingList: productMailingList,
       locale: "es-AR",
@@ -225,13 +225,11 @@ describe("Hraness site footer", () => {
     const summary = details?.querySelector("summary");
     expect(form?.getAttribute("lang")).toBe("es-AR");
     expect(form?.getAttribute("dir")).toBe("ltr");
-    expect(form?.getAttribute("data-layout")).toBe("button");
-    expect(form?.getAttribute("data-copy-variant")).toBe("inviting");
-    expect(form?.getAttribute("data-color")).toBe("orange");
-    expect(form?.getAttribute("data-shimmer")).toBe("true");
-    expect(summary?.textContent).toContain("Avisame");
-    expect(form?.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("billg@microsoft.com");
-    expect(form?.querySelector(".hraness-site-footer__shimmer")).not.toBeNull();
+    expect(details?.getAttribute("data-layout")).toBe("button");
+    expect(details?.getAttribute("data-presentation")).toBe("stable-modal-v1");
+    expect(summary?.textContent).toBe("Recibir novedades por correo");
+    expect(form?.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("you@example.com");
+    expect(form?.querySelector(".hraness-site-footer__shimmer")).toBeNull();
   });
 
   test("rejects malformed mailing-list audience IDs", () => {
@@ -337,15 +335,15 @@ describe("Hraness site footer", () => {
 });
 
 
-test("inline recipes retain one native mobile disclosure and one uniquely labelled form", () => {
+test("legacy inline inputs retain one stable native disclosure and one uniquely labelled form", () => {
   const { document } = parseHTML(renderHranessSiteFooter({ mailingList: { kind: "signup", audience: "hraness" }, variant: { layout: "inline", copyStyle: "goblin", color: "blue", shimmer: false } }));
   const disclosure = document.querySelector('[data-slot="hraness-mailing-disclosure"]');
   expect(disclosure?.tagName).toBe("DETAILS");
   expect(disclosure?.hasAttribute("open")).toBeFalse();
-  expect(disclosure?.querySelector(".hraness-site-footer__disclosure-closed-label")?.textContent).toBe("Feed the goblin, Subscribe by email");
+  expect(disclosure?.querySelector("summary")?.textContent).toBe("Get email updates");
   expect(disclosure?.querySelector("summary")?.hasAttribute("aria-label")).toBeFalse();
-  expect(disclosure?.querySelector(".hraness-site-footer__disclosure-open-label")?.textContent).toBe("CloseClose email signup");
+  expect(disclosure?.querySelector("dialog")?.hasAttribute("open")).toBeTrue();
   expect(document.querySelectorAll("form")).toHaveLength(1);
-  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("chunkylover53@aol.com");
+  expect(document.querySelector('input[name="email"]')?.getAttribute("placeholder")).toBe("you@example.com");
   expect(document.querySelector('input[name="email"]')?.closest("label")?.textContent).toBe("Email address");
 });

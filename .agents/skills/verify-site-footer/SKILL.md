@@ -39,14 +39,12 @@ The four sequential contexts are `idle`, `pending`, `accepted`, and `error`. Eac
 
 Do not add state setters or alternate footer markup to make a run pass. Read [the signup-state map](references/features/signup-states.md) when changing state coverage and [the responsive-layout map](references/features/responsive-layout.md) when changing geometry rules.
 
-A fifth signup context requests a synthetic version 3 inline enrollment through
-the real Accounts browser port, then repeats all four widths. The wide samples
-require the complete disclosure panel to match the form height and remain inside
-the footer. Compact reassignment must produce the button arm. The manifest retains
-the actual named rectangles and experiment requests. It then checks compact
-click/keyboard opening, synchronous email focus, Close and Escape, preserved
-input, a stable trigger footprint, localized accessible names, quieter open
-styling, 16px input text, and an attached 4–6px popup gap at 390px and 320px.
+A fifth signup context requests synthetic fixed `stable-modal-v1` attribution
+through the real Accounts browser port. It checks stable modal opening at desktop,
+390px and 320px, trusted synchronous email focus, Tab containment, close button,
+Escape/Enter/Space, input preservation, stable trigger footprint and 16px email
+text. A 320×300 viewport proves the dialog stays within the viewport and scrolls
+to its submit control. No presentation response may hide or choose the UI.
 
 A separate context renders the real footer with `mailingList: { kind: "none" }` at the same four widths. It checks all five link targets, no mailing UI or provider interaction, matching top and bottom visual padding plus the device safe-area inset, and visible keyboard focus through the home link and four social links.
 
@@ -65,13 +63,13 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - exact repository source-content identity before drive, after drive, and after cleanup;
 - wide brand, mailing, and social centerlines within 1 CSS pixel;
 - equal input and submit heights;
-- wide inline outer panel height equal to its form and complete containment inside the footer;
-- an absolute hidden idle status that does not enlarge its form row;
+- native modal containment with readable, separated 48px form controls;
+- idle status hidden without reserving space, and visible request state inside the modal;
 - four social targets at wide widths and a visible priority prefix beginning with Substack at compact widths;
 - the exact “by Hraness” organization lockup on the home link in every context, with no standalone attribution block;
 - positive computed top padding and bottom padding equal to that padding plus an independently measured device safe-area inset;
 - actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;
-- an in-flow footer row whose visible status surfaces clear its top edge;
+- an in-flow footer row with a stable trigger independent of the modal request state;
 - no compact horizontal overflow;
 - declared minimum target sizes; and
 - two-sample Direct stability with no named-layout violations.

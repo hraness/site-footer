@@ -79,31 +79,35 @@ const styles = stylex.create({
     "--hraness-site-footer-action-background": "light-dark(#1e40af, #93c5fd)",
     "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #172554)",
   },
-  experimentArm: {
-    opacity: { default: 1, [stylex.when.ancestor('[data-experiment="arming"]', rootMarker)]: { "@media (scripting: enabled)": 0 } },
-    visibility: { default: "visible", [stylex.when.ancestor('[data-experiment="arming"]', rootMarker)]: { "@media (scripting: enabled)": "hidden" } },
-    transitionProperty: { default: null, "@media (prefers-reduced-motion: no-preference)": "opacity, visibility" },
-    transitionDuration: { default: null, "@media (prefers-reduced-motion: no-preference)": "200ms" },
-    transitionTimingFunction: { default: null, "@media (prefers-reduced-motion: no-preference)": "ease-out" },
+  disclosure: { position: "static", gridArea: "mailing", "min-inline-size": 0, "max-inline-size": "22rem" },
+  dialog: {
+    position: { default: "absolute", ":modal": "fixed" },
+    "inset-block-start": { default: "auto", ":modal": "var(--hraness-signup-viewport-top, 0px)" },
+    "inset-block-end": { default: "calc(100% + 0.5rem)", ":modal": "calc(100% - var(--hraness-signup-viewport-top, 0px) - var(--hraness-signup-viewport-height, 100dvh))" },
+    "inset-inline": 0, margin: "auto",
+    "inline-size": "min(28rem, calc(100vw - 2rem))",
+    "max-inline-size": "calc(100vw - 2rem)",
+    "max-block-size": "calc(var(--hraness-signup-viewport-height, 100dvh) - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+    overflowY: "auto", overscrollBehavior: "contain", scrollbarGutter: "stable",
+    "padding-block": "clamp(1.25rem, 4vw, 2rem)", "padding-inline": "clamp(1.25rem, 4vw, 2rem)",
+    borderWidth: 0, borderRadius: "1rem",
+    backgroundColor: { default: "var(--hraness-site-footer-background)", "::backdrop": "rgb(0 0 0 / 0.55)" },
+    color: "var(--hraness-site-footer-foreground)",
+    boxShadow: "0 1rem 3rem rgb(0 0 0 / 0.25)",
+    fontFamily: "inherit", fontSize: "1rem", lineHeight: 1.5,
   },
-  disclosure: { position: { default: "static", "@media (min-width: 47.5rem)": "relative" }, gridArea: "mailing", "min-inline-size": 0, "max-inline-size": { default: "12rem", "@media (min-width: 47.5rem)": "20rem" } },
-  disclosureInline: {
-    // Keep one native form: on wide screens the same closed disclosure becomes
-    // the inline experiment arm. Modern details hides via content-visibility.
-    contentVisibility: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": { "::details-content": "visible" } } },
+  dialogHeader: { display: "flex", alignItems: "start", gap: "1rem", justifyContent: "space-between" },
+  dialogTitle: { margin: 0, fontSize: "1.5rem", fontWeight: 650, lineHeight: 1.2, textWrap: "balance" },
+  dialogDescription: { marginBlockStart: "0.75rem", marginBlockEnd: "1.5rem", fontSize: "1rem", lineHeight: 1.5 },
+  dialogClose: {
+    display: { default: "inline-flex", ":is([hidden])": "none" }, alignItems: "center", justifyContent: "center", flexShrink: 0,
+    "inline-size": "44px", "block-size": "44px", marginBlockStart: "-0.5rem", marginInlineEnd: "-0.5rem",
+    borderWidth: 0, borderRadius: "0.375rem", backgroundColor: { default: "transparent", ":hover": "var(--hraness-site-footer-field-background)" },
+    color: "inherit", cursor: "pointer",
   },
-  triggerInline: { display: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "none" } } },
-  panelInline: {
-    display: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "block" } },
-    position: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "static" } },
-    // Match the panel's logical axes so the conditional reset shares their
-    // compiled priority layer; a padding shorthand loses to those longhands.
-    "padding-block": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
-    "padding-inline": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
-    borderWidth: { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": 0 } },
-    "inline-size": { default: null, "@supports selector(::details-content)": { "@media (min-width: 47.5rem)": "100%" } },
-  },
+  emailLabel: { display: "block", marginBlockEnd: "0.5rem", fontSize: "0.9375rem", fontWeight: 600 },
   disclosureTrigger: {
+    cursor: "pointer", fontWeight: 600,
     listStyleType: "none", "inline-size": "fit-content", "max-inline-size": "100%",
     borderRadius: "0.375rem", "margin-inline-start": 0,
     fontSize: { default: "0.75rem", "@media (min-width: 47.5rem)": "0.8125rem" },
@@ -111,10 +115,9 @@ const styles = stylex.create({
     "padding-inline": "0.625rem",
     display: { default: "inline-grid", "::-webkit-details-marker": "none" },
     gridTemplateAreas: '"label"', justifyItems: "center",
-    backgroundImage: { default: holographicBackgroundImage, [stylex.when.ancestor("[open]", disclosureMarker)]: "none", "@media (forced-colors: active)": "none" },
-    boxShadow: { [stylex.when.ancestor("[open]", disclosureMarker)]: "none" },
-    borderColor: { default: "transparent", [stylex.when.ancestor("[open]", disclosureMarker)]: "var(--hraness-site-footer-line)", "@media (forced-colors: active)": "ButtonText" },
-    color: { default: "var(--hraness-site-footer-foreground)", [stylex.when.ancestor("[open]", disclosureMarker)]: "var(--hraness-site-footer-muted)" },
+    backgroundImage: { default: holographicBackgroundImage, "@media (forced-colors: active)": "none" },
+    borderColor: { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
+    color: "var(--hraness-site-footer-foreground)",
   },
   triggerClosed: {
     gridArea: "label",
@@ -214,7 +217,7 @@ const styles = stylex.create({
   },
   innerSignup: {
     gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing . consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
     gridTemplateRows: "var(--hraness-site-footer-content-block-size)",
   },
   innerAccount: {
@@ -234,7 +237,7 @@ const styles = stylex.create({
   },
   innerSignupSupport: {
     gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support . consent links"' },
-    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(10rem, 18rem) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+    gridTemplateColumns: { default: "auto minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerAccountSupport: {
     gridTemplateAreas: { default: '"brand mailing support links"', "@media (min-width: 47.5rem)": '"brand mailing support . consent links"' },
@@ -334,8 +337,8 @@ const styles = stylex.create({
     gridArea: "mailing", "inline-size": "min(100%, 18rem)", "min-inline-size": 0,
     "block-size": "var(--hraness-site-footer-form-block-size)", margin: 0,
   },
-  mailing: { position: "relative", display: "grid", gridTemplateRows: "var(--hraness-site-footer-control-block-size)" },
-  mailingControls: { display: "flex", "min-inline-size": 0 },
+  mailing: { position: "relative", display: { default: "block", ":is([hidden])": "none" }, margin: 0, "inline-size": "100%" },
+  mailingControls: { display: "grid", gap: "1rem", "min-inline-size": 0 },
   mailingLabel: { display: "block", "min-inline-size": 0, flexGrow: 1, flexShrink: 1, flexBasis: "auto" },
   control: {
     "block-size": "var(--hraness-site-footer-control-block-size)",
@@ -347,33 +350,26 @@ const styles = stylex.create({
     fontOpticalSizing: "inherit", fontVariationSettings: "inherit",
   },
   mailingInput: {
-    "--hraness-site-footer-holo-surface": "var(--hraness-site-footer-field-background)",
-    "inline-size": "100%", "min-inline-size": 0,
-    fontSize: { default: "0.8125rem", "@media (max-width: 47.499rem), (pointer: coarse)": "max(1rem, 16px)" },
-    borderStartStartRadius: "0.375rem", borderStartEndRadius: 0, borderEndEndRadius: 0, borderEndStartRadius: "0.375rem",
-    backgroundColor: "var(--hraness-site-footer-field-background)",
+    "inline-size": "100%", "min-inline-size": 0, "min-block-size": "48px", fontSize: "max(1rem, 16px)",
+    borderRadius: "0.5rem", backgroundColor: "var(--hraness-site-footer-field-background)",
     color: { default: "var(--hraness-site-footer-foreground)", "::placeholder": "var(--hraness-site-footer-muted)" },
-    opacity: { default: null, "::placeholder": 1 }, "padding-inline": "0.625rem",
+    caretColor: "var(--hraness-site-footer-foreground)",
+    opacity: { default: null, "::placeholder": 1 }, "padding-inline": "0.875rem",
   },
   mailingSubmit: {
-    alignItems: "center", display: "inline-flex", justifyContent: "center", lineHeight: 1, "margin-inline-start": "-2px",
-    borderStartStartRadius: 0, borderStartEndRadius: "0.375rem", borderEndEndRadius: "0.375rem", borderEndStartRadius: 0,
+    alignItems: "center", display: "inline-flex", justifyContent: "center", lineHeight: 1.2,
+    borderRadius: "0.5rem", "min-block-size": "48px", "inline-size": "100%",
     backgroundColor: { default: "var(--hraness-site-footer-action-background)", "@media (forced-colors: active)": "ButtonText" },
     color: { default: "var(--hraness-site-footer-action-foreground)", "@media (forced-colors: active)": "ButtonFace" },
-    cursor: { default: "pointer", ":disabled": "wait" },
-    opacity: { default: null, ":disabled": 0.62 },
-    fontWeight: 650, fontSize: "0.8125rem", "padding-inline": "0.625rem", "max-inline-size": "55%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center",
+    cursor: { default: "pointer", ":disabled": "wait" }, opacity: { default: null, ":disabled": 0.62 },
+    fontWeight: 650, fontSize: "1rem", "padding-inline": "0.875rem", textAlign: "center",
   },
   mailingStatus: {
-    position: "absolute", zIndex: 2,
-    "inset-block-end": "calc(100% + var(--hraness-site-footer-mailing-overlay-offset) + var(--hraness-site-footer-row-gap))",
-    "inset-inline": 0, overflow: "hidden", "min-inline-size": 0, "min-block-size": "var(--hraness-site-footer-status-block-size)",
-    margin: 0, borderRadius: "0.375rem",
-    backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
-    color: "var(--hraness-site-footer-muted)", fontSize: "0.875rem", lineHeight: 1.25, opacity: 0,
-    "padding-block": "0.35rem", "padding-inline": "0.5rem", pointerEvents: "none", visibility: "hidden", whiteSpace: "normal", overflowWrap: "anywhere",
+    marginBlockStart: "1rem", marginBlockEnd: 0, "min-inline-size": 0, padding: 0,
+    color: "var(--hraness-site-footer-foreground)", fontSize: "1rem", lineHeight: 1.5,
+    display: "none", whiteSpace: "normal", overflowWrap: "anywhere",
   },
-  statusVisible: { opacity: 1, visibility: "visible" },
+  statusVisible: { display: "block" },
   statusError: { color: "var(--hraness-site-footer-foreground)" },
   mailingConfirmation: {
     borderRadius: "0.375rem", backgroundColor: "var(--hraness-site-footer-field-background)",
@@ -395,11 +391,17 @@ export const footerClasses = {
   account: className("hraness-site-footer__account", styles.box, styles.backgroundReset, styles.border, styles.control, styles.account, styles.focusInset),
   support: className("hraness-site-footer__support", styles.box, styles.support, styles.focus, styles.motion),
   supportIcon: className("hraness-site-footer__support-icon", styles.socialIcon),
-  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure, styles.experimentArm)} ${stylex.props(disclosureMarker).className}`,
-  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.mailingSubmit, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
+  disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${stylex.props(disclosureMarker).className}`,
+  disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
   triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
+  dialog: className("hraness-site-footer__dialog", styles.box, styles.dialog),
+  dialogHeader: className("hraness-site-footer__dialog-header", styles.dialogHeader),
+  dialogTitle: className("hraness-site-footer__dialog-title", styles.dialogTitle),
+  dialogDescription: className("hraness-site-footer__dialog-description", styles.dialogDescription),
+  dialogClose: className("hraness-site-footer__dialog-close", styles.box, styles.dialogClose, styles.focusInset),
+  emailLabel: className("hraness-site-footer__email-label", styles.emailLabel),
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
   brandName: className("hraness-site-footer__brand-name", styles.brandName),
@@ -415,11 +417,11 @@ export const footerClasses = {
   consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),
   consentLink: className("hraness-site-footer__consent-link", styles.consentLink, styles.focus, styles.motion),
-  mailing: className("hraness-site-footer__mailing", styles.box, styles.mailingGeometry, styles.mailing),
+  mailing: className("hraness-site-footer__mailing", styles.box, styles.mailing),
   honeypot: className("hraness-site-footer__honeypot", styles.visuallyHidden),
   mailingControls: className("hraness-site-footer__mailing-controls", styles.box, styles.mailingControls),
   mailingLabel: className("hraness-site-footer__mailing-label", styles.box, styles.mailingLabel),
-  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.holographic, styles.focusInset),
+  mailingInput: className("hraness-site-footer__mailing-input", styles.box, styles.backgroundReset, styles.border, styles.control, styles.mailingInput, styles.focusInset),
   mailingSubmit: className("hraness-site-footer__mailing-submit", styles.box, styles.backgroundReset, styles.border, styles.control, styles.fixedFlex, styles.mailingSubmit, styles.holographic, styles.focusInset, styles.motion),
   mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focusInset),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden),
@@ -440,15 +442,12 @@ export function socialItemClassName(index = 0): string {
 }
 
 export function mailingStatusClassName(state: string): string {
-  return className("hraness-site-footer__mailing-status", styles.box, styles.backgroundReset, styles.border, styles.mailingStatus, styles.focusInset,
+  return className("hraness-site-footer__mailing-status", styles.box, styles.mailingStatus, styles.focusInset,
     state !== "idle" && styles.statusVisible,
     state === "error" && styles.statusError);
 }
 
-export function disclosureClassNames(layout: FooterVariant["layout"]): { root: string; trigger: string; panel: string } {
-  return {
-    root: `${footerClasses.disclosure} ${layout === "inline" ? stylex.props(styles.disclosureInline).className : ""}`.trim(),
-    trigger: `${footerClasses.disclosureTrigger} ${layout === "inline" ? stylex.props(styles.triggerInline).className : ""}`.trim(),
-    panel: `${footerClasses.disclosurePanel} ${layout === "inline" ? stylex.props(styles.panelInline).className : ""}`.trim(),
-  };
+/** Historical layout arguments no longer change the stable signup surface. */
+export function disclosureClassNames(_layout: FooterVariant["layout"]): { root: string; trigger: string; panel: string } {
+  return { root: footerClasses.disclosure, trigger: footerClasses.disclosureTrigger, panel: footerClasses.disclosurePanel };
 }
