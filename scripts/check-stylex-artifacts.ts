@@ -37,15 +37,16 @@ export function assertSourceBoundary(path: string, source: string): void {
       assert.notEqual(key, "style", `Owned style objects are forbidden: ${path}`);
     }
     if (ts.isPropertyAccessExpression(node)) {
-      // The pointer controller may only update three numeric inputs consumed by
-      // compiled recipes. It cannot set CSS declarations, inject styles or sheets.
+      // The pointer controller may only update two numeric light inputs
+      // consumed by compiled recipes. It cannot set CSS declarations, inject
+      // styles or sheets, and it never rotates the material direction.
       const call = node.parent.parent;
       const foilInput = path === "src/foil.ts" && node.name.text === "style"
         && ts.isPropertyAccessExpression(node.parent)
         && ["setProperty", "removeProperty"].includes(node.parent.name.text)
         && ts.isCallExpression(call) && call.expression === node.parent
         && call.arguments[0] !== undefined && ts.isStringLiteral(call.arguments[0])
-        && ["--hraness-foil-x", "--hraness-foil-y", "--hraness-foil-angle"].includes(call.arguments[0].text);
+        && ["--hraness-foil-x", "--hraness-foil-y"].includes(call.arguments[0].text);
       // Native-dialog custody may supply two numeric viewport inputs and
       // preserve/restore only the document root's overflow while it is modal.
       const modalInput = path === "src/react.tsx" && node.name.text === "style"

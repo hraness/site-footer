@@ -12,6 +12,7 @@ export declare const footerClasses: {
     supportIcon: string;
     disclosure: string;
     disclosureTrigger: string;
+    disclosureLabel: string;
     triggerClosed: string;
     triggerOpen: string;
     disclosurePanel: string;
@@ -46,7 +47,7 @@ export declare const footerClasses: {
     visuallyHidden: string;
 };
 export declare function footerClassName(signup: boolean, sticky?: boolean): string;
-export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"], account?: boolean, support?: boolean): string;
+export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"], account?: boolean, support?: boolean, showBrand?: boolean): string;
 export declare function socialItemClassName(index?: number): string;
 export declare function mailingStatusClassName(state: string): string;
 /** Historical layout arguments no longer change the stable signup surface. */

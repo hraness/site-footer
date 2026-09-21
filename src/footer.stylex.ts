@@ -8,8 +8,9 @@ export const rootMarker = stylex.defineMarker();
 // overrides or the same scheme-conditioned defaults, including the deeper dark
 // palette that keeps the pointer sheen visible.
 const holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
-const holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(circle at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(64% + var(--hraness-foil-glow, 0) * 28%), transparent) 0%, transparent 46%), conic-gradient(from var(--hraness-foil-angle, 135deg), var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6), var(--_hraness-foil-1))";
-const holographicBackgroundClip = "padding-box, border-box, border-box";
+const holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%), radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%), linear-gradient(115deg, var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6))";
+const holographicBackgroundClip = "padding-box, border-box, border-box, border-box";
+const holographicHalo = "0 1px 4px color-mix(in srgb, var(--hraness-site-footer-foreground, CanvasText) 12%, transparent)";
 const holographicStops = {
   "--_hraness-foil-1": { default: "var(--hraness-foil-1, oklch(0.89 0.065 337))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-1, oklch(0.56 0.16 340))" },
   "--_hraness-foil-2": { default: "var(--hraness-foil-2, oklch(0.875 0.05 277))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-2, oklch(0.52 0.15 285))" },
@@ -17,7 +18,6 @@ const holographicStops = {
   "--_hraness-foil-4": { default: "var(--hraness-foil-4, oklch(0.95 0.045 96))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-4, oklch(0.72 0.13 100))" },
   "--_hraness-foil-5": { default: "var(--hraness-foil-5, oklch(0.9 0.05 55))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-5, oklch(0.55 0.15 45))" },
   "--_hraness-foil-6": { default: "var(--hraness-foil-6, oklch(0.875 0.06 305))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-6, oklch(0.62 0.16 305))" },
-  "--_hraness-foil-halo": { default: "var(--hraness-foil-halo-alpha, 0.3)", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-halo-alpha, 0.45)" },
 };
 
 // Same direction, spread, and timing as Hraness.com's token support control.
@@ -112,12 +112,18 @@ const styles = stylex.create({
     borderRadius: "0.375rem", "margin-inline-start": 0,
     fontSize: { default: "0.75rem", "@media (min-width: 47.5rem)": "0.8125rem" },
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-    "padding-inline": "0.625rem",
-    display: { default: "inline-grid", "::-webkit-details-marker": "none" },
-    gridTemplateAreas: '"label"', justifyItems: "center",
+    "padding-inline": "0.625rem", "padding-block": 0,
+    // A block flex box avoids a summary line-box strut, while the label
+    // owns truncation and a page-independent, vertically centered line height.
+    display: { default: "flex", "::-webkit-details-marker": "none" },
+    alignItems: "center", justifyContent: "center", lineHeight: 1.2,
     backgroundImage: { default: holographicBackgroundImage, "@media (forced-colors: active)": "none" },
     borderColor: { default: "transparent", "@media (forced-colors: active)": "ButtonText" },
     color: "var(--hraness-site-footer-foreground)",
+  },
+  disclosureLabel: {
+    display: "block", "min-inline-size": 0, overflow: "hidden",
+    whiteSpace: "nowrap", textOverflow: "ellipsis",
   },
   triggerClosed: {
     gridArea: "label",
@@ -147,7 +153,7 @@ const styles = stylex.create({
     },
     backgroundOrigin: "border-box",
     backgroundClip: holographicBackgroundClip,
-    boxShadow: { default: "0 0 0.375rem hsl(var(--hraness-foil-angle, 135deg) 55% 75% / var(--_hraness-foil-halo))", "@media (forced-colors: active)": "none" },
+    boxShadow: { default: holographicHalo, "@media (forced-colors: active)": "none" },
   },
   compactConfirmation: { fontSize: "0.75rem", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" },
   shimmer: {
@@ -223,6 +229,24 @@ const styles = stylex.create({
   innerAccount: {
     gridTemplateAreas: { default: '"brand mailing links"', "@media (min-width: 47.5rem)": '"brand mailing . consent links"' },
     gridTemplateColumns: { default: "auto minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+  },
+  // Removing a brand must remove its track and gutter, including after a
+  // React support-profile update recomputes the row's presentation.
+  innerNoBrand: {
+    gridTemplateAreas: { default: '"links"', "@media (min-width: 47.5rem)": '". consent links"' },
+    gridTemplateColumns: { default: "minmax(0, 1fr)", "@media (min-width: 47.5rem)": "minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+  },
+  innerMailingNoBrand: {
+    gridTemplateAreas: { default: '"mailing links"', "@media (min-width: 47.5rem)": '"mailing . consent links"' },
+    gridTemplateColumns: { default: "minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "minmax(0, max-content) minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+  },
+  innerSupportNoBrand: {
+    gridTemplateAreas: { default: '"support links"', "@media (min-width: 47.5rem)": '"support . consent links"' },
+    gridTemplateColumns: { default: "auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+  },
+  innerMailingSupportNoBrand: {
+    gridTemplateAreas: { default: '"mailing support links"', "@media (min-width: 47.5rem)": '"mailing support . consent links"' },
+    gridTemplateColumns: { default: "minmax(0, max-content) auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "minmax(0, max-content) auto minmax(0, 1fr) auto minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   account: {
     gridArea: "mailing", display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -393,6 +417,7 @@ export const footerClasses = {
   supportIcon: className("hraness-site-footer__support-icon", styles.socialIcon),
   disclosure: `${className("hraness-site-footer__disclosure", styles.disclosure)} ${stylex.props(disclosureMarker).className}`,
   disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
+  disclosureLabel: className("hraness-site-footer__disclosure-label", styles.disclosureLabel),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
   triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
@@ -431,9 +456,9 @@ export function footerClassName(signup: boolean, sticky = true): string {
   return `${className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint)} ${stylex.props(rootMarker).className}`;
 }
 
-export function footerInnerClassName(signup: boolean, sticky = true, color: FooterVariant["color"] = "green", account = false, support = false): string {
+export function footerInnerClassName(signup: boolean, sticky = true, color: FooterVariant["color"] = "green", account = false, support = false, showBrand = true): string {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, !showBrand && styles.innerNoBrand, !showBrand && (signup || account) && styles.innerMailingNoBrand, !showBrand && support && styles.innerSupportNoBrand, !showBrand && support && (signup || account) && styles.innerMailingSupportNoBrand, sticky && styles.stickyBar, signup && colorStyle);
 }
 
 export function socialItemClassName(index = 0): string {

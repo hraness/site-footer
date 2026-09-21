@@ -61,6 +61,13 @@ function boundedError(value: unknown): string {
 
 const selectedState = selectedFixtureState();
 const pageParams = new URL(window.location.href).searchParams;
+const showBrand = pageParams.get("brand") !== "hidden";
+const supportEnabled = pageParams.get("support") !== "none";
+const locale = pageParams.get("locale") === "fr" ? "fr" : "en";
+const placement = pageParams.get("placement") === "sticky" ? "sticky" : "flow";
+const fixtureLineHeight = pageParams.get("lineHeight");
+if (fixtureLineHeight === "1" || fixtureLineHeight === "2") document.body.dataset.fixtureLineHeight = fixtureLineHeight;
+if (pageParams.get("font") === "wide") document.body.dataset.fixtureFont = "wide";
 const accountEnabled = pageParams.get("mailing") === "account";
 const signupEnabled = !accountEnabled && pageParams.get("mailing") !== "none";
 const consentRequired = pageParams.get("consent") === "required";
@@ -176,11 +183,12 @@ function Fixture() {
       <HranessSiteFooter
         // Keep the verifier's page shell in normal flow; production consumers
         // use the default sticky placement.
-        placement="flow"
+        placement={placement}
+        showBrand={showBrand}
         attribution={experimentEnabled}
-        locale="en"
-        support={{ id: "soundfish", name: "Soundfish", updates: true,
-          valueProposition: "Support ongoing development of browser music tools." }}
+        locale={locale}
+        {...(supportEnabled ? { support: { id: "soundfish", name: "Soundfish", updates: true,
+          valueProposition: "Support ongoing development of browser music tools." } } : {})}
         mailingList={accountEnabled ? { kind: "account" } : signupEnabled ? {
           audience: "footer-fixture",
           kind: "signup",
