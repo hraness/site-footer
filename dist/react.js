@@ -1,96 +1,125 @@
 "use client";
 
 // src/foil.ts
-var REST_X = 50;
-var REST_Y = 50;
-var REST_ANGLE = 135;
-var EASE = 0.22;
+var REST = 50;
 var SETTLE = 0.05;
-var MIN_PCT = -100;
-var MAX_PCT = 200;
-var clamp = (value) => Math.max(MIN_PCT, Math.min(MAX_PCT, value));
-var wrap = (angle) => (angle % 360 + 360) % 360;
-var shortestTurn = (from, to) => wrap(to - from + 180) - 180;
+var RESPONSE_MS = 85;
+var MIN_LIGHT = 8;
+var MAX_LIGHT = 92;
+var clampLight = (value) => Math.max(MIN_LIGHT, Math.min(MAX_LIGHT, value));
 function attachFooterFoil(root) {
-  if (typeof window.matchMedia !== "function" || typeof requestAnimationFrame !== "function")
+  if (typeof window.matchMedia !== "function" || typeof requestAnimationFrame !== "function" || typeof cancelAnimationFrame !== "function")
     return () => {};
-  const preference = window.matchMedia("(prefers-reduced-motion: no-preference) and (forced-colors: none)");
+  const preference = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)");
   const states = new Map;
-  let pointerX = 0;
-  let pointerY = 0;
+  let targets = [];
+  let needsTargets = true;
+  let pointer;
   let frame = 0;
+  let previousTime;
+  const restore = (target) => {
+    target.style.removeProperty("--hraness-foil-x");
+    target.style.removeProperty("--hraness-foil-y");
+  };
   const reset = () => {
     if (frame)
       cancelAnimationFrame(frame);
     frame = 0;
-    for (const target of states.keys()) {
-      target.style.removeProperty("--hraness-foil-x");
-      target.style.removeProperty("--hraness-foil-y");
-      target.style.removeProperty("--hraness-foil-angle");
-    }
+    previousTime = undefined;
+    pointer = undefined;
+    for (const target of states.keys())
+      restore(target);
     states.clear();
+    targets = [];
+    needsTargets = true;
   };
-  const paint = () => {
+  const refreshTargets = () => {
+    targets = [...root.matches("[data-foil]") ? [root] : [], ...root.querySelectorAll("[data-foil]")].filter((target) => {
+      const ancestor = target.parentElement?.closest("[data-foil]");
+      return !ancestor || !root.contains(ancestor);
+    });
+    const live = new Set(targets);
+    for (const target of states.keys()) {
+      if (!live.has(target)) {
+        restore(target);
+        states.delete(target);
+      }
+    }
+    needsTargets = false;
+  };
+  const paint = (time) => {
     frame = 0;
-    if (!preference.matches) {
+    if (!preference.matches || document.hidden || !pointer) {
       reset();
       return;
     }
-    const live = new Set(root.querySelectorAll("[data-foil]"));
-    for (const target of states.keys())
-      if (!live.has(target))
-        states.delete(target);
-    let settled = true;
-    for (const target of live) {
-      if (!target.isConnected) {
-        states.delete(target);
+    if (needsTargets)
+      refreshTargets();
+    const elapsed = previousTime === undefined ? 1000 / 60 : Math.max(0, Math.min(64, time - previousTime));
+    previousTime = time;
+    const ease = 1 - Math.exp(-elapsed / RESPONSE_MS);
+    const measured = targets.map((target) => ({
+      target,
+      bounds: target.getBoundingClientRect()
+    }));
+    let moving = false;
+    for (const {
+      target,
+      bounds
+    } of measured) {
+      if (!target.isConnected || !root.contains(target) || bounds.width <= 0 || bounds.height <= 0 || bounds.bottom <= 0 || bounds.right <= 0 || bounds.top >= window.innerHeight || bounds.left >= window.innerWidth) {
+        if (states.has(target)) {
+          restore(target);
+          states.delete(target);
+        }
         continue;
       }
-      const bounds = target.getBoundingClientRect();
-      const tx = clamp((pointerX - bounds.left) / Math.max(1, bounds.width) * 100);
-      const ty = clamp((pointerY - bounds.top) / Math.max(1, bounds.height) * 100);
-      const ta = wrap(Math.atan2(pointerY - (bounds.top + bounds.height / 2), pointerX - (bounds.left + bounds.width / 2)) * (180 / Math.PI) + 90);
-      let state = states.get(target);
-      if (!state) {
-        state = {
-          x: REST_X,
-          y: REST_Y,
-          angle: REST_ANGLE
-        };
-        states.set(target, state);
+      const goal = {
+        x: clampLight(REST + (pointer.x - bounds.left - bounds.width / 2) / Math.max(160, bounds.width) * 60),
+        y: clampLight(REST + (pointer.y - bounds.top - bounds.height / 2) / Math.max(120, bounds.height) * 50)
+      };
+      const light = states.get(target) ?? {
+        x: REST,
+        y: REST
+      };
+      for (const axis of ["x", "y"]) {
+        const distance = goal[axis] - light[axis];
+        if (Math.abs(distance) > SETTLE) {
+          light[axis] += distance * ease;
+          moving = true;
+        } else
+          light[axis] = goal[axis];
       }
-      const dx = tx - state.x;
-      const dy = ty - state.y;
-      const da = shortestTurn(state.angle, ta);
-      if (Math.abs(dx) > SETTLE || Math.abs(dy) > SETTLE || Math.abs(da) > SETTLE) {
-        settled = false;
-        state.x += dx * EASE;
-        state.y += dy * EASE;
-        state.angle = wrap(state.angle + da * EASE);
-      } else {
-        state.x = tx;
-        state.y = ty;
-        state.angle = ta;
-      }
-      target.style.setProperty("--hraness-foil-x", `${state.x.toFixed(1)}%`);
-      target.style.setProperty("--hraness-foil-y", `${state.y.toFixed(1)}%`);
-      target.style.setProperty("--hraness-foil-angle", `${state.angle.toFixed(1)}deg`);
+      states.set(target, light);
+      target.style.setProperty("--hraness-foil-x", `${light.x.toFixed(2)}%`);
+      target.style.setProperty("--hraness-foil-y", `${light.y.toFixed(2)}%`);
     }
-    if (!settled)
+    if (moving)
       frame = requestAnimationFrame(paint);
+    else
+      previousTime = undefined;
   };
   const move = (event) => {
-    if (!preference.matches) {
+    if (!preference.matches || document.hidden || event.pointerType === "touch") {
       reset();
       return;
     }
-    pointerX = event.clientX;
-    pointerY = event.clientY;
+    if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY))
+      return;
+    pointer = {
+      x: event.clientX,
+      y: event.clientY
+    };
+    needsTargets = true;
     if (!frame)
       frame = requestAnimationFrame(paint);
   };
-  const release = (event) => {
-    if (event.pointerType === "touch")
+  const leave = (event) => {
+    if (event.relatedTarget === null)
+      reset();
+  };
+  const visibility = () => {
+    if (document.hidden)
       reset();
   };
   window.addEventListener("pointermove", move, {
@@ -99,19 +128,30 @@ function attachFooterFoil(root) {
   window.addEventListener("pointerdown", move, {
     passive: true
   });
-  window.addEventListener("pointerup", release, {
+  window.addEventListener("pointerout", leave, {
     passive: true
   });
   window.addEventListener("pointercancel", reset);
   window.addEventListener("blur", reset);
+  window.addEventListener("scroll", reset, {
+    passive: true,
+    capture: true
+  });
+  window.addEventListener("resize", reset, {
+    passive: true
+  });
+  document.addEventListener("visibilitychange", visibility);
   preference.addEventListener("change", reset);
   return () => {
     reset();
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerdown", move);
-    window.removeEventListener("pointerup", release);
+    window.removeEventListener("pointerout", leave);
     window.removeEventListener("pointercancel", reset);
     window.removeEventListener("blur", reset);
+    window.removeEventListener("scroll", reset, true);
+    window.removeEventListener("resize", reset);
+    document.removeEventListener("visibilitychange", visibility);
     preference.removeEventListener("change", reset);
   };
 }
@@ -263,7 +303,7 @@ var env = Object.freeze({});
 
 // src/footer.stylex.ts
 var holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
-var holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(circle at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(64% + var(--hraness-foil-glow, 0) * 28%), transparent) 0%, transparent 46%), conic-gradient(from var(--hraness-foil-angle, 135deg), var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6), var(--_hraness-foil-1))";
+var holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%), radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%), linear-gradient(115deg, var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6))";
 var styles = {
   root: {
     "--hraness-site-footer-foreground": "x1ktp55a",
@@ -411,12 +451,22 @@ var styles = {
     kVQacm: "xb3r6kr",
     kg5iWk: "xlyipyv",
     kJVvJu: "xvpgqt4",
-    k1xSpc: "xwz0xwf x1i5lizr",
-    kC13JO: "xrbltni",
-    kAPf3g: "x1o2pa38",
-    kKwaWg: "xc1emh9 xhobzj1",
+    kF3gjK: "xt970qd",
+    k1xSpc: "x78zum5 x1i5lizr",
+    kGNEyG: "x6s0dn4",
+    kjj79g: "xl56j7k",
+    kLWn49: "x1u7k74",
+    kKwaWg: "xq9wfvg xhobzj1",
     kVAM5u: "x9r1u3d x1ylmb6m",
     kMwMTN: "x1g4142m",
+    $$css: true
+  },
+  disclosureLabel: {
+    k1xSpc: "x1lliihq",
+    kdYMnH: "xesnm00",
+    kVQacm: "xb3r6kr",
+    khDVqt: "xuxw1ft",
+    kg5iWk: "xlyipyv",
     $$css: true
   },
   triggerClosed: {
@@ -450,16 +500,15 @@ var styles = {
     "--_hraness-foil-4": "x47qxf1 x1n6b76k",
     "--_hraness-foil-5": "x13hwd88 x1z0t8xj",
     "--_hraness-foil-6": "xx7v8hi x1bbyikp",
-    "--_hraness-foil-halo": "x1ciovt3 x11yejcl",
     "--hraness-foil-glow": "x136ldfs x1a9zcsi",
     kMzoRj: "xdh2fpr",
     kVAM5u: "x9r1u3d x1ylmb6m",
     kWkggS: "x1bvqrnj",
     kMwMTN: "x1g4142m",
-    kKwaWg: "xc1emh9 xhobzj1",
+    kKwaWg: "xq9wfvg xhobzj1",
     kl9DO0: "x1gqfdwy",
-    kHypHr: "x188zq58",
-    kGVxlE: "xa67z0c xwaqzdf",
+    kHypHr: "x123zpmm",
+    kGVxlE: "x1kyqxw3 xwaqzdf",
     $$css: true
   },
   compactConfirmation: {
@@ -565,6 +614,26 @@ var styles = {
   innerAccount: {
     kC13JO: "x1m6ayzh x12d2mci",
     kumcoG: "xo69rmz x1t3gk10",
+    $$css: true
+  },
+  innerNoBrand: {
+    kC13JO: "x14deco2 x1ovmjtf",
+    kumcoG: "x1mkdm3x xh9f616",
+    $$css: true
+  },
+  innerMailingNoBrand: {
+    kC13JO: "x1e1zwiu x1s2ae5y",
+    kumcoG: "x1olarsd x1xd8dcn",
+    $$css: true
+  },
+  innerSupportNoBrand: {
+    kC13JO: "x1rpbaqk x1r7kgav",
+    kumcoG: "x5o1nov x1qs5i8y",
+    $$css: true
+  },
+  innerMailingSupportNoBrand: {
+    kC13JO: "x1cbzbnn xydvb3f",
+    kumcoG: "x1nrjx37 x1g8uo05",
     $$css: true
   },
   account: {
@@ -930,6 +999,7 @@ var footerClasses = {
     className: "x1gmlqhs"
   }.className}`,
   disclosureTrigger: className("hraness-site-footer__disclosure-trigger", styles.box, styles.border, styles.control, styles.holographic, styles.disclosureTrigger, styles.focusInset, styles.motion),
+  disclosureLabel: className("hraness-site-footer__disclosure-label", styles.disclosureLabel),
   triggerClosed: className("hraness-site-footer__disclosure-closed-label", styles.triggerClosed),
   triggerOpen: className("hraness-site-footer__disclosure-open-label", styles.triggerOpen),
   disclosurePanel: className("hraness-site-footer__disclosure-panel", styles.box, styles.border, styles.disclosurePanel),
@@ -968,9 +1038,9 @@ function footerClassName(signup, sticky = true) {
     className: "x12mkk0b"
   }.className}`;
 }
-function footerInnerClassName(signup, sticky = true, color = "green", account = false, support = false) {
+function footerInnerClassName(signup, sticky = true, color = "green", account = false, support = false, showBrand = true) {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, !showBrand && styles.innerNoBrand, !showBrand && (signup || account) && styles.innerMailingNoBrand, !showBrand && support && styles.innerSupportNoBrand, !showBrand && support && (signup || account) && styles.innerMailingSupportNoBrand, sticky && styles.stickyBar, signup && colorStyle);
 }
 function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
@@ -2192,7 +2262,7 @@ function renderMailingList(mailingList, state, presentation) {
   const titleId = "hraness-mailing-dialog-title";
   const descriptionId = "hraness-mailing-dialog-description";
   const classes = disclosureClassNames("button");
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}">${escapeAttribute(copy.button)}</summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
 var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 function resolveSupportLink(profile) {
@@ -2212,7 +2282,7 @@ function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILIN
   const supportLink = resolveSupportLink(presentation.support);
   const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">${HRANESS_SUPPORT_ICON_HTML}</a>`;
   const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null, showBrand)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/react.tsx
@@ -2747,7 +2817,7 @@ function HranessSiteFooter({
       link.setAttribute("aria-label", supportLink.label);
       link.setAttribute("title", supportLink.title);
     }
-    inner.className = footerInnerClassName(mailingList.kind === "signup", placement === "sticky", variant.color, mailingList.kind === "account", supportLink !== null);
+    inner.className = footerInnerClassName(mailingList.kind === "signup", placement === "sticky", variant.color, mailingList.kind === "account", supportLink !== null, showBrand);
   }, [innerHtml, JSON.stringify(supportLink)]);
   useEffect(() => {
     if (footer.current === null || mailingList.kind !== "signup")
@@ -2860,4 +2930,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=18298CDF7DF8B59464756E2164756E21
+//# debugId=9862E8865B4D021E64756E2164756E21

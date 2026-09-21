@@ -1570,7 +1570,7 @@ async function verifyDisclosure(browser: BrowserDriver, runDirectory: string): P
         if (parseFloat(getComputedStyle(input).fontSize) < 16) throw new Error('Email may zoom on focus.');
         if (panel.left < 0 || panel.right > innerWidth + .5 || panel.top < 0 || panel.bottom > innerHeight + .5) throw new Error('Modal overflows the viewport.');
         if (document.documentElement.style.overflow !== 'hidden') throw new Error('Modal did not lock background scrolling.');
-        if (!getComputedStyle(disclosure.querySelector('button[type="submit"]')).backgroundImage.includes('conic-gradient')) throw new Error('Submit lost its foil border.');
+        if (!getComputedStyle(disclosure.querySelector('button[type="submit"]')).backgroundImage.includes('radial-gradient')) throw new Error('Submit lost its foil border.');
       }
       return { open: dialog.open, width: box.width, height: box.height, panelHeight: panel.height, inputFontSize: getComputedStyle(input).fontSize };
     })()`);
@@ -1696,7 +1696,7 @@ async function driveState(options: {
     const foil = await options.browser.evaluate(`(async () => {
       const button = document.querySelector('[data-slot="hraness-mailing-disclosure"] > summary');
       if (!(button instanceof HTMLElement)) throw new Error('Idle signup lost its foil trigger.');
-      const enhanced = matchMedia('(prefers-reduced-motion: no-preference) and (forced-colors: none)').matches;
+      const enhanced = matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) and (forced-colors: none)').matches;
       const vars = () => [
         button.style.getPropertyValue('--hraness-foil-x'),
         button.style.getPropertyValue('--hraness-foil-y'),
@@ -1713,6 +1713,9 @@ async function driveState(options: {
         }
       };
       const rect = button.getBoundingClientRect();
+      // The v2 light field maps pointer offset through a minimum 160px field,
+      // rests at 50%, and clamps to the material's 8%-92% bounds.
+      const goal = (offset) => Math.max(8, Math.min(92, 50 + (rect.width * offset - rect.width / 2) / Math.max(160, rect.width) * 60));
       const fire = (type, offset, pointerType) => button.dispatchEvent(new PointerEvent(type, {
         bubbles: true, clientX: rect.left + rect.width * offset, clientY: rect.top + rect.height / 2, pointerType,
       }));
@@ -1730,20 +1733,20 @@ async function driveState(options: {
       fire('pointerdown', 0.5, 'touch');
       await settle();
       const touch = vars();
-      fire('pointerup', 0.5, 'touch');
-      const released = vars();
       const expectNear = (sample, x) => Math.abs(parseFloat(sample[0]) - x) < 1;
       if (!enhanced) {
         if ([...mouseNear, ...mouseFar, ...offElement, ...touch].some(value => value !== '')) throw new Error('Foil painted without the motion and color fallbacks.');
-        return { enhanced, mouseNear, mouseFar, offElement, touch, released };
+        return { enhanced, mouseNear, mouseFar, offElement, touch };
       }
-      if (!expectNear(mouseNear, 20) || !expectNear(mouseFar, 80) || !expectNear(touch, 50)) {
-        throw new Error('Foil did not track mouse and touch position: ' + JSON.stringify({ mouseNear, mouseFar, touch }));
+      if (!expectNear(mouseNear, goal(0.2)) || !expectNear(mouseFar, goal(0.8))) {
+        throw new Error('Foil light did not track the pointer: ' + JSON.stringify({ mouseNear, mouseFar, goals: [goal(0.2), goal(0.8)] }));
       }
-      if (mouseNear[2] === mouseFar[2]) throw new Error('Foil angle did not follow pointer position.');
-      if (!(parseFloat(offElement[0]) < 0) || offElement[2] === '') throw new Error('Foil ignored pointer movement outside the control: ' + JSON.stringify(offElement));
-      if (released.some(value => value !== '')) throw new Error('Foil kept its pointer state after touch release.');
-      return { enhanced, mouseNear, mouseFar, offElement, touch, released };
+      for (const sample of [mouseNear, mouseFar, offElement]) {
+        if (sample[2] !== '') throw new Error('Foil rotated the material direction: ' + JSON.stringify(sample));
+        if (sample[0] === '' || parseFloat(sample[0]) < 8 || parseFloat(sample[0]) > 92) throw new Error('Foil light left its material bounds: ' + JSON.stringify(sample));
+      }
+      if (touch.some(value => value !== '')) throw new Error('Foil kept its pointer state for a touch input.');
+      return { enhanced, mouseNear, mouseFar, offElement, touch };
     })()`);
     if (!isRecord(foil) || foil.enhanced !== true) {
       throw new Error(`Foil enhancement probe could not run: ${renderUnknown(foil)}`);
@@ -1914,6 +1917,74 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
   return evidence;
 }
 
+/** The label and first visible control need their own proof: centered outer
+ * rectangles can hide top-aligned text and an empty hidden-brand grid track. */
+async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
+  const cases = [
+    { name: "hidden-signup-tight", width: 320, query: "brand=hidden&lineHeight=1&support=none" },
+    { name: "hidden-signup-loose", width: 1280, query: "brand=hidden&lineHeight=2&placement=sticky" },
+    { name: "hidden-account", width: 390, query: "brand=hidden&mailing=account&lineHeight=2" },
+    { name: "hidden-support", width: 760, query: "brand=hidden&mailing=none&lineHeight=2" },
+    { name: "hidden-socials", width: 320, query: "brand=hidden&mailing=none&support=none&lineHeight=1" },
+    { name: "visible-brand-loose", width: 1280, query: "lineHeight=2&placement=sticky" },
+    // agent-browser cannot emulate `(pointer: coarse)`; these run as fine-pointer
+    // stress cases. The compiled coarse-target rules are proven in styles.test.
+    { name: "narrow-long-label", width: 320, query: "locale=fr&font=wide&lineHeight=2&support=none" },
+    { name: "narrow-hidden-long-label", width: 390, query: "brand=hidden&locale=fr&font=wide&lineHeight=1&placement=sticky" },
+  ] as const;
+  const evidence: unknown[] = [];
+  await browser.run(["tab", "new"]);
+  for (const sample of cases) {
+    await browser.run(["open", `${DEFAULT_BASE_URL}/?${sample.query}`]);
+    await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
+    await browser.run(["set", "viewport", String(sample.width), "844"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const geometry = await browser.evaluate(`(() => {
+      const footer = document.querySelector('#hraness-site-footer');
+      const inner = footer.querySelector('.hraness-site-footer__inner');
+      const innerBox = inner.getBoundingClientRect();
+      const style = getComputedStyle(inner);
+      if (document.documentElement.scrollWidth > innerWidth + 0.5) throw new Error('Footer alignment case overflows the viewport.');
+      const substack = footer.querySelector('.hraness-site-footer__social-link');
+      if (!substack.checkVisibility()) throw new Error('Layout pressure hid Substack.');
+      const summary = footer.querySelector('.hraness-site-footer__disclosure-trigger');
+      const leading = summary ?? footer.querySelector('[data-slot="hraness-account-link"]') ?? footer.querySelector('[data-slot="hraness-support-link"]');
+      const result = { label: null, firstInset: null, footerHeight: innerBox.height };
+      if (footer.dataset.brand === 'hidden' && leading) {
+        const inset = leading.getBoundingClientRect().left - innerBox.left;
+        const expected = parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
+        if (Math.abs(inset - expected) > 0.5) throw new Error('Hidden brand left a track or gutter before the first control: ' + JSON.stringify({ inset, expected }));
+        result.firstInset = { inset, expected };
+      }
+      if (summary) {
+        const label = summary.querySelector('.hraness-site-footer__disclosure-label');
+        if (!label || label.textContent !== summary.textContent) throw new Error('Signup lost its full accessible label.');
+        const box = summary.getBoundingClientRect();
+        const text = label.getBoundingClientRect();
+        const centerDelta = Math.abs(text.top + text.height / 2 - box.top - box.height / 2);
+        if (centerDelta > 0.5) throw new Error('Signup label is not vertically centered: ' + centerDelta);
+        if (text.left < box.left || text.right > box.right || text.top < box.top || text.bottom > box.bottom) throw new Error('Signup label escapes its control.');
+        if (getComputedStyle(label).textOverflow !== 'ellipsis') throw new Error('Long signup labels need a bounded ellipsis without losing the accessible name.');
+        result.label = { centerDelta, height: box.height, lineHeight: getComputedStyle(summary).lineHeight, fullText: label.textContent, truncated: label.scrollWidth > label.clientWidth };
+      }
+      return result;
+    })()`);
+    const spacing = assertFooterSpacing(await browser.evaluate(FOOTER_SPACING_EXPRESSION), sample.name);
+    const screenshotPath = join(runDirectory, `alignment-${sample.name}.png`);
+    await screenshot(browser, screenshotPath);
+    evidence.push({ name: sample.name, geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
+  }
+  const errors = browserPageErrors(await browser.run(["errors"]));
+  const consoleErrors = browserConsoleErrors(await browser.run(["console"]));
+  if (errors.length || consoleErrors.length) throw new Error("Footer alignment cases produced browser errors.");
+  const tabId = activeTabId(await browser.run(["tab"]));
+  await browser.run(["tab", bootstrapTabId]);
+  try { await browser.run(["tab", "close", tabId]); } catch (error) { if (!isRecoverableTabCloseRace(error)) throw error; }
+  const inventory = await browser.run(["tab"]);
+  if (activeTabId(inventory) !== bootstrapTabId || tabIds(inventory).includes(tabId)) throw new Error("Alignment tab did not close back to the bootstrap tab.");
+  return evidence;
+}
+
 function assertCrossStateGeometry(evidence: readonly ScenarioEvidence[]): void {
   const idle = evidence.find(({ state }) => state === "idle");
   if (idle === undefined) throw new Error("Idle geometry evidence is missing.");
@@ -1974,6 +2045,7 @@ async function runVerifier(): Promise<string> {
   const evidence: ScenarioEvidence[] = [];
   let noSignupEvidence: readonly unknown[] = [];
   let accountEvidence: readonly unknown[] = [];
+  let alignmentEvidence: readonly unknown[] = [];
   let bootstrapInventory: unknown = null;
   let finalInventory: unknown = null;
   let postDriveSource: SourceIdentity | null = null;
@@ -2025,6 +2097,7 @@ async function runVerifier(): Promise<string> {
     assertCrossStateGeometry(evidence);
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     accountEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId, true);
+    alignmentEvidence = await driveAlignmentCases(browser, artifacts.runDirectory, bootstrapTabId);
     finalInventory = await browser.run(["tab"]);
     postDriveSource = sourceIdentity();
     assertSameSourceIdentity(initialSource, postDriveSource);
@@ -2077,6 +2150,7 @@ async function runVerifier(): Promise<string> {
     scenarios: evidence,
     noSignup: noSignupEvidence,
     account: accountEvidence,
+    alignment: alignmentEvidence,
     schema: "hraness.site-footer.browser-verification/v1",
     source: {
       afterCleanup: finalSource,

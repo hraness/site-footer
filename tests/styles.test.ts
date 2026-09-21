@@ -145,8 +145,9 @@ describe("compiled footer presentation", () => {
   });
 
   test("keeps one visible foil button and a scrollable native dialog at every width", () => {
-    contains(footerClasses.disclosureTrigger, "conic-gradient(");
-    contains(footerClasses.disclosureTrigger, "var(--hraness-foil-x,50%)");
+    contains(footerClasses.disclosureTrigger, "linear-gradient(115deg");
+    contains(footerClasses.disclosureTrigger, "radial-gradient(ellipse 28% 100% at var(--hraness-foil-x,50%)");
+    expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("conic-gradient");
     expect(disclosureClassNames("inline")).toEqual(disclosureClassNames("button"));
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("@supportsselector(::details-content)");
     expect(cssFor(footerClasses.disclosure)).not.toContain("visibility:hidden");
@@ -160,9 +161,31 @@ describe("compiled footer presentation", () => {
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("animation-name");
   });
 
+  test("centers a truncating signup label independently of the page line height", () => {
+    contains(footerClasses.disclosureTrigger, "display:flex");
+    contains(footerClasses.disclosureTrigger, "align-items:center");
+    contains(footerClasses.disclosureTrigger, "justify-content:center");
+    contains(footerClasses.disclosureTrigger, "line-height:1.2");
+    contains(footerClasses.disclosureTrigger, "padding-block:0");
+    contains(footerClasses.disclosureLabel, "min-inline-size:0");
+    contains(footerClasses.disclosureLabel, "text-overflow:ellipsis");
+    expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("grid-template-areas");
+  });
+
+  test("removes the absent brand track from every mailing and support combination", () => {
+    for (const signup of [false, true]) for (const account of [false, true]) for (const support of [false, true]) {
+      if (signup && account) continue;
+      const css = cssFor(footerInnerClassName(signup, true, "green", account, support, false));
+      expect(css).not.toContain("brand");
+      const leading = [...(signup || account ? ["mailing"] : []), ...(support ? ["support"] : [])];
+      expect(css).toContain(`grid-template-areas:"${[...leading, "links"].join("")}"`);
+      expect(css).toContain(`grid-template-areas:"${[...leading, ".", "consent", "links"].join("")}"`);
+    }
+  });
+
   test("uses a quiet separate email field and foil submit with readable controls", () => {
-    expect(cssFor(footerClasses.mailingInput)).not.toContain("conic-gradient");
-    contains(footerClasses.mailingSubmit, "conic-gradient(");
+    expect(cssFor(footerClasses.mailingInput)).not.toContain("linear-gradient(115deg");
+    contains(footerClasses.mailingSubmit, "linear-gradient(115deg");
     contains(footerClasses.mailingSubmit, "min-block-size:48px");
     contains(footerClasses.mailingControls, "display:grid");
     contains(footerClasses.mailingControls, "gap:1rem");
@@ -175,9 +198,11 @@ describe("compiled footer presentation", () => {
       contains(footerClasses.mailingSubmit, `var(--hraness-foil-${stop.at(-1)},`);
     }
     contains(footerClasses.mailingSubmit, "@media(prefers-color-scheme:dark)");
-    contains(footerClasses.mailingSubmit, "var(--hraness-foil-halo-alpha,");
-    contains(footerClasses.mailingSubmit, "var(--_hraness-foil-halo)");
+    contains(footerClasses.mailingSubmit, "0 1px 4px color-mix(in srgb");
+    contains(footerClasses.mailingSubmit, "padding-box,border-box,border-box,border-box");
     contains(footerClasses.mailingSubmit, "--hraness-foil-surface");
+    expect(cssFor(footerClasses.mailingSubmit)).not.toContain("--hraness-foil-angle");
+    expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("--hraness-foil-angle");
     expect(cssFor(footerClasses.mailingSubmit)).not.toContain("--footer-foil-");
     expect(cssFor(footerClasses.mailingSubmit)).not.toContain("lightningcss");
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("--footer-foil-");

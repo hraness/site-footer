@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { parseHTML } from "linkedom";
+import { footerInnerClassName } from "../src/footer.stylex.js";
 import { act } from "react";
 import { HranessSiteFooter, type HranessSiteFooterProps, type HranessFooterConversionEvent } from "../src/react.js";
 
@@ -194,5 +195,23 @@ test("later telemetry eligibility emits one visible impression and observer exce
     await render({ onConversion: () => { throw new Error("observer failure"); } });
     await click(container.querySelector("summary")!);
     expect(container.querySelector<HTMLDialogElement>("dialog")!.open).toBeTrue();
+  });
+});
+
+
+test("hidden-brand layout survives support updates without resetting the signup", async () => {
+  await fixture(async ({ render, container }) => {
+    await render({ showBrand: false });
+    const trigger = container.querySelector("summary");
+    const inner = () => container.querySelector(".hraness-site-footer__inner")!;
+    expect(inner().className).toBe(footerInnerClassName(true, true, "green", false, false, false));
+    const support = { id: "hraness", name: "Hraness", updates: true, valueProposition: "Support Hraness." };
+    await render({ showBrand: false, support });
+    expect(inner().className).toBe(footerInnerClassName(true, true, "green", false, true, false));
+    expect(container.querySelector("summary")).toBe(trigger);
+    expect(container.querySelector(".hraness-site-footer__brand")).toBeNull();
+    await render({ showBrand: false });
+    expect(inner().className).toBe(footerInnerClassName(true, true, "green", false, false, false));
+    expect(container.querySelector("summary")).toBe(trigger);
   });
 });

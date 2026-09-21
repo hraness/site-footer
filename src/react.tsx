@@ -465,7 +465,7 @@ export function HranessSiteFooter({
       link.setAttribute("aria-label", supportLink.label);
       link.setAttribute("title", supportLink.title);
     }
-    inner.className = footerInnerClassName(mailingList.kind === "signup", placement === "sticky", variant.color, mailingList.kind === "account", supportLink !== null);
+    inner.className = footerInnerClassName(mailingList.kind === "signup", placement === "sticky", variant.color, mailingList.kind === "account", supportLink !== null, showBrand);
   }, [innerHtml, JSON.stringify(supportLink)]);
 
   useEffect(() => {
