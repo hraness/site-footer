@@ -5,9 +5,9 @@ export const disclosureMarker = stylex.defineMarker();
 export const rootMarker = stylex.defineMarker();
 // The shared Hraness foil contract. Marketing roots may define the
 // --hraness-foil-* spectrum; the private --_hraness-foil-* stops resolve those
-// overrides or the same scheme-conditioned defaults. The ring uses the
-// metallic recipe of the marketing header wordmark: ink-toned chrome bands
-// carrying a faint spectral reflection, lit by the two pointer light fields.
+// overrides or the same scheme-conditioned defaults. The ring borrows the
+// chrome bands and faint spectral reflection of the marketing header
+// wordmark, lit by the surface recipe's two white pointer light fields.
 const holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
 const metal = (amount: number) => `color-mix(in oklch, var(--hraness-site-footer-foreground, CanvasText) ${amount}%, var(--hraness-site-footer-background, Canvas))`;
 const reflection = (index: number) => `color-mix(in oklch, var(--_hraness-foil-${index}) var(--hraness-foil-reflection, 14%), transparent)`;
