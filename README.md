@@ -1,14 +1,17 @@
 # @hraness/site-footer
 
-Add the shared Hraness footer to a React or static website. It shows the
-“by Hraness” home link, links to Hraness on Substack, X, LinkedIn, and GitHub,
-and a cookie note. A site can also show an email signup for its own mailing
-list, a link to the visitor's Hraness account, or a support link.
+Add the shared Hraness footer to a React or static website. By default it shows
+the “by Hraness” home link and links to Hraness on Substack, X, LinkedIn, and
+GitHub. A site can add an email signup for its own mailing list or a link to the
+visitor's Hraness account, and a support link. In the React component, a cookie
+note appears when the visitor's region requires consent or the region check
+fails.
 
 The package renders the markup and copy, and the static renderer and the React
-component render the same initial HTML. Each site picks its mailing list, theme colors, and
-security policy. There is no default mailing list: visitors to a product site
-join the general Hraness list only when that site configures it.
+component render the same initial HTML. Each site picks its mailing list, theme
+colors, and security policy. `mailingList` is required and has no default
+audience, so a product site's signup goes to the general Hraness list only when
+the site sets `audience: "hraness"`.
 
 ## Install and first render
 
@@ -168,16 +171,16 @@ identity. Use `none` while the initial session is unresolved or unavailable,
 `account` when signed in. Hosts may show the unmeasured stable `signup` during initial or unavailable session checks; enable attribution only after confirming signed-out status.
 These states are mutually exclusive and require no audience for account access.
 
+```tsx
+<HranessSiteFooter mailingList={{ kind: "account" }} />
+```
+
 The cookie note says cookies keep the visitor signed in only when the site
 passes `signIn`. Pass it on sites that keep visitors signed in with cookies,
 whatever the current `mailingList` mode; leave it out on sites without sign-in.
 
 ```tsx
 <HranessSiteFooter mailingList={{ kind: "account" }} signIn />
-```
-
-```tsx
-<HranessSiteFooter mailingList={{ kind: "account" }} />
 ```
 
 During a background session refresh, a host may retain the current signup form
