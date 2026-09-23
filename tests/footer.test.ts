@@ -195,7 +195,8 @@ describe("Hraness site footer", () => {
     expect(accept?.getAttribute("type")).toBe("button");
     expect(accept?.textContent).toBe("Accept cookies");
     expect(learnMore?.querySelector("summary")?.textContent).toBe("Learn more");
-    expect(learnMore?.textContent).toContain("no advertising or cross-site trackers");
+    expect(learnMore?.textContent).toContain("None of it is used for advertising or cross-site tracking.");
+    expect(learnMore?.textContent).not.toContain("signed in");
     expect(privacy?.textContent).toBe("Privacy policy");
     expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeGreaterThan(
       html.indexOf('data-slot="hraness-mailing-list-signup"'),
@@ -203,6 +204,50 @@ describe("Hraness site footer", () => {
     expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeLessThan(
       html.indexOf('aria-label="Hraness links"'),
     );
+  });
+
+  test("claims cookie sign-in only for sites that pass signIn", () => {
+    for (const mailingList of [noMailingList, productMailingList, { kind: "account" } as const]) {
+      const without = parseHTML(renderHranessSiteFooter({ mailingList })).document
+        .querySelector('[data-slot="hraness-cookie-consent"] details')?.textContent ?? "";
+      const withSignIn = parseHTML(renderHranessSiteFooter({ mailingList, signIn: true })).document
+        .querySelector('[data-slot="hraness-cookie-consent"] details')?.textContent ?? "";
+
+      expect(without).not.toMatch(/signed in|sign in/u);
+      expect(without).toContain("remembers your appearance setting and this choice");
+      expect(withSignIn).toContain("Cookies keep you signed in");
+      expect(withSignIn).toContain("remembers your appearance setting and this choice");
+      for (const text of [without, withSignIn]) {
+        expect(text).toContain("None of it is used for advertising or cross-site tracking.");
+        expect(text).not.toContain("—");
+      }
+    }
+  });
+
+  test("names the product in the English signup dialog only when configured", () => {
+    const named = parseHTML(renderHranessSiteFooter({
+      mailingList: { ...productMailingList, name: "Soundfish" },
+    })).document;
+    expect(named.querySelector('[data-slot="hraness-mailing-dialog"] p')?.textContent)
+      .toBe("Get Soundfish updates by email. You're subscribed once you confirm your address.");
+    expect(named.querySelector('input[name="audience"]')?.getAttribute("value")).toBe(productMailingList.audience);
+
+    const unnamed = parseHTML(renderHranessSiteFooter({ mailingList: productMailingList })).document;
+    expect(unnamed.querySelector('[data-slot="hraness-mailing-dialog"] p')?.textContent)
+      .toBe("Get updates by email. You're subscribed once you confirm your address.");
+
+    const spanish = parseHTML(renderHranessSiteFooter({
+      locale: "es-ES",
+      mailingList: { ...productMailingList, name: "Soundfish" },
+    })).document;
+    expect(spanish.querySelector('[data-slot="hraness-mailing-dialog"] p')?.textContent).not.toContain("Soundfish");
+
+    for (const name of ["", " Soundfish", "<b>x</b>", "x".repeat(49)]) {
+      expect(() => renderHranessSiteFooter({ mailingList: { ...productMailingList, name } }))
+        .toThrow("product names");
+    }
+    expect(() => renderHranessSiteFooter({ mailingList: { ...productMailingList, name: "Sound.fish & Co" } }))
+      .not.toThrow();
   });
 
   test("keeps the consent note when the mailing list is omitted", () => {

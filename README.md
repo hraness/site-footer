@@ -1,14 +1,14 @@
 # @hraness/site-footer
 
-Add the same Hraness identity, accessible network
-links, and optional product-scoped email signup or signed-in account access to a
-React or static website. One package owns the markup, attribution copy, link
-order, mailing action, response states, and responsive layout. Each product
-chooses its mailing audience, theme bindings, and security policy.
+Add the shared Hraness footer to a React or static website. It shows the
+“by Hraness” home link, links to Hraness on Substack, X, LinkedIn, and GitHub,
+and a cookie note. A site can also show an email signup for its own mailing
+list, a link to the visitor's Hraness account, or a support link.
 
-The framework-neutral renderer and React adapter produce the same footer
-contract. A product visitor is never assigned to the general Hraness mailing
-audience by default.
+The package renders the markup and copy, and the static renderer and the React
+component render the same initial HTML. Each site picks its mailing list, theme colors, and
+security policy. There is no default mailing list: visitors to a product site
+join the general Hraness list only when that site configures it.
 
 ## Install and first render
 
@@ -104,6 +104,17 @@ provide a stable lowercase product audience:
 />
 ```
 
+Add `name` to name the product in the English signup dialog. With
+`name: "Soundfish"`, the dialog reads “Get Soundfish updates by email. You're
+subscribed once you confirm your address.” Without it, the dialog says “Get
+updates by email.” Other languages use their translated generic text.
+
+```tsx
+<HranessSiteFooter
+  mailingList={{ audience: "soundfish", kind: "signup", name: "Soundfish" }}
+/>
+```
+
 Hraness.com uses the shared `hraness` audience:
 
 ```tsx
@@ -141,7 +152,7 @@ website=<empty honeypot; Accounts ignores the request when filled>
 ```
 
 React sends `Accept: application/json`. A successful 2xx response replaces the
-form with `Check your email to confirm`. Provider validation details remain
+form with “Check your email for a confirmation link.” Provider validation details remain
 private to Accounts.
 
 ## Signed-in account navigation
@@ -156,6 +167,14 @@ The host owns authentication; the footer never reads session cookies or fetches
 identity. Use `none` while the initial session is unresolved or unavailable,
 `account` when signed in. Hosts may show the unmeasured stable `signup` during initial or unavailable session checks; enable attribution only after confirming signed-out status.
 These states are mutually exclusive and require no audience for account access.
+
+The cookie note says cookies keep the visitor signed in only when the site
+passes `signIn`. Pass it on sites that keep visitors signed in with cookies,
+whatever the current `mailingList` mode; leave it out on sites without sign-in.
+
+```tsx
+<HranessSiteFooter mailingList={{ kind: "account" }} signIn />
+```
 
 ```tsx
 <HranessSiteFooter mailingList={{ kind: "account" }} />
@@ -317,7 +336,7 @@ assignment, or telemetry. The deprecated `experiment` prop is accepted but inert
 Copy and layout do not change after an attribution response. Pending, retryable
 error, dismissal/reopening, callback changes and attribution eligibility changes
 preserve the form and its input. Generic request acceptance hides the form inside
-the modal and says “Check your email to confirm”; the footer button remains.
+the modal and says “Check your email for a confirmation link.” The footer button remains.
 
 The modal uses a visible email label, neutral `you@example.com` placeholder, and
 plain “Subscribe” submit. For the `hraness` audience, the benefit is new writing
@@ -354,6 +373,11 @@ pointer enhancement and reduced-motion/forced-color fallbacks. The email field
 is quiet and separately labelled. All styling is compiled through StyleX. Native
 modal custody may write only two numeric viewport custom properties and preserve
 and restore the document root's overflow; it never injects a stylesheet.
+
+Unreleased: the cookie note mentions sign-in only on sites that pass `signIn`,
+and it says the browser, not a cookie, remembers the consent choice. A signup
+can name its product in the English dialog through `mailingList.name`. The
+accepted state reads “Check your email for a confirmation link.”
 
 Version 0.16.0 introduces the stable modal and optional bounded lifecycle observations.
 

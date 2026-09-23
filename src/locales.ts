@@ -54,7 +54,7 @@ const sharedMessages = {
     "pending": "Subscribing…",
     "submitting": "Submitting your email…",
     "requestError": "Couldn't subscribe. Try again.",
-    "accepted": "Check your email to confirm",
+    "accepted": "Check your email for a confirmation link.",
     "openLabel": "Subscribe by email",
     "closeLabel": "Close email signup",
     "invalidEmail": "Enter a valid email address."
@@ -769,7 +769,7 @@ export function resolveFooterLocale(preferred?: string | readonly string[]): Foo
 }
 
 const stableDescriptions: Readonly<Record<string, string>> = {
-  en: "Receive updates by email. Confirm your address to subscribe.",
+  en: "Get updates by email. You're subscribed once you confirm your address.",
   es: "Recibe novedades por correo. Confirma tu dirección para suscribirte.",
   fr: "Recevez les nouveautés par e-mail. Confirmez votre adresse pour vous abonner.",
   pt: "Receba novidades por e-mail. Confirme seu endereço para assinar.",
@@ -816,7 +816,7 @@ const stableDescriptions: Readonly<Record<string, string>> = {
 };
 
 /** Stable signup copy is independent of the historical experiment catalog. */
-export function stableFooterMessages(locale: FooterLocale, audience?: string) {
+export function stableFooterMessages(locale: FooterLocale, audience?: string, productName?: string) {
   const copy = locale.styles.direct;
   const english = /^en(?:-|$)/u.test(locale.locale);
   const language = locale.locale.split("-")[0]!;
@@ -828,6 +828,8 @@ export function stableFooterMessages(locale: FooterLocale, audience?: string) {
     title: english ? "Get email updates" : copy.formLabel,
     description: english && audience === "hraness"
       ? "Get new writing and updates on Hraness projects. Confirm your email to subscribe."
+      : english && productName !== undefined
+      ? `Get ${productName} updates by email. You're subscribed once you confirm your address.`
       : stableDescriptions[key] ?? stableDescriptions.en!,
     submit: english ? "Subscribe" : copy.button,
     placeholder: "you@example.com",

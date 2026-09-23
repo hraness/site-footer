@@ -1089,7 +1089,7 @@ var sharedMessages = {
     pending: "Subscribing…",
     submitting: "Submitting your email…",
     requestError: "Couldn't subscribe. Try again.",
-    accepted: "Check your email to confirm",
+    accepted: "Check your email for a confirmation link.",
     openLabel: "Subscribe by email",
     closeLabel: "Close email signup",
     invalidEmail: "Enter a valid email address."
@@ -1806,7 +1806,7 @@ function resolveFooterLocale(preferred) {
   return FOOTER_LOCALES.en;
 }
 var stableDescriptions = {
-  en: "Receive updates by email. Confirm your address to subscribe.",
+  en: "Get updates by email. You're subscribed once you confirm your address.",
   es: "Recibe novedades por correo. Confirma tu dirección para suscribirte.",
   fr: "Recevez les nouveautés par e-mail. Confirmez votre adresse pour vous abonner.",
   pt: "Receba novidades por e-mail. Confirme seu endereço para assinar.",
@@ -1851,7 +1851,7 @@ var stableDescriptions = {
   sw: "Pokea habari mpya kwa barua pepe. Thibitisha anwani yako ili kujisajili.",
   af: "Ontvang nuus per e-pos. Bevestig jou adres om in te teken."
 };
-function stableFooterMessages(locale, audience) {
+function stableFooterMessages(locale, audience, productName) {
   const copy = locale.styles.direct;
   const english = /^en(?:-|$)/u.test(locale.locale);
   const language = locale.locale.split("-")[0];
@@ -1860,7 +1860,7 @@ function stableFooterMessages(locale, audience) {
     ...copy,
     button: english ? "Get email updates" : copy.formLabel,
     title: english ? "Get email updates" : copy.formLabel,
-    description: english && audience === "hraness" ? "Get new writing and updates on Hraness projects. Confirm your email to subscribe." : stableDescriptions[key] ?? stableDescriptions.en,
+    description: english && audience === "hraness" ? "Get new writing and updates on Hraness projects. Confirm your email to subscribe." : english && productName !== undefined ? `Get ${productName} updates by email. You're subscribed once you confirm your address.` : stableDescriptions[key] ?? stableDescriptions.en,
     submit: english ? "Subscribe" : copy.button,
     placeholder: "you@example.com"
   };
@@ -2069,6 +2069,8 @@ var HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
 var MAX_AUDIENCE_LENGTH = 24;
+var MAX_PRODUCT_NAME_LENGTH = 48;
+var PRODUCT_NAME_PATTERN = new RegExp("^[\\p{L}\\p{N}][\\p{L}\\p{N} .'&+-]{0,47}$", "u");
 var MAX_SOCIAL_HREF_LENGTH = 200;
 var MAX_SOCIAL_LABEL_LENGTH = 64;
 var AUDIENCE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -2143,6 +2145,9 @@ function parseHranessMailingListConfig(value) {
   }
   if (value.audience.length === 0 || value.audience.length > MAX_AUDIENCE_LENGTH || value.audience.trim() !== value.audience || !AUDIENCE_PATTERN.test(value.audience)) {
     throw new TypeError(`Hraness mailing-list audience IDs must be canonical lowercase slugs of at most ${MAX_AUDIENCE_LENGTH} characters.`);
+  }
+  if (value.name !== undefined && (typeof value.name !== "string" || value.name.length > MAX_PRODUCT_NAME_LENGTH || value.name.trim() !== value.name || !PRODUCT_NAME_PATTERN.test(value.name))) {
+    throw new TypeError(`Hraness mailing-list product names must be plain names of at most ${MAX_PRODUCT_NAME_LENGTH} characters.`);
   }
   return value;
 }
@@ -2253,7 +2258,7 @@ function renderMailingList(mailingList, state, presentation) {
   const {
     locale
   } = presentation;
-  const copy = stableFooterMessages(locale, mailingList.audience);
+  const copy = stableFooterMessages(locale, mailingList.audience, mailingList.name);
   const localAttributes = ` lang="${escapeAttribute(locale.locale)}" dir="${locale.dir}"`;
   const email = state.kind === "pending" || state.kind === "error" ? ` value="${escapeAttribute(state.email)}"` : "";
   const pending = state.kind === "pending";
@@ -2264,7 +2269,11 @@ function renderMailingList(mailingList, state, presentation) {
   const classes = disclosureClassNames("button");
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
-var HRANESS_CONSENT_HTML = `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">Cookies keep you signed in, remember appearance and this choice; no advertising or cross-site trackers. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+var HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your browser remembers your appearance setting and this choice. None of it is used for advertising or cross-site tracking.";
+var HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. None of it is used for advertising or cross-site tracking.";
+function renderConsentHtml(signIn) {
+  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+}
 function resolveSupportLink(profile) {
   if (profile === undefined)
     return null;
@@ -2282,7 +2291,7 @@ function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILIN
   const supportLink = resolveSupportLink(presentation.support);
   const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">${HRANESS_SUPPORT_ICON_HTML}</a>`;
   const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null, showBrand)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${HRANESS_CONSENT_HTML}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null, showBrand)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${renderConsentHtml(presentation.signIn === true)}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
 }
 
 // src/react.tsx
@@ -2303,6 +2312,7 @@ function HranessSiteFooter({
   placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
+  signIn = false,
   social: socialInput,
   support
 }) {
@@ -2341,7 +2351,8 @@ function HranessSiteFooter({
   const variant = DEFAULT_FOOTER_VARIANT;
   const socialKey = socialLinks.map((link) => `${link.platform}:${link.href}:${link.label}`).join("|");
   const renderState = activeStateFor(mailingList, state);
-  const presentationKey = `${locale.locale}:${placement}`;
+  const productName = mailingList.kind === "signup" ? mailingList.name ?? "" : "";
+  const presentationKey = `${locale.locale}:${placement}:${signIn === true}:${productName}`;
   useLayoutEffect(() => {
     const context = attributionContext.current;
     if (context.key !== mailingListKey || context.enabled !== attribution || context.locale !== locale.locale) {
@@ -2481,6 +2492,7 @@ function HranessSiteFooter({
     locale,
     variant,
     sticky: placement === "sticky",
+    signIn: signIn === true,
     ...support === undefined ? {} : {
       support
     }
@@ -2731,7 +2743,7 @@ function HranessSiteFooter({
   useLayoutEffect(() => {
     if (mailingList.kind !== "signup")
       return;
-    const copy = stableFooterMessages(locale, mailingList.audience);
+    const copy = stableFooterMessages(locale, mailingList.audience, mailingList.name);
     const form = footer.current?.querySelector(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
     const status = footer.current?.querySelector(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
     if (!form || !status)
@@ -2930,4 +2942,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=9862E8865B4D021E64756E2164756E21
+//# debugId=1D5056F04BA29A6664756E2164756E21

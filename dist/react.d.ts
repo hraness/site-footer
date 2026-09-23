@@ -21,13 +21,18 @@ export interface HranessSiteFooterProps {
     /** Omit the Hraness home link when the containing site already supplies that identity. */
     readonly showBrand?: boolean;
     /**
+     * True only when this site keeps visitors signed in with cookies. The cookie
+     * note mentions sign-in only when it is true. Defaults to false.
+     */
+    readonly signIn?: boolean;
+    /**
      * Retarget owned social destinations without adding platforms or changing
      * order. Defaults remain the shared Hraness profiles.
      */
     readonly social?: HranessSocialConfig;
 }
 /** Progressively enhance the canonical native mailing-list form when JavaScript is available. */
-export declare function HranessSiteFooter({ locale: localeInput, onConversion, attribution, placement, mailingList: mailingListInput, showBrand, social: socialInput, support, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
+export declare function HranessSiteFooter({ locale: localeInput, onConversion, attribution, placement, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
     "aria-label": string;
     className: string;
     "data-brand": string;

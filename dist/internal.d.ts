@@ -26,6 +26,8 @@ export interface FooterPresentation {
     readonly locale: FooterLocale;
     readonly variant: FooterVariant;
     readonly sticky: boolean;
+    /** True only when the host site keeps visitors signed in with cookies. */
+    readonly signIn?: boolean;
     readonly experimentToken?: string;
 }
 export declare const DEFAULT_FOOTER_PRESENTATION: FooterPresentation;
@@ -45,6 +47,8 @@ export declare const HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accep
 export type HranessMailingListConfig = Readonly<{
     audience: string;
     kind: "signup";
+    /** Product name shown in the English signup dialog, such as "Soundfish". */
+    name?: string;
 }> | Readonly<{
     kind: "none";
 }> | Readonly<{
