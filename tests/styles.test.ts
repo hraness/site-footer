@@ -199,8 +199,16 @@ describe("compiled footer presentation", () => {
     }
     contains(footerClasses.mailingSubmit, "@media(prefers-color-scheme:dark)");
     contains(footerClasses.mailingSubmit, "0 1px 4px color-mix(in srgb");
-    contains(footerClasses.mailingSubmit, "padding-box,border-box,border-box,border-box");
+    contains(footerClasses.mailingSubmit, "padding-box,border-box,border-box,border-box,border-box");
     contains(footerClasses.mailingSubmit, "--hraness-foil-surface");
+  });
+
+  test("paints the header's metallic chrome with only a faint spectral reflection", () => {
+    for (const control of [footerClasses.mailingSubmit, footerClasses.disclosureTrigger]) {
+      contains(control, "var(--hraness-foil-reflection,14%)");
+      contains(control, "color-mix(in oklch,var(--hraness-site-footer-foreground,CanvasText) 86%,var(--hraness-site-footer-background,Canvas)) 39%");
+      expect(cssFor(control)).not.toContain("linear-gradient(115deg,var(--_hraness-foil-1),");
+    }
     expect(cssFor(footerClasses.mailingSubmit)).not.toContain("--hraness-foil-angle");
     expect(cssFor(footerClasses.disclosureTrigger)).not.toContain("--hraness-foil-angle");
     expect(cssFor(footerClasses.mailingSubmit)).not.toContain("--footer-foil-");
