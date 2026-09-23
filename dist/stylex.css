@@ -287,8 +287,8 @@
     background-clip: border-box;
   }
 
-  .x123zpmm {
-    background-clip: padding-box, border-box, border-box, border-box;
+  .xnerjni {
+    background-clip: padding-box, border-box, border-box, border-box, border-box;
   }
 
   .x1ta4xzc {
@@ -316,8 +316,8 @@
     background-color: var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)));
   }
 
-  .xq9wfvg {
-    background-image: linear-gradient(var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background))),var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))),radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%),color-mix(in srgb,white calc(60% + var(--hraness-foil-glow, 0) * 24%),transparent) 0%,transparent 72%),radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)),#ffffff47 0%,transparent 78%),linear-gradient(115deg,var(--_hraness-foil-1),var(--_hraness-foil-2),var(--_hraness-foil-3),var(--_hraness-foil-4),var(--_hraness-foil-5),var(--_hraness-foil-6));
+  .x16jmbxj {
+    background-image: linear-gradient(var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background))),var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))),radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%),color-mix(in srgb,white calc(60% + var(--hraness-foil-glow, 0) * 24%),transparent) 0%,transparent 72%),radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)),#ffffff47 0%,transparent 78%),linear-gradient(115deg,color-mix(in oklch,var(--_hraness-foil-1) var(--hraness-foil-reflection, 14%),transparent),color-mix(in oklch,var(--_hraness-foil-2) var(--hraness-foil-reflection, 14%),transparent),color-mix(in oklch,var(--_hraness-foil-3) var(--hraness-foil-reflection, 14%),transparent),color-mix(in oklch,var(--_hraness-foil-4) var(--hraness-foil-reflection, 14%),transparent),color-mix(in oklch,var(--_hraness-foil-5) var(--hraness-foil-reflection, 14%),transparent),color-mix(in oklch,var(--_hraness-foil-6) var(--hraness-foil-reflection, 14%),transparent)),linear-gradient(115deg,color-mix(in oklch,var(--hraness-site-footer-foreground, CanvasText) 90%,var(--hraness-site-footer-background, Canvas)) 0%,color-mix(in oklch,var(--hraness-site-footer-foreground, CanvasText) 100%,var(--hraness-site-footer-background, Canvas)) 24%,color-mix(in oklch,var(--hraness-site-footer-foreground, CanvasText) 86%,var(--hraness-site-footer-background, Canvas)) 39%,color-mix(in oklch,var(--hraness-site-footer-foreground, CanvasText) 100%,var(--hraness-site-footer-background, Canvas)) 56%,color-mix(in oklch,var(--hraness-site-footer-foreground, CanvasText) 84%,var(--hraness-site-footer-background, Canvas)) 82%,color-mix(in oklch,var(--hraness-site-footer-foreground, CanvasText) 100%,var(--hraness-site-footer-background, Canvas)) 100%);
   }
 
   .x18o3ruo {
