@@ -22,10 +22,10 @@ Require Bun 1.3.14, `@hraness/direct` 0.7.18, agent-browser 0.32.3, the checked 
 Run the complete verifier through the host browser lane:
 
 ```sh
-ABSOLUTE_OOMPA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-browser -- bun run verify:browser
+ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-browser -- bun run verify:browser
 ```
 
-Resolve `ABSOLUTE_OOMPA_HOST_RUN` with `command -v oompa-host-run` first. The verifier builds the fixture into one unique temporary directory, binds only `127.0.0.1:4187`, checks `/health`, launches one fresh contained Chromium process, and refuses to reuse another local server. It records exact server and browser ownership before driving.
+Resolve `ABSOLUTE_HRA_HOST_RUN` with `command -v hra-host-run` first. The verifier builds the fixture into one unique temporary directory, binds only `127.0.0.1:4187`, checks `/health`, launches one fresh contained Chromium process, and refuses to reuse another local server. It records exact server and browser ownership before driving.
 
 ## Drive
 
@@ -93,13 +93,13 @@ Normal runs close the whole verifier-owned browser, terminate the exact server p
 After an interrupted run, inspect without mutation:
 
 ```sh
-ABSOLUTE_OOMPA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --dry-run
+ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --dry-run
 ```
 
 Apply only the validated recorded cleanup:
 
 ```sh
-ABSOLUTE_OOMPA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --apply
+ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --apply
 ```
 
 Resolve the same reviewed absolute scheduler path used for launch. Cleanup refuses a mismatched repository, token, exact PID command, session name, or temporary path, and revalidates PID ownership before signal escalation. The browser idle timeout is a bounded fallback, not cleanup evidence.
