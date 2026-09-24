@@ -34,6 +34,13 @@ test("the idle React adapter renders identically to the static renderer", () => 
   );
   expect(signupHtml).not.toContain("data-experiment");
   expect(signupHtml).toBe(renderHranessSiteFooter({ mailingList, showBrand: false }));
+  const namedSignInHtml = renderToStaticMarkup(
+    <HranessSiteFooter mailingList={{ ...mailingList, name: "Soundfish" }} signIn />,
+  );
+  expect(namedSignInHtml).toBe(renderHranessSiteFooter({ mailingList: { ...mailingList, name: "Soundfish" }, signIn: true }));
+  expect(namedSignInHtml).toContain("Get Soundfish updates by email.");
+  expect(namedSignInHtml).toContain("Cookies keep you signed in");
+  expect(signupHtml).not.toContain("signed in");
   expect(signupHtml).not.toContain("turnstile");
   expect(signupHtml).not.toContain("challenges.cloudflare.com");
   expect(signupHtml).toContain('name="audience" type="hidden" value="soundfish"');
@@ -87,7 +94,7 @@ test("the shared renderer bounds pending, accepted, and error states", () => {
   expect(accepted).toContain('data-state="accepted"');
   expect(accepted).toContain('aria-atomic="true"');
   expect(accepted).toContain('role="status"');
-  expect(accepted).toContain("Check your email to confirm");
+  expect(accepted).toContain("Check your email for a confirmation link.");
 
   const error = renderHranessSiteFooterInnerHtml(true, mailingList, {
     audience: "soundfish",
@@ -112,7 +119,7 @@ test("a stale response state cannot leak across audience changes", () => {
 
   expect(html).toContain('data-state="idle"');
   expect(html).toContain('name="audience" type="hidden" value="aicharts"');
-  expect(html).not.toContain("Check your email to confirm");
+  expect(html).not.toContain("Check your email for a confirmation link.");
 });
 
 test("the React adapter reveals geo-gated cookie consent and persists acceptance", async () => {
@@ -522,7 +529,7 @@ test("the React adapter posts the native form, restores request focus, and confi
 
     expect(container?.querySelector("form")?.hidden).toBeTrue();
     expect(container?.querySelector('[data-slot="hraness-mailing-list-status"]')?.textContent)
-      .toBe("Check your email to confirm");
+      .toBe("Check your email for a confirmation link.");
   } finally {
     await act(async () => {
       root.unmount();

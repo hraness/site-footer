@@ -20,5 +20,5 @@ Use the repository verifier. It fills by `input[name="email"]`, activates `butto
 
 - Pending intentionally leaves the synthetic response unsettled until the context is disposed.
 - The honeypot must stay empty in the recorded request; a filled `website` field is an Accounts-discarded bot signal, not a visible control.
-- Accepted retains hidden input/submit nodes to preserve form identity; the modal announces “Check your email to confirm”. This is anti-enumeration acceptance, not confirmed subscription.
+- Accepted retains hidden input/submit nodes to preserve form identity; the modal announces “Check your email for a confirmation link.” This is anti-enumeration acceptance, not confirmed subscription.
 - Provider and delivery behavior remain outside this fixture's proof boundary.

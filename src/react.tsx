@@ -58,6 +58,11 @@ export interface HranessSiteFooterProps {
   /** Omit the Hraness home link when the containing site already supplies that identity. */
   readonly showBrand?: boolean;
   /**
+   * True only when this site keeps visitors signed in with cookies. The cookie
+   * note mentions sign-in only when it is true. Defaults to false.
+   */
+  readonly signIn?: boolean;
+  /**
    * Retarget owned social destinations without adding platforms or changing
    * order. Defaults remain the shared Hraness profiles.
    */
@@ -82,6 +87,7 @@ export function HranessSiteFooter({
   placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
+  signIn = false,
   social: socialInput,
   support,
 }: HranessSiteFooterProps) {
@@ -112,7 +118,8 @@ export function HranessSiteFooter({
   const variant = DEFAULT_FOOTER_VARIANT;
   const socialKey = socialLinks.map((link) => `${link.platform}:${link.href}:${link.label}`).join("|");
   const renderState = activeStateFor(mailingList, state);
-  const presentationKey = `${locale.locale}:${placement}`;
+  const productName = mailingList.kind === "signup" ? mailingList.name ?? "" : "";
+  const presentationKey = `${locale.locale}:${placement}:${signIn === true}:${productName}`;
 
   useLayoutEffect(() => {
     const context = attributionContext.current;
@@ -209,7 +216,7 @@ export function HranessSiteFooter({
       mailingList,
       IDLE_STATE,
       socialLinks,
-      { locale, variant, sticky: placement === "sticky", ...(support === undefined ? {} : { support }) },
+      { locale, variant, sticky: placement === "sticky", signIn: signIn === true, ...(support === undefined ? {} : { support }) },
     ),
     // Support-only updates patch their own link below, preserving an active
     // native form, disclosure, focus, and in-flight request.
@@ -399,7 +406,7 @@ export function HranessSiteFooter({
 
   useLayoutEffect(() => {
     if (mailingList.kind !== "signup") return;
-    const copy = stableFooterMessages(locale, mailingList.audience);
+    const copy = stableFooterMessages(locale, mailingList.audience, mailingList.name);
     const form = footer.current?.querySelector<HTMLFormElement>(`form[data-slot="${HRANESS_MAILING_FORM_SLOT}"]`);
     const status = footer.current?.querySelector<HTMLElement>(`[data-slot="${HRANESS_MAILING_STATUS_SLOT}"]`);
     if (!form || !status) return;

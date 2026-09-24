@@ -63,7 +63,7 @@ export declare const FOOTER_LOCALES: Readonly<Record<string, FooterLocale>>;
  */
 export declare function resolveFooterLocale(preferred?: string | readonly string[]): FooterLocale;
 /** Stable signup copy is independent of the historical experiment catalog. */
-export declare function stableFooterMessages(locale: FooterLocale, audience?: string): {
+export declare function stableFooterMessages(locale: FooterLocale, audience?: string, productName?: string): {
     button: string;
     title: string;
     description: string;

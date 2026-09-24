@@ -53,5 +53,13 @@ test("stable signup copy separates presubmission benefit from accepted confirmat
   }
   const copy = stableFooterMessages(FOOTER_LOCALES.en!, "hraness");
   expect(copy.description).toBe("Get new writing and updates on Hraness projects. Confirm your email to subscribe.");
+  expect(stableFooterMessages(FOOTER_LOCALES.en!, "hraness", "Anything").description).toBe(copy.description);
   expect(copy.submit).toBe("Subscribe");
+  expect(copy.accepted).toBe("Check your email for a confirmation link.");
+  expect(stableFooterMessages(FOOTER_LOCALES["en-GB"]!, "soundfish", "Soundfish").description)
+    .toBe("Get Soundfish updates by email. You're subscribed once you confirm your address.");
+  expect(stableFooterMessages(FOOTER_LOCALES.en!, "soundfish").description)
+    .toBe("Get updates by email. You're subscribed once you confirm your address.");
+  expect(stableFooterMessages(FOOTER_LOCALES["fr-FR"]!, "soundfish", "Soundfish").description)
+    .not.toContain("Soundfish");
 });

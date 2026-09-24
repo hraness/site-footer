@@ -148,7 +148,7 @@ test("duplicate submits are suppressed and generic acceptance preserves the stab
     expect(trigger.textContent).toBe("Get email updates");
     expect(form.hidden).toBeTrue();
     const status = container.querySelector('[data-slot="hraness-mailing-list-status"]')!;
-    expect(status.textContent).toBe("Check your email to confirm");
+    expect(status.textContent).toBe("Check your email for a confirmation link.");
     expect(window.document.activeElement === status).toBeTrue();
     expect(events.filter(event => event.stage === "accepted")).toHaveLength(1);
     expect(events.some(event => String(event.stage).includes("confirmed"))).toBeFalse();
@@ -178,7 +178,7 @@ test("delayed or failed attribution never changes the CTA and stale eligibility 
     await render();
     await act(async () => requests[2]!.resolve(new Response(null, { status: 202 })));
     expect(events.filter(event => event.stage === "accepted")).toHaveLength(0);
-    expect(container.querySelector('[data-slot="hraness-mailing-list-status"]')?.textContent).toBe("Check your email to confirm");
+    expect(container.querySelector('[data-slot="hraness-mailing-list-status"]')?.textContent).toBe("Check your email for a confirmation link.");
   });
 });
 
