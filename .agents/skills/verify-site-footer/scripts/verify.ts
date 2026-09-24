@@ -1985,6 +1985,90 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
   return evidence;
 }
 
+/** Independent measured boxes reject both floating consent and an undersized spacer. */
+export function assertConsentFootprint(input: unknown): void {
+  const value = exactRecord(input, ["width", "shown", "footprint", "height", "top", "bottom", "paddingTop", "paddingBottom", "borderTop", "borderBottom", "controlTop", "controlBottom", "consentTop", "consentBottom", "gap"], "Consent footprint");
+  if (typeof value.shown !== "boolean") throw new Error("Consent visibility is not a boolean.");
+  const number = (name: string) => finiteNumber(value[name], `Consent ${name}`);
+  const width = number("width"), height = number("height"), top = number("top"), bottom = number("bottom");
+  if (height <= 0 || Math.abs(number("footprint") - height) > 0.5 || Math.abs(bottom - top - height) > 0.5) throw new Error("Footer footprint must match the whole rendered bar.");
+  const controlTop = number("controlTop"), controlBottom = number("controlBottom");
+  if (controlBottom <= controlTop || controlTop < top || controlBottom > bottom) throw new Error("Control row escapes footer.");
+  let contentBottom = controlBottom;
+  if (value.shown) {
+    const consentTop = number("consentTop"), consentBottom = number("consentBottom");
+    if (consentBottom <= consentTop || consentTop < top || consentBottom > bottom) throw new Error("Visible consent must remain inside the opaque bar.");
+    if (width < 760) {
+      if (Math.abs(consentTop - controlBottom - number("gap")) > 0.5) throw new Error("Compact consent must have one separate row and gap.");
+      contentBottom = consentBottom;
+    } else if (Math.abs(consentTop - controlTop) > 0.5 || Math.abs(consentBottom - controlBottom) > 0.5) throw new Error("Wide consent must remain in the control row.");
+  }
+  if (Math.abs(controlTop - top - number("borderTop") - number("paddingTop")) > 0.5
+    || Math.abs(bottom - contentBottom - number("borderBottom") - number("paddingBottom")) > 0.5) throw new Error("Footer rows must retain their actual padding clearances.");
+}
+
+async function driveConsentCases(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
+  const evidence: unknown[] = [];
+  await browser.run(["tab", "new"]);
+  for (const sample of [
+    { width: 320, query: "mailing=none&support=none" },
+    { width: 390, query: "lineHeight=2&font=wide" },
+    { width: 390, query: "mailing=account&brand=hidden" },
+    { width: 760, query: "mailing=none" },
+    { width: 1280, query: "lineHeight=2" },
+  ]) {
+    // Start from the real origin, then clear only this synthetic consent decision.
+    await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=none`]);
+    await browser.evaluate(`localStorage.removeItem('hraness-consent-cookies-v1')`);
+    const url = `${DEFAULT_BASE_URL}/?consent=required&placement=sticky&${sample.query}`;
+    await browser.run(["set", "viewport", String(sample.width), "844"]);
+    await browser.run(["open", url]);
+    await browser.run(["wait", '[data-slot="hraness-cookie-consent"]:not([hidden])', "--timeout", "5000"]);
+    const measure = async () => {
+      await browser.evaluate(SETTLE_EXPRESSION);
+      return browser.evaluate(`(() => {
+        const footer = document.querySelector('#hraness-site-footer');
+        const inner = footer.querySelector('.hraness-site-footer__inner');
+        const consent = footer.querySelector('[data-slot="hraness-cookie-consent"]');
+        const box = inner.getBoundingClientRect(), style = getComputedStyle(inner), notice = consent.getBoundingClientRect();
+        const controls = [...inner.querySelectorAll('.hraness-site-footer__brand, .hraness-site-footer__disclosure-trigger, .hraness-site-footer__account, .hraness-site-footer__support, .hraness-site-footer__social-link')].filter(e => e.checkVisibility()).map(e => e.getBoundingClientRect());
+        if (!controls.length || document.documentElement.scrollWidth > innerWidth + .5) throw new Error('Missing or overflowing footer controls.');
+        if (style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)') throw new Error('Footer surface must be opaque.');
+        if (controls.some(r => r.left < box.left || r.right > box.right)) throw new Error('Control escapes bar width.');
+        if (!consent.hidden && (notice.left < box.left || notice.right > box.right)) throw new Error('Consent escapes bar width.');
+        return {width:innerWidth, shown:!consent.hidden, footprint:footer.getBoundingClientRect().height, height:box.height, top:box.top, bottom:box.bottom, paddingTop:parseFloat(style.paddingTop), paddingBottom:parseFloat(style.paddingBottom), borderTop:parseFloat(style.borderTopWidth), borderBottom:parseFloat(style.borderBottomWidth), controlTop:Math.min(...controls.map(r=>r.top)), controlBottom:Math.max(...controls.map(r=>r.bottom)), consentTop:notice.top, consentBottom:notice.bottom, gap:parseFloat(style.rowGap)};
+      })()`);
+    };
+    const shown = await measure(); assertConsentFootprint(shown);
+    if (!isRecord(shown) || shown.width !== sample.width || shown.shown !== true) throw new Error("Consent case did not use its requested visible state.");
+    const screenshotPath = join(runDirectory, `consent-${String(sample.width)}-${evidence.length}.png`);
+    await screenshot(browser, screenshotPath);
+    await browser.run(["click", '[data-slot="hraness-cookie-consent-accept"]']);
+    // A hidden element never becomes "visible", so wait on the attribute itself.
+    await browser.run(["wait", "--fn", `document.querySelector('[data-slot="hraness-cookie-consent"]')?.hidden === true`, "--timeout", "5000"]);
+    const accepted = await measure(); assertConsentFootprint(accepted);
+    if (!isRecord(accepted) || accepted.shown !== false) throw new Error("Consent acceptance did not remove its row.");
+    const released = Number(shown.height) - Number(accepted.height);
+    const expected = sample.width < 760 ? Number(shown.consentBottom) - Number(shown.consentTop) + Number(shown.gap) : 0;
+    if (Math.abs(released - expected) > .5) throw new Error("Consent acceptance retained an empty row or changed the wide bar.");
+    await browser.run(["open", url]);
+    await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
+    const reloaded = await measure(); assertConsentFootprint(reloaded);
+    const storage = await browser.evaluate(`localStorage.getItem('hraness-consent-cookies-v1')`);
+    if (!isRecord(reloaded) || reloaded.shown !== false || storage !== "accepted") throw new Error("Accepted consent did not persist after reload.");
+    evidence.push({sample, shown, accepted, reloaded, screenshot:relative(REPOSITORY_ROOT, screenshotPath)});
+  }
+  const errors = browserPageErrors(await browser.run(["errors"]));
+  const consoleErrors = browserConsoleErrors(await browser.run(["console"]));
+  if (errors.length || consoleErrors.length) throw new Error("Consent layout cases produced browser errors.");
+  const tabId = activeTabId(await browser.run(["tab"]));
+  await browser.run(["tab", bootstrapTabId]);
+  try { await browser.run(["tab", "close", tabId]); } catch (error) { if (!isRecoverableTabCloseRace(error)) throw error; }
+  const inventory = await browser.run(["tab"]);
+  if (activeTabId(inventory) !== bootstrapTabId || tabIds(inventory).includes(tabId)) throw new Error("Consent tab did not close back to the bootstrap tab.");
+  return evidence;
+}
+
 function assertCrossStateGeometry(evidence: readonly ScenarioEvidence[]): void {
   const idle = evidence.find(({ state }) => state === "idle");
   if (idle === undefined) throw new Error("Idle geometry evidence is missing.");
@@ -2046,6 +2130,7 @@ async function runVerifier(): Promise<string> {
   let noSignupEvidence: readonly unknown[] = [];
   let accountEvidence: readonly unknown[] = [];
   let alignmentEvidence: readonly unknown[] = [];
+  let consentEvidence: readonly unknown[] = [];
   let bootstrapInventory: unknown = null;
   let finalInventory: unknown = null;
   let postDriveSource: SourceIdentity | null = null;
@@ -2098,6 +2183,7 @@ async function runVerifier(): Promise<string> {
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     accountEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId, true);
     alignmentEvidence = await driveAlignmentCases(browser, artifacts.runDirectory, bootstrapTabId);
+    consentEvidence = await driveConsentCases(browser, artifacts.runDirectory, bootstrapTabId);
     finalInventory = await browser.run(["tab"]);
     postDriveSource = sourceIdentity();
     assertSameSourceIdentity(initialSource, postDriveSource);
@@ -2151,6 +2237,7 @@ async function runVerifier(): Promise<string> {
     noSignup: noSignupEvidence,
     account: accountEvidence,
     alignment: alignmentEvidence,
+    consent: consentEvidence,
     schema: "hraness.site-footer.browser-verification/v1",
     source: {
       afterCleanup: finalSource,
