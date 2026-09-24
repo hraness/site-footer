@@ -2041,7 +2041,8 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     };
     const shown = await measure(); assertConsentFootprint(shown);
     if (!isRecord(shown) || shown.width !== sample.width || shown.shown !== true) throw new Error("Consent case did not use its requested visible state.");
-    const screenshotPath = join(runDirectory, `consent-${String(sample.width)}-${evidence.length}.png`);
+    const screenshotBase = join(runDirectory, `consent-${String(sample.width)}-${evidence.length}`);
+    const screenshotPath = `${screenshotBase}-shown.png`;
     await screenshot(browser, screenshotPath);
     await browser.run(["click", '[data-slot="hraness-cookie-consent-accept"]']);
     // A hidden element never becomes "visible", so wait on the attribute itself.
@@ -2051,12 +2052,21 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     const released = Number(shown.height) - Number(accepted.height);
     const expected = sample.width < 760 ? Number(shown.consentBottom) - Number(shown.consentTop) + Number(shown.gap) : 0;
     if (Math.abs(released - expected) > .5) throw new Error("Consent acceptance retained an empty row or changed the wide bar.");
+    const acceptedScreenshotPath = `${screenshotBase}-accepted.png`;
+    await screenshot(browser, acceptedScreenshotPath);
     await browser.run(["open", url]);
     await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
     const reloaded = await measure(); assertConsentFootprint(reloaded);
     const storage = await browser.evaluate(`localStorage.getItem('hraness-consent-cookies-v1')`);
     if (!isRecord(reloaded) || reloaded.shown !== false || storage !== "accepted") throw new Error("Accepted consent did not persist after reload.");
-    evidence.push({sample, shown, accepted, reloaded, screenshot:relative(REPOSITORY_ROOT, screenshotPath)});
+    const reloadedScreenshotPath = `${screenshotBase}-reloaded.png`;
+    await screenshot(browser, reloadedScreenshotPath);
+    evidence.push({
+      sample, shown, accepted, reloaded,
+      screenshot: relative(REPOSITORY_ROOT, screenshotPath),
+      acceptedScreenshot: relative(REPOSITORY_ROOT, acceptedScreenshotPath),
+      reloadedScreenshot: relative(REPOSITORY_ROOT, reloadedScreenshotPath),
+    });
   }
   const errors = browserPageErrors(await browser.run(["errors"]));
   const consoleErrors = browserConsoleErrors(await browser.run(["console"]));

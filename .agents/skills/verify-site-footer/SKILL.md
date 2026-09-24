@@ -57,7 +57,8 @@ A separate consent layout context uses the existing synthetic region response to
 show the real notice at 320, 390, 760 and 1280 pixels, including account and wide-font
 variants. It compares the outer document footprint with the complete rendered bar,
 requires compact consent inside a separate row and wide consent inline, then clicks
-Accept and reloads to prove the row and reserved space disappear together. It never
+Accept and reloads to prove the row and reserved space disappear together. Each case
+retains a full-page screenshot of the shown, accepted and reloaded states. It never
 changes component state directly or contacts Accounts.
 
 ## Evidence
