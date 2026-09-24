@@ -53,6 +53,14 @@ experiments enabled to prove it sends no signup or experiment request. At all
 four widths it checks the native account destination, muted border without foil,
 visible keyboard focus, one row, viewport containment and priority socials.
 
+A separate consent layout context uses the existing synthetic region response to
+show the real notice at 320, 390, 760 and 1280 pixels, including account and wide-font
+variants. It compares the outer document footprint with the complete rendered bar,
+requires compact consent inside a separate row and wide consent inline, then clicks
+Accept and reloads to prove the row and reserved space disappear together. Each case
+retains a full-page screenshot of the shown, accepted and reloaded states. It never
+changes component state directly or contacts Accounts.
+
 ## Evidence
 
 The verifier retains full-page PNGs, per-state JSON, and one bounded manifest below `artifacts/site-footer/browser-verification/`. Require:
@@ -71,6 +79,7 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;
 - an in-flow footer row with a stable trigger independent of the modal request state;
 - no compact horizontal overflow;
+- visible compact consent on its own row inside the opaque bar, wide consent inline with the controls, and a document footprint equal to the whole bar in the shown, accepted and reloaded states;
 - declared minimum target sizes; and
 - two-sample Direct stability with no named-layout violations.
 

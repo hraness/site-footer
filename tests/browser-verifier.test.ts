@@ -8,6 +8,7 @@ import {
 
 import {
   assertAgentBrowserSocketBudget,
+  assertConsentFootprint,
   assertDisclosureSnapshot,
   assertFontCascade,
   browserConsoleErrors,
@@ -214,4 +215,18 @@ test("wide layout rejects a padded inline panel even when its inner form remains
     if (!sample.ok) return;
     expect(validateDirectNamedLayout(contract.value, [sample.value, sample.value]).ok).toBe(!padded);
   }
+});
+
+test("consent geometry rejects floating notices and understated document footprints", () => {
+  const compact = { width:320, shown:true, footprint:69, height:69, top:775, bottom:844, paddingTop:4, paddingBottom:4, borderTop:1, borderBottom:0, controlTop:780, controlBottom:808, consentTop:812, consentBottom:840, gap:4 };
+  expect(() => assertConsentFootprint(compact)).not.toThrow();
+  expect(() => assertConsentFootprint({...compact, footprint:37})).toThrow("footprint");
+  expect(() => assertConsentFootprint({...compact, consentTop:735, consentBottom:763})).toThrow("inside");
+  expect(() => assertConsentFootprint({...compact, consentTop:800})).toThrow("separate row");
+  const hidden = {...compact, shown:false, footprint:37, height:37, top:807, controlTop:812, controlBottom:840, consentTop:0, consentBottom:0};
+  expect(() => assertConsentFootprint(hidden)).not.toThrow();
+  expect(() => assertConsentFootprint({...compact, shown:false})).toThrow("padding clearances");
+  const wide = {...hidden, width:1280, shown:true, consentTop:812, consentBottom:840};
+  expect(() => assertConsentFootprint(wide)).not.toThrow();
+  expect(() => assertConsentFootprint({...compact, width:1280})).toThrow("control row");
 });
