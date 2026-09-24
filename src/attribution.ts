@@ -1,12 +1,48 @@
 import { FOOTER_EXPERIMENT_URL, type FooterViewport } from "./experiment.js";
 
+export const FOOTER_STABLE_PROTOCOL = "stable-modal-v1";
+export const FOOTER_COPY_PROTOCOL = "copy-modal-v1";
+/** Accounts-assigned English signup labels; `direct` is the control. */
+export const FOOTER_COPY_ARMS = ["direct", "product", "newsletter"] as const;
+export type FooterCopyArm = (typeof FOOTER_COPY_ARMS)[number];
+
+export function isFooterCopyArm(value: unknown): value is FooterCopyArm {
+  return typeof value === "string" && (FOOTER_COPY_ARMS as readonly string[]).includes(value);
+}
+
+export interface FooterAttribution { readonly token: string; readonly expiresAt: number }
+
 /** Fixed measurement contract; the response never determines presentation. */
-export async function requestStableFooterAttribution(audience: string, locale: string, viewport: FooterViewport, signal: AbortSignal): Promise<{ token: string; expiresAt: number } | null> {
+export async function requestStableFooterAttribution(audience: string, locale: string, viewport: FooterViewport, signal: AbortSignal): Promise<FooterAttribution | null> {
+  const value = await requestAttribution({ action: "assign", audience, locale, viewport, presentationVersion: FOOTER_STABLE_PROTOCOL }, signal);
+  return value && fixedAssignment(value, { locale, viewport, copyStyle: "direct", cohort: "fixed", policyVersion: FOOTER_STABLE_PROTOCOL })
+    ? { token: value.token, expiresAt: value.expiresAt } : null;
+}
+
+/** English copy test. The client echoes its rendered arm, and Accounts must confirm that same arm. */
+export async function requestCopyFooterAttribution(audience: string, locale: string, viewport: FooterViewport, arm: FooterCopyArm, signal: AbortSignal): Promise<FooterAttribution | null> {
+  const value = await requestAttribution({ action: "assign", audience, locale, viewport, presentationVersion: FOOTER_COPY_PROTOCOL, copyArm: arm }, signal);
+  return value && fixedAssignment(value, { locale, viewport, copyStyle: arm, cohort: "explore", policyVersion: FOOTER_COPY_PROTOCOL })
+    ? { token: value.token, expiresAt: value.expiresAt } : null;
+}
+
+type Envelope = FooterAttribution & { readonly assignment: object };
+
+function fixedAssignment(value: Envelope, expected: Record<string, string>): boolean {
+  const id = Reflect.get(value.assignment, "id");
+  if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(id)) return false;
+  for (const [key, want] of Object.entries({ ...expected, layout: "button", color: "green", shimmer: false })) {
+    if (Reflect.get(value.assignment, key) !== want) return false;
+  }
+  return true;
+}
+
+async function requestAttribution(body: Record<string, string>, signal: AbortSignal): Promise<Envelope | null> {
   try {
     const response = await fetch(FOOTER_EXPERIMENT_URL, {
       method: "POST", credentials: "omit", cache: "no-store", signal,
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ action: "assign", audience, locale, viewport, presentationVersion: "stable-modal-v1" }),
+      body: JSON.stringify(body),
     });
     if (!response.ok) return null;
     if (!response.body) return null;
@@ -32,11 +68,6 @@ export async function requestStableFooterAttribution(audience: string, locale: s
     const assignment: unknown = Reflect.get(value, "assignment");
     if (Reflect.get(value, "version") !== 1 || typeof token !== "string" || !/^[0-9a-f]{64}$/u.test(token)
       || typeof assignment !== "object" || assignment === null) return null;
-    const id = Reflect.get(assignment, "id");
-    if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(id)) return null;
-    for (const [key, expected] of Object.entries({ locale, viewport, layout: "button", copyStyle: "direct", color: "green", shimmer: false, cohort: "fixed", policyVersion: "stable-modal-v1" })) {
-      if (Reflect.get(assignment, key) !== expected) return null;
-    }
-    return signal.aborted ? null : { token, expiresAt };
+    return signal.aborted ? null : { token, expiresAt, assignment };
   } catch { return null; }
 }

@@ -31,3 +31,27 @@ test("fixed attribution admits only a bounded, unexpired matching scope without 
     expect(await request()).toBeNull();
   } finally { globalThis.fetch = original; }
 });
+
+test("copy attribution echoes the rendered arm and admits only Accounts' confirmation of that arm", async () => {
+  const { requestCopyFooterAttribution, FOOTER_COPY_ARMS } = await import("../src/attribution.js");
+  const original = globalThis.fetch;
+  const copy = (copyStyle: string) => ({ ...envelope(), assignment: { ...envelope().assignment, copyStyle, cohort: "explore", policyVersion: "copy-modal-v1" } });
+  let payload: unknown;
+  const requests: unknown[] = [];
+  globalThis.fetch = (async (_url: unknown, init: RequestInit) => { requests.push(JSON.parse(String(init.body))); return Response.json(payload); }) as typeof fetch;
+  try {
+    for (const arm of FOOTER_COPY_ARMS) {
+      payload = copy(arm);
+      expect(await requestCopyFooterAttribution("hraness", "en", "wide", arm, new AbortController().signal))
+        .toEqual({ token: "a".repeat(64), expiresAt: (payload as ReturnType<typeof envelope>).expiresAt });
+      expect(requests.at(-1)).toEqual({ action: "assign", audience: "hraness", locale: "en", viewport: "wide", presentationVersion: "copy-modal-v1", copyArm: arm });
+      for (const invalid of [
+        copy(arm === "direct" ? "product" : "direct"), envelope(),
+        { ...copy(arm), assignment: { ...copy(arm).assignment, cohort: "fixed" } },
+        { ...copy(arm), assignment: { ...copy(arm).assignment, layout: "inline" } },
+      ]) { payload = invalid; expect(await requestCopyFooterAttribution("hraness", "en", "wide", arm, new AbortController().signal)).toBeNull(); }
+    }
+    payload = copy("direct");
+    expect(await requestStableFooterAttribution("hraness", "en", "wide", new AbortController().signal)).toBeNull();
+  } finally { globalThis.fetch = original; }
+});

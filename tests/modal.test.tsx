@@ -5,14 +5,17 @@ import { act } from "react";
 import { HranessSiteFooter, type HranessSiteFooterProps, type HranessFooterConversionEvent } from "../src/react.js";
 
 const signup = { kind: "signup", audience: "hraness" } as const;
+const unnamed = { kind: "signup", audience: "aicharts" } as const;
 const fixed = { version: 1, token: "f".repeat(64), expiresAt: Date.now() + 48 * 60 * 60 * 1000, assignment: {
   id: "123e4567-e89b-42d3-a456-426614174000", locale: "en", layout: "button", copyStyle: "direct",
   color: "green", shimmer: false, cohort: "fixed", policyVersion: "stable-modal-v1", viewport: "wide",
 } };
 
+const copyEnvelope = (copyStyle: string) => ({ ...fixed, token: "c".repeat(64), assignment: { ...fixed.assignment, copyStyle, cohort: "explore", policyVersion: "copy-modal-v1" } });
+
 async function fixture(run: (f: {
   container: HTMLElement; window: ReturnType<typeof parseHTML>["window"];
-  render: (props?: Partial<HranessSiteFooterProps>) => Promise<void>;
+  render: (props?: Partial<HranessSiteFooterProps>, packageDefault?: boolean) => Promise<void>;
   click: (target: Element) => Promise<void>;
   requests: Array<{ url: string; init: RequestInit; resolve: (value: Response) => void }>;
   events: HranessFooterConversionEvent[]; viewport: EventTarget & { height: number; offsetTop: number };
@@ -58,7 +61,7 @@ async function fixture(run: (f: {
   const root = createRoot(container);
   try {
     await run({ container, window, viewport, events, requests,
-      render: async (props = {}) => { await act(async () => root.render(<HranessSiteFooter mailingList={signup} locale="en" onConversion={event => events.push(event)} {...props} />)); },
+      render: async (props = {}, packageDefault = false) => { await act(async () => root.render(<HranessSiteFooter mailingList={signup} locale="en" {...(packageDefault ? {} : { attribution: false })} onConversion={event => events.push(event)} {...props} />)); },
       click: async target => { await act(async () => target.dispatchEvent(new window.Event("click", { bubbles: true, cancelable: true }))); },
       visible: () => intersections.forEach(callback => callback([{ isIntersecting: true, intersectionRatio: 1 } as IntersectionObserverEntry], {} as IntersectionObserver)),
     });
@@ -157,25 +160,26 @@ test("duplicate submits are suppressed and generic acceptance preserves the stab
 
 test("delayed or failed attribution never changes the CTA and stale eligibility cannot attribute success", async () => {
   await fixture(async ({ render, container, window, click, requests, events }) => {
-    await render({ attribution: true });
+    // A product list without a name stays on the fixed label and protocol.
+    await render({ attribution: true, mailingList: unnamed });
     const trigger = container.querySelector("summary")!;
     await click(trigger);
     const input = container.querySelector<HTMLInputElement>('input[name="email"]')!;
     input.value = "preserve@example.test";
     expect(JSON.parse(String(requests[0]!.init.body)).presentationVersion).toBe("stable-modal-v1");
-    await render({ attribution: false, onConversion: undefined });
+    await render({ attribution: false, onConversion: undefined, mailingList: unnamed });
     expect(requests[0]!.init.signal?.aborted).toBeTrue();
     await act(async () => requests[0]!.resolve(Response.json(fixed)));
     expect(container.querySelector('input[name="email"]')).toBe(input);
     expect(input.value).toBe("preserve@example.test");
     expect(container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!.disabled).toBeTrue();
-    await render({ attribution: true });
+    await render({ attribution: true, mailingList: unnamed });
     await act(async () => requests[1]!.resolve(new Response(null, { status: 503 })));
     expect(container.querySelector("summary")).toBe(trigger);
     expect(container.querySelector<HTMLDialogElement>("dialog")!.open).toBeTrue();
     await act(async () => container.querySelector("form")!.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })));
-    await render({ attribution: false, onConversion: undefined });
-    await render();
+    await render({ attribution: false, onConversion: undefined, mailingList: unnamed });
+    await render({ mailingList: unnamed });
     await act(async () => requests[2]!.resolve(new Response(null, { status: 202 })));
     expect(events.filter(event => event.stage === "accepted")).toHaveLength(0);
     expect(container.querySelector('[data-slot="hraness-mailing-list-status"]')?.textContent).toBe("Check your email for a confirmation link.");
@@ -213,5 +217,109 @@ test("hidden-brand layout survives support updates without resetting the signup"
     await render({ showBrand: false });
     expect(inner().className).toBe(footerInnerClassName(true, true, "green", false, false, false));
     expect(container.querySelector("summary")).toBe(trigger);
+  });
+});
+
+test("English visitors keep one Accounts-confirmed label and fall back to the fixed label when it is unavailable", async () => {
+  await fixture(async ({ render, container, window, requests }) => {
+    const stored = new Map<string, string>([["hraness-site-footer:copy-arm:v1", "newsletter"]]);
+    const assigns = () => requests.filter(request => request.url.endsWith("/api/mailing/experiment"));
+    Object.defineProperty(window, "localStorage", { configurable: true, value: {
+      getItem: (key: string) => stored.get(key) ?? "accepted", setItem: (key: string, value: string) => stored.set(key, value),
+    } });
+    await render({ attribution: true });
+    const label = () => container.querySelector("summary > span")!.textContent;
+    const title = () => container.querySelector("dialog h2")!.textContent;
+    const disclosure = () => container.querySelector<HTMLElement>('[data-slot="hraness-mailing-disclosure"]')!;
+    const token = () => container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!;
+    expect(label()).toBe("Subscribe to the newsletter");
+    expect(title()).toBe("Subscribe to the newsletter");
+    expect(disclosure().dataset.presentation).toBe("copy-modal-v1");
+    expect(JSON.parse(String(assigns()[0]!.init.body))).toEqual({
+      action: "assign", audience: "hraness", locale: "en", viewport: "wide", presentationVersion: "copy-modal-v1", copyArm: "newsletter",
+    });
+    const copy = copyEnvelope("newsletter");
+    await act(async () => assigns()[0]!.resolve(Response.json(copy)));
+    expect(token().disabled).toBeFalse();
+    expect(token().value).toBe("c".repeat(64));
+    // The arm and its unexpired token survive eligibility changes.
+    await render({ attribution: false });
+    await render({ attribution: true });
+    expect(label()).toBe("Subscribe to the newsletter");
+    expect(assigns()).toHaveLength(1);
+    expect(token().value).toBe("c".repeat(64));
+  });
+  // A different arm from Accounts, or no confirmation, is never attributed to the rendered label.
+  for (const response of [() => Response.json({ ...copyEnvelope("newsletter"), assignment: { ...copyEnvelope("newsletter").assignment, copyStyle: "product" } }), () => new Response(null, { status: 503 })]) {
+    await fixture(async ({ render, container, window, requests }) => {
+      Object.defineProperty(window, "localStorage", { configurable: true, value: {
+        getItem: (key: string) => key === "hraness-site-footer:copy-arm:v1" ? "newsletter" : "accepted", setItem() {},
+      } });
+      const assigns = () => requests.filter(request => request.url.endsWith("/api/mailing/experiment"));
+      await render({ attribution: true });
+      await act(async () => assigns()[0]!.resolve(response()));
+      expect(container.querySelector("summary > span")!.textContent).toBe("Get email updates");
+      expect(container.querySelector("dialog h2")!.textContent).toBe("Get email updates");
+      expect(container.querySelector<HTMLElement>('[data-slot="hraness-mailing-disclosure"]')!.dataset.presentation).toBe("stable-modal-v1");
+      expect(container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!.disabled).toBeTrue();
+      expect(JSON.parse(String(assigns()[1]!.init.body)).presentationVersion).toBe("stable-modal-v1");
+      await act(async () => assigns()[1]!.resolve(Response.json(fixed)));
+      expect(container.querySelector<HTMLInputElement>('input[name="experimentToken"]')!.value).toBe("f".repeat(64));
+    });
+  }
+});
+
+test("default attribution skips Do Not Track, Global Privacy Control and automated browsers", async () => {
+  for (const flag of [{ doNotTrack: "1" }, { webdriver: true }, { globalPrivacyControl: true }]) {
+    await fixture(async ({ render, requests }) => {
+      const saved = Object.keys(flag).map(key => [key, Object.getOwnPropertyDescriptor(navigator, key)] as const);
+      for (const [key, value] of Object.entries(flag)) Object.defineProperty(navigator, key, { configurable: true, value });
+      try {
+        await render({}, true);
+        expect(requests).toHaveLength(0);
+        // An explicit host decision still applies.
+        await render({ attribution: true });
+        expect(requests.some(request => request.url.endsWith("/api/mailing/experiment"))).toBeTrue();
+      } finally {
+        for (const [key, descriptor] of saved) { if (descriptor) Object.defineProperty(navigator, key, descriptor); else Reflect.deleteProperty(navigator, key); }
+      }
+    });
+  }
+  await fixture(async ({ render, requests }) => {
+    await render({ mailingList: unnamed }, true);
+    expect(JSON.parse(String(requests[0]!.init.body)).presentationVersion).toBe("stable-modal-v1");
+  });
+});
+
+test("default attribution waits for cookie consent where the region requires it", async () => {
+  await fixture(async ({ render, container, window, requests, click }) => {
+    const stored = new Map<string, string>();
+    Object.defineProperty(window, "localStorage", { configurable: true, value: {
+      getItem: (key: string) => stored.get(key) ?? null, setItem: (key: string, value: string) => stored.set(key, value),
+    } });
+    const assigns = () => requests.filter(request => request.url.endsWith("/api/mailing/experiment"));
+    await render({ mailingList: unnamed }, true);
+    expect(assigns()).toHaveLength(0);
+    const region = requests.find(request => request.url.endsWith("/api/consent/region"))!;
+    await act(async () => region.resolve(Response.json({ required: true })));
+    expect(assigns()).toHaveLength(0);
+    expect(stored.has("hraness-site-footer:copy-arm:v1")).toBeFalse();
+    await click(container.querySelector('[data-slot="hraness-cookie-consent-accept"]')!);
+    expect(assigns()).toHaveLength(1);
+  });
+});
+
+test("a slow copy confirmation returns to the fixed label and token", async () => {
+  await fixture(async ({ render, container, window, requests }) => {
+    Object.defineProperty(window, "localStorage", { configurable: true, value: {
+      getItem: (key: string) => key === "hraness-site-footer:copy-arm:v1" ? "product" : "accepted", setItem() {},
+    } });
+    const assigns = () => requests.filter(request => request.url.endsWith("/api/mailing/experiment"));
+    await render({ attribution: true });
+    expect(container.querySelector("summary > span")!.textContent).toBe("Get Hraness updates");
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 1_600)); });
+    expect(assigns()[0]!.init.signal?.aborted).toBeTrue();
+    expect(container.querySelector("summary > span")!.textContent).toBe("Get email updates");
+    expect(JSON.parse(String(assigns()[1]!.init.body)).presentationVersion).toBe("stable-modal-v1");
   });
 });

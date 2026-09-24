@@ -3,8 +3,8 @@ import type { SupportProfile } from "./internal.js";
 
 import { attachFooterFoil } from "./foil.js";
 import { footerClassName, footerClasses, footerInnerClassName, mailingStatusClassName } from "./footer.stylex.js";
-import { resolveFooterLocale, stableFooterMessages } from "./locales.js";
-import { requestStableFooterAttribution } from "./attribution.js";
+import { footerCopyLabel, footerCopyProductName, resolveFooterLocale, stableFooterMessages } from "./locales.js";
+import { FOOTER_COPY_ARMS, FOOTER_COPY_PROTOCOL, FOOTER_STABLE_PROTOCOL, isFooterCopyArm, requestCopyFooterAttribution, requestStableFooterAttribution, type FooterCopyArm } from "./attribution.js";
 import { DEFAULT_FOOTER_VARIANT, FOOTER_WIDE_QUERY, exposeFooterEnrollment } from "./experiment.js";
 import type { HranessFooterConversionEvent, HranessFooterConversionStage, HranessFooterConversionReason } from "./internal.js";
 export type { HranessFooterConversionEvent, HranessFooterConversionStage, HranessFooterConversionReason } from "./internal.js";
@@ -49,7 +49,12 @@ export interface HranessSiteFooterProps {
   readonly experiment?: boolean;
   /** Optional, privacy-bounded observations. Omit when attribution is ineligible. */
   readonly onConversion?: ((event: HranessFooterConversionEvent) => void) | undefined;
-  /** Opt in only while measurement is eligible; fixed token attribution never controls presentation. */
+  /**
+   * Anonymous signup attribution. When omitted, it runs once cookie consent is
+   * accepted or not required, except for Do Not Track, Global Privacy Control,
+   * and automated browsers; an explicit value is the host's eligibility decision. English visitors on lists with a short product
+   * name join the Accounts signup-label test.
+   */
   readonly attribution?: boolean;
   /** Sticky includes its own document footprint. Flow leaves placement to the host. */
   readonly placement?: "sticky" | "flow";
@@ -83,7 +88,7 @@ function activeStateFor(
 export function HranessSiteFooter({
   locale: localeInput,
   onConversion,
-  attribution = false,
+  attribution: attributionRequested,
   placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
@@ -96,8 +101,16 @@ export function HranessSiteFooter({
   const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
-  const [consentPending, setConsentPending] = useState(false);
+  // "checking" until stored acceptance or the region lookup settles; only "clear" permits default measurement.
+  const [consent, setConsent] = useState<"checking" | "required" | "clear">("checking");
+  const consentPending = consent === "required";
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
+  // Server renders and first hydration never measure; eligibility needs the browser.
+  const [measurable, setMeasurable] = useState(false);
+  const [copyUnavailable, setCopyUnavailable] = useState(false);
+  const storedCopyArm = useRef<FooterCopyArm | null>(null);
+  // An explicit choice is the host's; the default measures only eligible browsers.
+  const attribution = measurable && (attributionRequested ?? (consent === "clear" && footerMeasurementEligible()));
   const activeRequest = useRef<AbortController | null>(null);
   const attributionContext = useRef({ key: mailingListKey, enabled: attribution, locale: locale.locale });
   const attributionRequest = useRef<AbortController | null>(null);
@@ -120,6 +133,11 @@ export function HranessSiteFooter({
   const renderState = activeStateFor(mailingList, state);
   const productName = mailingList.kind === "signup" ? mailingList.name ?? "" : "";
   const presentationKey = `${locale.locale}:${placement}:${signIn === true}:${productName}`;
+  const copyName = mailingList.kind === "signup" ? footerCopyProductName(locale, mailingList.audience, mailingList.name) : null;
+  // A browser keeps one label. Resolving it during render keeps the fixed label
+  // from ever requesting a token while an arm is about to render.
+  const copyArm = attribution && copyName !== null && !copyUnavailable
+    ? storedCopyArm.current ??= storedFooterCopyArm() : null;
 
   useLayoutEffect(() => {
     const context = attributionContext.current;
@@ -152,6 +170,7 @@ export function HranessSiteFooter({
     mounted.current = true;
     return () => { mounted.current = false; activeRequest.current?.abort(); attributionRequest.current?.abort(); exposureRequest.current?.abort(); markAttribution.current = () => null; };
   }, []);
+  useLayoutEffect(() => { setMeasurable(true); }, []);
   useEffect(() => {
     if (!interacted.current) setLocale(resolveFooterLocale(localeInput ?? navigator.languages));
   }, [typeof localeInput === "string" ? localeInput : localeInput?.join(",")]);
@@ -239,7 +258,7 @@ export function HranessSiteFooter({
     const valid = () => mounted.current && attributionContext.current === context && context.enabled;
     const viewport = () => query?.matches === false ? "compact" as const : "wide" as const;
     let assignedViewport = viewport();
-    const scope = () => `${window.location?.origin ?? ""}:${mailingListKey}:${locale.locale}:${viewport()}`;
+    const scope = () => `${window.location?.origin ?? ""}:${mailingListKey}:${locale.locale}:${viewport()}:${copyArm ?? FOOTER_STABLE_PROTOCOL}`;
     const mark = () => {
       if (!valid() || !token || assignedViewport !== viewport() || !attributionCache.current || attributionCache.current.expiresAt <= Date.now() + 60_000) return null;
       if (!exposed) {
@@ -278,10 +297,19 @@ export function HranessSiteFooter({
       attributionCache.current = null;
       const controller = new AbortController();
       attributionRequest.current = controller;
-      timeout = setTimeout(() => controller.abort(), 1_500);
-      void requestStableFooterAttribution(mailingList.audience, locale.locale, assignedViewport, controller.signal).then(result => {
+      timeout = setTimeout(() => {
+        controller.abort();
+        // A slow confirmation is no confirmation: return to the fixed label and token.
+        if (copyArm !== null && valid() && attributionRequest.current === controller) setCopyUnavailable(true);
+      }, 1_500);
+      const request = copyArm === null
+        ? requestStableFooterAttribution(mailingList.audience, locale.locale, assignedViewport, controller.signal)
+        : requestCopyFooterAttribution(mailingList.audience, locale.locale, assignedViewport, copyArm, controller.signal);
+      void request.then(result => {
         if (!valid() || controller.signal.aborted || attributionRequest.current !== controller) return;
         if (timeout !== undefined) clearTimeout(timeout);
+        // An unconfirmed arm is never measured; fall back to the fixed label and token.
+        if (!result && copyArm !== null) { setCopyUnavailable(true); return; }
         if (result) {
           const cached = { ...result, scope: scope(), exposed: false };
           attributionCache.current = cached;
@@ -308,7 +336,21 @@ export function HranessSiteFooter({
       if (markAttribution.current === mark) markAttribution.current = () => null;
       if (input) { input.value = ""; input.disabled = true; }
     };
-  }, [attribution, mailingListKey, locale.locale, innerHtml]);
+  }, [attribution, mailingListKey, locale.locale, innerHtml, copyArm]);
+
+  // The fixed label is rendered markup; a confirmed-eligible arm only swaps its text.
+  useLayoutEffect(() => {
+    if (mailingList.kind !== "signup") return;
+    const disclosure = footer.current?.querySelector<HTMLElement>('[data-slot="hraness-mailing-disclosure"]');
+    const label = disclosure?.querySelector<HTMLElement>("summary > span");
+    const title = disclosure?.querySelector<HTMLElement>('[data-slot="hraness-mailing-dialog"] h2');
+    if (!disclosure || !label || !title) return;
+    const copy = stableFooterMessages(locale, mailingList.audience, mailingList.name);
+    const text = copyArm !== null && copyName !== null ? footerCopyLabel(copyArm, copyName) : null;
+    label.textContent = text ?? copy.button;
+    title.textContent = text ?? copy.title;
+    disclosure.dataset.presentation = text === null ? FOOTER_STABLE_PROTOCOL : FOOTER_COPY_PROTOCOL;
+  }, [innerHtml, copyArm, copyName, locale]);
 
   // Upgrade the same native disclosure and form; callbacks and request states
   // never replace this DOM, so input, focus and the top-layer dialog survive.
@@ -484,7 +526,7 @@ export function HranessSiteFooter({
   // and fails toward showing the note.
   useEffect(() => {
     try {
-      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") return;
+      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") { setConsent("clear"); return; }
     } catch {
       // Storage disabled: the in-memory accept still applies for this page.
     }
@@ -499,9 +541,9 @@ export function HranessSiteFooter({
       const required = typeof body === "object" && body !== null
         ? Reflect.get(body, "required") === true
         : true;
-      if (!controller.signal.aborted) setConsentPending(required);
+      if (!controller.signal.aborted) setConsent(required ? "required" : "clear");
     }).catch(() => {
-      if (!controller.signal.aborted) setConsentPending(true);
+      if (!controller.signal.aborted) setConsent("required");
     });
     return () => { controller.abort(); };
   }, []);
@@ -540,7 +582,7 @@ export function HranessSiteFooter({
       } catch {
         // Private browsing or disabled storage: hide for this page only.
       }
-      setConsentPending(false);
+      setConsent("clear");
     },
     onSubmit: handleSubmit,
     onInputCapture: (event: { target: EventTarget | null }) => {
@@ -572,4 +614,27 @@ export function HranessSiteFooter({
     },
     ref: footer,
   });
+}
+
+const FOOTER_COPY_ARM_KEY = "hraness-site-footer:copy-arm:v1";
+
+/** Anonymous measurement stays off for Do Not Track, Global Privacy Control, and automation. */
+function footerMeasurementEligible(): boolean {
+  try {
+    const browser = navigator as Navigator & { globalPrivacyControl?: boolean };
+    return browser.webdriver !== true && browser.doNotTrack !== "1" && browser.globalPrivacyControl !== true;
+  } catch { return false; }
+}
+
+/** Reuse this browser's arm, or pick one uniformly and remember it when storage allows. */
+function storedFooterCopyArm(): FooterCopyArm {
+  try {
+    const stored = window.localStorage.getItem(FOOTER_COPY_ARM_KEY);
+    if (isFooterCopyArm(stored)) return stored;
+  } catch { /* Storage can be blocked; the arm then lasts for this page. */ }
+  const random = new Uint32Array(1);
+  crypto.getRandomValues(random);
+  const arm = FOOTER_COPY_ARMS[random[0]! % FOOTER_COPY_ARMS.length]!;
+  try { window.localStorage.setItem(FOOTER_COPY_ARM_KEY, arm); } catch { /* Best effort. */ }
+  return arm;
 }

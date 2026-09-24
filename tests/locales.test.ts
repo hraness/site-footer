@@ -63,3 +63,17 @@ test("stable signup copy separates presubmission benefit from accepted confirmat
   expect(stableFooterMessages(FOOTER_LOCALES["fr-FR"]!, "soundfish", "Soundfish").description)
     .not.toContain("Soundfish");
 });
+
+test("the copy test names Hraness or a short configured product, in English only", async () => {
+  const { footerCopyLabel, footerCopyProductName, resolveFooterLocale } = await import("../src/locales.js");
+  const en = resolveFooterLocale("en-US");
+  expect(footerCopyProductName(en, "hraness")).toBe("Hraness");
+  expect(footerCopyProductName(en, "hraness", "Other")).toBe("Hraness");
+  expect(footerCopyProductName(en, "soundfish", "Soundfish")).toBe("Soundfish");
+  expect(footerCopyProductName(en, "soundfish")).toBeNull();
+  expect(footerCopyProductName(en, "soundfish", "A".repeat(21))).toBeNull();
+  expect(footerCopyProductName(resolveFooterLocale("es"), "hraness")).toBeNull();
+  expect(footerCopyLabel("direct", "Soundfish")).toBe("Get email updates");
+  expect(footerCopyLabel("product", "Soundfish")).toBe("Get Soundfish updates");
+  expect(footerCopyLabel("newsletter", "Soundfish")).toBe("Subscribe to the newsletter");
+});

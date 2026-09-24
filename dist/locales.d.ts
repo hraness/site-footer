@@ -79,4 +79,13 @@ export declare function stableFooterMessages(locale: FooterLocale, audience?: st
     closeLabel: string;
     invalidEmail: string;
 };
+/** Longest product name eligible for the English copy test's product label. */
+export declare const FOOTER_COPY_PRODUCT_NAME_MAX = 20;
+/**
+ * The English copy-test product name: Hraness for the umbrella list, otherwise
+ * the configured product name. Null keeps the visitor on the fixed label.
+ */
+export declare function footerCopyProductName(locale: FooterLocale, audience: string, productName?: string): string | null;
+/** Accounts-confirmed English signup labels. `direct` matches the fixed label. */
+export declare function footerCopyLabel(arm: "direct" | "product" | "newsletter", productName: string): string;
 //# sourceMappingURL=locales.d.ts.map
