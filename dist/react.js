@@ -1867,6 +1867,16 @@ function stableFooterMessages(locale, audience, productName) {
     placeholder: "you@example.com"
   };
 }
+var FOOTER_COPY_PRODUCT_NAME_MAX = 20;
+function footerCopyProductName(locale, audience, productName) {
+  if (!/^en(?:-|$)/u.test(locale.locale))
+    return null;
+  const name = audience === "hraness" ? "Hraness" : productName;
+  return name !== undefined && name.length > 0 && name.length <= FOOTER_COPY_PRODUCT_NAME_MAX ? name : null;
+}
+function footerCopyLabel(arm, productName) {
+  return arm === "product" ? `Get ${productName} updates` : arm === "newsletter" ? "Subscribe to the newsletter" : "Get email updates";
+}
 
 // src/experiment.ts
 var FOOTER_WIDE_QUERY = "(min-width: 47.5rem)";
@@ -1899,7 +1909,67 @@ async function exposeFooterEnrollment(token, signal) {
 }
 
 // src/attribution.ts
+var FOOTER_STABLE_PROTOCOL = "stable-modal-v1";
+var FOOTER_COPY_PROTOCOL = "copy-modal-v1";
+var FOOTER_COPY_ARMS = ["direct", "product", "newsletter"];
+function isFooterCopyArm(value) {
+  return typeof value === "string" && FOOTER_COPY_ARMS.includes(value);
+}
 async function requestStableFooterAttribution(audience, locale, viewport, signal) {
+  const value = await requestAttribution({
+    action: "assign",
+    audience,
+    locale,
+    viewport,
+    presentationVersion: FOOTER_STABLE_PROTOCOL
+  }, signal);
+  return value && fixedAssignment(value, {
+    locale,
+    viewport,
+    copyStyle: "direct",
+    cohort: "fixed",
+    policyVersion: FOOTER_STABLE_PROTOCOL
+  }) ? {
+    token: value.token,
+    expiresAt: value.expiresAt
+  } : null;
+}
+async function requestCopyFooterAttribution(audience, locale, viewport, arm, signal) {
+  const value = await requestAttribution({
+    action: "assign",
+    audience,
+    locale,
+    viewport,
+    presentationVersion: FOOTER_COPY_PROTOCOL,
+    copyArm: arm
+  }, signal);
+  return value && fixedAssignment(value, {
+    locale,
+    viewport,
+    copyStyle: arm,
+    cohort: "explore",
+    policyVersion: FOOTER_COPY_PROTOCOL
+  }) ? {
+    token: value.token,
+    expiresAt: value.expiresAt
+  } : null;
+}
+function fixedAssignment(value, expected) {
+  const id = Reflect.get(value.assignment, "id");
+  if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(id))
+    return false;
+  for (const [key, want] of Object.entries({
+    ...expected,
+    layout: "button",
+    color: "green",
+    shimmer: false
+  })) {
+    if (Reflect.get(value.assignment, key) !== want)
+      return false;
+  }
+  return true;
+}
+async function requestAttribution(body, signal) {
   try {
     const response = await fetch(FOOTER_EXPERIMENT_URL, {
       method: "POST",
@@ -1910,13 +1980,7 @@ async function requestStableFooterAttribution(audience, locale, viewport, signal
         "content-type": "application/json",
         accept: "application/json"
       },
-      body: JSON.stringify({
-        action: "assign",
-        audience,
-        locale,
-        viewport,
-        presentationVersion: "stable-modal-v1"
-      })
+      body: JSON.stringify(body)
     });
     if (!response.ok)
       return null;
@@ -1956,25 +2020,10 @@ async function requestStableFooterAttribution(audience, locale, viewport, signal
     const assignment = Reflect.get(value, "assignment");
     if (Reflect.get(value, "version") !== 1 || typeof token !== "string" || !/^[0-9a-f]{64}$/u.test(token) || typeof assignment !== "object" || assignment === null)
       return null;
-    const id = Reflect.get(assignment, "id");
-    if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(id))
-      return null;
-    for (const [key, expected] of Object.entries({
-      locale,
-      viewport,
-      layout: "button",
-      copyStyle: "direct",
-      color: "green",
-      shimmer: false,
-      cohort: "fixed",
-      policyVersion: "stable-modal-v1"
-    })) {
-      if (Reflect.get(assignment, key) !== expected)
-        return null;
-    }
     return signal.aborted ? null : {
       token,
-      expiresAt
+      expiresAt,
+      assignment
     };
   } catch {
     return null;
@@ -2310,7 +2359,7 @@ function activeStateFor(mailingList, state) {
 function HranessSiteFooter({
   locale: localeInput,
   onConversion,
-  attribution = false,
+  attribution: attributionRequested,
   placement = "sticky",
   mailingList: mailingListInput,
   showBrand = true,
@@ -2325,6 +2374,10 @@ function HranessSiteFooter({
   const [state, setState] = useState(IDLE_STATE);
   const [consentPending, setConsentPending] = useState(false);
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
+  const [measurable, setMeasurable] = useState(false);
+  const [copyUnavailable, setCopyUnavailable] = useState(false);
+  const storedCopyArm = useRef(null);
+  const attribution = measurable && (attributionRequested ?? footerMeasurementEligible());
   const activeRequest = useRef(null);
   const attributionContext = useRef({
     key: mailingListKey,
@@ -2355,6 +2408,8 @@ function HranessSiteFooter({
   const renderState = activeStateFor(mailingList, state);
   const productName = mailingList.kind === "signup" ? mailingList.name ?? "" : "";
   const presentationKey = `${locale.locale}:${placement}:${signIn === true}:${productName}`;
+  const copyName = mailingList.kind === "signup" ? footerCopyProductName(locale, mailingList.audience, mailingList.name) : null;
+  const copyArm = attribution && copyName !== null && !copyUnavailable ? storedCopyArm.current ??= storedFooterCopyArm() : null;
   useLayoutEffect(() => {
     const context = attributionContext.current;
     if (context.key !== mailingListKey || context.enabled !== attribution || context.locale !== locale.locale) {
@@ -2399,6 +2454,9 @@ function HranessSiteFooter({
       exposureRequest.current?.abort();
       markAttribution.current = () => null;
     };
+  }, []);
+  useLayoutEffect(() => {
+    setMeasurable(true);
   }, []);
   useEffect(() => {
     if (!interacted.current)
@@ -2518,7 +2576,7 @@ function HranessSiteFooter({
     const valid = () => mounted.current && attributionContext.current === context && context.enabled;
     const viewport = () => query?.matches === false ? "compact" : "wide";
     let assignedViewport = viewport();
-    const scope = () => `${window.location?.origin ?? ""}:${mailingListKey}:${locale.locale}:${viewport()}`;
+    const scope = () => `${window.location?.origin ?? ""}:${mailingListKey}:${locale.locale}:${viewport()}:${copyArm ?? FOOTER_STABLE_PROTOCOL}`;
     const mark = () => {
       if (!valid() || !token || assignedViewport !== viewport() || !attributionCache.current || attributionCache.current.expiresAt <= Date.now() + 60000)
         return null;
@@ -2579,11 +2637,16 @@ function HranessSiteFooter({
       const controller = new AbortController;
       attributionRequest.current = controller;
       timeout = setTimeout(() => controller.abort(), 1500);
-      requestStableFooterAttribution(mailingList.audience, locale.locale, assignedViewport, controller.signal).then((result) => {
+      const request = copyArm === null ? requestStableFooterAttribution(mailingList.audience, locale.locale, assignedViewport, controller.signal) : requestCopyFooterAttribution(mailingList.audience, locale.locale, assignedViewport, copyArm, controller.signal);
+      request.then((result) => {
         if (!valid() || controller.signal.aborted || attributionRequest.current !== controller)
           return;
         if (timeout !== undefined)
           clearTimeout(timeout);
+        if (!result && copyArm !== null) {
+          setCopyUnavailable(true);
+          return;
+        }
         if (result) {
           const cached2 = {
             ...result,
@@ -2626,7 +2689,21 @@ function HranessSiteFooter({
         input.disabled = true;
       }
     };
-  }, [attribution, mailingListKey, locale.locale, innerHtml]);
+  }, [attribution, mailingListKey, locale.locale, innerHtml, copyArm]);
+  useLayoutEffect(() => {
+    if (mailingList.kind !== "signup")
+      return;
+    const disclosure = footer.current?.querySelector('[data-slot="hraness-mailing-disclosure"]');
+    const label = disclosure?.querySelector("summary > span");
+    const title = disclosure?.querySelector('[data-slot="hraness-mailing-dialog"] h2');
+    if (!disclosure || !label || !title)
+      return;
+    const copy = stableFooterMessages(locale, mailingList.audience, mailingList.name);
+    const text = copyArm !== null && copyName !== null ? footerCopyLabel(copyArm, copyName) : null;
+    label.textContent = text ?? copy.button;
+    title.textContent = text ?? copy.title;
+    disclosure.dataset.presentation = text === null ? FOOTER_STABLE_PROTOCOL : FOOTER_COPY_PROTOCOL;
+  }, [innerHtml, copyArm, copyName, locale]);
   useLayoutEffect(() => {
     const disclosure = footer.current?.querySelector('[data-slot="hraness-mailing-disclosure"]');
     const dialog = footer.current?.querySelector('[data-slot="hraness-mailing-dialog"]');
@@ -2940,8 +3017,31 @@ function HranessSiteFooter({
     ref: footer
   });
 }
+var FOOTER_COPY_ARM_KEY = "hraness-site-footer:copy-arm:v1";
+function footerMeasurementEligible() {
+  try {
+    const browser = navigator;
+    return browser.webdriver !== true && browser.doNotTrack !== "1" && browser.globalPrivacyControl !== true;
+  } catch {
+    return false;
+  }
+}
+function storedFooterCopyArm() {
+  try {
+    const stored = window.localStorage.getItem(FOOTER_COPY_ARM_KEY);
+    if (isFooterCopyArm(stored))
+      return stored;
+  } catch {}
+  const random = new Uint32Array(1);
+  crypto.getRandomValues(random);
+  const arm = FOOTER_COPY_ARMS[random[0] % FOOTER_COPY_ARMS.length];
+  try {
+    window.localStorage.setItem(FOOTER_COPY_ARM_KEY, arm);
+  } catch {}
+  return arm;
+}
 export {
   HranessSiteFooter
 };
 
-//# debugId=AC90FA73DD47311664756E2164756E21
+//# debugId=AE4A7CABBC52679564756E2164756E21

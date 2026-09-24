@@ -168,7 +168,7 @@ The static renderer supports the same state without JavaScript.
 
 The host owns authentication; the footer never reads session cookies or fetches
 identity. Use `none` while the initial session is unresolved or unavailable,
-`account` when signed in. Hosts may show the unmeasured stable `signup` during initial or unavailable session checks; enable attribution only after confirming signed-out status.
+`account` when signed in. Hosts that show `signup` during initial or unavailable session checks should pass `attribution={false}` until signed-out status is confirmed.
 These states are mutually exclusive and require no audience for account access.
 
 ```tsx
@@ -336,7 +336,8 @@ consumer layout. Product navigation belongs with the page navigation.
 
 The `stable-modal-v1` presentation never waits for a session check, feature flag,
 assignment, or telemetry. The deprecated `experiment` prop is accepted but inert.
-Copy and layout do not change after an attribution response. Pending, retryable
+Layout never changes after an attribution response, and the only copy that can
+change is the English signup label in the test described below. Pending, retryable
 error, dismissal/reopening, callback changes and attribution eligibility changes
 preserve the form and its input. Generic request acceptance hides the form inside
 the modal and says “Check your email for a confirmation link.” The footer button remains.
@@ -360,9 +361,22 @@ measurement is ineligible. Adding/removing it never changes the UI. `accepted`
 means only a generic anti-enumeration request acceptance, including suppressed
 or honeypot cases; it is never a provider-delivery or confirmed-subscription event.
 
-`attribution` defaults to false. Eligible consumers may enable it to request the
-fixed Accounts `stable-modal-v1` token and attach that opaque capability to native
-and enhanced posts. The response never selects UI. Pending, failed and malformed
+When `attribution` is omitted, the footer measures every browser except those that
+send Do Not Track or Global Privacy Control and automated browsers. An explicit
+`true` or `false` is the host's own eligibility decision. When it runs, the
+footer requests an anonymous Accounts token and attaches it to native and
+enhanced posts, so Accounts can count confirmed signups. Pass `attribution={false}`
+to turn it off.
+
+English visitors on the `hraness` list, or on a list whose `name` is at most 20
+characters, join a signup-label test (`copy-modal-v1`). Each browser gets one of
+three labels for the button and the dialog title: “Get email updates”,
+“Get {name} updates” (“Get Hraness updates” on hraness.com), or “Subscribe to the
+newsletter”. The label is chosen at random once, stored in `localStorage` under
+`hraness-site-footer:copy-arm:v1`, and rendered before any token is requested.
+Accounts must confirm that same label, or the footer returns to “Get email updates”
+with the fixed `stable-modal-v1` token. Everyone else always sees the fixed label.
+The response never selects layout. Pending, failed and malformed
 responses leave the button usable. Ineligibility immediately disables the hidden
 token and aborts measurement requests. An unexpired same-origin, audience, locale
 and viewport token may be reused in memory after a successful session recheck,
@@ -380,7 +394,9 @@ and restore the document root's overflow; it never injects a stylesheet.
 Unreleased: the cookie note mentions sign-in only on sites that pass `signIn`,
 and it says the browser, not a cookie, remembers the consent choice. A signup
 can name its product in the English dialog through `mailingList.name`. The
-accepted state reads “Check your email for a confirmation link.”
+accepted state reads “Check your email for a confirmation link.” Signup attribution is on
+by default, skipping Do Not Track, Global Privacy Control, and automated browsers,
+and English visitors join the three-label `copy-modal-v1` signup test.
 
 Version 0.16.0 introduces the stable modal and optional bounded lifecycle observations.
 

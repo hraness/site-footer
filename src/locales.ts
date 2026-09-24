@@ -835,3 +835,21 @@ export function stableFooterMessages(locale: FooterLocale, audience?: string, pr
     placeholder: "you@example.com",
   };
 }
+
+/** Longest product name eligible for the English copy test's product label. */
+export const FOOTER_COPY_PRODUCT_NAME_MAX = 20;
+
+/**
+ * The English copy-test product name: Hraness for the umbrella list, otherwise
+ * the configured product name. Null keeps the visitor on the fixed label.
+ */
+export function footerCopyProductName(locale: FooterLocale, audience: string, productName?: string): string | null {
+  if (!/^en(?:-|$)/u.test(locale.locale)) return null;
+  const name = audience === "hraness" ? "Hraness" : productName;
+  return name !== undefined && name.length > 0 && name.length <= FOOTER_COPY_PRODUCT_NAME_MAX ? name : null;
+}
+
+/** Accounts-confirmed English signup labels. `direct` matches the fixed label. */
+export function footerCopyLabel(arm: "direct" | "product" | "newsletter", productName: string): string {
+  return arm === "product" ? `Get ${productName} updates` : arm === "newsletter" ? "Subscribe to the newsletter" : "Get email updates";
+}

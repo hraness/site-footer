@@ -12,7 +12,12 @@ export interface HranessSiteFooterProps {
     readonly experiment?: boolean;
     /** Optional, privacy-bounded observations. Omit when attribution is ineligible. */
     readonly onConversion?: ((event: HranessFooterConversionEvent) => void) | undefined;
-    /** Opt in only while measurement is eligible; fixed token attribution never controls presentation. */
+    /**
+     * Anonymous signup attribution. When omitted, it runs except for Do Not Track,
+     * Global Privacy Control, and automated browsers; an explicit value is the
+     * host's eligibility decision. English visitors on lists with a short product
+     * name join the Accounts signup-label test.
+     */
     readonly attribution?: boolean;
     /** Sticky includes its own document footprint. Flow leaves placement to the host. */
     readonly placement?: "sticky" | "flow";
@@ -32,7 +37,7 @@ export interface HranessSiteFooterProps {
     readonly social?: HranessSocialConfig;
 }
 /** Progressively enhance the canonical native mailing-list form when JavaScript is available. */
-export declare function HranessSiteFooter({ locale: localeInput, onConversion, attribution, placement, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
+export declare function HranessSiteFooter({ locale: localeInput, onConversion, attribution: attributionRequested, placement, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
     "aria-label": string;
     className: string;
     "data-brand": string;
