@@ -50,9 +50,9 @@ export interface HranessSiteFooterProps {
   /** Optional, privacy-bounded observations. Omit when attribution is ineligible. */
   readonly onConversion?: ((event: HranessFooterConversionEvent) => void) | undefined;
   /**
-   * Anonymous signup attribution. When omitted, it runs except for Do Not Track,
-   * Global Privacy Control, and automated browsers; an explicit value is the
-   * host's eligibility decision. English visitors on lists with a short product
+   * Anonymous signup attribution. When omitted, it runs once cookie consent is
+   * accepted or not required, except for Do Not Track, Global Privacy Control,
+   * and automated browsers; an explicit value is the host's eligibility decision. English visitors on lists with a short product
    * name join the Accounts signup-label test.
    */
   readonly attribution?: boolean;
@@ -101,14 +101,16 @@ export function HranessSiteFooter({
   const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
-  const [consentPending, setConsentPending] = useState(false);
+  // "checking" until stored acceptance or the region lookup settles; only "clear" permits default measurement.
+  const [consent, setConsent] = useState<"checking" | "required" | "clear">("checking");
+  const consentPending = consent === "required";
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   // Server renders and first hydration never measure; eligibility needs the browser.
   const [measurable, setMeasurable] = useState(false);
   const [copyUnavailable, setCopyUnavailable] = useState(false);
   const storedCopyArm = useRef<FooterCopyArm | null>(null);
   // An explicit choice is the host's; the default measures only eligible browsers.
-  const attribution = measurable && (attributionRequested ?? footerMeasurementEligible());
+  const attribution = measurable && (attributionRequested ?? (consent === "clear" && footerMeasurementEligible()));
   const activeRequest = useRef<AbortController | null>(null);
   const attributionContext = useRef({ key: mailingListKey, enabled: attribution, locale: locale.locale });
   const attributionRequest = useRef<AbortController | null>(null);
@@ -295,7 +297,11 @@ export function HranessSiteFooter({
       attributionCache.current = null;
       const controller = new AbortController();
       attributionRequest.current = controller;
-      timeout = setTimeout(() => controller.abort(), 1_500);
+      timeout = setTimeout(() => {
+        controller.abort();
+        // A slow confirmation is no confirmation: return to the fixed label and token.
+        if (copyArm !== null && valid() && attributionRequest.current === controller) setCopyUnavailable(true);
+      }, 1_500);
       const request = copyArm === null
         ? requestStableFooterAttribution(mailingList.audience, locale.locale, assignedViewport, controller.signal)
         : requestCopyFooterAttribution(mailingList.audience, locale.locale, assignedViewport, copyArm, controller.signal);
@@ -520,7 +526,7 @@ export function HranessSiteFooter({
   // and fails toward showing the note.
   useEffect(() => {
     try {
-      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") return;
+      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") { setConsent("clear"); return; }
     } catch {
       // Storage disabled: the in-memory accept still applies for this page.
     }
@@ -535,9 +541,9 @@ export function HranessSiteFooter({
       const required = typeof body === "object" && body !== null
         ? Reflect.get(body, "required") === true
         : true;
-      if (!controller.signal.aborted) setConsentPending(required);
+      if (!controller.signal.aborted) setConsent(required ? "required" : "clear");
     }).catch(() => {
-      if (!controller.signal.aborted) setConsentPending(true);
+      if (!controller.signal.aborted) setConsent("required");
     });
     return () => { controller.abort(); };
   }, []);
@@ -576,7 +582,7 @@ export function HranessSiteFooter({
       } catch {
         // Private browsing or disabled storage: hide for this page only.
       }
-      setConsentPending(false);
+      setConsent("clear");
     },
     onSubmit: handleSubmit,
     onInputCapture: (event: { target: EventTarget | null }) => {

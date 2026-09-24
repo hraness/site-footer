@@ -290,3 +290,36 @@ test("default attribution skips Do Not Track, Global Privacy Control and automat
     expect(JSON.parse(String(requests[0]!.init.body)).presentationVersion).toBe("stable-modal-v1");
   });
 });
+
+test("default attribution waits for cookie consent where the region requires it", async () => {
+  await fixture(async ({ render, container, window, requests, click }) => {
+    const stored = new Map<string, string>();
+    Object.defineProperty(window, "localStorage", { configurable: true, value: {
+      getItem: (key: string) => stored.get(key) ?? null, setItem: (key: string, value: string) => stored.set(key, value),
+    } });
+    const assigns = () => requests.filter(request => request.url.endsWith("/api/mailing/experiment"));
+    await render({ mailingList: unnamed }, true);
+    expect(assigns()).toHaveLength(0);
+    const region = requests.find(request => request.url.endsWith("/api/consent/region"))!;
+    await act(async () => region.resolve(Response.json({ required: true })));
+    expect(assigns()).toHaveLength(0);
+    expect(stored.has("hraness-site-footer:copy-arm:v1")).toBeFalse();
+    await click(container.querySelector('[data-slot="hraness-cookie-consent-accept"]')!);
+    expect(assigns()).toHaveLength(1);
+  });
+});
+
+test("a slow copy confirmation returns to the fixed label and token", async () => {
+  await fixture(async ({ render, container, window, requests }) => {
+    Object.defineProperty(window, "localStorage", { configurable: true, value: {
+      getItem: (key: string) => key === "hraness-site-footer:copy-arm:v1" ? "product" : "accepted", setItem() {},
+    } });
+    const assigns = () => requests.filter(request => request.url.endsWith("/api/mailing/experiment"));
+    await render({ attribution: true });
+    expect(container.querySelector("summary > span")!.textContent).toBe("Get Hraness updates");
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 1_600)); });
+    expect(assigns()[0]!.init.signal?.aborted).toBeTrue();
+    expect(container.querySelector("summary > span")!.textContent).toBe("Get email updates");
+    expect(JSON.parse(String(assigns()[1]!.init.body)).presentationVersion).toBe("stable-modal-v1");
+  });
+});

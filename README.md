@@ -361,8 +361,9 @@ measurement is ineligible. Adding/removing it never changes the UI. `accepted`
 means only a generic anti-enumeration request acceptance, including suppressed
 or honeypot cases; it is never a provider-delivery or confirmed-subscription event.
 
-When `attribution` is omitted, the footer measures every browser except those that
-send Do Not Track or Global Privacy Control and automated browsers. An explicit
+When `attribution` is omitted, the footer measures a browser only after cookie
+consent is accepted or the region needs none, and never for browsers that send Do
+Not Track or Global Privacy Control or for automated browsers. An explicit
 `true` or `false` is the host's own eligibility decision. When it runs, the
 footer requests an anonymous Accounts token and attaches it to native and
 enhanced posts, so Accounts can count confirmed signups. Pass `attribution={false}`
@@ -374,8 +375,9 @@ three labels for the button and the dialog title: “Get email updates”,
 “Get {name} updates” (“Get Hraness updates” on hraness.com), or “Subscribe to the
 newsletter”. The label is chosen at random once, stored in `localStorage` under
 `hraness-site-footer:copy-arm:v1`, and rendered before any token is requested.
-Accounts must confirm that same label, or the footer returns to “Get email updates”
-with the fixed `stable-modal-v1` token. Everyone else always sees the fixed label.
+Accounts must confirm that same label within 1.5 seconds, or the footer returns to
+“Get email updates” with the fixed `stable-modal-v1` token for the rest of that
+page. On server-rendered pages, the label changes once the footer hydrates. Everyone else always sees the fixed label.
 The response never selects layout. Pending, failed and malformed
 responses leave the button usable. Ineligibility immediately disables the hidden
 token and aborts measurement requests. An unexpired same-origin, audience, locale

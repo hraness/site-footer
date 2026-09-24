@@ -2372,12 +2372,13 @@ function HranessSiteFooter({
   const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState(IDLE_STATE);
-  const [consentPending, setConsentPending] = useState(false);
+  const [consent, setConsent] = useState("checking");
+  const consentPending = consent === "required";
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   const [measurable, setMeasurable] = useState(false);
   const [copyUnavailable, setCopyUnavailable] = useState(false);
   const storedCopyArm = useRef(null);
-  const attribution = measurable && (attributionRequested ?? footerMeasurementEligible());
+  const attribution = measurable && (attributionRequested ?? (consent === "clear" && footerMeasurementEligible()));
   const activeRequest = useRef(null);
   const attributionContext = useRef({
     key: mailingListKey,
@@ -2636,7 +2637,11 @@ function HranessSiteFooter({
       attributionCache.current = null;
       const controller = new AbortController;
       attributionRequest.current = controller;
-      timeout = setTimeout(() => controller.abort(), 1500);
+      timeout = setTimeout(() => {
+        controller.abort();
+        if (copyArm !== null && valid() && attributionRequest.current === controller)
+          setCopyUnavailable(true);
+      }, 1500);
       const request = copyArm === null ? requestStableFooterAttribution(mailingList.audience, locale.locale, assignedViewport, controller.signal) : requestCopyFooterAttribution(mailingList.audience, locale.locale, assignedViewport, copyArm, controller.signal);
       request.then((result) => {
         if (!valid() || controller.signal.aborted || attributionRequest.current !== controller)
@@ -2917,8 +2922,10 @@ function HranessSiteFooter({
   }, [innerHtml, mailingListKey]);
   useEffect(() => {
     try {
-      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted")
+      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") {
+        setConsent("clear");
         return;
+      }
     } catch {}
     const controller = new AbortController;
     fetch(HRANESS_CONSENT_REGION_URL, {
@@ -2932,10 +2939,10 @@ function HranessSiteFooter({
       const body = await response.json();
       const required = typeof body === "object" && body !== null ? Reflect.get(body, "required") === true : true;
       if (!controller.signal.aborted)
-        setConsentPending(required);
+        setConsent(required ? "required" : "clear");
     }).catch(() => {
       if (!controller.signal.aborted)
-        setConsentPending(true);
+        setConsent("required");
     });
     return () => {
       controller.abort();
@@ -2977,7 +2984,7 @@ function HranessSiteFooter({
       try {
         window.localStorage.setItem(HRANESS_CONSENT_STORAGE_KEY, "accepted");
       } catch {}
-      setConsentPending(false);
+      setConsent("clear");
     },
     onSubmit: handleSubmit,
     onInputCapture: (event) => {
@@ -3044,4 +3051,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=AE4A7CABBC52679564756E2164756E21
+//# debugId=0AA049A369A37CA764756E2164756E21

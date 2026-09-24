@@ -13,9 +13,9 @@ export interface HranessSiteFooterProps {
     /** Optional, privacy-bounded observations. Omit when attribution is ineligible. */
     readonly onConversion?: ((event: HranessFooterConversionEvent) => void) | undefined;
     /**
-     * Anonymous signup attribution. When omitted, it runs except for Do Not Track,
-     * Global Privacy Control, and automated browsers; an explicit value is the
-     * host's eligibility decision. English visitors on lists with a short product
+     * Anonymous signup attribution. When omitted, it runs once cookie consent is
+     * accepted or not required, except for Do Not Track, Global Privacy Control,
+     * and automated browsers; an explicit value is the host's eligibility decision. English visitors on lists with a short product
      * name join the Accounts signup-label test.
      */
     readonly attribution?: boolean;
