@@ -456,8 +456,11 @@ their meanings. Keep values compatible with their original color or length type.
 
 The signup controls share the Hraness foil contract with marketing surfaces:
 `--hraness-foil-surface` retints the control face (the legacy
-`--hraness-site-footer-holo-surface` override still wins when set),
-`--hraness-foil-1` through `--hraness-foil-6` replace the six spectrum stops,
+`--hraness-site-footer-holo-surface` override still wins when set). The ring
+uses the metallic recipe of the marketing header wordmark: ink-toned chrome
+bands from the footer foreground, with `--hraness-foil-1` through
+`--hraness-foil-6` contributing only a faint reflection that
+`--hraness-foil-reflection` (default 14%) scales,
 and `--hraness-foil-halo-alpha` scales the resting glow. Products that import
 `@hraness/design-kit` get the same palette on `.hraness-foil` surfaces for free;
 the pointer position itself stays internal to the `attachFooterFoil` controller.

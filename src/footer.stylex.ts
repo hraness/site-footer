@@ -5,11 +5,20 @@ export const disclosureMarker = stylex.defineMarker();
 export const rootMarker = stylex.defineMarker();
 // The shared Hraness foil contract. Marketing roots may define the
 // --hraness-foil-* spectrum; the private --_hraness-foil-* stops resolve those
-// overrides or the same scheme-conditioned defaults, including the deeper dark
-// palette that keeps the pointer sheen visible.
+// overrides or the same scheme-conditioned defaults. The ring borrows the
+// chrome bands and faint spectral reflection of the marketing header
+// wordmark, lit by the surface recipe's two white pointer light fields.
 const holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
-const holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%), radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%), linear-gradient(115deg, var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6))";
-const holographicBackgroundClip = "padding-box, border-box, border-box, border-box";
+const metal = (amount: number) => `color-mix(in oklch, var(--hraness-site-footer-foreground, CanvasText) ${amount}%, var(--hraness-site-footer-background, Canvas))`;
+const reflection = (index: number) => `color-mix(in oklch, var(--_hraness-foil-${index}) var(--hraness-foil-reflection, 14%), transparent)`;
+const holographicBackgroundImage = [
+  `linear-gradient(${holographicSurface}, ${holographicSurface})`,
+  "radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%)",
+  "radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%)",
+  `linear-gradient(115deg, ${[1, 2, 3, 4, 5, 6].map(reflection).join(", ")})`,
+  `linear-gradient(115deg, ${metal(90)} 0%, ${metal(100)} 24%, ${metal(86)} 39%, ${metal(100)} 56%, ${metal(84)} 82%, ${metal(100)} 100%)`,
+].join(", ");
+const holographicBackgroundClip = "padding-box, border-box, border-box, border-box, border-box";
 const holographicHalo = "0 1px 4px color-mix(in srgb, var(--hraness-site-footer-foreground, CanvasText) 12%, transparent)";
 const holographicStops = {
   "--_hraness-foil-1": { default: "var(--hraness-foil-1, oklch(0.89 0.065 337))", "@media (prefers-color-scheme: dark)": "var(--hraness-foil-1, oklch(0.56 0.16 340))" },

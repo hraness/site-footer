@@ -303,7 +303,9 @@ var env = Object.freeze({});
 
 // src/footer.stylex.ts
 var holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
-var holographicBackgroundImage = "linear-gradient(" + holographicSurface + ", " + holographicSurface + "), radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%), radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%), linear-gradient(115deg, var(--_hraness-foil-1), var(--_hraness-foil-2), var(--_hraness-foil-3), var(--_hraness-foil-4), var(--_hraness-foil-5), var(--_hraness-foil-6))";
+var metal = (amount) => `color-mix(in oklch, var(--hraness-site-footer-foreground, CanvasText) ${amount}%, var(--hraness-site-footer-background, Canvas))`;
+var reflection = (index) => `color-mix(in oklch, var(--_hraness-foil-${index}) var(--hraness-foil-reflection, 14%), transparent)`;
+var holographicBackgroundImage = [`linear-gradient(${holographicSurface}, ${holographicSurface})`, "radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%)", "radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%)", `linear-gradient(115deg, ${[1, 2, 3, 4, 5, 6].map(reflection).join(", ")})`, `linear-gradient(115deg, ${metal(90)} 0%, ${metal(100)} 24%, ${metal(86)} 39%, ${metal(100)} 56%, ${metal(84)} 82%, ${metal(100)} 100%)`].join(", ");
 var styles = {
   root: {
     "--hraness-site-footer-foreground": "x1ktp55a",
@@ -456,7 +458,7 @@ var styles = {
     kGNEyG: "x6s0dn4",
     kjj79g: "xl56j7k",
     kLWn49: "x1u7k74",
-    kKwaWg: "xq9wfvg xhobzj1",
+    kKwaWg: "x16jmbxj xhobzj1",
     kVAM5u: "x9r1u3d x1ylmb6m",
     kMwMTN: "x1g4142m",
     $$css: true
@@ -505,9 +507,9 @@ var styles = {
     kVAM5u: "x9r1u3d x1ylmb6m",
     kWkggS: "x1bvqrnj",
     kMwMTN: "x1g4142m",
-    kKwaWg: "xq9wfvg xhobzj1",
+    kKwaWg: "x16jmbxj xhobzj1",
     kl9DO0: "x1gqfdwy",
-    kHypHr: "x123zpmm",
+    kHypHr: "xnerjni",
     kGVxlE: "x1kyqxw3 xwaqzdf",
     $$css: true
   },
@@ -2942,4 +2944,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=1D5056F04BA29A6664756E2164756E21
+//# debugId=AC90FA73DD47311664756E2164756E21
