@@ -25,7 +25,7 @@ Run the complete verifier through the host browser lane:
 ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-browser -- bun run verify:browser
 ```
 
-Resolve `ABSOLUTE_HRA_HOST_RUN` with `command -v hra-host-run` first. The verifier builds the fixture into one unique temporary directory, binds only `127.0.0.1:4187`, checks `/health`, launches one fresh contained Chromium process, and refuses to reuse another local server. It records exact server and browser ownership before driving.
+Resolve `ABSOLUTE_HRA_HOST_RUN` with `command -v host-run` first. The verifier builds the fixture into one unique temporary directory, binds only `127.0.0.1:4187`, checks `/health`, launches one fresh contained Chromium process, and refuses to reuse another local server. It records exact server and browser ownership before driving.
 
 ## Drive
 
