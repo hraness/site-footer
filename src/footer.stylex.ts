@@ -64,7 +64,16 @@ const styles = stylex.create({
     "--hraness-site-footer-padding-block": "clamp(0.25rem, 0.8vw, 0.375rem)",
     "--hraness-site-footer-mailing-overlay-offset": "calc(var(--hraness-site-footer-mailing-overlay-clearance) + var(--hraness-site-footer-padding-block) + 1px)",
     "--hraness-site-footer-content-block-size": "var(--hraness-site-footer-control-block-size)",
-    "--hraness-site-footer-bar-block-size": "calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)",
+    // The same visible native state sizes the fixed bar and its document space.
+    // Hidden consent creates neither a second row nor an empty row gap.
+    "--_hraness-site-footer-consent-block-size": {
+      default: "0px",
+      ':has(> .hraness-site-footer__inner > [data-slot="hraness-cookie-consent"]:not([hidden]))': {
+        default: "calc(var(--hraness-site-footer-control-block-size) + var(--hraness-site-footer-row-gap))",
+        "@media (min-width: 47.5rem)": "0px",
+      },
+    },
+    "--hraness-site-footer-bar-block-size": "calc(var(--hraness-site-footer-content-block-size) + var(--_hraness-site-footer-consent-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)",
     "inline-size": "100%",
     color: "var(--hraness-site-footer-foreground)",
     fontFamily: 'var(--font-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
@@ -334,16 +343,17 @@ const styles = stylex.create({
   },
   socialIcon: { "inline-size": "1rem", "block-size": "1rem" },
   consent: {
-    // The advisory consent note floats above compact bars without creating a row.
-    position: { default: "absolute", "@media (min-width: 47.5rem)": "static" },
-    "inset-block-end": { default: "calc(100% + 0.5rem)", "@media (min-width: 47.5rem)": "auto" },
-    "inset-inline-end": "1rem", backgroundColor: "var(--hraness-site-footer-background)",
+    // Keep the notice inside the opaque bar, separate from the control row.
+    position: "static",
+    display: { default: "flex", ":is([hidden])": "none" },
+    alignItems: "center", "block-size": "var(--hraness-site-footer-control-block-size)",
+    backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
     gridColumnStart: { default: 1, "@media (min-width: 47.5rem)": "consent" },
     gridColumnEnd: { default: -1, "@media (min-width: 47.5rem)": "consent" },
-    gridRowStart: { default: null, "@media (min-width: 47.5rem)": "consent" },
-    gridRowEnd: { default: null, "@media (min-width: 47.5rem)": "consent" },
+    gridRowStart: { default: 2, "@media (min-width: 47.5rem)": "consent" },
+    gridRowEnd: { default: 3, "@media (min-width: 47.5rem)": "consent" },
     alignSelf: "center", justifySelf: "end", "min-inline-size": 0,
-    color: "var(--hraness-site-footer-muted)", fontSize: "0.8125rem", whiteSpace: "nowrap",
+    color: "var(--hraness-site-footer-muted)", fontSize: "0.8125rem", lineHeight: 1.25, whiteSpace: "nowrap",
   },
   consentAccept: {
     padding: 0, borderWidth: 0, backgroundColor: "transparent", cursor: "pointer",

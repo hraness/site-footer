@@ -75,6 +75,23 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(true), "env(safe-area-inset-bottom, 0px)");
   });
 
+  test("keeps visible compact consent inside the bar and reserves the same second row", () => {
+    const root = footerClassName(false);
+    contains(root, "--_hraness-site-footer-consent-block-size:0px");
+    contains(root, ':has(>.hraness-site-footer__inner>[data-slot="hraness-cookie-consent"]:not([hidden]))');
+    contains(root, "--_hraness-site-footer-consent-block-size:calc(var(--hraness-site-footer-control-block-size) + var(--hraness-site-footer-row-gap))");
+    contains(root, "@media (min-width:47.5rem)");
+    contains(footerClasses.consent, "position:static");
+    contains(footerClasses.consent, ":is([hidden])");
+    contains(footerClasses.consent, "display:none");
+    contains(footerClasses.consent, "grid-row-start:2");
+    contains(footerClasses.consent, "grid-row-end:3");
+    contains(footerClasses.consent, "block-size:var(--hraness-site-footer-control-block-size)");
+    contains(footerClasses.consent, "background-color:Canvas");
+    expect(cssFor(footerClasses.consent)).not.toContain("position:absolute");
+    expect(cssFor(footerClasses.consent)).not.toContain("inset-block-end:");
+  });
+
   test("preserves theme fallbacks, coarse targets, and root overrides", () => {
     contains(footerClassName(false), "var(--foreground,currentColor)");
     contains(footerClassName(false), "--hraness-site-footer-social-target:1.75rem");
@@ -225,7 +242,7 @@ describe("compiled footer presentation", () => {
     for (const signup of [false, true]) {
       contains(footerInnerClassName(signup), "padding-block-start:var(--hraness-site-footer-padding-block)");
       contains(footerInnerClassName(signup), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px))");
-      contains(footerClassName(signup), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)");
+      contains(footerClassName(signup), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--_hraness-site-footer-consent-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)");
     }
   });
 

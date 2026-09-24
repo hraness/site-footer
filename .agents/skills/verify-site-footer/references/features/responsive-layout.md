@@ -3,7 +3,7 @@
 ## Sub-features
 
 - One aligned wide row at 1280 by 900.
-- One-row compact composition with a native disclosure at 390 by 844.
+- One compact control row with a native disclosure at 390 by 844; visible cookie consent occupies a separate row inside the same opaque bar.
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
 - One row at both widths; compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
@@ -52,3 +52,9 @@ also cover visualViewport offset/height updates, interacted eligibility toggles,
 late/malformed attribution, callback churn, and duplicate submissions.
 
 Every fixture also enables the native optional Support link. Signup samples check its exact product/source destination, value proposition, containment, minimum target and separation from the other controls. No-signup and account contexts include it in geometry and keyboard-focus coverage. All scenarios remain synthetic and never navigate to Accounts.
+
+The consent cases compare the actual outer footprint and inner bar heights in
+shown, accepted and reloaded states. Compact acceptance must remove exactly the
+notice height plus one row gap; wide acceptance leaves the control row height
+unchanged. Synthetic geometry controls reject both the former floating notice and
+a second row whose spacer still reserves only the original bar.

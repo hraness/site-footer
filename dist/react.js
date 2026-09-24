@@ -326,7 +326,8 @@ var styles = {
     "--hraness-site-footer-padding-block": "x19y8ktx",
     "--hraness-site-footer-mailing-overlay-offset": "x1h47zgc",
     "--hraness-site-footer-content-block-size": "x1ghcxmq",
-    "--hraness-site-footer-bar-block-size": "xe0js8b",
+    "--_hraness-site-footer-consent-block-size": "x10ugufv x14v872f x1dhdpc8",
+    "--hraness-site-footer-bar-block-size": "x150d4k9",
     kULEZF: "xiuoait",
     kMwMTN: "x1g4142m",
     kMv6JI: "xprmc4t",
@@ -799,19 +800,21 @@ var styles = {
     $$css: true
   },
   consent: {
-    kVAEAm: "x10l6tqk x18obxus",
-    kctUWg: "x1smivkc x1cd001l",
-    k7w2rI: "x1fmyei2",
-    kWkggS: "x1hhhz6w",
+    kVAEAm: "x1uhb9sk",
+    k1xSpc: "x78zum5 xvgho8r",
+    kGNEyG: "x6s0dn4",
+    kLWsYc: "xlashs9",
+    kWkggS: "x1hhhz6w x9yvj25",
     kEXP64: "xcrlgei xax01ff",
     kWZpDQ: "xx1abn8 xr0yb7",
-    k1lYIM: "x1i433cm",
-    kpJH7q: "x1qh7fzj",
+    k1lYIM: "x13vxnyz x1i433cm",
+    kpJH7q: "x1tee5qw x1qh7fzj",
     kSGwAc: "xamitd3",
     kFhvOy: "x1qab1bc",
     kdYMnH: "xesnm00",
     kMwMTN: "xj5idha",
     kGuDYH: "x1dcheo9",
+    kLWn49: "x132q4wb",
     khDVqt: "xuxw1ft",
     $$css: true
   },
@@ -3051,4 +3054,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=0AA049A369A37CA764756E2164756E21
+//# debugId=9C2B02C929D4B53D64756E2164756E21

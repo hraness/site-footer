@@ -46,6 +46,9 @@ privacy policy. The consent note stays hidden
 without client-side JavaScript; after hydration the React adapter asks the
 shared Accounts region endpoint whether consent applies, fails toward showing
 the note when detection is unavailable, and stores acceptance in local storage.
+On narrow screens, a visible note occupies its own row inside the footer; the
+footer reserves both rows so page content can scroll clear of them. Acceptance
+removes that row and its space. Wide footers keep the note beside the links.
 The first render issues no request, sets no cookie, and writes no local
 storage. The links and inline decorative vectors work without client-side
 JavaScript.
