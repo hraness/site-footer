@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.17.0
+bun add github:hraness/site-footer#v0.18.0
 ```
 
 Start with the network footer and no mailing form:
@@ -396,12 +396,14 @@ is quiet and separately labelled. All styling is compiled through StyleX. Native
 modal custody may write only two numeric viewport custom properties and preserve
 and restore the document root's overflow; it never injects a stylesheet.
 
-Unreleased: the cookie note mentions sign-in only on sites that pass `signIn`,
-and it says the browser, not a cookie, remembers the consent choice. A signup
-can name its product in the English dialog through `mailingList.name`. The
-accepted state reads “Check your email for a confirmation link.” Signup attribution is on
-by default, skipping Do Not Track, Global Privacy Control, and automated browsers,
-and English visitors join the three-label `copy-modal-v1` signup test.
+Version 0.18.0 gives the signup foil the header's metallic chrome and keeps
+compact cookie consent on its own row inside the footer. The cookie note mentions
+sign-in only on sites that pass `signIn`, and it says the browser, not a cookie,
+remembers the consent choice. A signup can name its product in the English dialog
+through `mailingList.name`. The accepted state reads “Check your email for a
+confirmation link.” Signup attribution is on by default once cookie consent allows
+it, skipping Do Not Track, Global Privacy Control, and automated browsers, and
+English visitors join the three-label `copy-modal-v1` signup test.
 
 Version 0.16.0 introduces the stable modal and optional bounded lifecycle observations.
 
