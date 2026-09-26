@@ -1,6 +1,6 @@
 {
   "name": "@hraness/site-footer",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "description": "The shared Hraness footer for React and static sites: network links, an optional email signup or account link, and a cookie note.",
   "license": "MIT",
   "type": "module",
