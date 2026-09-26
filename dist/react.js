@@ -1881,6 +1881,73 @@ function footerCopyLabel(arm, productName) {
   return arm === "product" ? `Get ${productName} updates` : arm === "newsletter" ? "Subscribe to the newsletter" : "Get email updates";
 }
 
+// src/telemetry.ts
+var HRANESS_TELEMETRY_VISIT_URL = "https://account.hraness.com/api/telemetry/visit";
+var VISIT_TOKEN_KEY = "hraness-site-visit";
+var DAY_TOKEN_PATTERN = /^[a-f0-9]{16,64}$/u;
+var HOST_PATTERN = /^[a-z0-9.-]{1,253}$/u;
+function dailyVisitToken() {
+  const day = new Date().toISOString().slice(0, 10);
+  try {
+    const stored = window.localStorage.getItem(VISIT_TOKEN_KEY);
+    if (stored !== null) {
+      const separator = stored.indexOf(":");
+      const token2 = stored.slice(separator + 1);
+      if (separator > 0 && stored.slice(0, separator) === day && DAY_TOKEN_PATTERN.test(token2)) {
+        return token2;
+      }
+    }
+    const token = crypto.randomUUID().replaceAll("-", "");
+    window.localStorage.setItem(VISIT_TOKEN_KEY, `${day}:${token}`);
+    return token;
+  } catch {
+    return null;
+  }
+}
+function referrerHost() {
+  try {
+    if (typeof document?.referrer !== "string" || document.referrer.length === 0)
+      return null;
+    const host = new URL(document.referrer).hostname.toLowerCase();
+    if (host === window.location.hostname.toLowerCase())
+      return null;
+    return HOST_PATTERN.test(host) ? host : null;
+  } catch {
+    return null;
+  }
+}
+function reportSiteVisit() {
+  if (typeof window === "undefined" || typeof fetch !== "function" || typeof window.location?.hostname !== "string" || typeof navigator === "undefined")
+    return;
+  try {
+    const browser = navigator;
+    if (browser.webdriver === true || browser.doNotTrack === "1" || browser.globalPrivacyControl === true)
+      return;
+  } catch {
+    return;
+  }
+  const token = dailyVisitToken();
+  if (token === null)
+    return;
+  const referrer = referrerHost();
+  fetch(HRANESS_TELEMETRY_VISIT_URL, {
+    body: JSON.stringify({
+      ...referrer === null ? {} : {
+        referrer
+      },
+      token,
+      v: 1
+    }),
+    credentials: "omit",
+    headers: {
+      "content-type": "application/json"
+    },
+    keepalive: true,
+    method: "POST",
+    mode: "cors"
+  }).catch(() => {});
+}
+
 // src/experiment.ts
 var FOOTER_WIDE_QUERY = "(min-width: 47.5rem)";
 var FOOTER_EXPERIMENT_URL = "https://account.hraness.com/api/mailing/experiment";
@@ -2451,6 +2518,7 @@ function HranessSiteFooter({
   });
   useLayoutEffect(() => {
     mounted.current = true;
+    reportSiteVisit();
     return () => {
       mounted.current = false;
       activeRequest.current?.abort();
@@ -3054,4 +3122,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=9C2B02C929D4B53D64756E2164756E21
+//# debugId=9CBD8E1D0A77FDA764756E2164756E21

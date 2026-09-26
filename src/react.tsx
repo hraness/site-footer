@@ -4,6 +4,7 @@ import type { SupportProfile } from "./internal.js";
 import { attachFooterFoil } from "./foil.js";
 import { footerClassName, footerClasses, footerInnerClassName, mailingStatusClassName } from "./footer.stylex.js";
 import { footerCopyLabel, footerCopyProductName, resolveFooterLocale, stableFooterMessages } from "./locales.js";
+import { reportSiteVisit } from "./telemetry.js";
 import { FOOTER_COPY_ARMS, FOOTER_COPY_PROTOCOL, FOOTER_STABLE_PROTOCOL, isFooterCopyArm, requestCopyFooterAttribution, requestStableFooterAttribution, type FooterCopyArm } from "./attribution.js";
 import { DEFAULT_FOOTER_VARIANT, FOOTER_WIDE_QUERY, exposeFooterEnrollment } from "./experiment.js";
 import type { HranessFooterConversionEvent, HranessFooterConversionStage, HranessFooterConversionReason } from "./internal.js";
@@ -168,6 +169,7 @@ export function HranessSiteFooter({
   });
   useLayoutEffect(() => {
     mounted.current = true;
+    reportSiteVisit();
     return () => { mounted.current = false; activeRequest.current?.abort(); attributionRequest.current?.abort(); exposureRequest.current?.abort(); markAttribution.current = () => null; };
   }, []);
   useLayoutEffect(() => { setMeasurable(true); }, []);
