@@ -163,13 +163,13 @@ var styles = {
     "--hraness-site-footer-control-block-size": "x1xgbxbt x9cmhvv",
     "--hraness-site-footer-status-block-size": "x4sry57",
     "--hraness-site-footer-form-block-size": "xys6ka6",
-    "--hraness-site-footer-row-gap": "x1d4g2j8",
+    "--hraness-site-footer-row-gap": "x18ca4t7",
     "--hraness-site-footer-mailing-overlay-clearance": "x1sphz0r",
-    "--hraness-site-footer-padding-block": "x19y8ktx",
+    "--hraness-site-footer-padding-block": "x1a0dqq5",
     "--hraness-site-footer-mailing-overlay-offset": "x1h47zgc",
     "--hraness-site-footer-content-block-size": "x1ghcxmq",
-    "--_hraness-site-footer-consent-block-size": "x10ugufv x14v872f x1dhdpc8",
-    "--hraness-site-footer-bar-block-size": "x150d4k9",
+    "--_hraness-site-footer-consent-clearance": "xwk8b0x x1dsv906",
+    "--hraness-site-footer-bar-block-size": "x1baz8l3",
     kULEZF: "xiuoait",
     kMwMTN: "x1g4142m",
     kMv6JI: "xprmc4t",
@@ -179,17 +179,6 @@ var styles = {
   signup: {
     "--hraness-site-footer-content-block-size": "x1o9lycj",
     "--hraness-site-footer-mailing-overlay-clearance": "xma658k",
-    $$css: true
-  },
-  stickyFootprint: {
-    kVQ08L: "x5vl0wm",
-    $$css: true
-  },
-  stickyBar: {
-    kVAEAm: "xixxii4",
-    khdm6U: "x17y0mx6",
-    kctUWg: "xuufnwz",
-    kY2c9j: "xf5e64p",
     $$css: true
   },
   green: {
@@ -210,6 +199,7 @@ var styles = {
   disclosure: {
     kVAEAm: "x1uhb9sk",
     kJuA4N: "x1qaspin",
+    kFhvOy: "x1lqcxt8",
     kdYMnH: "xesnm00",
     k2kXS: "x1n9s1zj",
     $$css: true
@@ -424,13 +414,13 @@ var styles = {
     $$css: true
   },
   inner: {
-    kanfag: "x12e8u3k",
-    k9g6sI: "x12h1iku",
+    "--_hraness-site-footer-links-justify": "x9fpagd",
+    "--_hraness-site-footer-links-offset": "x10xu2di",
     kVAEAm: "x1n2onr6",
     k1xSpc: "xrvj5dj",
-    kC13JO: "x182hbjg x196kgno",
-    kumcoG: "x1rkzygb x1qs5i8y",
-    k9llMU: "xv7uhgh",
+    kC13JO: "x182hbjg x83lif4",
+    kumcoG: "x1rkzygb x1o8kq85",
+    kJBjZk: "xx97v1z",
     kULEZF: "xiuoait",
     kLWsYc: "xzlj3eo",
     kVQ08L: "x5vl0wm",
@@ -442,43 +432,54 @@ var styles = {
     khm7nJ: "x1lfezxm",
     kT8eP4: "x1b1eqt9",
     kmc9e2: "x3so8kt",
-    kpvK8V: "x1gz0dqr x1np48w9",
+    kpvK8V: "x1hdm9tg x1np48w9",
     kWkggS: "x1hhhz6w x9yvj25",
     kS5dFF: "x1bhgv95",
-    kgDt7k: "xpcvst1",
-    kzfwIZ: "x1i0wikq",
-    kO8tuG: "xs8f16d",
+    kgDt7k: "x79o31f",
+    kzfwIZ: "x1b42vfr",
+    kO8tuG: "x1l962nu",
     $$css: true
   },
   innerSignup: {
-    kC13JO: "x1m6ayzh x12d2mci",
-    kumcoG: "xo69rmz x1t3gk10",
-    k9llMU: "x42z6zh",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x8wilts x63hp6x",
+    kumcoG: "x1mkdm3x x11123my",
     $$css: true
   },
   innerAccount: {
-    kC13JO: "x1m6ayzh x12d2mci",
-    kumcoG: "xo69rmz x1t3gk10",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x8wilts x63hp6x",
+    kumcoG: "x1mkdm3x x11123my",
     $$css: true
   },
   innerNoBrand: {
-    kC13JO: "x14deco2 x1ovmjtf",
-    kumcoG: "x1mkdm3x xh9f616",
+    "--_hraness-site-footer-links-justify": "x9fpagd",
+    "--_hraness-site-footer-links-offset": "x10xu2di",
+    kC13JO: "x14deco2 xskd2tj",
+    kumcoG: "x1mkdm3x xj3lp7q",
     $$css: true
   },
   innerMailingNoBrand: {
-    kC13JO: "x1e1zwiu x1s2ae5y",
-    kumcoG: "x1olarsd x1xd8dcn",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x18vlmh1 x4fh1zb",
+    kumcoG: "x1mkdm3x x1q9k5wc",
     $$css: true
   },
   innerSupportNoBrand: {
-    kC13JO: "x1rpbaqk x1r7kgav",
-    kumcoG: "x5o1nov x1qs5i8y",
+    "--_hraness-site-footer-links-justify": "x9fpagd",
+    "--_hraness-site-footer-links-offset": "x10xu2di",
+    kC13JO: "x1rpbaqk x1ape6aw",
+    kumcoG: "x5o1nov x1o8kq85",
     $$css: true
   },
   innerMailingSupportNoBrand: {
-    kC13JO: "x1cbzbnn xydvb3f",
-    kumcoG: "x1nrjx37 x1g8uo05",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x1snwzqd x1ja9pd9",
+    kumcoG: "x37z1gs xl7e3be",
     $$css: true
   },
   account: {
@@ -486,6 +487,7 @@ var styles = {
     k1xSpc: "x3nfvp2",
     kGNEyG: "x6s0dn4",
     kjj79g: "xl56j7k",
+    kFhvOy: "x1lqcxt8",
     kdYMnH: "xesnm00",
     k2kXS: "xmk4v7v",
     kJVvJu: "xvpgqt4",
@@ -501,22 +503,29 @@ var styles = {
     $$css: true
   },
   innerSupport: {
-    kC13JO: "x7p9kbz xa4jtz2",
-    kumcoG: "x170cel8 x1yi829s",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x1ioy8xi x1essjf7",
+    kumcoG: "x1rkzygb x1od97uc",
     $$css: true
   },
   innerSignupSupport: {
-    kC13JO: "x1y8t5ps x11qbbop",
-    kumcoG: "x186f4cn xzi2blw",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x17r4bj8 xhbf6pg",
+    kumcoG: "x37z1gs xzm20xa",
     $$css: true
   },
   innerAccountSupport: {
-    kC13JO: "x1y8t5ps x11qbbop",
-    kumcoG: "x186f4cn xzi2blw",
+    "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
+    "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
+    kC13JO: "x17r4bj8 xhbf6pg",
+    kumcoG: "x37z1gs xzm20xa",
     $$css: true
   },
   support: {
     kJuA4N: "x2ga2k1",
+    kFhvOy: "x1lqcxt8",
     k1xSpc: "x3nfvp2",
     kGNEyG: "x6s0dn4",
     kjj79g: "xl56j7k",
@@ -545,6 +554,7 @@ var styles = {
   brand: {
     kJuA4N: "x1pmbb8p",
     kSGwAc: "xamitd3",
+    kFhvOy: "x1lqcxt8",
     kjj79g: "xl56j7k",
     kdYMnH: "xart1r9",
     kVQ08L: "xeuuy2l",
@@ -576,14 +586,14 @@ var styles = {
     k9g6sI: "x12h1iku",
     kULEZF: "xiuoait",
     kdYMnH: "xesnm00",
-    kjj79g: "x13a6bvl",
-    kImiAN: "xvc5jky",
+    kjj79g: "x1jfo8e8",
+    kImiAN: "xjsudho",
     $$css: true
   },
   socials: {
     k1xSpc: "x78zum5",
     kdYMnH: "xesnm00",
-    kjj79g: "x13a6bvl",
+    kjj79g: "x1jfo8e8",
     kOIVth: "x1enigpx",
     kogj98: "x1ghz6dp",
     kmVPX3: "x1717udv",
@@ -642,18 +652,18 @@ var styles = {
     $$css: true
   },
   consent: {
-    kVAEAm: "x1uhb9sk",
+    kVAEAm: "xixxii4",
+    kY2c9j: "xf5e64p",
+    kctUWg: "x1n7s8u9",
+    k7w2rI: "xs1cnaw",
     k1xSpc: "x78zum5 xvgho8r",
     kGNEyG: "x6s0dn4",
-    kLWsYc: "xlashs9",
+    k2kXS: "x15qkubi",
+    kF3gjK: "x1o5vn8x",
+    kJVvJu: "xllzysa",
+    kaIpWk: "x1e6avla",
     kWkggS: "x1hhhz6w x9yvj25",
-    kEXP64: "xcrlgei xax01ff",
-    kWZpDQ: "xx1abn8 xr0yb7",
-    k1lYIM: "x13vxnyz x1i433cm",
-    kpJH7q: "x1tee5qw x1qh7fzj",
-    kSGwAc: "xamitd3",
-    kFhvOy: "x1qab1bc",
-    kdYMnH: "xesnm00",
+    kGVxlE: "xim0ftz xwaqzdf",
     kMwMTN: "xj5idha",
     kGuDYH: "x1dcheo9",
     kLWn49: "x132q4wb",
@@ -661,17 +671,21 @@ var styles = {
     $$css: true
   },
   consentAccept: {
-    kmVPX3: "x1717udv",
+    k1xSpc: "x3nfvp2",
+    kGNEyG: "x6s0dn4",
+    kF3gjK: "xt970qd",
+    kJVvJu: "xvpgqt4",
     kMzoRj: "xc342km",
-    kWkggS: "xjbqb8w",
+    kaIpWk: "x1e6avla",
     kkrTdU: "x1ypdohk",
+    kWkggS: "xjbqb8w x1voprv7",
     kMwMTN: "x1g4142m",
     k63SB2: "xh88oxj",
-    kybGjl: "x1hl2dhg x4ohgrr",
+    kybGjl: "x1hl2dhg",
     $$css: true
   },
   consentSeparator: {
-    kYk0Dm: "x82nc2q",
+    kYk0Dm: "xrxpjvj",
     $$css: true
   },
   consentMore: {
@@ -681,19 +695,26 @@ var styles = {
   },
   consentLearn: {
     kkrTdU: "x1ypdohk",
-    k1xSpc: "xt0psk2 x1i5lizr",
+    k1xSpc: "x3nfvp2 x1i5lizr",
+    kGNEyG: "x6s0dn4",
+    kLWsYc: "xlashs9",
+    kJVvJu: "xvpgqt4",
+    kaIpWk: "x1e6avla",
     kH6xsr: "x3ct3a4",
     keTefX: "x1lziwak",
-    kybGjl: "x1hl2dhg x4ohgrr",
+    kWkggS: "xjbqb8w x1voprv7",
+    kMwMTN: "x1heor9g xxeg0yr",
+    kybGjl: "x1hl2dhg",
     $$css: true
   },
   consentPanel: {
     kVAEAm: "x10l6tqk",
     kY2c9j: "xhtitgo",
-    kctUWg: "x1byf6of",
+    kctUWg: "x1smivkc",
     k7w2rI: "xtijo5x",
     kULEZF: "x146urod",
     k2kXS: "x1ljtl1n",
+    kGVxlE: "xim0ftz xwaqzdf",
     kF3gjK: "x13eudtd",
     kJVvJu: "x1ryrjj2",
     kaIpWk: "x116uinm",
@@ -864,7 +885,7 @@ var footerClasses = {
   socials: className("hraness-site-footer__socials", styles.socials),
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
-  consent: className("hraness-site-footer__consent", styles.box, styles.consent),
+  consent: className("hraness-site-footer__consent", styles.box, styles.border, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentSeparator: className("hraness-site-footer__consent-separator", styles.consentSeparator),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
@@ -880,14 +901,14 @@ var footerClasses = {
   mailingConfirmation: className("hraness-site-footer__mailing-confirmation", styles.box, styles.backgroundReset, styles.border, styles.mailingGeometry, styles.flexCenter, styles.mailingConfirmation, styles.compactConfirmation, styles.focusInset),
   visuallyHidden: className("hraness-site-footer__visually-hidden", styles.visuallyHidden)
 };
-function footerClassName(signup, sticky = true) {
-  return `${className("hraness-site-footer", styles.root, signup && styles.signup, sticky && styles.stickyFootprint)} ${{
+function footerClassName(signup, _sticky = true) {
+  return `${className("hraness-site-footer", styles.root, signup && styles.signup)} ${{
     className: "x12mkk0b"
   }.className}`;
 }
-function footerInnerClassName(signup, sticky = true, color = "green", account = false, support = false, showBrand = true) {
+function footerInnerClassName(signup, _sticky = true, color = "green", account = false, support = false, showBrand = true) {
   const colorStyle = color === "orange" ? styles.orange : color === "blue" ? styles.blue : styles.green;
-  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, !showBrand && styles.innerNoBrand, !showBrand && (signup || account) && styles.innerMailingNoBrand, !showBrand && support && styles.innerSupportNoBrand, !showBrand && support && (signup || account) && styles.innerMailingSupportNoBrand, sticky && styles.stickyBar, signup && colorStyle);
+  return className("hraness-site-footer__inner", styles.box, styles.backgroundReset, styles.inner, signup && styles.innerSignup, account && styles.innerAccount, support && styles.innerSupport, support && signup && styles.innerSignupSupport, support && account && styles.innerAccountSupport, !showBrand && styles.innerNoBrand, !showBrand && (signup || account) && styles.innerMailingNoBrand, !showBrand && support && styles.innerSupportNoBrand, !showBrand && support && (signup || account) && styles.innerMailingSupportNoBrand, signup && colorStyle);
 }
 function socialItemClassName(index = 0) {
   return className("hraness-site-footer__social-item", styles.socialItem, index === 1 ? styles.socialSecond : index === 2 ? styles.socialThird : index === 3 ? styles.socialFourth : styles.socialAlways);
@@ -2144,4 +2165,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=DD44E163BFE4657764756E2164756E21
+//# debugId=5CC6F5FF2116479664756E2164756E21

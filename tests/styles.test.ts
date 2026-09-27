@@ -33,7 +33,8 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.account, ":focus-visible");
     expect(cssFor(footerClasses.account)).not.toContain("conic-gradient");
     expect(cssFor(footerClasses.account)).not.toContain("animation-name");
-    contains(footerInnerClassName(false, true, "green", true), 'grid-template-areas:"brand mailing links"');
+    contains(footerInnerClassName(false, true, "green", true), 'grid-template-areas:"brand" "mailing" "links"');
+    contains(footerInnerClassName(false, true, "green", true), 'grid-template-areas:"brand mailing . links"');
     expect(cssFor(footerInnerClassName(false, true, "green", true))).not.toContain("#166534");
   });
   test("binds the fail-fast compiler and portable support dependency", async () => {
@@ -57,39 +58,70 @@ describe("compiled footer presentation", () => {
     expect(collector.seal()).toEqual([]);
   });
 
-  test("owns a sticky responsive row and separate signup geometry", () => {
+  test("keeps the footer in normal document flow at every width and placement", () => {
     const root = footerClassName(false);
     const signup = footerClassName(true);
     contains(root, "inline-size:100%");
-    contains(root, "min-block-size:var(--hraness-site-footer-bar-block-size)");
     expect(cssFor(root)).not.toMatch(/[{;]block-size:/u);
-    contains(footerInnerClassName(false), "position:fixed");
-    contains(footerInnerClassName(false), 'grid-template-areas:"brand . consent links"');
-    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing links"');
-    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing . consent links"');
+    // The footer never pins itself to the viewport or reserves a second bar.
+    for (const sticky of [true, false]) for (const hasSignup of [false, true]) {
+      expect(footerClassName(hasSignup, sticky)).toBe(footerClassName(hasSignup, true));
+      expect(footerInnerClassName(hasSignup, sticky)).toBe(footerInnerClassName(hasSignup, true));
+      expect(cssFor(footerClassName(hasSignup, sticky))).not.toMatch(/position:(?:fixed|sticky)|min-block-size/u);
+      expect(cssFor(footerInnerClassName(hasSignup, sticky))).not.toMatch(/position:(?:fixed|sticky)|z-index|inset-block-end/u);
+      contains(footerInnerClassName(hasSignup, sticky), "position:relative");
+    }
+    contains(footerInnerClassName(false), 'grid-template-areas:"brand links"');
+    contains(footerInnerClassName(false), 'grid-template-areas:"brand . links"');
+    contains(footerInnerClassName(true), 'grid-template-areas:"brand" "mailing" "links"');
+    contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing . links"');
     contains(footerInnerClassName(true), "@media (min-width:47.5rem)");
+    contains(footerInnerClassName(true), "grid-auto-rows:var(--hraness-site-footer-content-block-size)");
+    // No containment on the row: the fixed cookie note must resolve against the viewport.
+    expect(cssFor(footerInnerClassName(true))).not.toContain("container-type");
+    contains(footerInnerClassName(true), "border-block-start-color:var(--hraness-site-footer-line)");
     contains(signup, "--hraness-site-footer-mailing-overlay-clearance:0rem");
     contains(signup, "--hraness-site-footer-content-block-size:max(var(--hraness-site-footer-social-target),var(--hraness-site-footer-form-block-size))");
     contains(footerInnerClassName(true), "min-block-size:var(--hraness-site-footer-bar-block-size)");
     for (const inset of ["left", "right"]) contains(footerInnerClassName(true), `env(safe-area-inset-${inset})`);
     contains(footerInnerClassName(true), "env(safe-area-inset-bottom, 0px)");
+    contains(footerInnerClassName(true), "var(--hraness-site-footer-max-inline-size,100%)");
   });
 
-  test("keeps visible compact consent inside the bar and reserves the same second row", () => {
+  test("stacks compact social links on their own aligned row and keeps wide links at the end", () => {
+    contains(footerInnerClassName(false), "--_hraness-site-footer-links-justify:flex-end");
+    for (const inner of [footerInnerClassName(true), footerInnerClassName(false, true, "green", true), footerInnerClassName(false, true, "green", false, true)]) {
+      contains(inner, "--_hraness-site-footer-links-justify:flex-start");
+      contains(inner, "--_hraness-site-footer-links-offset:calc((1rem - var(--hraness-site-footer-social-target)) / 2)");
+    }
+    contains(footerClasses.links, "justify-content:var(--_hraness-site-footer-links-justify,flex-end)");
+    contains(footerClasses.links, "margin-inline-start:var(--_hraness-site-footer-links-offset,0px)");
+    contains(footerClasses.socials, "justify-content:var(--_hraness-site-footer-links-justify,flex-end)");
+    for (const classes of [footerClasses.brand, footerClasses.account, footerClasses.support, footerClasses.disclosure]) contains(classes, "justify-self:start");
+  });
+
+  test("floats visible consent as a compact end-corner note that the footer clears", () => {
     const root = footerClassName(false);
-    contains(root, "--_hraness-site-footer-consent-block-size:0px");
+    contains(root, "--_hraness-site-footer-consent-clearance:0px");
     contains(root, ':has(>.hraness-site-footer__inner>[data-slot="hraness-cookie-consent"]:not([hidden]))');
-    contains(root, "--_hraness-site-footer-consent-block-size:calc(var(--hraness-site-footer-control-block-size) + var(--hraness-site-footer-row-gap))");
-    contains(root, "@media (min-width:47.5rem)");
-    contains(footerClasses.consent, "position:static");
+    contains(root, "--_hraness-site-footer-consent-clearance:calc(var(--hraness-site-footer-control-block-size) + 1.25rem + 2px)");
+    contains(footerInnerClassName(false), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px) + env(safe-area-inset-bottom, 0px))");
+    contains(footerClasses.consent, "position:fixed");
+    contains(footerClasses.consent, "inset-block-end:calc(.75rem + env(safe-area-inset-bottom, 0px))");
+    contains(footerClasses.consent, "inset-inline-end:max(.75rem,env(safe-area-inset-right))");
+    contains(footerClasses.consent, "max-inline-size:calc(100vw - 1.5rem)");
     contains(footerClasses.consent, ":is([hidden])");
     contains(footerClasses.consent, "display:none");
-    contains(footerClasses.consent, "grid-row-start:2");
-    contains(footerClasses.consent, "grid-row-end:3");
-    contains(footerClasses.consent, "block-size:var(--hraness-site-footer-control-block-size)");
     contains(footerClasses.consent, "background-color:Canvas");
-    expect(cssFor(footerClasses.consent)).not.toContain("position:absolute");
-    expect(cssFor(footerClasses.consent)).not.toContain("inset-block-end:");
+    contains(footerClasses.consent, "border-color:ButtonText");
+    contains(footerClasses.consent, "box-shadow:none");
+    // It never spans the viewport or joins the footer grid.
+    expect(cssFor(footerClasses.consent)).not.toMatch(/inset-inline-start|inset-inline:|[{;]inline-size:100|grid-(?:row|column)/u);
+    for (const target of [footerClasses.consentAccept, footerClasses.consentLearn]) {
+      contains(target, "block-size:var(--hraness-site-footer-control-block-size)");
+      contains(target, "padding-inline:.625rem");
+      contains(target, ":focus-visible");
+    }
   });
 
   test("preserves theme fallbacks, coarse targets, and root overrides", () => {
@@ -146,19 +178,22 @@ describe("compiled footer presentation", () => {
     contains(footerClassName(false), "--hraness-site-footer-socials-inline-size:calc(4 * var(--hraness-site-footer-social-target) + max(.375rem, 6px))");
     const socials = "minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))";
     for (const [inner, columns] of [
-      [footerInnerClassName(false), `auto minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(true), `auto minmax(0, max-content) minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(false, true, "green", true), `auto minmax(0, max-content) minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(false, true, "green", false, true), `auto auto minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(true, true, "green", false, true), `auto minmax(0, max-content) auto minmax(0, 1fr) auto ${socials}`],
-      [footerInnerClassName(false, true, "green", true, true), `auto minmax(0, max-content) auto minmax(0, 1fr) auto ${socials}`],
+      [footerInnerClassName(false), `auto minmax(0, 1fr) ${socials}`],
+      [footerInnerClassName(true), `auto minmax(0, max-content) minmax(0, 1fr) ${socials}`],
+      [footerInnerClassName(false, true, "green", true), `auto minmax(0, max-content) minmax(0, 1fr) ${socials}`],
+      [footerInnerClassName(false, true, "green", false, true), `auto auto minmax(0, 1fr) ${socials}`],
+      [footerInnerClassName(true, true, "green", false, true), `auto minmax(0, max-content) auto minmax(0, 1fr) ${socials}`],
+      [footerInnerClassName(false, true, "green", true, true), `auto minmax(0, max-content) auto minmax(0, 1fr) ${socials}`],
     ] as const) contains(inner, `grid-template-columns:${columns}`);
-    for (const inner of [footerInnerClassName(false), footerInnerClassName(true), footerInnerClassName(false, true, "green", true)]) {
-      // Compact templates never gain a consent column or gap.
-      expect(cssFor(inner)).toMatch(/grid-template-areas:"brand(?:mailing)?links"/u);
+    for (let index = 0; index < 6; index += 1) {
+      const signup = index % 2 === 1, account = index === 2 || index === 3, support = index >= 4;
+      // Neither layout gains a consent column: the note floats outside the grid.
+      expect(cssFor(footerInnerClassName(signup && !account, true, "green", account, support))).not.toMatch(/grid-template-areas:[^}]*consent/u);
     }
-    contains(footerInnerClassName(true, true, "green", false, true), 'grid-template-areas:"brand mailing support . consent links"');
-    contains(footerInnerClassName(false, true, "green", false, true), 'grid-template-areas:"brand support . consent links"');
+    contains(footerInnerClassName(true, true, "green", false, true), 'grid-template-areas:"brand brand" "mailing support" "links links"');
+    contains(footerInnerClassName(true, true, "green", false, true), 'grid-template-areas:"brand mailing support . links"');
+    contains(footerInnerClassName(false, true, "green", false, true), 'grid-template-areas:"brand support" "links links"');
+    contains(footerInnerClassName(false, true, "green", false, true), 'grid-template-areas:"brand support . links"');
   });
 
   test("keeps one visible foil button and a scrollable native dialog at every width", () => {
@@ -194,9 +229,11 @@ describe("compiled footer presentation", () => {
       if (signup && account) continue;
       const css = cssFor(footerInnerClassName(signup, true, "green", account, support, false));
       expect(css).not.toContain("brand");
-      const leading = [...(signup || account ? ["mailing"] : []), ...(support ? ["support"] : [])];
-      expect(css).toContain(`grid-template-areas:"${[...leading, "links"].join("")}"`);
-      expect(css).toContain(`grid-template-areas:"${[...leading, ".", "consent", "links"].join("")}"`);
+      const mailing = signup || account;
+      const leading = [...(mailing ? ["mailing"] : []), ...(support ? ["support"] : [])];
+      const compact = mailing && support ? '"mailing support" "links links"' : mailing ? '"mailing" "links"' : `"${[...leading, "links"].join(" ")}"`;
+      expect(css).toContain(`grid-template-areas:${compact.replace(/\s+/gu, "")}`);
+      expect(css).toContain(`grid-template-areas:"${[...leading, ".", "links"].join("")}"`);
     }
   });
 
@@ -241,8 +278,8 @@ describe("compiled footer presentation", () => {
   test("reserves matching visual padding plus the device safe area in both layouts", () => {
     for (const signup of [false, true]) {
       contains(footerInnerClassName(signup), "padding-block-start:var(--hraness-site-footer-padding-block)");
-      contains(footerInnerClassName(signup), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px))");
-      contains(footerClassName(signup), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--_hraness-site-footer-consent-block-size) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)");
+      contains(footerInnerClassName(signup), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px) + env(safe-area-inset-bottom, 0px))");
+      contains(footerClassName(signup), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--_hraness-site-footer-consent-clearance) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)");
     }
   });
 

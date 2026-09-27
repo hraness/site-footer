@@ -46,8 +46,13 @@ export declare const footerClasses: {
     mailingConfirmation: string;
     visuallyHidden: string;
 };
-export declare function footerClassName(signup: boolean, sticky?: boolean): string;
-export declare function footerInnerClassName(signup: boolean, sticky?: boolean, color?: FooterVariant["color"], account?: boolean, support?: boolean, showBrand?: boolean): string;
+/**
+ * The footer always sits in normal document flow. The historical `sticky`
+ * placement argument is accepted for compatibility and no longer changes
+ * presentation.
+ */
+export declare function footerClassName(signup: boolean, _sticky?: boolean): string;
+export declare function footerInnerClassName(signup: boolean, _sticky?: boolean, color?: FooterVariant["color"], account?: boolean, support?: boolean, showBrand?: boolean): string;
 export declare function socialItemClassName(index?: number): string;
 export declare function mailingStatusClassName(state: string): string;
 /** Historical layout arguments no longer change the stable signup surface. */
