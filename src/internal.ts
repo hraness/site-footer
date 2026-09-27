@@ -43,6 +43,7 @@ export interface FooterPresentation {
   readonly support?: SupportProfile;
   readonly locale: FooterLocale;
   readonly variant: FooterVariant;
+  /** Historical placement flag; presentation is always in normal document flow. */
   readonly sticky: boolean;
   /** True only when the host site keeps visitors signed in with cookies. */
   readonly signIn?: boolean;

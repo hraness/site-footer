@@ -3,10 +3,10 @@
 ## Sub-features
 
 - One aligned wide row at 1280 by 900.
-- One compact control row with a native disclosure at 390 by 844; visible cookie consent occupies a separate row inside the same opaque bar.
+- A compact stacked footer at 390 by 844: the brand, then the native signup disclosure and support link in one row, then the social row. Visible cookie consent is a compact fixed note in the viewport's end corner, and the in-flow footer clears it at the end of the page.
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
-- One row at both widths; compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
+- One row at wide widths; compact footers with a signup, account, or support control stack those controls above one social row. Compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
 - Organization-owned home link in every context: the Ra mark followed by the exact “by Hraness” lockup text in one `lang="en"` link, the accessible name “Hraness home,” and a control-sized target; no standalone attribution block remains.
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.
@@ -26,7 +26,7 @@ Resize the same state from a desktop-sized viewport to a compact phone-sized vie
 
 The verifier samples package-named rectangles twice after two animation frames. It validates explicit Direct rules for containment, centerline alignment, selected non-overlap relationships, clipping, minimum sizes, and stability. It also reads computed footer and status positioning plus document scroll width.
 
-Every signup state and no-signup viewport records computed top and bottom padding, the independently resolved safe-area inset, and the physical clearance between the footer edges and the outermost visible controls and links. Bottom padding must equal positive top padding plus the inset, within 0.5 CSS pixels. Both rendered clearances must match those computed paddings, and the fixed inner height must contain the rendered content, padding, and borders. This catches padding added without increasing the reserved bar height. The inset is measured with an invisible, out-of-flow box that is removed immediately; no footer styles or component state are changed.
+Every signup state and no-signup viewport records computed top and bottom padding, the independently resolved safe-area inset, and the physical clearance between the footer edges and the outermost visible controls and links. Bottom padding must equal positive top padding plus the inset, within 0.5 CSS pixels. Both rendered clearances must match those computed paddings, and the in-flow inner height must contain the rendered content, padding, and borders. This catches padding added without increasing the footer height. The inset is measured with an invisible, out-of-flow box that is removed immediately; no footer styles or component state are changed.
 
 Each viewport also records the real controls' computed font cascade. The fixture
 sets the footer to the `dark` palette and `"TRK"` language. A lower-priority
@@ -53,8 +53,11 @@ late/malformed attribution, callback churn, and duplicate submissions.
 
 Every fixture also enables the native optional Support link. Signup samples check its exact product/source destination, value proposition, containment, minimum target and separation from the other controls. No-signup and account contexts include it in geometry and keyboard-focus coverage. All scenarios remain synthetic and never navigate to Accounts.
 
-The consent cases compare the actual outer footprint and inner bar heights in
-shown, accepted and reloaded states. Compact acceptance must remove exactly the
-notice height plus one row gap; wide acceptance leaves the control row height
-unchanged. Synthetic geometry controls reject both the former floating notice and
-a second row whose spacer still reserves only the original bar.
+The consent cases scroll to the end of the page and compare the outer footprint
+and inner footer heights in shown, accepted and reloaded states. A visible note
+must be `position: fixed`, 12 CSS pixels from the viewport's end corner, at most
+85% of the viewport width, and clear of the footer controls. The footer's bottom
+padding must equal its top padding plus the note height and corner inset.
+Acceptance must remove exactly that clearance at every width. Synthetic geometry
+controls reject a full-width or in-flow note, a note that covers the controls, and
+clearance that does not match the note.

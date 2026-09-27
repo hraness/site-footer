@@ -113,7 +113,7 @@ describe("site-footer browser verifier", () => {
       .toEqual({ ok: true, violations: [] });
   });
 
-  test("builds compact rules around only selected non-overlap relationships", () => {
+  test("builds compact stacked rules around only selected non-overlap relationships", () => {
     const contract = parseDirectNamedLayoutContract(
       createLayoutContract("compact", boxes.map(({ name }) => name)),
     );
@@ -124,9 +124,12 @@ describe("site-footer browser verifier", () => {
       .filter(({ kind }) => kind === "no-overlap")
       .map(({ id }) => id);
     expect(noOverlapIds).toEqual([
+      "compact.brand-socials.clear",
       "compact.brand-mailing.clear",
       "compact.socials-mailing.clear",
     ]);
+    // Stacked rows no longer share one centerline.
+    expect(contract.value.rules.some(({ kind }) => kind === "center-y")).toBeFalse();
   });
 
   test("keeps visible status overlays clear of the footer row", () => {
@@ -217,16 +220,22 @@ test("wide layout rejects a padded inline panel even when its inner form remains
   }
 });
 
-test("consent geometry rejects floating notices and understated document footprints", () => {
-  const compact = { width:320, shown:true, footprint:69, height:69, top:775, bottom:844, paddingTop:4, paddingBottom:4, borderTop:1, borderBottom:0, controlTop:780, controlBottom:808, consentTop:812, consentBottom:840, gap:4 };
-  expect(() => assertConsentFootprint(compact)).not.toThrow();
-  expect(() => assertConsentFootprint({...compact, footprint:37})).toThrow("footprint");
-  expect(() => assertConsentFootprint({...compact, consentTop:735, consentBottom:763})).toThrow("inside");
-  expect(() => assertConsentFootprint({...compact, consentTop:800})).toThrow("separate row");
-  const hidden = {...compact, shown:false, footprint:37, height:37, top:807, controlTop:812, controlBottom:840, consentTop:0, consentBottom:0};
-  expect(() => assertConsentFootprint(hidden)).not.toThrow();
-  expect(() => assertConsentFootprint({...compact, shown:false})).toThrow("padding clearances");
-  const wide = {...hidden, width:1280, shown:true, consentTop:812, consentBottom:840};
+test("consent geometry requires a compact corner note that the in-flow footer clears", () => {
+  // A 390x844 page scrolled to its end: 12px padding, a 28px control row, and
+  // a 38px note 12px from the corner, cleared by 50px of extra bottom padding.
+  const shown = { width:390, viewportHeight:844, shown:true, position:"fixed", footprint:115, height:115, top:729, bottom:844, paddingTop:12, paddingBottom:62, borderTop:1, borderBottom:0, controlTop:742, controlBottom:782, consentTop:794, consentBottom:832, consentLeft:168, consentRight:378 };
+  expect(() => assertConsentFootprint(shown)).not.toThrow();
+  expect(() => assertConsentFootprint({...shown, position:"static"})).toThrow("corner note");
+  expect(() => assertConsentFootprint({...shown, consentLeft:0})).toThrow("never span");
+  expect(() => assertConsentFootprint({...shown, consentLeft:12})).toThrow("never span");
+  expect(() => assertConsentFootprint({...shown, consentLeft:160, consentRight:370})).toThrow("end corner");
+  expect(() => assertConsentFootprint({...shown, paddingBottom:12, footprint:65, height:65, top:779, controlTop:792, controlBottom:832})).toThrow("covers the footer controls");
+  expect(() => assertConsentFootprint({...shown, paddingBottom:70, footprint:123, height:123, top:721, controlTop:734, controlBottom:774})).toThrow("padding clearances");
+  expect(() => assertConsentFootprint({...shown, footprint:160})).toThrow("footprint");
+  expect(() => assertConsentFootprint({...shown, bottom:800, top:685})).toThrow("end of the page");
+  const accepted = {...shown, shown:false, footprint:65, height:65, top:779, paddingBottom:12, controlTop:792, controlBottom:832, consentTop:0, consentBottom:0, consentLeft:0, consentRight:0};
+  expect(() => assertConsentFootprint(accepted)).not.toThrow();
+  expect(() => assertConsentFootprint({...accepted, paddingBottom:62, footprint:115, height:115, top:729, controlTop:742, controlBottom:782})).toThrow("padding clearances");
+  const wide = {...shown, width:1280, consentLeft:1058, consentRight:1268};
   expect(() => assertConsentFootprint(wide)).not.toThrow();
-  expect(() => assertConsentFootprint({...compact, width:1280})).toThrow("control row");
 });

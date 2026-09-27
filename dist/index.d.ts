@@ -16,6 +16,10 @@ export interface HranessSiteFooterOptions {
     /** Explicit Accounts product identity. Omit to render no paid-support control. */
     readonly support?: SupportProfile;
     readonly locale?: string | readonly string[];
+    /**
+     * @deprecated Accepted for compatibility and inert. The footer always sits
+     * in normal document flow at the end of the page.
+     */
     readonly placement?: "sticky" | "flow";
     /** A server may provide a checked experiment assignment; static rendering makes no analytics request. */
     readonly variant?: FooterVariant;

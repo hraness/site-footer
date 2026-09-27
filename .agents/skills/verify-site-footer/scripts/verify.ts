@@ -457,8 +457,14 @@ export function createLayoutContract(
       });
     }
   } else {
-    for (const second of ["mailing", "socials"]) add({
-      first: "brand", id: `compact.brand-${second}.center-y`, kind: "center-y", second, tolerance: 1,
+    // Compact footers stack the brand, the signup and support controls, then
+    // the social row. The sample expression proves that vertical order.
+    add({
+      first: "brand",
+      id: "compact.brand-socials.clear",
+      kind: "no-overlap",
+      second: "socials",
+      tolerance: 0,
     });
     add({
       first: "brand",
@@ -1176,6 +1182,14 @@ const LAYOUT_SAMPLE_EXPRESSION = `(() => {
     rect("support", support),
     rect("socials", socials),
   ];
+  if (compact) {
+    const [brandBox, mailingBox, supportBox, socialsBox] = [brand, mailing, support, socials].map((element) => element.getBoundingClientRect());
+    if (brandBox.bottom > Math.min(mailingBox.top, supportBox.top) + 0.5
+      || Math.max(mailingBox.bottom, supportBox.bottom) > socialsBox.top + 0.5
+      || Math.abs(mailingBox.top + mailingBox.height / 2 - supportBox.top - supportBox.height / 2) > 1) {
+      throw new Error("Compact footer must stack the brand, one centered control row, then the social links.");
+    }
+  }
   const dialog = document.querySelector('[data-slot="hraness-mailing-dialog"]');
   if (dialog instanceof HTMLDialogElement && dialog.open) boxes.push(rect("dialog", dialog));
   const controls = document.querySelector(".hraness-site-footer__mailing-controls");
@@ -1876,10 +1890,17 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       const boxes = links.filter(link => link.checkVisibility()).map(link => {
         const rect = link.getBoundingClientRect();
         if (rect.width < 28 || rect.height < 28 || rect.left < 0 || rect.right > innerWidth + 0.5) throw new Error('Footer target is clipped or too small.');
-        return { name: link.getAttribute('aria-label') ?? link.textContent, x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+        return { name: link.getAttribute('aria-label') ?? link.textContent, social: link.classList.contains('hraness-site-footer__social-link'), x: rect.x, y: rect.y, width: rect.width, height: rect.height };
       });
       const centers = boxes.map(box => box.y + box.height / 2);
-      if (Math.max(...centers) - Math.min(...centers) > 1) throw new Error('Footer links must stay in one centered row.');
+      const socialCenters = boxes.filter(box => box.social).map(box => box.y + box.height / 2);
+      if (Math.max(...socialCenters) - Math.min(...socialCenters) > 1) throw new Error('Social links must stay in one centered row.');
+      const stacked = !matchMedia('(min-width: 47.5rem)').matches && boxes.filter(box => !box.social).length > 1;
+      if (stacked) {
+        // Compact footers with account or support controls give the social links their own row below them.
+        const leadingBottom = Math.max(...boxes.filter(box => !box.social).map(box => box.y + box.height));
+        if (leadingBottom > Math.min(...boxes.filter(box => box.social).map(box => box.y)) + 0.5) throw new Error('Compact social links must start their own row below the brand and controls.');
+      } else if (Math.max(...centers) - Math.min(...centers) > 1) throw new Error('Footer links must stay in one centered row.');
       return { width: innerWidth, height: inner.getBoundingClientRect().height, bottomPadding: getComputedStyle(inner).paddingBlockEnd, boxes };
     })()`);
     const spacing = assertFooterSpacing(
@@ -1985,26 +2006,38 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
   return evidence;
 }
 
-/** Independent measured boxes reject both floating consent and an undersized spacer. */
+/** The visible cookie note floats this far from the viewport's end corner. */
+const CONSENT_CORNER_INSET = 12;
+
+/**
+ * Independent measured boxes, taken at the end of the page: a visible note is
+ * a compact fixed notice in the viewport's end corner that never spans the
+ * width, and the in-flow footer clears exactly that notice below its controls.
+ */
 export function assertConsentFootprint(input: unknown): void {
-  const value = exactRecord(input, ["width", "shown", "footprint", "height", "top", "bottom", "paddingTop", "paddingBottom", "borderTop", "borderBottom", "controlTop", "controlBottom", "consentTop", "consentBottom", "gap"], "Consent footprint");
+  const value = exactRecord(input, ["width", "viewportHeight", "shown", "position", "footprint", "height", "top", "bottom", "paddingTop", "paddingBottom", "borderTop", "borderBottom", "controlTop", "controlBottom", "consentTop", "consentBottom", "consentLeft", "consentRight"], "Consent footprint");
   if (typeof value.shown !== "boolean") throw new Error("Consent visibility is not a boolean.");
+  const position = requiredString(value.position, "Consent position");
   const number = (name: string) => finiteNumber(value[name], `Consent ${name}`);
   const width = number("width"), height = number("height"), top = number("top"), bottom = number("bottom");
-  if (height <= 0 || Math.abs(number("footprint") - height) > 0.5 || Math.abs(bottom - top - height) > 0.5) throw new Error("Footer footprint must match the whole rendered bar.");
+  if (height <= 0 || Math.abs(number("footprint") - height) > 0.5 || Math.abs(bottom - top - height) > 0.5) throw new Error("Footer footprint must match the whole rendered footer.");
+  if (Math.abs(bottom - number("viewportHeight")) > 0.5) throw new Error("Consent geometry must be measured at the end of the page.");
   const controlTop = number("controlTop"), controlBottom = number("controlBottom");
-  if (controlBottom <= controlTop || controlTop < top || controlBottom > bottom) throw new Error("Control row escapes footer.");
-  let contentBottom = controlBottom;
+  if (controlBottom <= controlTop || controlTop < top || controlBottom > bottom) throw new Error("Control rows escape footer.");
+  const paddingTop = number("paddingTop");
+  let clearance = 0;
   if (value.shown) {
     const consentTop = number("consentTop"), consentBottom = number("consentBottom");
-    if (consentBottom <= consentTop || consentTop < top || consentBottom > bottom) throw new Error("Visible consent must remain inside the opaque bar.");
-    if (width < 760) {
-      if (Math.abs(consentTop - controlBottom - number("gap")) > 0.5) throw new Error("Compact consent must have one separate row and gap.");
-      contentBottom = consentBottom;
-    } else if (Math.abs(consentTop - controlTop) > 0.5 || Math.abs(consentBottom - controlBottom) > 0.5) throw new Error("Wide consent must remain in the control row.");
+    const consentLeft = number("consentLeft"), consentRight = number("consentRight");
+    if (position !== "fixed" || consentBottom <= consentTop || consentRight <= consentLeft) throw new Error("Visible consent must float as its own corner note.");
+    if (consentLeft < CONSENT_CORNER_INSET - 0.5 || consentRight - consentLeft > width * 0.85) throw new Error("Visible consent must stay compact and never span the width.");
+    if (Math.abs(width - consentRight - CONSENT_CORNER_INSET) > 0.5 || Math.abs(number("viewportHeight") - consentBottom - CONSENT_CORNER_INSET) > 0.5) throw new Error("Visible consent must sit in the viewport's end corner.");
+    if (consentTop < controlBottom + paddingTop - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page.");
+    clearance = consentBottom - consentTop + CONSENT_CORNER_INSET;
   }
-  if (Math.abs(controlTop - top - number("borderTop") - number("paddingTop")) > 0.5
-    || Math.abs(bottom - contentBottom - number("borderBottom") - number("paddingBottom")) > 0.5) throw new Error("Footer rows must retain their actual padding clearances.");
+  if (Math.abs(controlTop - top - number("borderTop") - paddingTop) > 0.5
+    || Math.abs(number("paddingBottom") - paddingTop - clearance) > 0.5
+    || Math.abs(bottom - controlBottom - number("borderBottom") - number("paddingBottom")) > 0.5) throw new Error("Footer rows must retain their actual padding clearances.");
 }
 
 async function driveConsentCases(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
@@ -2025,6 +2058,7 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     await browser.run(["open", url]);
     await browser.run(["wait", '[data-slot="hraness-cookie-consent"]:not([hidden])', "--timeout", "5000"]);
     const measure = async () => {
+      await browser.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)");
       await browser.evaluate(SETTLE_EXPRESSION);
       return browser.evaluate(`(() => {
         const footer = document.querySelector('#hraness-site-footer');
@@ -2036,7 +2070,7 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
         if (style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)') throw new Error('Footer surface must be opaque.');
         if (controls.some(r => r.left < box.left || r.right > box.right)) throw new Error('Control escapes bar width.');
         if (!consent.hidden && (notice.left < box.left || notice.right > box.right)) throw new Error('Consent escapes bar width.');
-        return {width:innerWidth, shown:!consent.hidden, footprint:footer.getBoundingClientRect().height, height:box.height, top:box.top, bottom:box.bottom, paddingTop:parseFloat(style.paddingTop), paddingBottom:parseFloat(style.paddingBottom), borderTop:parseFloat(style.borderTopWidth), borderBottom:parseFloat(style.borderBottomWidth), controlTop:Math.min(...controls.map(r=>r.top)), controlBottom:Math.max(...controls.map(r=>r.bottom)), consentTop:notice.top, consentBottom:notice.bottom, gap:parseFloat(style.rowGap)};
+        return {width:innerWidth, viewportHeight:innerHeight, shown:!consent.hidden, position:getComputedStyle(consent).position, footprint:footer.getBoundingClientRect().height, height:box.height, top:box.top, bottom:box.bottom, paddingTop:parseFloat(style.paddingTop), paddingBottom:parseFloat(style.paddingBottom), borderTop:parseFloat(style.borderTopWidth), borderBottom:parseFloat(style.borderBottomWidth), controlTop:Math.min(...controls.map(r=>r.top)), controlBottom:Math.max(...controls.map(r=>r.bottom)), consentTop:notice.top, consentBottom:notice.bottom, consentLeft:notice.left, consentRight:notice.right};
       })()`);
     };
     const shown = await measure(); assertConsentFootprint(shown);
@@ -2048,10 +2082,11 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     // A hidden element never becomes "visible", so wait on the attribute itself.
     await browser.run(["wait", "--fn", `document.querySelector('[data-slot="hraness-cookie-consent"]')?.hidden === true`, "--timeout", "5000"]);
     const accepted = await measure(); assertConsentFootprint(accepted);
-    if (!isRecord(accepted) || accepted.shown !== false) throw new Error("Consent acceptance did not remove its row.");
+    if (!isRecord(accepted) || accepted.shown !== false) throw new Error("Consent acceptance did not remove the note.");
+    // Acceptance releases exactly the note's clearance and nothing else, at every width.
     const released = Number(shown.height) - Number(accepted.height);
-    const expected = sample.width < 760 ? Number(shown.consentBottom) - Number(shown.consentTop) + Number(shown.gap) : 0;
-    if (Math.abs(released - expected) > .5) throw new Error("Consent acceptance retained an empty row or changed the wide bar.");
+    const expected = Number(shown.consentBottom) - Number(shown.consentTop) + CONSENT_CORNER_INSET;
+    if (Math.abs(released - expected) > .5) throw new Error("Consent acceptance retained empty clearance or changed the control rows.");
     const acceptedScreenshotPath = `${screenshotBase}-accepted.png`;
     await screenshot(browser, acceptedScreenshotPath);
     await browser.run(["open", url]);

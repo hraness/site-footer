@@ -181,8 +181,8 @@ function Fixture() {
         </article>
       </main>
       <HranessSiteFooter
-        // Keep the verifier's page shell in normal flow; production consumers
-        // use the default sticky placement.
+        // The deprecated placement prop is inert; `?placement=sticky` cases
+        // prove it renders the same in-flow footer as the default.
         placement={placement}
         showBrand={showBrand}
         attribution={experimentEnabled}
