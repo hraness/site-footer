@@ -29,6 +29,8 @@ export interface FooterPresentation {
     /** True only when the host site keeps visitors signed in with cookies. */
     readonly signIn?: boolean;
     readonly experimentToken?: string;
+    /** Normalized signup page URL (origin and path only), from `parseHranessPageUrl`. */
+    readonly pageUrl?: string;
 }
 export declare const DEFAULT_FOOTER_PRESENTATION: FooterPresentation;
 export declare const HRANESS_FOOTER_LABEL = "Hraness network";
@@ -40,6 +42,12 @@ export declare const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status"
 export declare const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
 export declare const HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 export declare const HRANESS_MAILING_HONEYPOT_FIELD = "website";
+export declare const HRANESS_MAILING_PAGE_FIELD = "page";
+export declare const HRANESS_MAILING_PLACEMENT_FIELD = "placement";
+/** The footer's fixed Accounts signup placement. */
+export declare const HRANESS_MAILING_PLACEMENT = "footer";
+/** Accounts stores at most 2,048 bytes of signup URL; longer pages send none. */
+export declare const HRANESS_MAX_PAGE_URL_LENGTH = 2048;
 export declare const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 export declare const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 export declare const HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
@@ -103,6 +111,16 @@ export declare const HRANESS_SOCIAL_LINKS: readonly [{
     readonly href: "https://github.com/hraness";
 }];
 export declare function parseHranessMailingListConfig(value: HranessMailingListConfig): HranessMailingListConfig;
+/**
+ * Reduce an absolute http(s) URL to its origin and path. Query strings and
+ * fragments can carry tokens or email addresses, so they never leave the page.
+ * Returns null for anything else, including URLs with credentials.
+ */
+export declare function normalizeHranessPageUrl(value: unknown): string | null;
+/** Parse the consumer's `pageUrl` option; undefined means the page is unknown at render time. */
+export declare function parseHranessPageUrl(value: string | undefined): string | undefined;
+/** The browser's current signup page: `location.origin + location.pathname`, never search or hash. */
+export declare function currentHranessPageUrl(): string | null;
 export declare function parseHranessSocialConfig(value: HranessSocialConfig | undefined): HranessSocialConfig;
 export declare function resolveHranessSocialLinks(value: HranessSocialConfig | undefined): ReadonlyArray<HranessSocialLink>;
 /** Question-mark vector rendered inside the optional Accounts support link. */

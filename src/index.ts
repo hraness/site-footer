@@ -15,6 +15,7 @@ import {
   HRANESS_ACCOUNT_URL,
   HRANESS_SOCIAL_LINKS,
   parseHranessMailingListConfig,
+  parseHranessPageUrl,
   renderHranessSiteFooterInnerHtml,
   resolveHranessSocialLinks,
   type HranessMailingListConfig,
@@ -59,6 +60,13 @@ export interface HranessSiteFooterOptions {
    * order. Defaults remain the shared Hraness profiles.
    */
   readonly social?: HranessSocialConfig;
+  /**
+   * Absolute URL of the page being rendered, such as
+   * `https://hraness.com/valhalla`. The signup form sends its origin and path
+   * so Accounts can record where a reader subscribed; any query string or
+   * fragment is dropped. Omit it when unknown and the form sends no page.
+   */
+  readonly pageUrl?: string;
 }
 
 /** Render the complete framework-neutral Hraness network footer. */
@@ -71,9 +79,11 @@ export function renderHranessSiteFooter({
   signIn = false,
   social: socialInput,
   support,
+  pageUrl: pageUrlInput,
 }: HranessSiteFooterOptions): string {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const pageUrl = parseHranessPageUrl(pageUrlInput);
   variant = parseFooterVariant(variant);
   const socialLinks = resolveHranessSocialLinks(socialInput);
-  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, socialLinks, { locale: resolveFooterLocale(localeInput), variant, sticky: placement === "sticky", signIn: signIn === true, ...(support === undefined ? {} : { support }) })}</footer>`;
+  return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, socialLinks, { locale: resolveFooterLocale(localeInput), variant, sticky: placement === "sticky", signIn: signIn === true, ...(support === undefined ? {} : { support }), ...(pageUrl === undefined ? {} : { pageUrl }) })}</footer>`;
 }

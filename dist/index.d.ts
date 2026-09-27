@@ -33,7 +33,14 @@ export interface HranessSiteFooterOptions {
      * order. Defaults remain the shared Hraness profiles.
      */
     readonly social?: HranessSocialConfig;
+    /**
+     * Absolute URL of the page being rendered, such as
+     * `https://hraness.com/valhalla`. The signup form sends its origin and path
+     * so Accounts can record where a reader subscribed; any query string or
+     * fragment is dropped. Omit it when unknown and the form sends no page.
+     */
+    readonly pageUrl?: string;
 }
 /** Render the complete framework-neutral Hraness network footer. */
-export declare function renderHranessSiteFooter({ locale: localeInput, placement, variant, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, }: HranessSiteFooterOptions): string;
+export declare function renderHranessSiteFooter({ locale: localeInput, placement, variant, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, pageUrl: pageUrlInput, }: HranessSiteFooterOptions): string;
 //# sourceMappingURL=index.d.ts.map

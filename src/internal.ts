@@ -47,6 +47,8 @@ export interface FooterPresentation {
   /** True only when the host site keeps visitors signed in with cookies. */
   readonly signIn?: boolean;
   readonly experimentToken?: string;
+  /** Normalized signup page URL (origin and path only), from `parseHranessPageUrl`. */
+  readonly pageUrl?: string;
 }
 
 export const DEFAULT_FOOTER_PRESENTATION: FooterPresentation = {
@@ -66,6 +68,12 @@ export const HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 export const HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
 export const HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 export const HRANESS_MAILING_HONEYPOT_FIELD = "website";
+export const HRANESS_MAILING_PAGE_FIELD = "page";
+export const HRANESS_MAILING_PLACEMENT_FIELD = "placement";
+/** The footer's fixed Accounts signup placement. */
+export const HRANESS_MAILING_PLACEMENT = "footer";
+/** Accounts stores at most 2,048 bytes of signup URL; longer pages send none. */
+export const HRANESS_MAX_PAGE_URL_LENGTH = 2048;
 export const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
 export const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 export const HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
@@ -245,6 +253,46 @@ export function parseHranessMailingListConfig(
   return value;
 }
 
+/**
+ * Reduce an absolute http(s) URL to its origin and path. Query strings and
+ * fragments can carry tokens or email addresses, so they never leave the page.
+ * Returns null for anything else, including URLs with credentials.
+ */
+export function normalizeHranessPageUrl(value: unknown): string | null {
+  if (typeof value !== "string" || value.length === 0) return null;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if ((url.protocol !== "https:" && url.protocol !== "http:") || url.username !== "" || url.password !== "") return null;
+  const page = `${url.origin}${url.pathname}`;
+  return page.length <= HRANESS_MAX_PAGE_URL_LENGTH ? page : null;
+}
+
+/** Parse the consumer's `pageUrl` option; undefined means the page is unknown at render time. */
+export function parseHranessPageUrl(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const page = normalizeHranessPageUrl(value);
+  if (page === null) {
+    throw new TypeError(
+      `Hraness site footer pageUrl must be an absolute http(s) URL of at most ${HRANESS_MAX_PAGE_URL_LENGTH} characters without credentials.`,
+    );
+  }
+  return page;
+}
+
+/** The browser's current signup page: `location.origin + location.pathname`, never search or hash. */
+export function currentHranessPageUrl(): string | null {
+  try {
+    const { location } = globalThis as { location?: { href?: unknown } };
+    return normalizeHranessPageUrl(location?.href);
+  } catch {
+    return null;
+  }
+}
+
 function isHranessSocialPlatform(value: string): value is HranessSocialPlatform {
   return (HRANESS_SOCIAL_PLATFORMS as readonly string[]).includes(value);
 }
@@ -406,6 +454,14 @@ function renderHranessSocialLinksHtml(
   return `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${socialLinks.map((link, index) => `<li class="${socialItemClassName(index)}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
 }
 
+// An unknown page renders disabled so native posts omit it; the React adapter
+// fills and enables it from the browser location.
+function renderPageInput(pageUrl: string | undefined): string {
+  return pageUrl === undefined
+    ? `<input name="${HRANESS_MAILING_PAGE_FIELD}" type="hidden" value="" disabled="">`
+    : `<input name="${HRANESS_MAILING_PAGE_FIELD}" type="hidden" value="${escapeAttribute(pageUrl)}">`;
+}
+
 const MAILING_IDLE_STATE = { kind: "idle" } as const satisfies HranessMailingListRenderState;
 
 function renderMailingList(
@@ -425,7 +481,7 @@ function renderMailingList(
   const classes = disclosureClassNames("button");
   // An open, nonmodal dialog inside native details remains a usable disclosure
   // without JavaScript. The React adapter upgrades this exact form to showModal.
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${renderPageInput(presentation.pageUrl)}<input name="${HRANESS_MAILING_PLACEMENT_FIELD}" type="hidden" value="${HRANESS_MAILING_PLACEMENT}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
 
 // The consent choice itself is stored in local storage, not a cookie, so the

@@ -75,8 +75,9 @@ const footerHtml = renderHranessSiteFooter({
 ```
 
 Both renderers require `mailingList`. Both accept `showBrand: false` when the
-host page already supplies the Hraness identity and an optional `social` object
-that retargets owned destinations.
+host page already supplies the Hraness identity, an optional `social` object
+that retargets owned destinations, and an optional `pageUrl` that tells the
+signup form which page it is on.
 
 Static generators can resolve the checked stylesheet without assuming a
 `node_modules` path:
@@ -135,8 +136,8 @@ Hraness.com uses the shared `hraness` audience:
 The configured signup follows one checked state path:
 
 1. The footer renders a required email field, a product audience, the fixed
-   package source, and a hidden honeypot field that Accounts checks and
-   silently discards when filled.
+   package source, the signup page and `placement=footer`, and a hidden
+   honeypot field that Accounts checks and silently discards when filled.
 2. The enhanced React form sends one multipart `POST` with
    `credentials: "omit"`. The plain form performs a normal cross-origin
    submission, so signup also works without JavaScript.
@@ -147,6 +148,37 @@ The configured signup follows one checked state path:
 Accounts applies rate limiting and double opt-in; the visitor is only
 subscribed after confirming the emailed link.
 
+### Record the signup page
+
+Pass `pageUrl`, the absolute URL of the page being rendered, so Accounts can
+record which page a reader subscribed from. The form sends only its origin and
+path. Any query string or fragment is dropped before it reaches the markup,
+because either can carry a token or an email address.
+
+```tsx
+// Next.js App Router: build the URL from the request's own path.
+<HranessSiteFooter
+  mailingList={{ audience: "hraness", kind: "signup" }}
+  pageUrl={new URL(pathname, "https://hraness.com").href}
+/>
+```
+
+```ts
+renderHranessSiteFooter({
+  mailingList: { audience: "hraness", kind: "signup" },
+  pageUrl: "https://hraness.com/valhalla",
+});
+```
+
+`pageUrl` must be an absolute `http:` or `https:` URL without a user name or
+password, at most 2,048 characters after normalization; anything else throws a
+`TypeError`. Leave it out when the page is unknown: the page field then renders
+disabled, so a form submitted without JavaScript sends no page. After
+hydration, the React footer fills the field from `location.origin +
+location.pathname` and keeps it current across client navigation and at
+submit time, whether or not `pageUrl` was passed. Accounts stores the page only
+when its origin matches the submitting page's `Origin` header.
+
 The static form uses the same fields and package-owned Accounts action:
 
 ```text
@@ -155,6 +187,8 @@ email=<visitor address>
 audience=<the consumer's explicit stable audience ID>
 source=hraness-site-footer
 website=<empty honeypot; Accounts ignores the request when filled>
+page=<origin and path of the signup page; omitted when unknown>
+placement=footer
 ```
 
 React sends `Accept: application/json`. A successful 2xx response replaces the
@@ -298,8 +332,10 @@ remain independent of this mode.
 Signup changes that boundary in visible, bounded ways:
 
 - The visitor's `email`, the consumer's `audience`,
-  `source=hraness-site-footer`, and the empty `website` honeypot field are
-  transmitted to `https://account.hraness.com/api/mailing/subscribe`.
+  `source=hraness-site-footer`, the signup page's origin and path,
+  `placement=footer`, and the empty `website` honeypot field are transmitted
+  to `https://account.hraness.com/api/mailing/subscribe`. The page never
+  includes a query string or fragment.
 - The React request uses `credentials: "omit"`. The static form performs a
   normal cross-origin form submission.
 - The package loads no third-party script or frame in either mode.
