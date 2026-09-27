@@ -19,7 +19,11 @@ export interface HranessSiteFooterProps {
      * name join the Accounts signup-label test.
      */
     readonly attribution?: boolean;
-    /** Sticky includes its own document footprint. Flow leaves placement to the host. */
+    /**
+     * @deprecated Accepted for compatibility and inert. The footer always sits
+     * in normal document flow at the end of the page; a visible cookie note
+     * floats as a compact corner notice until accepted.
+     */
     readonly placement?: "sticky" | "flow";
     /** Select signup, the signed-in account link, or no account/signup control. */
     readonly mailingList: HranessMailingListConfig;

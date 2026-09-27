@@ -39,7 +39,7 @@ describe("compiled footer presentation", () => {
   });
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.19.3");
+    expect(pkg.version).toBe("0.20.0");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -85,7 +85,7 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(true), "min-block-size:var(--hraness-site-footer-bar-block-size)");
     for (const inset of ["left", "right"]) contains(footerInnerClassName(true), `env(safe-area-inset-${inset})`);
     contains(footerInnerClassName(true), "env(safe-area-inset-bottom, 0px)");
-    contains(footerInnerClassName(true), "var(--hraness-site-footer-max-inline-size,100%)");
+    contains(footerInnerClassName(true), "var(--hraness-site-footer-measure,100%)");
   });
 
   test("stacks compact social links on their own aligned row and keeps wide links at the end", () => {

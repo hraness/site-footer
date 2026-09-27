@@ -51,13 +51,15 @@ A separate context renders the real footer with `mailingList: { kind: "none" }` 
 An additional account context uses `mailingList: { kind: "account" }` with
 experiments enabled to prove it sends no signup or experiment request. At all
 four widths it checks the native account destination, muted border without foil,
-visible keyboard focus, one row, viewport containment and priority socials.
+visible keyboard focus, one wide row (compact widths stack the controls above
+one social row), viewport containment and priority socials.
 
 A separate consent layout context uses the existing synthetic region response to
 show the real notice at 320, 390, 760 and 1280 pixels, including account and wide-font
-variants. It compares the outer document footprint with the complete rendered bar,
-requires compact consent inside a separate row and wide consent inline, then clicks
-Accept and reloads to prove the row and reserved space disappear together. Each case
+variants. Measured at the end of the page, it requires a compact fixed note in the
+viewport's end corner that never spans the width, and an in-flow footer whose extra
+bottom padding exactly clears that note below the controls. It then clicks Accept
+and reloads to prove the note and its clearance disappear together. Each case
 retains a full-page screenshot of the shown, accepted and reloaded states. It never
 changes component state directly or contacts Accounts.
 
@@ -69,17 +71,17 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - the exact synthetic request fields for submitted states and no request otherwise;
 - no page errors or error/assertion-level console entries;
 - exact repository source-content identity before drive, after drive, and after cleanup;
-- wide brand, mailing, and social centerlines within 1 CSS pixel;
+- wide brand, mailing, and social centerlines within 1 CSS pixel, and compact brand, control, and social rows stacked in that order;
 - equal input and submit heights;
 - native modal containment with readable, separated 48px form controls;
 - idle status hidden without reserving space, and visible request state inside the modal;
 - four social targets at wide widths and a visible priority prefix beginning with Substack at compact widths;
 - the exact “by Hraness” organization lockup on the home link in every context, with no standalone attribution block;
 - positive computed top padding and bottom padding equal to that padding plus an independently measured device safe-area inset;
-- actual visible content clearances matching both padding values, with the fixed footer height including both clearances, in signup and no-signup layouts;
+- actual visible content clearances matching both padding values, with the in-flow footer height including both clearances, in signup and no-signup layouts;
 - an in-flow footer row with a stable trigger independent of the modal request state;
 - no compact horizontal overflow;
-- visible compact consent on its own row inside the opaque bar, wide consent inline with the controls, and a document footprint equal to the whole bar in the shown, accepted and reloaded states;
+- visible consent as a compact end-corner note that never spans the width or covers the footer controls, with a footer footprint that clears exactly that note in the shown state and releases it in the accepted and reloaded states;
 - declared minimum target sizes; and
 - two-sample Direct stability with no named-layout violations.
 

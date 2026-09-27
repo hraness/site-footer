@@ -436,8 +436,8 @@ var styles = {
     kWkggS: "x1hhhz6w x9yvj25",
     kS5dFF: "x1bhgv95",
     kgDt7k: "x79o31f",
-    kzfwIZ: "x1b42vfr",
-    kO8tuG: "x1l962nu",
+    kzfwIZ: "xhvvu7z",
+    kO8tuG: "x1dyck8u",
     $$css: true
   },
   innerSignup: {
@@ -2165,4 +2165,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=5CC6F5FF2116479664756E2164756E21
+//# debugId=4D7DD848E44C538A64756E2164756E21

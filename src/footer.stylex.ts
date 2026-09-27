@@ -247,8 +247,8 @@ const styles = stylex.create({
     "padding-block-end": "calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance, 0px) + env(safe-area-inset-bottom, 0px))",
     // An optional host content width aligns the row with the page column while
     // the hairline and surface still span the viewport.
-    "padding-inline-start": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left), calc((100% - var(--hraness-site-footer-max-inline-size, 100%)) / 2))",
-    "padding-inline-end": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right), calc((100% - var(--hraness-site-footer-max-inline-size, 100%)) / 2))",
+    "padding-inline-start": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left), calc((100% - var(--hraness-site-footer-measure, 100%)) / 2))",
+    "padding-inline-end": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-right), calc((100% - var(--hraness-site-footer-measure, 100%)) / 2))",
   },
   // Compact footers with a signup, account, or support control stack in
   // document order: the brand, the controls, then a full row of social links.

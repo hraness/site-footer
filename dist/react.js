@@ -594,8 +594,8 @@ var styles = {
     kWkggS: "x1hhhz6w x9yvj25",
     kS5dFF: "x1bhgv95",
     kgDt7k: "x79o31f",
-    kzfwIZ: "x1b42vfr",
-    kO8tuG: "x1l962nu",
+    kzfwIZ: "xhvvu7z",
+    kO8tuG: "x1dyck8u",
     $$css: true
   },
   innerSignup: {
@@ -3357,4 +3357,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=F89BE2B393E643DD64756E2164756E21
+//# debugId=4E00470622DD23DD64756E2164756E21

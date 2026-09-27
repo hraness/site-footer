@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.19.3
+bun add github:hraness/site-footer#v0.20.0
 ```
 
 Start with the network footer and no mailing form:
@@ -46,9 +46,9 @@ privacy policy. The consent note stays hidden
 without client-side JavaScript; after hydration the React adapter asks the
 shared Accounts region endpoint whether consent applies, fails toward showing
 the note when detection is unavailable, and stores acceptance in local storage.
-On narrow screens, a visible note occupies its own row inside the footer; the
-footer reserves both rows so page content can scroll clear of them. Acceptance
-removes that row and its space. Wide footers keep the note beside the links.
+A visible note is a small notice in the bottom corner of the window that never
+spans its width. At the end of the page the footer adds room below its links so
+the note never covers them. Accepting removes the note and that room.
 The first render issues no request, sets no cookie, and writes no local
 storage. The links and inline decorative vectors work without client-side
 JavaScript.
@@ -59,7 +59,7 @@ JavaScript.
 | --- | --- | --- |
 | `@hraness/site-footer` | Render complete HTML into a static template or server response | Framework-neutral ESM with no React import |
 | `@hraness/site-footer/react` | Render the same contract in React and progressively enhance signup states | React client component for React 18 and 19 |
-| `@hraness/site-footer/styles.css` | Apply the sticky responsive footer, theme fallbacks, and focus states | Compatibility import of checked atomic CSS, imported once by the consumer |
+| `@hraness/site-footer/styles.css` | Apply the responsive footer layout, theme fallbacks, and focus states | Compatibility import of checked atomic CSS, imported once by the consumer |
 | `@hraness/site-footer/stylex.css` | Resolve or copy the complete standalone stylesheet | Generated CSS with finite package priority layers |
 | `@hraness/site-footer/stylex-manifest.json` | Admit the package to the shared StyleX build pipeline | Verified rules, compiler identity, and runtime and stylesheet hashes |
 | `@hraness/site-footer/compiler-foundation.css` | Supply the foundation when a consumer combines package rules | Empty foundation; all footer presentation comes from the manifest |
@@ -297,7 +297,7 @@ name “Hraness on LinkedIn.”
 ## Organization attribution
 
 Every footer attributes the site to the organization, never to a person. The
-Hraness home link is one organization-owned lockup at the start of the bar:
+Hraness home link is one organization-owned lockup at the start of the footer:
 the Ra mark followed by the text **by Hraness**, marked `lang="en" dir="ltr"`
 so it is independent of the signup locale, and keeping the accessible name
 “Hraness home.”
@@ -353,9 +353,19 @@ framework runtime. The React adapter declares `React >=18 <20` and begins with
 the required client-component directive.
 
 The stylesheet follows `--plain-*` or common product theme variables when
-present and falls back to system colors. The footer is sticky by default and reserves its own document footprint, so
-content is not obscured. Pass `placement="flow"` for a host that owns a full-height
-layout and wants normal document flow. The signup footer always uses one aligned row.
+present and falls back to system colors. The footer sits in normal document flow
+where you render it, usually right after `<main>`. Only a visible cookie note
+floats, in the bottom corner of the window. Wide screens show one row. Below `47.5rem`, a footer with a signup, account, or
+support control stacks the home link, those controls, and one row of social links;
+a footer with only the home link and social links keeps one row. The `placement`
+prop is deprecated and has no effect.
+
+To keep the footer at the bottom of the window on a short page, give the page a
+full-height column, for example `body { min-height: 100dvh; display: flex;
+flex-direction: column }` with `main { flex: 1 }`. To line the footer's content up
+with your page column, set `--hraness-site-footer-measure` on the footer (for
+example `72rem`); its top rule and background still span the full width.
+
 At every width, one stable “Get email updates” button opens the same signup form.
 React upgrades its native disclosure to a named `dialog` with synchronous email
 focus, browser focus containment, Escape/dismiss return focus, and a scrollable
@@ -370,7 +380,7 @@ keeps the accessible name “Hraness home.”
 
 The footer keeps matching top and bottom padding around its controls and adds
 the device's safe-area inset below that spacing. Its computed height includes
-both. Do not add another footer bar, viewport spacer, or blank padding after it in a
+both. Do not add another footer bar, spacer, or blank padding after it in a
 consumer layout. Product navigation belongs with the page navigation.
 
 The `stable-modal-v1` presentation never waits for a session check, feature flag,
@@ -431,6 +441,24 @@ pointer enhancement and reduced-motion/forced-color fallbacks. The email field
 is quiet and separately labelled. All styling is compiled through StyleX. Native
 modal custody may write only two numeric viewport custom properties and preserve
 and restore the document root's overflow; it never injects a stylesheet.
+
+Version 0.20.0 moves the footer into normal document flow. It is no longer fixed
+to the bottom of the window and no longer reserves room for a fixed bar, so it
+no longer covers page content. Phones get a stacked layout with 44px touch targets
+instead of one crowded row. The cookie note becomes a small notice in the bottom
+corner of the window that goes away when accepted. The `placement` prop is
+deprecated and has no effect, and `--hraness-site-footer-measure` can align the
+footer's content with the page column.
+
+To upgrade, update the pin to `v0.20.0`, then:
+
+- Render the footer after the page content, as before. Pages that did so need no
+  other change.
+- Remove any bottom padding, margin, or spacer added to clear the old fixed bar.
+- Remove overrides written for the fixed bar, such as translucent backgrounds,
+  `backdrop-filter`, or upward shadows on `.hraness-site-footer__inner`.
+- If a short page should keep its footer at the bottom of the window, use the
+  full-height column described under "Compatibility and layout".
 
 Version 0.18.0 gives the signup foil the header's metallic chrome and keeps
 compact cookie consent on its own row inside the footer. The cookie note mentions

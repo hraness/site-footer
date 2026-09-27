@@ -859,12 +859,12 @@
     padding-block-start: var(--hraness-site-footer-padding-block);
   }
 
-  .x1l962nu {
-    padding-inline-end: max(clamp(1rem,4vw,2rem),env(safe-area-inset-right),calc((100% - var(--hraness-site-footer-max-inline-size, 100%)) / 2));
+  .x1dyck8u {
+    padding-inline-end: max(clamp(1rem,4vw,2rem),env(safe-area-inset-right),calc((100% - var(--hraness-site-footer-measure, 100%)) / 2));
   }
 
-  .x1b42vfr {
-    padding-inline-start: max(clamp(1rem,4vw,2rem),env(safe-area-inset-left),calc((100% - var(--hraness-site-footer-max-inline-size, 100%)) / 2));
+  .xhvvu7z {
+    padding-inline-start: max(clamp(1rem,4vw,2rem),env(safe-area-inset-left),calc((100% - var(--hraness-site-footer-measure, 100%)) / 2));
   }
 
   .x10l6tqk {
