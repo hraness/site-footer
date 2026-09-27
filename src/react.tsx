@@ -18,11 +18,16 @@ import {
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_FORM_SLOT,
+  HRANESS_MAILING_PAGE_FIELD,
+  HRANESS_MAILING_PLACEMENT,
+  HRANESS_MAILING_PLACEMENT_FIELD,
   HRANESS_MAILING_SOURCE,
   HRANESS_MAILING_STATUS_SLOT,
   HRANESS_MAILING_SUBSCRIBE_URL,
   HRANESS_SUPPORT_ICON_HTML,
+  currentHranessPageUrl,
   parseHranessMailingListConfig,
+  parseHranessPageUrl,
   renderHranessSiteFooterInnerHtml,
   resolveHranessSocialLinks,
   resolveSupportLink,
@@ -73,6 +78,14 @@ export interface HranessSiteFooterProps {
    * order. Defaults remain the shared Hraness profiles.
    */
   readonly social?: HranessSocialConfig;
+  /**
+   * Absolute URL of the page being rendered, such as
+   * `https://hraness.com/valhalla`, so server-rendered and no-JavaScript
+   * signups send their page. Any query string or fragment is dropped. After
+   * hydration the form follows `location.origin + location.pathname` across
+   * client navigation, whether or not this is set.
+   */
+  readonly pageUrl?: string;
 }
 
 const IDLE_STATE = { kind: "idle" } as const satisfies HranessMailingListRenderState;
@@ -96,8 +109,10 @@ export function HranessSiteFooter({
   signIn = false,
   social: socialInput,
   support,
+  pageUrl: pageUrlInput,
 }: HranessSiteFooterProps) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const pageUrl = parseHranessPageUrl(pageUrlInput);
   const supportLink = resolveSupportLink(support);
   const mailingListKey = mailingList.kind === "signup" ? `signup:${mailingList.audience}` : mailingList.kind;
   const socialLinks = resolveHranessSocialLinks(socialInput);
@@ -129,6 +144,17 @@ export function HranessSiteFooter({
   const modalOpen = useRef(false);
   const closeModal = useRef<(reason: HranessFooterConversionReason) => void>(() => {});
   const openModal = useRef<() => void>(() => {});
+  // The browser location wins after hydration; the prop covers server renders.
+  const resolvePage = useRef<() => string | null>(() => null);
+  resolvePage.current = () => currentHranessPageUrl() ?? pageUrl ?? null;
+  const syncPage = useRef(() => {
+    const input = footer.current?.querySelector<HTMLInputElement>(`input[name="${HRANESS_MAILING_PAGE_FIELD}"]`);
+    if (!input) return null;
+    const page = resolvePage.current();
+    input.value = page ?? "";
+    input.disabled = page === null;
+    return page;
+  });
   const variant = DEFAULT_FOOTER_VARIANT;
   const socialKey = socialLinks.map((link) => `${link.platform}:${link.href}:${link.label}`).join("|");
   const renderState = activeStateFor(mailingList, state);
@@ -174,6 +200,19 @@ export function HranessSiteFooter({
     return () => { mounted.current = false; activeRequest.current?.abort(); attributionRequest.current?.abort(); exposureRequest.current?.abort(); markAttribution.current = () => null; };
   }, []);
   useLayoutEffect(() => { setMeasurable(true); }, []);
+  // Keep the native form's page current. Host layouts often persist across
+  // client navigation without re-rendering, so also follow history changes.
+  useLayoutEffect(() => { syncPage.current(); });
+  useEffect(() => {
+    const sync = () => { syncPage.current(); };
+    const navigation = (window as Window & { navigation?: EventTarget }).navigation;
+    window.addEventListener("popstate", sync);
+    navigation?.addEventListener?.("currententrychange", sync);
+    return () => {
+      window.removeEventListener("popstate", sync);
+      navigation?.removeEventListener?.("currententrychange", sync);
+    };
+  }, []);
   useEffect(() => {
     if (!interacted.current) setLocale(resolveFooterLocale(localeInput ?? navigator.languages));
   }, [typeof localeInput === "string" ? localeInput : localeInput?.join(",")]);
@@ -190,8 +229,10 @@ export function HranessSiteFooter({
 
   const handleSubmit = useCallback((event: FormEvent<HTMLElement>) => {
     const target = event.target;
-    if (!(target instanceof HTMLElement) || target.tagName !== "FORM" || target.dataset.slot !== HRANESS_MAILING_FORM_SLOT
-      || !mounted.current || mailingList.kind !== "signup" || activeKey.current !== mailingListKey
+    if (!(target instanceof HTMLElement) || target.tagName !== "FORM" || target.dataset.slot !== HRANESS_MAILING_FORM_SLOT) return;
+    // Refresh before any fallback so a native POST also carries the current page.
+    const page = syncPage.current();
+    if (!mounted.current || mailingList.kind !== "signup" || activeKey.current !== mailingListKey
       || typeof fetch !== "function" || typeof FormData !== "function" || typeof AbortController !== "function") return;
     const emailControl = target.querySelector<HTMLInputElement>('input[name="email"]');
     if (!emailControl) return;
@@ -206,6 +247,8 @@ export function HranessSiteFooter({
     body.set("email", email);
     body.set("source", HRANESS_MAILING_SOURCE);
     body.set("website", target.querySelector<HTMLInputElement>('input[name="website"]')?.value ?? "");
+    if (page !== null) body.set(HRANESS_MAILING_PAGE_FIELD, page);
+    body.set(HRANESS_MAILING_PLACEMENT_FIELD, HRANESS_MAILING_PLACEMENT);
     const token = markAttribution.current();
     if (token) body.set("experimentToken", token);
     const request = new AbortController();
@@ -238,8 +281,9 @@ export function HranessSiteFooter({
       mailingList,
       IDLE_STATE,
       socialLinks,
-      { locale, variant, sticky: placement === "sticky", signIn: signIn === true, ...(support === undefined ? {} : { support }) },
+      { locale, variant, sticky: placement === "sticky", signIn: signIn === true, ...(support === undefined ? {} : { support }), ...(pageUrl === undefined ? {} : { pageUrl }) },
     ),
+    // pageUrl is patched in place by syncPage so navigation never resets the form.
     // Support-only updates patch their own link below, preserving an active
     // native form, disclosure, focus, and in-flight request.
     [mailingListKey, showBrand, socialKey, presentationKey],

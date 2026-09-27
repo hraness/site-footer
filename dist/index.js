@@ -1844,6 +1844,10 @@ var HRANESS_MAILING_STATUS_SLOT = "hraness-mailing-list-status";
 var HRANESS_MAILING_SUBSCRIBE_URL = "https://account.hraness.com/api/mailing/subscribe";
 var HRANESS_ACCOUNT_URL = "https://account.hraness.com/";
 var HRANESS_MAILING_HONEYPOT_FIELD = "website";
+var HRANESS_MAILING_PAGE_FIELD = "page";
+var HRANESS_MAILING_PLACEMENT_FIELD = "placement";
+var HRANESS_MAILING_PLACEMENT = "footer";
+var HRANESS_MAX_PAGE_URL_LENGTH = 2048;
 var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
 var MAX_AUDIENCE_LENGTH = 24;
@@ -1928,6 +1932,29 @@ function parseHranessMailingListConfig(value) {
     throw new TypeError(`Hraness mailing-list product names must be plain names of at most ${MAX_PRODUCT_NAME_LENGTH} characters.`);
   }
   return value;
+}
+function normalizeHranessPageUrl(value) {
+  if (typeof value !== "string" || value.length === 0)
+    return null;
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:" || url.username !== "" || url.password !== "")
+    return null;
+  const page = `${url.origin}${url.pathname}`;
+  return page.length <= HRANESS_MAX_PAGE_URL_LENGTH ? page : null;
+}
+function parseHranessPageUrl(value) {
+  if (value === undefined)
+    return;
+  const page = normalizeHranessPageUrl(value);
+  if (page === null) {
+    throw new TypeError(`Hraness site footer pageUrl must be an absolute http(s) URL of at most ${HRANESS_MAX_PAGE_URL_LENGTH} characters without credentials.`);
+  }
+  return page;
 }
 function isHranessSocialPlatform(value) {
   return HRANESS_SOCIAL_PLATFORMS.includes(value);
@@ -2029,6 +2056,9 @@ var HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${foot
 function renderHranessSocialLinksHtml(socialLinks) {
   return `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${socialLinks.map((link, index) => `<li class="${socialItemClassName(index)}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
 }
+function renderPageInput(pageUrl) {
+  return pageUrl === undefined ? `<input name="${HRANESS_MAILING_PAGE_FIELD}" type="hidden" value="" disabled="">` : `<input name="${HRANESS_MAILING_PAGE_FIELD}" type="hidden" value="${escapeAttribute(pageUrl)}">`;
+}
 var MAILING_IDLE_STATE = {
   kind: "idle"
 };
@@ -2045,7 +2075,7 @@ function renderMailingList(mailingList, state, presentation) {
   const titleId = "hraness-mailing-dialog-title";
   const descriptionId = "hraness-mailing-dialog-description";
   const classes = disclosureClassNames("button");
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${renderPageInput(presentation.pageUrl)}<input name="${HRANESS_MAILING_PLACEMENT_FIELD}" type="hidden" value="${HRANESS_MAILING_PLACEMENT}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
 var HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your browser remembers your appearance setting and this choice. None of it is used for advertising or cross-site tracking.";
 var HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. None of it is used for advertising or cross-site tracking.";
@@ -2083,9 +2113,11 @@ function renderHranessSiteFooter({
   showBrand = true,
   signIn = false,
   social: socialInput,
-  support
+  support,
+  pageUrl: pageUrlInput
 }) {
   const mailingList = parseHranessMailingListConfig(mailingListInput);
+  const pageUrl = parseHranessPageUrl(pageUrlInput);
   variant = parseFooterVariant(variant);
   const socialLinks = resolveHranessSocialLinks(socialInput);
   return `<footer aria-label="${HRANESS_FOOTER_LABEL}" class="${footerClassName(mailingList.kind === "signup", placement === "sticky")}" data-brand="${showBrand ? "visible" : "hidden"}" data-mailing-list="${mailingList.kind}" data-slot="${HRANESS_FOOTER_SLOT}" id="${HRANESS_FOOTER_SLOT}">${renderHranessSiteFooterInnerHtml(showBrand, mailingList, undefined, socialLinks, {
@@ -2095,6 +2127,9 @@ function renderHranessSiteFooter({
     signIn: signIn === true,
     ...support === undefined ? {} : {
       support
+    },
+    ...pageUrl === undefined ? {} : {
+      pageUrl
     }
   })}</footer>`;
 }
@@ -2109,4 +2144,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=0BF16262DC7951EE64756E2164756E21
+//# debugId=DD44E163BFE4657764756E2164756E21

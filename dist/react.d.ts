@@ -35,9 +35,17 @@ export interface HranessSiteFooterProps {
      * order. Defaults remain the shared Hraness profiles.
      */
     readonly social?: HranessSocialConfig;
+    /**
+     * Absolute URL of the page being rendered, such as
+     * `https://hraness.com/valhalla`, so server-rendered and no-JavaScript
+     * signups send their page. Any query string or fragment is dropped. After
+     * hydration the form follows `location.origin + location.pathname` across
+     * client navigation, whether or not this is set.
+     */
+    readonly pageUrl?: string;
 }
 /** Progressively enhance the canonical native mailing-list form when JavaScript is available. */
-export declare function HranessSiteFooter({ locale: localeInput, onConversion, attribution: attributionRequested, placement, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
+export declare function HranessSiteFooter({ locale: localeInput, onConversion, attribution: attributionRequested, placement, mailingList: mailingListInput, showBrand, signIn, social: socialInput, support, pageUrl: pageUrlInput, }: HranessSiteFooterProps): import("react").DetailedReactHTMLElement<{
     "aria-label": string;
     className: string;
     "data-brand": string;
