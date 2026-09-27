@@ -1916,28 +1916,21 @@ function referrerHost() {
     return null;
   }
 }
-function reportSiteVisit() {
+function telemetryAllowed() {
   if (typeof window === "undefined" || typeof fetch !== "function" || typeof window.location?.hostname !== "string" || typeof navigator === "undefined")
-    return;
+    return false;
   try {
     const browser = navigator;
     if (browser.webdriver === true || browser.doNotTrack === "1" || browser.globalPrivacyControl === true)
-      return;
+      return false;
   } catch {
-    return;
+    return false;
   }
-  const token = dailyVisitToken();
-  if (token === null)
-    return;
-  const referrer = referrerHost();
+  return true;
+}
+function postSignal(payload) {
   fetch(HRANESS_TELEMETRY_VISIT_URL, {
-    body: JSON.stringify({
-      ...referrer === null ? {} : {
-        referrer
-      },
-      token,
-      v: 1
-    }),
+    body: JSON.stringify(payload),
     credentials: "omit",
     headers: {
       "content-type": "application/json"
@@ -1946,6 +1939,149 @@ function reportSiteVisit() {
     method: "POST",
     mode: "cors"
   }).catch(() => {});
+}
+function reportSiteVisit() {
+  if (!telemetryAllowed())
+    return;
+  const token = dailyVisitToken();
+  if (token === null)
+    return;
+  const referrer = referrerHost();
+  postSignal({
+    ...referrer === null ? {} : {
+      referrer
+    },
+    token,
+    v: 1
+  });
+}
+function errorDigest(message, source) {
+  let hash = 2166136261;
+  const text = `${message}${source}`;
+  for (let index = 0;index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0") + "00000000".slice(8);
+}
+var DWELL_BUCKETS = [1e4, 60000, 300000];
+function vitalBucket(name, value) {
+  if (name === "lcp")
+    return value <= 2500 ? "good" : value <= 4000 ? "needs-improvement" : "poor";
+  if (name === "cls")
+    return value <= 0.1 ? "good" : value <= 0.25 ? "needs-improvement" : "poor";
+  return value <= 200 ? "good" : value <= 500 ? "needs-improvement" : "poor";
+}
+function dwellBucket(elapsed) {
+  return elapsed < DWELL_BUCKETS[0] ? "lt10s" : elapsed < DWELL_BUCKETS[1] ? "lt60s" : elapsed < DWELL_BUCKETS[2] ? "lt300s" : "gte300s";
+}
+function scrollBucket() {
+  try {
+    const doc = document.documentElement;
+    const total = doc.scrollHeight - window.innerHeight;
+    if (total <= 0)
+      return "p100";
+    const ratio = Math.min(1, Math.max(0, window.scrollY / total));
+    return ratio >= 0.99 ? "p100" : ratio >= 0.75 ? "p75" : ratio >= 0.5 ? "p50" : ratio >= 0.25 ? "p25" : "p0";
+  } catch {
+    return "p0";
+  }
+}
+function initSiteSignals() {
+  if (!telemetryAllowed())
+    return;
+  const token = dailyVisitToken();
+  if (token === null)
+    return;
+  const view = crypto.randomUUID().replaceAll("-", "");
+  const started = Date.now();
+  const onFault = (message, source) => {
+    if (message.length === 0)
+      return;
+    postSignal({
+      digest: errorDigest(message.slice(0, 240), source.slice(0, 120)),
+      kind: "error",
+      token,
+      v: 1
+    });
+  };
+  window.addEventListener("error", (event) => {
+    onFault(typeof event.message === "string" ? event.message : "", typeof event.filename === "string" ? event.filename : "");
+  }, true);
+  window.addEventListener("unhandledrejection", (event) => {
+    const reason = event.reason;
+    onFault(reason instanceof Error ? reason.name : "", "");
+  });
+  const vitals = new Map;
+  let clsValue = 0;
+  try {
+    new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      const last = entries[entries.length - 1];
+      if (last !== undefined) {
+        vitals.set("lcp", vitalBucket("lcp", last.startTime));
+      }
+    }).observe({
+      buffered: true,
+      type: "largest-contentful-paint"
+    });
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        const shift = entry;
+        if (shift.hadRecentInput !== true)
+          clsValue += shift.value ?? 0;
+      }
+      vitals.set("cls", vitalBucket("cls", clsValue));
+    }).observe({
+      buffered: true,
+      type: "layout-shift"
+    });
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        const timing = entry;
+        vitals.set("inp", vitalBucket("inp", timing.duration));
+      }
+    }).observe({
+      buffered: true,
+      durationThreshold: 40,
+      type: "event"
+    });
+  } catch {}
+  let sent = false;
+  const finish = () => {
+    if (sent || document.visibilityState !== "hidden")
+      return;
+    sent = true;
+    if (vitals.size > 0) {
+      postSignal({
+        kind: "vitals",
+        token,
+        v: 1,
+        ...vitals.has("cls") ? {
+          cls: vitals.get("cls")
+        } : {},
+        ...vitals.has("inp") ? {
+          inp: vitals.get("inp")
+        } : {},
+        ...vitals.has("lcp") ? {
+          lcp: vitals.get("lcp")
+        } : {}
+      });
+    }
+    postSignal({
+      dwell: dwellBucket(Date.now() - started),
+      kind: "engage",
+      scroll: scrollBucket(),
+      token,
+      v: 1,
+      view
+    });
+  };
+  window.addEventListener("pagehide", finish);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden")
+      finish();
+  });
 }
 
 // src/experiment.ts
@@ -2519,6 +2655,7 @@ function HranessSiteFooter({
   useLayoutEffect(() => {
     mounted.current = true;
     reportSiteVisit();
+    initSiteSignals();
     return () => {
       mounted.current = false;
       activeRequest.current?.abort();
@@ -3122,4 +3259,4 @@ export {
   HranessSiteFooter
 };
 
-//# debugId=9CBD8E1D0A77FDA764756E2164756E21
+//# debugId=163CCE7D4493703364756E2164756E21
