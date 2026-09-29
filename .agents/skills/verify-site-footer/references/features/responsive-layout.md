@@ -7,6 +7,7 @@
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
 - One row at wide widths; compact footers with a signup, account, or support control stack those controls above one social row. Compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
+- Metallic mark paint in every context: the fixed Ra silhouette retains its inline vector fallback beneath a decorative gradient and data-URL alpha mask.
 - Organization-owned home link in every context: the Ra mark followed by the exact “by Hraness” lockup text in one `lang="en"` link, the accessible name “Hraness home,” and a control-sized target; no standalone attribution block remains.
 - Matching top and bottom visual padding, with the device safe-area inset added below it.
 - Rendered control and link clearances matching the computed padding; footer height includes both clearances.

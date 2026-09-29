@@ -28,7 +28,7 @@ test("account state is a localized native link without any signup presentation",
     expect(locale.accountLabel.trim().length).toBeGreaterThan(0);
     expect(link.getAttribute("dir")).toBe(locale.dir);
     expect(link.getAttribute("lang")).toBe(locale.locale);
-    expect(document.querySelector('form, input, [data-foil], [data-copy-variant], [data-layout], [data-shimmer]')).toBeNull();
+    expect(document.querySelector('form, input, [data-foil]:not(.hraness-site-footer__mark-root), [data-copy-variant], [data-layout], [data-shimmer]')).toBeNull();
     expect(document.querySelectorAll('nav[aria-label="Hraness links"] a')).toHaveLength(4);
   }
   expect(FOOTER_LOCALES.en?.accountLabel).toBe("My account");

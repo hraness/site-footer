@@ -144,10 +144,13 @@ function props(...styles) {
 var env = Object.freeze({});
 
 // src/footer.stylex.ts
+var raMarkPaths = '<path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle>';
 var holographicSurface = "var(--hraness-site-footer-holo-surface, var(--hraness-foil-surface, var(--hraness-site-footer-background)))";
 var metal = (amount) => `color-mix(in oklch, var(--hraness-site-footer-foreground, CanvasText) ${amount}%, var(--hraness-site-footer-background, Canvas))`;
 var reflection = (index) => `color-mix(in oklch, var(--_hraness-foil-${index}) var(--hraness-foil-reflection, 14%), transparent)`;
 var holographicBackgroundImage = [`linear-gradient(${holographicSurface}, ${holographicSurface})`, "radial-gradient(ellipse 28% 100% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), color-mix(in srgb, white calc(60% + var(--hraness-foil-glow, 0) * 24%), transparent) 0%, transparent 72%)", "radial-gradient(ellipse 80% 180% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), color-mix(in srgb, white 28%, transparent) 0%, transparent 78%)", `linear-gradient(115deg, ${[1, 2, 3, 4, 5, 6].map(reflection).join(", ")})`, `linear-gradient(115deg, ${metal(90)} 0%, ${metal(100)} 24%, ${metal(86)} 39%, ${metal(100)} 56%, ${metal(84)} 82%, ${metal(100)} 100%)`].join(", ");
+var metallicMarkImage = [`radial-gradient(ellipse 24% 85% at var(--hraness-foil-x, 50%) var(--hraness-foil-y, 50%), ${metal(80)} 0%, transparent 68%)`, `radial-gradient(ellipse 65% 160% at calc(100% - var(--hraness-foil-x, 50%)) calc(100% - var(--hraness-foil-y, 50%)), ${metal(98)} 0%, transparent 72%)`, `linear-gradient(115deg, ${[1, 2, 3, 4, 5, 6].map(reflection).join(", ")})`, `linear-gradient(115deg, ${metal(90)} 0%, ${metal(100)} 24%, ${metal(86)} 39%, ${metal(100)} 56%, ${metal(84)} 82%, ${metal(100)} 100%)`].join(", ");
+var raMarkMask = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">${raMarkPaths}</svg>')`;
 var styles = {
   root: {
     "--hraness-site-footer-foreground": "x1ktp55a",
@@ -578,6 +581,35 @@ var styles = {
   mark: {
     kULEZF: "xif76xs",
     kLWsYc: "x1wugil3",
+    k1xSpc: "x1lliihq",
+    $$css: true
+  },
+  markRoot: {
+    kVAEAm: "x1n2onr6",
+    k1xSpc: "x3nfvp2",
+    kULEZF: "xif76xs",
+    kLWsYc: "x1wugil3",
+    kLWn49: "x14ju556",
+    $$css: true
+  },
+  markPaint: {
+    "--_hraness-foil-1": "x35j2r9 x1dscx4y",
+    "--_hraness-foil-2": "xmntjkq x14xjb22",
+    "--_hraness-foil-3": "x1xbl91z x1iiaa4z",
+    "--_hraness-foil-4": "x47qxf1 x1n6b76k",
+    "--_hraness-foil-5": "x13hwd88 x1z0t8xj",
+    "--_hraness-foil-6": "xx7v8hi x1bbyikp",
+    k1xSpc: "xq2h55",
+    "--_hraness-footer-mark-display": "x1lhcm7p xr9ynje x1apl0kd",
+    kVAEAm: "x10l6tqk",
+    kpwlN0: "x10a8y8t",
+    kfzvcC: "x47corl",
+    kKwaWg: "xyowimg",
+    kX1K2I: "xi9drc3",
+    knW2Df: "x5e4rk6",
+    kJcbqH: "x16fucec",
+    k2A1W4: "x1rudrqi",
+    kn1fP1: "x2k2kcx",
     $$css: true
   },
   links: {
@@ -880,6 +912,8 @@ var footerClasses = {
   shimmer: className("hraness-site-footer__shimmer", styles.shimmer),
   brand: className("hraness-site-footer__brand", styles.flexCenter, styles.fixedFlex, styles.brand, styles.focus, styles.motion),
   brandName: className("hraness-site-footer__brand-name", styles.brandName),
+  markRoot: className("hraness-site-footer__mark-root", styles.fixedFlex, styles.markRoot),
+  markPaint: className("hraness-site-footer__mark-paint", styles.markPaint),
   mark: className("hraness-site-footer__mark", styles.fixedFlex, styles.mark),
   links: className("hraness-site-footer__links", styles.flexCenter, styles.links),
   socials: className("hraness-site-footer__socials", styles.socials),
@@ -2072,7 +2106,7 @@ function renderSocialIcon(platform) {
 }
 var SUPPORT_ICON = CircleQuestionMarkIcon;
 var HRANESS_SUPPORT_ICON_HTML = `<svg aria-hidden="true" class="${footerClasses.supportIcon}" data-slot="hraness-support-icon" fill="none" focusable="false" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${renderIconPaths(SUPPORT_ICON)}</svg>`;
-var RA_MARK = `<svg aria-hidden="true" class="${footerClasses.mark}" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M372 141a116 116 0 1 1-232 0 116 116 0 1 1 232 0Zm-14 0a102 102 0 1 0-204 0 102 102 0 1 0 204 0Zm-8 0a94 94 0 1 1-188 0 94 94 0 1 1 188 0Z" fill="currentColor" fill-rule="evenodd"></path><path d="M211 252c75-8 154 30 204 94 32 40 51 89 59 142H184c20-28 29-57 22-87-9-39-26-71-28-99-2-22 9-39 33-50Z" fill="currentColor"></path><path d="M246 270c-27-20-67-23-100-9-25 11-42 31-46 56l-34 20 38 12c4 25 14 47 31 66 15 13 22 32 18 56l-14 17h116c-20-27-23-50-8-68 6-8 14-14 23-21 23-20 34-50 28-79-5-22-23-40-52-50ZM132 309c9-14 22-22 38-22 13 0 25 7 34 19-10 14-23 22-39 22-14 0-25-6-33-19Z" fill="currentColor" fill-rule="evenodd"></path><path d="M151 410c-2 30-16 57-43 78h197c-19-27-40-49-63-63-28-18-59-23-91-15Z" fill="currentColor"></path><circle cx="166" cy="307" fill="currentColor" r="8"></circle></svg>`;
+var RA_MARK = `<span aria-hidden="true" class="${footerClasses.markRoot}" data-foil=""><svg class="${footerClasses.mark}" data-slot="hraness-mark" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">${raMarkPaths}</svg><span class="${footerClasses.markPaint}" data-slot="hraness-mark-paint"></span></span>`;
 var HRANESS_SITE_FOOTER_BRAND_HTML = `<a aria-label="Hraness home" class="${footerClasses.brand}" href="https://hraness.com/" lang="en" dir="ltr">${RA_MARK}<span class="${footerClasses.brandName}">by Hraness</span></a>`;
 function renderHranessSocialLinksHtml(socialLinks) {
   return `<nav aria-label="Hraness links" class="${footerClasses.links}"><ul class="${footerClasses.socials}">${socialLinks.map((link, index) => `<li class="${socialItemClassName(index)}"><a aria-label="${escapeAttribute(link.label)}" class="${footerClasses.socialLink}" href="${escapeAttribute(link.href)}" rel="me" title="${escapeAttribute(link.title)}">${renderSocialIcon(link.platform)}</a></li>`).join("")}</ul></nav>`;
@@ -2165,4 +2199,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=4D7DD848E44C538A64756E2164756E21
+//# debugId=B5E1877FC7EA68EB64756E2164756E21

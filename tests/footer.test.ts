@@ -360,7 +360,7 @@ describe("Hraness site footer", () => {
     })).toThrow("specific accessible names");
   });
 
-  test("uses the exact raw Ra mark without image or mask dependencies", () => {
+  test("keeps the exact Ra vector fallback beneath decorative metallic paint", () => {
     const html = renderHranessSiteFooter({ mailingList: noMailingList });
     const { document } = parseHTML(html);
     const mark = document.querySelector('svg[data-slot="hraness-mark"]');
@@ -373,6 +373,9 @@ describe("Hraness site footer", () => {
     expect(mark?.getAttribute("viewBox")).toBe("0 0 512 512");
     expect(mark?.querySelectorAll("path")).toHaveLength(4);
     expect(mark?.querySelectorAll("circle")).toHaveLength(1);
+    expect(mark?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    expect(mark?.parentElement?.hasAttribute("data-foil")).toBe(true);
+    expect(mark?.parentElement?.querySelector('[data-slot="hraness-mark-paint"]')).not.toBeNull();
     expect(document.querySelector("img")).toBeNull();
     expect(document.querySelector("mask")).toBeNull();
     expect(html).not.toContain("0thernet");
