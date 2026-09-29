@@ -364,7 +364,10 @@ To keep the footer at the bottom of the window on a short page, give the page a
 full-height column, for example `body { min-height: 100dvh; display: flex;
 flex-direction: column }` with `main { flex: 1 }`. To line the footer's content up
 with your page column, set `--hraness-site-footer-measure` on the footer (for
-example `72rem`); its top rule and background still span the full width.
+example `72rem`); its top rule and background still span the full width. When a
+product keeps its own marketing footer from `@hraness/design-kit`, mount this
+footer directly after it: the marketing grammar joins the two landmarks into one
+band and binds the measure itself.
 
 At every width, one stable “Get email updates” button opens the same signup form.
 React upgrades its native disclosure to a named `dialog` with synchronous email
