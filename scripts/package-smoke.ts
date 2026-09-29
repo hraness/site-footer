@@ -105,7 +105,10 @@ if (
 const accountHtml = root.renderHranessSiteFooter?.({ mailingList: { kind: "account" } });
 assert.ok(accountHtml?.includes('href="https://account.hraness.com/"'));
 assert.ok(accountHtml?.includes('>My account</a>'));
-assert.ok(!/data-foil|<form|experimentToken|data-copy-variant/u.test(accountHtml ?? ""));
+assert.ok(!/<form|experimentToken|data-copy-variant/u.test(accountHtml ?? ""));
+const accountFoil = accountHtml?.match(/<[^>]*data-foil[^>]*>/gu) ?? [];
+assert.equal(accountFoil.length, 1);
+assert.ok(accountFoil[0]?.includes('class="hraness-site-footer__mark-root '));
 
 const aichartsHtml = root.renderHranessSiteFooter?.({
   mailingList: { kind: "none" },
@@ -201,7 +204,9 @@ try {
     const { renderHranessSiteFooter } = await import(${JSON.stringify(pathToFileURL(resolve(packed, "dist/index.js")).href)});
     const html = renderHranessSiteFooter({mailingList:{kind:"none"}});
     const account = renderHranessSiteFooter({mailingList:{kind:"account"}});
-    if (!account.includes('>My account</a>') || /data-foil|<form|experimentToken/.test(account)) throw new Error("Detached account render failed");
+    if (!account.includes('>My account</a>') || /<form|experimentToken|data-copy-variant/.test(account)) throw new Error("Detached account render failed");
+    const accountFoil = account.match(/<[^>]*data-foil[^>]*>/g) ?? [];
+    if (accountFoil.length !== 1 || !accountFoil[0].includes('class="hraness-site-footer__mark-root ')) throw new Error("Detached account foil escaped its decorative mark");
     if (!html.includes('class="hraness-site-footer x') || !html.includes('Hraness on Substack')) throw new Error("Detached root render failed");
   `], consumer);
   const cssBuild = await Bun.build({ entrypoints: [resolve(packed, "styles.css")], target: "browser" });

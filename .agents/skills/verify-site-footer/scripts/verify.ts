@@ -1114,6 +1114,15 @@ const BRAND_STATEMENTS = `
   const brandLink = document.querySelector(".hraness-site-footer__brand");
   const brandMark = brandLink?.querySelector('svg[data-slot="hraness-mark"]');
   const brandName = brandLink?.querySelector(".hraness-site-footer__brand-name");
+  const markPaint = brandLink?.querySelector('[data-slot="hraness-mark-paint"]');
+  if (!(markPaint instanceof HTMLElement)) throw new Error("Footer brand lost its metallic paint.");
+  const markStyle = getComputedStyle(markPaint);
+  const markRect = markPaint.getBoundingClientRect();
+  if (!matchMedia('(forced-colors: active)').matches && CSS.supports('mask-image', 'linear-gradient(black, black)') &&
+      (markStyle.display === 'none' || !markStyle.backgroundImage.includes('gradient') || !markStyle.maskImage.includes('data:image/svg+xml') || markRect.width < 20 || markRect.height < 20)) {
+    throw new Error("Footer metallic paint lost its exact-alpha mask or fixed footprint.");
+  }
+
   if (
     !(brandLink instanceof HTMLAnchorElement) || !(brandMark instanceof SVGElement) || !(brandName instanceof HTMLElement)
     || brandLink.href !== "https://hraness.com/"
@@ -1875,7 +1884,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
       const links = [...footer.querySelectorAll('a')]
         .filter(link => link.closest('[data-slot="hraness-cookie-consent"]') === null);
       if (links.length !== ${account ? 7 : 6} || brand.textContent !== 'by Hraness') throw new Error('Unexpected footer identity or social count.');
-      if (footer.querySelector('form, input, script, [data-foil], [data-copy-variant], .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
+      if (footer.querySelector('form, input, script, [data-foil]:not(.hraness-site-footer__mark-root), [data-copy-variant], .hraness-site-footer__mailing-status')) throw new Error('No-signup footer contains mailing UI.');
       const state = window.__siteFooterFixture.snapshot();
       if (state.requests.length || state.errors.length || window.__siteFooterFixture.experimentSnapshot().length) throw new Error('No-signup footer used a signup or experiment boundary.');
       const account = footer.querySelector('[data-slot="hraness-account-link"]');

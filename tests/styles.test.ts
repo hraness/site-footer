@@ -37,9 +37,18 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(false, true, "green", true), 'grid-template-areas:"brand mailing . links"');
     expect(cssFor(footerInnerClassName(false, true, "green", true))).not.toContain("#166534");
   });
+  test("metallic mark retains alpha masking and native forced-color fallback", () => {
+    const css = cssFor(footerClasses.markPaint);
+    expect(css).toContain("mask-mode:alpha");
+    expect(css).toContain("data:image/svg+xml");
+    expect(css).toContain("@media(forced-colors:active)");
+    expect(css).toContain("--_hraness-footer-mark-display:none");
+    expect(css).toContain("pointer-events:none");
+  });
+
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.20.0");
+    expect(pkg.version).toBe("0.20.1");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });

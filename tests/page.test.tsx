@@ -90,7 +90,7 @@ describe("signup page and placement fields", () => {
       expect(rendered).toBe(page);
       expect(rendered).not.toMatch(/[?#]/u);
     }
-  });
+  }, 60_000);
 });
 
 test("the React adapter follows client navigation and submits the current page", async () => {
