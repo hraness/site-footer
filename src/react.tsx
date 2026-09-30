@@ -2,7 +2,7 @@
 import type { SupportProfile } from "./internal.js";
 
 import { attachFooterFoil } from "./foil.js";
-import { acceptCookieConsent, observeCookieConsent } from "./consent.js";
+import { acceptCookieConsent, initHranessCookieConsent, observeCookieConsent } from "./consent.js";
 import { footerClassName, footerClasses, footerInnerClassName, mailingStatusClassName } from "./footer.stylex.js";
 import { footerCopyLabel, footerCopyProductName, resolveFooterLocale, stableFooterMessages } from "./locales.js";
 import { initSiteSignals, reportSiteVisit } from "./telemetry.js";
@@ -27,6 +27,7 @@ import {
   currentHranessPageUrl,
   parseHranessMailingListConfig,
   parseHranessPageUrl,
+  renderConsentHtml,
   renderHranessSiteFooterInnerHtml,
   resolveHranessSocialLinks,
   resolveSupportLink,
@@ -44,6 +45,24 @@ import {
   useState,
   type FormEvent,
 } from "react";
+
+export interface HranessCookieConsentProps {
+  /** Include the essential sign-in cookie explanation only on sites that use it. */
+  readonly signIn?: boolean;
+}
+
+/** The shared consent note for focused app routes that omit the site footer. */
+export function HranessCookieConsent({ signIn = false }: HranessCookieConsentProps = {}) {
+  const root = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    return root.current === null ? undefined : initHranessCookieConsent(root.current);
+  }, [signIn]);
+  return createElement("div", {
+    ref: root,
+    className: footerClasses.consentRoot,
+    dangerouslySetInnerHTML: { __html: renderConsentHtml(signIn) },
+  });
+}
 
 export interface HranessSiteFooterProps {
   /** Explicit Accounts product identity. Omit to render no paid-support control. */
