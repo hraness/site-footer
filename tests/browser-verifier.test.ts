@@ -46,6 +46,8 @@ describe("site-footer browser verifier", () => {
     expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Close email signup" [expanded=true]' }, true, "Close email signup")).not.toThrow();
     expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Feed the goblin" [expanded=true]\n- button "Close email signup"' }, true, "Close email signup")).toThrow();
     expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Close email signup" [expanded=false]' }, true, "Close email signup")).toThrow();
+    expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Get email updates" [expanded=false]\n- DisclosureTriangle "Analytics preferences" [expanded=false]' }, false, "Get email updates")).not.toThrow();
+    expect(() => assertDisclosureSnapshot({ snapshot: '- DisclosureTriangle "Get email updates" [expanded=false]\n- DisclosureTriangle "Get email updates" [expanded=false]' }, false, "Get email updates")).toThrow();
   });
   test("requires independent child palettes and inherited language on the real control samples", () => {
     const inherited = { language: '"TRK"', palette: "light" };

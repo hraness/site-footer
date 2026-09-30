@@ -76,8 +76,8 @@ export const HRANESS_MAILING_PLACEMENT_FIELD = "placement";
 export const HRANESS_MAILING_PLACEMENT = "footer";
 /** Accounts stores at most 2,048 bytes of signup URL; longer pages send none. */
 export const HRANESS_MAX_PAGE_URL_LENGTH = 2048;
-import { HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT } from "./consent.js";
-export { HRANESS_CONSENT_REGION_URL, HRANESS_CONSENT_STORAGE_KEY, HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT } from "./consent.js";
+import { HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT, HRANESS_CONSENT_DECLINE_SLOT } from "./consent.js";
+export { HRANESS_CONSENT_REGION_URL, HRANESS_CONSENT_STORAGE_KEY, HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT, HRANESS_CONSENT_DECLINE_SLOT } from "./consent.js";
 
 const MAX_AUDIENCE_LENGTH = 24;
 const MAX_PRODUCT_NAME_LENGTH = 48;
@@ -490,7 +490,7 @@ const HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your bro
 const HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
 
 export function renderConsentHtml(signIn: boolean): string {
-  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" class="${footerClasses.consentLearn}">${HRANESS_SUPPORT_ICON_HTML}</summary><span class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-consent-prompt="" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" data-notice="required" class="${footerClasses.consentLearn}"><span class="${footerClasses.consentLabel}" data-consent-icon="">${HRANESS_SUPPORT_ICON_HTML}</span><span class="${footerClasses.consentLabel}" data-consent-label="" hidden="">Analytics preferences</span></summary><div class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} You can change your analytics choice here at any time. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a><div class="${footerClasses.consentActions}"><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept analytics</button><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_DECLINE_SLOT}" type="button">Decline analytics</button></div></div></details></div>`;
 }
 
 export function resolveSupportLink(profile: SupportProfile | undefined) {

@@ -6,7 +6,7 @@ import { HRANESS_CONSENT_STORAGE_KEY, initHranessCookieConsent } from "../../dis
 const scenario = process.argv[2];
 const { document, Event: DomEvent } = parseHTML(renderHranessSiteFooter({ mailingList: { kind: "none" } }));
 const browser = new EventTarget();
-let stored: string | null = scenario === "stored" || scenario === "storage-change" ? "accepted" : null;
+let stored: string | null = scenario === "stored" || scenario === "storage-change" ? "accepted" : scenario === "declined" ? "declined" : null;
 Object.defineProperty(browser, "localStorage", { value: {
   getItem: (key: string) => { assert.equal(key, HRANESS_CONSENT_STORAGE_KEY); if (scenario === "blocked-storage") throw new Error("storage disabled"); return stored; },
   setItem: (key: string, value: string) => { assert.equal(key, HRANESS_CONSENT_STORAGE_KEY); if (scenario === "blocked-storage") throw new Error("storage disabled"); stored = value; },
@@ -27,8 +27,13 @@ globalThis.fetch = (async (url: RequestInfo | URL, options?: RequestInit) => {
   return Response.json(scenario === "malformed" ? { required: "false" } : { required: scenario !== "permitted" });
 }) as typeof fetch;
 const note = document.querySelector('[data-slot="hraness-cookie-consent"]')!;
-const button = note.querySelector('button')!;
+const button = note.querySelector('[data-consent-prompt]')!;
+const summary = note.querySelector('summary')!;
+const decline = note.querySelector('[data-slot="hraness-cookie-consent-decline"]')!;
+const mode = () => note.getAttribute('data-consent-state');
 let acceptedEvents = 0;
+let declinedEvents = 0;
+browser.addEventListener("hraness-consent-declined", () => { declinedEvents += 1; });
 browser.addEventListener("hraness-consent-accepted", () => { acceptedEvents += 1; });
 const cleanup = initHranessCookieConsent(document as unknown as Document);
 const flush = async () => { for (let i = 0; i < 10; i += 1) await Promise.resolve(); };
@@ -46,7 +51,8 @@ try {
     resolveRegion!(Response.json({ required: true }));
     await flush();
     assert.equal(acceptedEvents, 1);
-    assert.equal(note.hasAttribute("hidden"), true);
+    assert.equal(note.hasAttribute("hidden"), false);
+    assert.equal(mode(), "clear");
   } else if (scenario === "storage-change") {
     assert.equal(calls, 0);
     stored = "refused";
@@ -56,16 +62,28 @@ try {
     assert.equal(note.hasAttribute("hidden"), false);
   } else {
     await flush();
-    assert.equal(note.hasAttribute("hidden"), scenario === "stored" || scenario === "permitted");
-    assert.equal(calls, scenario === "stored" ? 0 : 1);
+    assert.equal(note.hasAttribute("hidden"), false);
+    assert.equal(mode(), scenario === "stored" || scenario === "permitted" ? "clear" : scenario === "declined" ? "declined" : "required");
+    assert.equal(calls, scenario === "stored" || scenario === "declined" ? 0 : 1);
     if (scenario === "required" || scenario === "blocked-storage") {
       button.dispatchEvent(new DomEvent("click", { bubbles: true }));
       assert.equal(acceptedEvents, 1);
-      assert.equal(note.hasAttribute("hidden"), true);
+      assert.equal(note.hasAttribute("hidden"), false);
+      assert.equal(summary.getAttribute("aria-label"), "Analytics preferences");
+      assert.equal(button.hasAttribute("hidden"), true);
       assert.equal(stored, scenario === "blocked-storage" ? null : "accepted");
+      note.querySelector('details')!.setAttribute('open', '');
+      decline.dispatchEvent(new DomEvent('click', { bubbles: true }));
+      assert.equal(declinedEvents, 1);
+      assert.equal(mode(), 'declined');
+      assert.equal(stored, scenario === 'blocked-storage' ? null : 'declined');
+      assert.equal(note.querySelector('details')!.hasAttribute('open'), false);
+      button.dispatchEvent(new DomEvent('click', { bubbles: true }));
+      assert.equal(mode(), 'clear');
+      assert.equal(acceptedEvents, 2);
       cleanup();
       button.dispatchEvent(new DomEvent("click", { bubbles: true }));
-      assert.equal(acceptedEvents, 1);
+      assert.equal(acceptedEvents, 2);
     }
   }
 } finally { cleanup(); globalThis.fetch = originalFetch; }

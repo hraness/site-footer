@@ -2,7 +2,7 @@
 import type { SupportProfile } from "./internal.js";
 
 import { attachFooterFoil } from "./foil.js";
-import { acceptCookieConsent, initHranessCookieConsent, observeCookieConsent } from "./consent.js";
+import { chooseCookieConsent, initHranessCookieConsent, observeCookieConsent, updateCookieConsent, type CookieConsentState } from "./consent.js";
 import { footerClassName, footerClasses, footerInnerClassName, mailingStatusClassName } from "./footer.stylex.js";
 import { footerCopyLabel, footerCopyProductName, resolveFooterLocale, stableFooterMessages } from "./locales.js";
 import { initSiteSignals, reportSiteVisit } from "./telemetry.js";
@@ -12,7 +12,6 @@ import type { HranessFooterConversionEvent, HranessFooterConversionStage, Hranes
 export type { HranessFooterConversionEvent, HranessFooterConversionStage, HranessFooterConversionReason } from "./internal.js";
 
 import {
-  HRANESS_CONSENT_ACCEPT_SLOT,
   HRANESS_CONSENT_SLOT,
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
@@ -140,15 +139,14 @@ export function HranessSiteFooter({
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
   // "checking" until stored acceptance or the region lookup settles; only "clear" permits default measurement.
-  const [consent, setConsent] = useState<"checking" | "required" | "clear">("checking");
-  const consentPending = consent === "required";
+  const [consent, setConsent] = useState<CookieConsentState>("checking");
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   // Server renders and first hydration never measure; eligibility needs the browser.
   const [measurable, setMeasurable] = useState(false);
   const [copyUnavailable, setCopyUnavailable] = useState(false);
   const storedCopyArm = useRef<FooterCopyArm | null>(null);
-  // An explicit choice is the host's; the default measures only eligible browsers.
-  const attribution = measurable && (attributionRequested ?? (consent === "clear" && footerMeasurementEligible()));
+  // Hosts may disable measurement; enabling it never overrides a visitor's choice.
+  const attribution = measurable && consent === "clear" && (attributionRequested ?? footerMeasurementEligible());
   const activeRequest = useRef<AbortController | null>(null);
   const attributionContext = useRef({ key: mailingListKey, enabled: attribution, locale: locale.locale });
   const attributionRequest = useRef<AbortController | null>(null);
@@ -593,14 +591,10 @@ export function HranessSiteFooter({
 
   useEffect(() => observeCookieConsent(setConsent), []);
 
-  // The dangerouslySetInnerHTML content is rebuilt on state changes, so the
-  // revealed consent element must be re-marked whenever the markup changes.
+  // Reapply preference state whenever other footer content is rebuilt.
   useEffect(() => {
-    const target = footer.current?.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`);
-    if (!(target instanceof Element)) return;
-    if (consentPending) target.removeAttribute("hidden");
-    else target.setAttribute("hidden", "");
-  }, [innerHtml, consentPending]);
+    if (footer.current) updateCookieConsent(footer.current, consent);
+  }, [innerHtml, consent]);
 
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
@@ -621,8 +615,7 @@ export function HranessSiteFooter({
         return;
       }
       if (target.closest('[data-slot="hraness-mailing-close"]')) { closeModal.current("dismiss_button"); return; }
-      if (target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`) === null) return;
-      acceptCookieConsent();
+      if (!event.defaultPrevented) chooseCookieConsent(target);
     },
     onSubmit: handleSubmit,
     onInputCapture: (event: { target: EventTarget | null }) => {

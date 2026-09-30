@@ -149,6 +149,7 @@ interface ManualGeometry {
 }
 
 interface FooterSpacing {
+  readonly consentClearance: number;
   readonly bottomClearance: number;
   readonly bottomPadding: number;
   readonly expectedHeight: number;
@@ -1262,6 +1263,7 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const contentTop = Math.min(...content.map(item => item.top));
   const contentBottom = Math.max(...content.map(item => item.bottom));
   return {
+    consentClearance: (() => { const consent = inner.querySelector('[data-slot="hraness-cookie-consent"]'); return consent && !consent.hidden ? consent.getBoundingClientRect().height + 12 : 0; })(),
     bottomClearance: box.bottom - borderBottom - contentBottom,
     bottomPadding,
     expectedHeight: contentBottom - contentTop + topPadding + bottomPadding + borderTop + borderBottom,
@@ -1274,10 +1276,11 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
 
 function assertFooterSpacing(input: unknown, label: string): FooterSpacing {
   const record = exactRecord(input, [
-    "bottomClearance", "bottomPadding", "expectedHeight", "innerHeight",
+    "consentClearance", "bottomClearance", "bottomPadding", "expectedHeight", "innerHeight",
     "safeAreaInset", "topClearance", "topPadding",
   ], `${label} footer spacing`);
   const spacing = Object.freeze({
+    consentClearance: finiteNumber(record.consentClearance, "Footer consent clearance"),
     bottomClearance: finiteNumber(record.bottomClearance, "Footer bottom clearance"),
     bottomPadding: finiteNumber(record.bottomPadding, "Footer bottom padding"),
     expectedHeight: finiteNumber(record.expectedHeight, "Footer expected height"),
@@ -1287,7 +1290,7 @@ function assertFooterSpacing(input: unknown, label: string): FooterSpacing {
     topPadding: finiteNumber(record.topPadding, "Footer top padding"),
   });
   if (spacing.topPadding <= 0 || spacing.safeAreaInset < 0
-    || Math.abs(spacing.bottomPadding - spacing.topPadding - spacing.safeAreaInset) > 0.5) {
+    || Math.abs(spacing.bottomPadding - spacing.topPadding - spacing.safeAreaInset + spacing.consentClearance) > 0.5) {
     throw new Error(`${label} must retain matching visual padding above the device safe area.`);
   }
   if (Math.abs(spacing.topClearance - spacing.topPadding) > 0.5
@@ -1568,10 +1571,11 @@ function browserPageErrors(input: unknown): readonly unknown[] {
 export function assertDisclosureSnapshot(input: unknown, expanded: boolean, expectedName: string): void {
   if (!isRecord(input) || typeof input.snapshot !== "string") throw new Error("Missing native disclosure accessibility snapshot.");
   const summaries = input.snapshot.split("\n").filter(line => line.includes("- DisclosureTriangle "));
-  const summary = summaries[0]?.match(/- DisclosureTriangle "(.*)" \[expanded=(true|false)\]/u);
+  // A page also has the independent analytics-preferences disclosure.
   // Chromium separates adjacent text runs with spaces, including before commas.
-  const name = summary?.[1]?.replace(/\s+,/gu, ",").replace(/\s+/gu, " ").trim();
-  if (summaries.length !== 1 || name !== expectedName || summary?.[2] !== String(expanded)) {
+  const matches = summaries.map(line => line.match(/- DisclosureTriangle "(.*)" \[expanded=(true|false)\]/u))
+    .filter(summary => summary?.[1]?.replace(/\s+,/gu, ",").replace(/\s+/gu, " ").trim() === expectedName);
+  if (matches.length !== 1 || matches[0]?.[2] !== String(expanded)) {
     throw new Error(`Native summary has the wrong accessible name or expanded state: ${summaries.join("; ")}`);
   }
 }
@@ -1923,7 +1927,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
     evidence.push({ geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   await browser.run(["press", "Tab"]);
-  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Support Soundfish: optional paid membership", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
+  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Support Soundfish: optional paid membership", "Analytics preferences", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
     const focused = await browser.evaluate(`(() => {
       const element = document.activeElement;
       return { name: element?.getAttribute('aria-label') ?? element?.textContent, outline: element ? getComputedStyle(element).outlineStyle : null };
@@ -2090,26 +2094,40 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     const screenshotBase = join(runDirectory, `consent-${String(sample.width)}-${evidence.length}`);
     const screenshotPath = `${screenshotBase}-shown.png`;
     await screenshot(browser, screenshotPath);
-    await browser.run(["click", '[data-slot="hraness-cookie-consent-accept"]']);
-    // A hidden element never becomes "visible", so wait on the attribute itself.
-    await browser.run(["wait", "--fn", `document.querySelector('[data-slot="hraness-cookie-consent"]')?.hidden === true`, "--timeout", "5000"]);
+    await browser.run(["click", '[data-consent-prompt]']);
+    await browser.run(["wait", 'summary[aria-label="Analytics preferences"]', "--timeout", "5000"]);
     const accepted = await measure(); assertConsentFootprint(accepted);
-    if (!isRecord(accepted) || accepted.shown !== false) throw new Error("Consent acceptance did not remove the note.");
-    // Acceptance releases exactly the note's clearance and nothing else, at every width.
-    const released = Number(shown.height) - Number(accepted.height);
-    const expected = Number(shown.consentBottom) - Number(shown.consentTop) + CONSENT_CORNER_INSET;
-    if (Math.abs(released - expected) > .5) throw new Error("Consent acceptance retained empty clearance or changed the control rows.");
+    if (!isRecord(accepted) || accepted.shown !== true) throw new Error("Acceptance must keep analytics preferences available.");
+    if (Math.abs(Number(shown.height) - Number(accepted.height)) > .5) throw new Error("Analytics preferences changed footer clearance.");
+    await browser.run(["click", 'summary[aria-label="Analytics preferences"]']);
+    if (sample.width === 320) {
+      await browser.run(["set", "viewport", "320", "300"]);
+      await browser.evaluate(`(() => {
+        const panel = document.querySelector('[data-slot="hraness-cookie-consent"] .hraness-site-footer__consent-panel');
+        const button = panel.querySelector('[data-slot="hraness-cookie-consent-decline"]');
+        button.scrollIntoView({block:'nearest'});
+        const box = panel.getBoundingClientRect(), control = button.getBoundingClientRect();
+        if (box.top < 0 || box.bottom > innerHeight || box.left < 0 || box.right > innerWidth || control.top < box.top || control.bottom > box.bottom) throw new Error('Short viewport cannot reach analytics preferences.');
+      })()`);
+      await screenshot(browser, `${screenshotBase}-preferences-short.png`);
+      await browser.run(["set", "viewport", "320", "844"]);
+    }
+    await browser.run(["click", '[data-slot="hraness-cookie-consent-decline"]']);
+    const declined = await browser.evaluate(`({choice:localStorage.getItem('hraness-consent-cookies-v1'),state:document.querySelector('[data-slot="hraness-cookie-consent"]').dataset.consentState,open:document.querySelector('[data-slot="hraness-cookie-consent"] details').open})`);
+    if (!isRecord(declined) || declined.choice !== "declined" || declined.state !== "declined" || declined.open !== false) throw new Error("Preferences must persist withdrawal and close the disclosure.");
+    await browser.run(["click", 'summary[aria-label="Analytics preferences"]']);
+    await browser.run(["click", 'details [data-slot="hraness-cookie-consent-accept"]']);
     const acceptedScreenshotPath = `${screenshotBase}-accepted.png`;
     await screenshot(browser, acceptedScreenshotPath);
     await browser.run(["open", url]);
     await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
     const reloaded = await measure(); assertConsentFootprint(reloaded);
     const storage = await browser.evaluate(`localStorage.getItem('hraness-consent-cookies-v1')`);
-    if (!isRecord(reloaded) || reloaded.shown !== false || storage !== "accepted") throw new Error("Accepted consent did not persist after reload.");
+    if (!isRecord(reloaded) || reloaded.shown !== true || storage !== "accepted") throw new Error("Accepted consent did not persist after reload.");
     const reloadedScreenshotPath = `${screenshotBase}-reloaded.png`;
     await screenshot(browser, reloadedScreenshotPath);
     evidence.push({
-      sample, shown, accepted, reloaded,
+      sample, shown, accepted, declined, reloaded,
       screenshot: relative(REPOSITORY_ROOT, screenshotPath),
       acceptedScreenshot: relative(REPOSITORY_ROOT, acceptedScreenshotPath),
       reloadedScreenshot: relative(REPOSITORY_ROOT, reloadedScreenshotPath),

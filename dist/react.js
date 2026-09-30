@@ -161,45 +161,65 @@ var HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region
 var HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
 var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
 var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
-function accepted() {
+var HRANESS_CONSENT_DECLINE_SLOT = "hraness-cookie-consent-decline";
+var pageChoices = new WeakMap;
+function choice() {
+  if (pageChoices.has(window))
+    return pageChoices.get(window);
   try {
-    return window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted";
+    const stored = window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY);
+    return stored === null ? null : stored === "accepted" ? "accepted" : "declined";
   } catch {
-    return false;
+    return null;
   }
 }
-function acceptCookieConsent() {
+function rememberChoice(value) {
+  pageChoices.set(window, value);
   try {
-    window.localStorage.setItem(HRANESS_CONSENT_STORAGE_KEY, "accepted");
+    window.localStorage.setItem(HRANESS_CONSENT_STORAGE_KEY, value);
   } catch {}
-  window.dispatchEvent(new Event("hraness-consent-accepted"));
+  window.dispatchEvent(new Event(`hraness-consent-${value}`));
+}
+function acceptCookieConsent() {
+  rememberChoice("accepted");
+}
+function declineCookieConsent() {
+  rememberChoice("declined");
 }
 function observeCookieConsent(listener) {
   const controller = new AbortController;
   let disposed = false;
-  let choiceAccepted = accepted();
+  let currentChoice = choice();
   let regional = "checking";
   let timer;
   const publish = () => {
     if (!disposed)
-      listener(choiceAccepted ? "clear" : regional);
+      listener(currentChoice === "accepted" ? "clear" : currentChoice === "declined" ? "declined" : regional);
   };
   const onAccept = () => {
-    choiceAccepted = true;
+    pageChoices.set(window, "accepted");
+    currentChoice = "accepted";
+    publish();
+  };
+  const onDecline = () => {
+    pageChoices.set(window, "declined");
+    currentChoice = "declined";
     publish();
   };
   const onStorage = (event) => {
     if (event.key !== null && event.key !== HRANESS_CONSENT_STORAGE_KEY)
       return;
-    choiceAccepted = accepted();
-    if (!choiceAccepted && regional === "checking")
+    pageChoices.delete(window);
+    currentChoice = choice();
+    if (currentChoice === null && regional === "checking")
       regional = "required";
     publish();
   };
   window.addEventListener("hraness-consent-accepted", onAccept);
+  window.addEventListener("hraness-consent-declined", onDecline);
   window.addEventListener("storage", onStorage);
   publish();
-  if (!choiceAccepted) {
+  if (currentChoice === null) {
     timer = setTimeout(() => {
       regional = "required";
       publish();
@@ -232,25 +252,44 @@ function observeCookieConsent(listener) {
     clearTimeout(timer);
     controller.abort();
     window.removeEventListener("hraness-consent-accepted", onAccept);
+    window.removeEventListener("hraness-consent-declined", onDecline);
     window.removeEventListener("storage", onStorage);
   };
 }
+function updateCookieConsent(root, state) {
+  for (const note of root.querySelectorAll(`[data-slot="${HRANESS_CONSENT_SLOT}"]`)) {
+    note.toggleAttribute("hidden", state === "checking");
+    note.setAttribute("data-consent-state", state);
+    const required = state === "required";
+    note.querySelector("[data-consent-prompt]")?.toggleAttribute("hidden", !required);
+    note.querySelector("[data-consent-icon]")?.toggleAttribute("hidden", !required);
+    note.querySelector("[data-consent-label]")?.toggleAttribute("hidden", required);
+    const summary = note.querySelector("summary");
+    summary?.setAttribute("data-notice", required ? "required" : "preferences");
+    summary?.setAttribute("aria-label", required ? "About cookies" : "Analytics preferences");
+    summary?.setAttribute("title", required ? "About cookies" : "Analytics preferences");
+  }
+}
+function chooseCookieConsent(target) {
+  const button = target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"], [data-slot="${HRANESS_CONSENT_DECLINE_SLOT}"]`);
+  if (!button)
+    return false;
+  if (button.getAttribute("data-slot") === HRANESS_CONSENT_DECLINE_SLOT)
+    declineCookieConsent();
+  else
+    acceptCookieConsent();
+  const note = button.closest(`[data-slot="${HRANESS_CONSENT_SLOT}"]`);
+  note?.querySelector("details")?.removeAttribute("open");
+  note?.querySelector("summary")?.focus?.();
+  return true;
+}
 function initHranessCookieConsent(root = document) {
-  const removeConsent = observeCookieConsent((state) => {
-    for (const note of root.querySelectorAll(`[data-slot="${HRANESS_CONSENT_SLOT}"]`)) {
-      if (state === "required")
-        note.removeAttribute("hidden");
-      else
-        note.setAttribute("hidden", "");
-    }
-  });
+  const removeConsent = observeCookieConsent((state) => updateCookieConsent(root, state));
   const onClick = (event) => {
     const target = event.target;
-    if (typeof target?.closest !== "function")
+    if (typeof target?.closest !== "function" || !root.contains(target) || event.defaultPrevented)
       return;
-    const button = target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`);
-    if (button !== null && root.contains(button) && !event.defaultPrevented)
-      acceptCookieConsent();
+    chooseCookieConsent(target);
   };
   root.addEventListener("click", onClick);
   return () => {
@@ -972,7 +1011,7 @@ var styles = {
     $$css: true
   },
   consentAccept: {
-    k1xSpc: "x3nfvp2",
+    k1xSpc: "x3nfvp2 xvgho8r",
     kGNEyG: "x6s0dn4",
     kF3gjK: "xt970qd",
     kJVvJu: "xvpgqt4",
@@ -996,8 +1035,8 @@ var styles = {
     kGNEyG: "x6s0dn4",
     kjj79g: "xl56j7k",
     kLWsYc: "xlashs9",
-    kULEZF: "xtnhhbn",
-    kJVvJu: "xnjsko4",
+    kdYMnH: "xart1r9",
+    kJVvJu: "xvpgqt4 x1m71csk",
     kaIpWk: "x1e6avla",
     kH6xsr: "x3ct3a4",
     keTefX: "x1lziwak",
@@ -1006,9 +1045,24 @@ var styles = {
     kybGjl: "x1hl2dhg",
     $$css: true
   },
+  consentLabel: {
+    k1xSpc: "x3nfvp2 xvgho8r",
+    kGNEyG: "x6s0dn4",
+    $$css: true
+  },
+  consentActions: {
+    k1xSpc: "x78zum5",
+    kwnvtZ: "x1a02dak",
+    kOIVth: "xvh977a",
+    kAiAap: "x1gixskw",
+    kjj79g: "x1qughib",
+    $$css: true
+  },
   consentPanel: {
     kVAEAm: "x10l6tqk",
     kY2c9j: "xhtitgo",
+    kLO5vc: "xu668xk",
+    kYl2zh: "x1odjw0f",
     kctUWg: "x1smivkc",
     k7w2rI: "xtijo5x",
     kULEZF: "x146urod",
@@ -1191,6 +1245,8 @@ var footerClasses = {
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
   consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
+  consentLabel: className("hraness-site-footer__consent-label", styles.consentLabel),
+  consentActions: className("hraness-site-footer__consent-actions", styles.consentActions),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),
   consentLink: className("hraness-site-footer__consent-link", styles.consentLink, styles.focus, styles.motion),
   mailing: className("hraness-site-footer__mailing", styles.box, styles.mailing),
@@ -2719,17 +2775,17 @@ function renderMailingList(mailingList, state, presentation) {
   const localAttributes = ` lang="${escapeAttribute(locale.locale)}" dir="${locale.dir}"`;
   const email = state.kind === "pending" || state.kind === "error" ? ` value="${escapeAttribute(state.email)}"` : "";
   const pending = state.kind === "pending";
-  const accepted2 = state.kind === "accepted";
-  const statusCopy = pending ? copy.submitting : accepted2 ? copy.accepted : state.kind === "error" ? copy.requestError : "";
+  const accepted = state.kind === "accepted";
+  const statusCopy = pending ? copy.submitting : accepted ? copy.accepted : state.kind === "error" ? copy.requestError : "";
   const titleId = "hraness-mailing-dialog-title";
   const descriptionId = "hraness-mailing-dialog-description";
   const classes = disclosureClassNames("button");
-  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted2 ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${renderPageInput(presentation.pageUrl)}<input name="${HRANESS_MAILING_PLACEMENT_FIELD}" type="hidden" value="${HRANESS_MAILING_PLACEMENT}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted2 ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
+  return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${renderPageInput(presentation.pageUrl)}<input name="${HRANESS_MAILING_PLACEMENT_FIELD}" type="hidden" value="${HRANESS_MAILING_PLACEMENT}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
 var HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
 var HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
 function renderConsentHtml(signIn) {
-  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" class="${footerClasses.consentLearn}">${HRANESS_SUPPORT_ICON_HTML}</summary><span class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-consent-prompt="" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" data-notice="required" class="${footerClasses.consentLearn}"><span class="${footerClasses.consentLabel}" data-consent-icon="">${HRANESS_SUPPORT_ICON_HTML}</span><span class="${footerClasses.consentLabel}" data-consent-label="" hidden="">Analytics preferences</span></summary><div class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} You can change your analytics choice here at any time. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a><div class="${footerClasses.consentActions}"><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept analytics</button><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_DECLINE_SLOT}" type="button">Decline analytics</button></div></div></details></div>`;
 }
 function resolveSupportLink(profile) {
   if (profile === undefined)
@@ -2796,12 +2852,11 @@ function HranessSiteFooter({
   const socialLinks = resolveHranessSocialLinks(socialInput);
   const [state, setState] = useState(IDLE_STATE);
   const [consent, setConsent] = useState("checking");
-  const consentPending = consent === "required";
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   const [measurable, setMeasurable] = useState(false);
   const [copyUnavailable, setCopyUnavailable] = useState(false);
   const storedCopyArm = useRef(null);
-  const attribution = measurable && (attributionRequested ?? (consent === "clear" && footerMeasurementEligible()));
+  const attribution = measurable && consent === "clear" && (attributionRequested ?? footerMeasurementEligible());
   const activeRequest = useRef(null);
   const attributionContext = useRef({
     key: mailingListKey,
@@ -3046,8 +3101,8 @@ function HranessSiteFooter({
         const controller = new AbortController;
         exposureRequest.current = controller;
         const cached = attributionCache.current;
-        exposeFooterEnrollment(token, controller.signal).then((accepted2) => {
-          if (accepted2 && !controller.signal.aborted)
+        exposeFooterEnrollment(token, controller.signal).then((accepted) => {
+          if (accepted && !controller.signal.aborted)
             cached.exposed = true;
           else if (valid())
             exposed = false;
@@ -3293,8 +3348,8 @@ function HranessSiteFooter({
     if (!form || !status)
       return;
     const pending = renderState.kind === "pending";
-    const accepted2 = renderState.kind === "accepted";
-    form.hidden = accepted2;
+    const accepted = renderState.kind === "accepted";
+    form.hidden = accepted;
     form.dataset.state = renderState.kind;
     form.setAttribute("aria-busy", String(pending));
     const input = form.querySelector('input[name="email"]');
@@ -3302,7 +3357,7 @@ function HranessSiteFooter({
       input.readOnly = pending;
     const button = form.querySelector('button[type="submit"]');
     if (button) {
-      button.disabled = pending || accepted2;
+      button.disabled = pending || accepted;
       button.setAttribute("aria-disabled", String(button.disabled));
       button.textContent = pending ? copy.pending : copy.submit;
     }
@@ -3310,12 +3365,12 @@ function HranessSiteFooter({
     status.dataset.state = renderState.kind;
     status.setAttribute("role", renderState.kind === "error" ? "alert" : "status");
     status.setAttribute("aria-live", renderState.kind === "error" ? "assertive" : "polite");
-    status.textContent = pending ? copy.submitting : accepted2 ? copy.accepted : renderState.kind === "error" ? copy.requestError : "";
+    status.textContent = pending ? copy.submitting : accepted ? copy.accepted : renderState.kind === "error" ? copy.requestError : "";
     if (modalOpen.current && renderState.kind === "error")
       input?.focus({
         preventScroll: true
       });
-    else if (modalOpen.current && accepted2)
+    else if (modalOpen.current && accepted)
       status.focus({
         preventScroll: true
       });
@@ -3382,14 +3437,9 @@ function HranessSiteFooter({
   }, [innerHtml, mailingListKey]);
   useEffect(() => observeCookieConsent(setConsent), []);
   useEffect(() => {
-    const target = footer.current?.querySelector(`[data-slot="${HRANESS_CONSENT_SLOT}"]`);
-    if (!(target instanceof Element))
-      return;
-    if (consentPending)
-      target.removeAttribute("hidden");
-    else
-      target.setAttribute("hidden", "");
-  }, [innerHtml, consentPending]);
+    if (footer.current)
+      updateCookieConsent(footer.current, consent);
+  }, [innerHtml, consent]);
   return createElement("footer", {
     "aria-label": HRANESS_FOOTER_LABEL,
     className: footerClassName(mailingList.kind === "signup", placement === "sticky"),
@@ -3412,9 +3462,8 @@ function HranessSiteFooter({
         closeModal.current("dismiss_button");
         return;
       }
-      if (target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`) === null)
-        return;
-      acceptCookieConsent();
+      if (!event.defaultPrevented)
+        chooseCookieConsent(target);
     },
     onSubmit: handleSubmit,
     onInputCapture: (event) => {
@@ -3482,4 +3531,4 @@ export {
   HranessCookieConsent
 };
 
-//# debugId=5180345ABE8D50B364756E2164756E21
+//# debugId=F66D9CC1FF87A46A64756E2164756E21

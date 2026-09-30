@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.20.4
+bun add github:hraness/site-footer#v0.20.5
 ```
 
 Start with the network footer and no mailing form:
@@ -45,11 +45,10 @@ links, and one hidden geo-gated cookie-consent note linking to the Hraness
 privacy policy. The consent note stays hidden
 without client-side JavaScript; the React adapter and static consent initializer ask the
 shared Accounts region endpoint whether consent applies, fails toward showing
-the note when detection is unavailable, and stores acceptance in local storage.
+the note when detection is unavailable, and stores acceptance or refusal in local storage.
 A visible note is a small notice in the bottom corner of the window that never
 spans its width. The note uses a labelled question-mark disclosure for details. At the end of the page the footer adds room above its controls so
-the note never covers them. Accepting removes the note and that room and dispatches
-`hraness-consent-accepted` for the shared analytics adapter, even when local storage is unavailable.
+the note never covers them. After either choice, a compact **Analytics preferences** control stays available in the same place. It opens accept and decline buttons, so visitors can withdraw or change their choice at any time. Both choices notify the shared analytics adapter immediately through `hraness-consent-accepted` or `hraness-consent-declined`, including when local storage is unavailable. Use `@hraness/posthog` 0.3.7 or newer to handle withdrawal.
 The first render issues no request, sets no cookie, and writes no local
 storage. The links and inline decorative vectors work without client-side
 JavaScript.
@@ -430,8 +429,7 @@ or honeypot cases; it is never a provider-delivery or confirmed-subscription eve
 
 When `attribution` is omitted, the footer measures a browser only after cookie
 consent is accepted or the region needs none, and never for browsers that send Do
-Not Track or Global Privacy Control or for automated browsers. An explicit
-`true` or `false` is the host's own eligibility decision. When it runs, the
+Not Track or Global Privacy Control or for automated browsers. Setting `true` enables the host's eligibility decision but never overrides regional consent or a visitor's refusal. When it runs, the
 footer requests an anonymous Accounts token and attaches it to native and
 enhanced posts, so Accounts can count confirmed signups. Pass `attribution={false}`
 to turn it off.

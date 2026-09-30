@@ -63,7 +63,7 @@ show the real notice at 320, 390, 760 and 1280 pixels, including account and wid
 variants. Measured at the end of the page, it requires a compact fixed note in the
 viewport's end corner that never spans the width, and an in-flow footer whose extra
 top padding exactly clears that note above the controls. It then clicks Accept
-and reloads to prove the note and its clearance disappear together. Each case
+to reveal persistent Analytics preferences, reopens it to decline, then accepts again and reloads to prove the choice persists. The shared control and its clearance remain available after either choice. Each case
 retains a full-page screenshot of the shown, accepted and reloaded states. It never
 changes component state directly or contacts Accounts.
 

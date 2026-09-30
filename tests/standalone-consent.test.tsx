@@ -45,18 +45,27 @@ for (const required of [true, false]) {
     try {
       await act(async () => root.render(<HranessCookieConsent signIn />));
       const note = container.querySelector("[data-slot=hraness-cookie-consent]")!;
-      expect(note.hasAttribute("hidden")).toBe(!required);
+      expect(note.hasAttribute("hidden")).toBe(false);
+      expect(note.getAttribute("data-consent-state")).toBe(required ? "required" : "clear");
       if (required) {
         await act(async () => note.querySelector("button")!.dispatchEvent(new window.Event("click", { bubbles: true })));
         expect(stored as string | null).toBe("accepted");
         expect(accepted).toBe(1);
-        expect(note.hasAttribute("hidden")).toBe(true);
+        expect(note.hasAttribute("hidden")).toBe(false);
+        expect(note.querySelector("summary")?.getAttribute("aria-label")).toBe("Analytics preferences");
       }
+      await act(async () => note.querySelector('[data-slot="hraness-cookie-consent-decline"]')!.dispatchEvent(new window.Event("click", { bubbles: true })));
+      expect(stored as string | null).toBe("declined");
+      expect(note.getAttribute("data-consent-state")).toBe("declined");
+      expect(note.hasAttribute("hidden")).toBe(false);
+      await act(async () => note.querySelector('details [data-slot="hraness-cookie-consent-accept"]')!.dispatchEvent(new window.Event("click", { bubbles: true })));
+      expect(stored as string | null).toBe("accepted");
+      expect(note.getAttribute("data-consent-state")).toBe("clear");
       await act(async () => root.unmount());
       unmounted = true;
       expect(signal?.aborted).toBe(true);
       note.querySelector("button")!.dispatchEvent(new window.Event("click", { bubbles: true }));
-      expect(accepted).toBe(required ? 1 : 0);
+      expect(accepted).toBe(required ? 2 : 1);
     } finally {
       if (!unmounted) await act(async () => root.unmount());
       for (const [key, descriptor] of originals) {
