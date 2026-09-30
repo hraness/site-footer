@@ -224,9 +224,17 @@ test("the React adapter reveals geo-gated cookie consent and persists acceptance
 
     expect(storage.get("hraness-consent-cookies-v1")).toBe("accepted");
     expect(acceptedEvents).toBe(1);
+    expect(container!.querySelector('summary[aria-label="Analytics preferences"]')).not.toBeNull();
+    await act(async () => {
+      container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent-decline"]')!
+        .dispatchEvent(new window.Event("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+    expect(storage.get("hraness-consent-cookies-v1")).toBe("declined");
+    expect(container!.querySelector('[data-slot="hraness-cookie-consent"]')!.getAttribute('data-consent-state')).toBe('declined');
     expect(
       container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent"]')!.hasAttribute("hidden"),
-    ).toBeTrue();
+    ).toBeFalse();
   } finally {
     await act(async () => {
       root.unmount();
@@ -244,7 +252,7 @@ test("the React adapter reveals geo-gated cookie consent and persists acceptance
   }
 });
 
-test("the React adapter keeps consent hidden when already accepted", async () => {
+test("the React adapter keeps analytics preferences available when already accepted", async () => {
   const { window } = parseHTML('<div id="root"></div>');
   const overrides = {
     Comment: window.Comment,
@@ -303,7 +311,7 @@ test("the React adapter keeps consent hidden when already accepted", async () =>
 
     expect(
       container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent"]')!.hasAttribute("hidden"),
-    ).toBeTrue();
+    ).toBeFalse();
     expect(requests).not.toContain("https://account.hraness.com/api/consent/region");
   } finally {
     await act(async () => {

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { resolve } from "node:path";
 
-for (const scenario of ["required", "permitted", "stored", "unavailable", "malformed", "blocked-storage", "race", "cleanup", "storage-change"]) {
+for (const scenario of ["required", "permitted", "stored", "declined", "unavailable", "malformed", "blocked-storage", "race", "cleanup", "storage-change"]) {
   test(`static cookie consent: ${scenario}`, () => {
     const result = Bun.spawnSync([
       process.execPath,

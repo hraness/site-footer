@@ -38,6 +38,8 @@ export declare const footerClasses: {
     consentAccept: string;
     consentMore: string;
     consentLearn: string;
+    consentLabel: string;
+    consentActions: string;
     consentPanel: string;
     consentLink: string;
     mailing: string;

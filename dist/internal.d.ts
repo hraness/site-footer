@@ -49,7 +49,7 @@ export declare const HRANESS_MAILING_PLACEMENT_FIELD = "placement";
 export declare const HRANESS_MAILING_PLACEMENT = "footer";
 /** Accounts stores at most 2,048 bytes of signup URL; longer pages send none. */
 export declare const HRANESS_MAX_PAGE_URL_LENGTH = 2048;
-export { HRANESS_CONSENT_REGION_URL, HRANESS_CONSENT_STORAGE_KEY, HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT } from "./consent.js";
+export { HRANESS_CONSENT_REGION_URL, HRANESS_CONSENT_STORAGE_KEY, HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT, HRANESS_CONSENT_DECLINE_SLOT } from "./consent.js";
 export type HranessMailingListConfig = Readonly<{
     audience: string;
     kind: "signup";
