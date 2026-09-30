@@ -151,7 +151,9 @@ if (unbrandedHtml === undefined || unbrandedHtml.includes('data-slot="hraness-ma
 
 const react = await import(pathToFileURL(resolve(repository, "dist/react.js")).href) as {
   HranessSiteFooter?: unknown;
+  HranessCookieConsent?: unknown;
 };
+assert.equal(typeof react.HranessCookieConsent, "function", "Standalone consent is exported");
 if (typeof react.HranessSiteFooter !== "function") {
   throw new Error("The built React adapter is missing.");
 }

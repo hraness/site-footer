@@ -123,6 +123,7 @@ export declare function parseHranessSocialConfig(value: HranessSocialConfig | un
 export declare function resolveHranessSocialLinks(value: HranessSocialConfig | undefined): ReadonlyArray<HranessSocialLink>;
 /** Question-mark vector rendered inside the optional Accounts support link. */
 export declare const HRANESS_SUPPORT_ICON_HTML: string;
+export declare function renderConsentHtml(signIn: boolean): string;
 export declare function resolveSupportLink(profile: SupportProfile | undefined): Readonly<{
     href: string;
     label: `Support ${string}: optional paid membership`;

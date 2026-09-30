@@ -235,6 +235,29 @@ function observeCookieConsent(listener) {
     window.removeEventListener("storage", onStorage);
   };
 }
+function initHranessCookieConsent(root = document) {
+  const removeConsent = observeCookieConsent((state) => {
+    for (const note of root.querySelectorAll(`[data-slot="${HRANESS_CONSENT_SLOT}"]`)) {
+      if (state === "required")
+        note.removeAttribute("hidden");
+      else
+        note.setAttribute("hidden", "");
+    }
+  });
+  const onClick = (event) => {
+    const target = event.target;
+    if (typeof target?.closest !== "function")
+      return;
+    const button = target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`);
+    if (button !== null && root.contains(button) && !event.defaultPrevented)
+      acceptCookieConsent();
+  };
+  root.addEventListener("click", onClick);
+  return () => {
+    removeConsent();
+    root.removeEventListener("click", onClick);
+  };
+}
 
 // node_modules/@stylexjs/stylex/lib/es/stylex.mjs
 var styleq = {};
@@ -1163,6 +1186,7 @@ var footerClasses = {
   socials: className("hraness-site-footer__socials", styles.socials),
   socialLink: className("hraness-site-footer__social-link", styles.flexCenter, styles.fixedFlex, styles.socialLink, styles.focus, styles.motion),
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
+  consentRoot: className("hraness-cookie-consent", styles.root),
   consent: className("hraness-site-footer__consent", styles.box, styles.border, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
@@ -2730,6 +2754,21 @@ function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILIN
 // src/react.tsx
 import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
+function HranessCookieConsent({
+  signIn = false
+} = {}) {
+  const root = useRef(null);
+  useEffect(() => {
+    return root.current === null ? undefined : initHranessCookieConsent(root.current);
+  }, [signIn]);
+  return createElement("div", {
+    ref: root,
+    className: footerClasses.consentRoot,
+    dangerouslySetInnerHTML: {
+      __html: renderConsentHtml(signIn)
+    }
+  });
+}
 var IDLE_STATE = {
   kind: "idle"
 };
@@ -3439,7 +3478,8 @@ function storedFooterCopyArm() {
   return arm;
 }
 export {
-  HranessSiteFooter
+  HranessSiteFooter,
+  HranessCookieConsent
 };
 
-//# debugId=DA6C967B72FA351264756E2164756E21
+//# debugId=5180345ABE8D50B364756E2164756E21

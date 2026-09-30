@@ -3,6 +3,18 @@ import type { HranessFooterConversionEvent } from "./internal.js";
 export type { HranessFooterConversionEvent, HranessFooterConversionStage, HranessFooterConversionReason } from "./internal.js";
 import { type HranessMailingListConfig, type HranessSocialConfig } from "./internal.js";
 import { type FormEvent } from "react";
+export interface HranessCookieConsentProps {
+    /** Include the essential sign-in cookie explanation only on sites that use it. */
+    readonly signIn?: boolean;
+}
+/** The shared consent note for focused app routes that omit the site footer. */
+export declare function HranessCookieConsent({ signIn }?: HranessCookieConsentProps): import("react").DetailedReactHTMLElement<{
+    ref: import("react").RefObject<HTMLDivElement | null>;
+    className: string;
+    dangerouslySetInnerHTML: {
+        __html: string;
+    };
+}, HTMLDivElement>;
 export interface HranessSiteFooterProps {
     /** Explicit Accounts product identity. Omit to render no paid-support control. */
     readonly support?: SupportProfile;

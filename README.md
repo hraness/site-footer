@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.20.3
+bun add github:hraness/site-footer#v0.20.4
 ```
 
 Start with the network footer and no mailing form:
@@ -626,6 +626,23 @@ Generated files in `dist/` come only from `bun run build`; do not edit them by
 hand. Reviewed HugeIcons vectors retain their attribution in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The package is available
 under the [MIT License](LICENSE).
+
+### App routes without a footer
+
+For a focused tool route that omits the site footer, render only the shared
+consent note. Import the package stylesheet once and mount one consent surface
+per page. It starts hidden during server rendering, observes the same regional
+policy after mounting, and cleans up on route changes.
+
+```tsx
+import { HranessCookieConsent } from "@hraness/site-footer/react";
+import "@hraness/site-footer/styles.css";
+
+<HranessCookieConsent />
+```
+
+Pass `signIn` only when the site uses essential sign-in cookies. The component
+contains no signup form, studio mark, social links, or footer landmark.
 
 ## Questions
 
