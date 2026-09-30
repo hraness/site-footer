@@ -56,9 +56,9 @@ Every fixture also enables the native optional Support link. Signup samples chec
 
 The consent cases scroll to the end of the page and compare the outer footprint
 and inner footer heights in shown, accepted and reloaded states. A visible note
-must be `position: fixed`, 12 CSS pixels from the viewport's end corner, at most
-85% of the viewport width, and clear of the footer controls. The footer's bottom
-padding must equal its top padding plus the note height and corner inset.
+must be `position: fixed`, 12 CSS pixels from the viewport's inline end, at most
+85% of the viewport width, and 12 pixels above the footer controls. The footer's top
+padding must equal its bottom padding plus the note height and corner inset.
 Acceptance must remove exactly that clearance at every width. Synthetic geometry
 controls reject a full-width or in-flow note, a note that covers the controls, and
 clearance that does not match the note.

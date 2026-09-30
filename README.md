@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.20.1
+bun add github:hraness/site-footer#v0.20.2
 ```
 
 Start with the network footer and no mailing form:
@@ -47,8 +47,9 @@ without client-side JavaScript; after hydration the React adapter asks the
 shared Accounts region endpoint whether consent applies, fails toward showing
 the note when detection is unavailable, and stores acceptance in local storage.
 A visible note is a small notice in the bottom corner of the window that never
-spans its width. At the end of the page the footer adds room below its links so
-the note never covers them. Accepting removes the note and that room.
+spans its width. The note uses a labelled question-mark disclosure for details. At the end of the page the footer adds room above its controls so
+the note never covers them. Accepting removes the note and that room and dispatches
+`hraness-consent-accepted` for the shared analytics adapter, even when local storage is unavailable.
 The first render issues no request, sets no cookie, and writes no local
 storage. The links and inline decorative vectors work without client-side
 JavaScript.
@@ -213,7 +214,9 @@ These states are mutually exclusive and require no audience for account access.
 ```
 
 The cookie note says cookies keep the visitor signed in only when the site
-passes `signIn`. Pass it on sites that keep visitors signed in with cookies,
+passes `signIn`. The disclosure also explains that analytics helps us understand
+how the site is used, without advertising or cross-site tracking.
+Pass it on sites that keep visitors signed in with cookies,
 whatever the current `mailingList` mode; leave it out on sites without sign-in.
 
 ```tsx

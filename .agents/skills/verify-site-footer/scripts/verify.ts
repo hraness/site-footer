@@ -1,3 +1,5 @@
+import { browserIdentity } from "./browser-launch.js";
+
 import { createHash, randomUUID } from "node:crypto";
 import {
   existsSync,
@@ -763,6 +765,7 @@ async function doctor(): Promise<Readonly<Record<string, unknown>>> {
   await rm(join(ARTIFACT_ROOT, ".write-probe"), { force: true });
   return Object.freeze({
     agentBrowser: browserInstalled,
+    browser: browserIdentity(),
     baseUrl: DEFAULT_BASE_URL,
     bun: Bun.version,
     direct: directInstalled,
@@ -2021,7 +2024,7 @@ const CONSENT_CORNER_INSET = 12;
 /**
  * Independent measured boxes, taken at the end of the page: a visible note is
  * a compact fixed notice in the viewport's end corner that never spans the
- * width, and the in-flow footer clears exactly that notice below its controls.
+ * width, and the in-flow footer clears exactly that notice above its controls.
  */
 export function assertConsentFootprint(input: unknown): void {
   const value = exactRecord(input, ["width", "viewportHeight", "shown", "position", "footprint", "height", "top", "bottom", "paddingTop", "paddingBottom", "borderTop", "borderBottom", "controlTop", "controlBottom", "consentTop", "consentBottom", "consentLeft", "consentRight"], "Consent footprint");
@@ -2033,19 +2036,19 @@ export function assertConsentFootprint(input: unknown): void {
   if (Math.abs(bottom - number("viewportHeight")) > 0.5) throw new Error("Consent geometry must be measured at the end of the page.");
   const controlTop = number("controlTop"), controlBottom = number("controlBottom");
   if (controlBottom <= controlTop || controlTop < top || controlBottom > bottom) throw new Error("Control rows escape footer.");
-  const paddingTop = number("paddingTop");
+  const paddingTop = number("paddingTop"), paddingBottom = number("paddingBottom");
   let clearance = 0;
   if (value.shown) {
     const consentTop = number("consentTop"), consentBottom = number("consentBottom");
     const consentLeft = number("consentLeft"), consentRight = number("consentRight");
     if (position !== "fixed" || consentBottom <= consentTop || consentRight <= consentLeft) throw new Error("Visible consent must float as its own corner note.");
     if (consentLeft < CONSENT_CORNER_INSET - 0.5 || consentRight - consentLeft > width * 0.85) throw new Error("Visible consent must stay compact and never span the width.");
-    if (Math.abs(width - consentRight - CONSENT_CORNER_INSET) > 0.5 || Math.abs(number("viewportHeight") - consentBottom - CONSENT_CORNER_INSET) > 0.5) throw new Error("Visible consent must sit in the viewport's end corner.");
-    if (consentTop < controlBottom + paddingTop - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page.");
+    if (Math.abs(width - consentRight - CONSENT_CORNER_INSET) > 0.5) throw new Error("Visible consent must sit in the viewport's end corner.");
+    if (consentBottom > controlTop - CONSENT_CORNER_INSET + 0.5 || consentTop < top + number("borderTop") + paddingBottom - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page.");
     clearance = consentBottom - consentTop + CONSENT_CORNER_INSET;
   }
   if (Math.abs(controlTop - top - number("borderTop") - paddingTop) > 0.5
-    || Math.abs(number("paddingBottom") - paddingTop - clearance) > 0.5
+    || Math.abs(paddingTop - paddingBottom - clearance) > 0.5
     || Math.abs(bottom - controlBottom - number("borderBottom") - number("paddingBottom")) > 0.5) throw new Error("Footer rows must retain their actual padding clearances.");
 }
 
@@ -2190,7 +2193,7 @@ async function runVerifier(): Promise<string> {
   let postDriveSource: SourceIdentity | null = null;
   try {
     await mkdir(socketDirectory, { recursive: true });
-    await writeFile(configPath, "{}\n", { encoding: "utf8", mode: 0o600 });
+    await writeFile(configPath, JSON.stringify({ executablePath: join(SCRIPT_DIRECTORY, "browser-launch.ts") }) + "\n", { encoding: "utf8", mode: 0o600 });
     await buildFixture(runtimeDirectory);
     lease = await acquireVerificationServer({
       baseUrl: DEFAULT_BASE_URL,

@@ -194,7 +194,8 @@ describe("Hraness site footer", () => {
     expect(accept?.tagName).toBe("BUTTON");
     expect(accept?.getAttribute("type")).toBe("button");
     expect(accept?.textContent).toBe("Accept cookies");
-    expect(learnMore?.querySelector("summary")?.textContent).toBe("Learn more");
+    expect(learnMore?.querySelector("summary")?.getAttribute("aria-label")).toBe("About cookies");
+    expect(learnMore?.querySelector("summary svg")?.getAttribute("aria-hidden")).toBe("true");
     expect(learnMore?.textContent).toContain("None of it is used for advertising or cross-site tracking.");
     expect(learnMore?.textContent).not.toContain("signed in");
     expect(privacy?.textContent).toBe("Privacy policy");
@@ -218,6 +219,7 @@ describe("Hraness site footer", () => {
       expect(withSignIn).toContain("Cookies keep you signed in");
       expect(withSignIn).toContain("remembers your appearance setting and this choice");
       for (const text of [without, withSignIn]) {
+        expect(text).toContain("We use analytics to understand how the site is used.");
         expect(text).toContain("None of it is used for advertising or cross-site tracking.");
         expect(text).not.toContain("—");
       }

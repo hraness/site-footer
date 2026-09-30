@@ -223,19 +223,38 @@ test("wide layout rejects a padded inline panel even when its inner form remains
 test("consent geometry requires a compact corner note that the in-flow footer clears", () => {
   // A 390x844 page scrolled to its end: 12px padding, a 28px control row, and
   // a 38px note 12px from the corner, cleared by 50px of extra bottom padding.
-  const shown = { width:390, viewportHeight:844, shown:true, position:"fixed", footprint:115, height:115, top:729, bottom:844, paddingTop:12, paddingBottom:62, borderTop:1, borderBottom:0, controlTop:742, controlBottom:782, consentTop:794, consentBottom:832, consentLeft:168, consentRight:378 };
+  const shown = { width:390, viewportHeight:844, shown:true, position:"fixed", footprint:115, height:115, top:729, bottom:844, paddingTop:62, paddingBottom:12, borderTop:1, borderBottom:0, controlTop:792, controlBottom:832, consentTop:742, consentBottom:780, consentLeft:168, consentRight:378 };
   expect(() => assertConsentFootprint(shown)).not.toThrow();
   expect(() => assertConsentFootprint({...shown, position:"static"})).toThrow("corner note");
   expect(() => assertConsentFootprint({...shown, consentLeft:0})).toThrow("never span");
   expect(() => assertConsentFootprint({...shown, consentLeft:12})).toThrow("never span");
   expect(() => assertConsentFootprint({...shown, consentLeft:160, consentRight:370})).toThrow("end corner");
-  expect(() => assertConsentFootprint({...shown, paddingBottom:12, footprint:65, height:65, top:779, controlTop:792, controlBottom:832})).toThrow("covers the footer controls");
-  expect(() => assertConsentFootprint({...shown, paddingBottom:70, footprint:123, height:123, top:721, controlTop:734, controlBottom:774})).toThrow("padding clearances");
+  expect(() => assertConsentFootprint({...shown, paddingTop:12, footprint:65, height:65, top:779, controlTop:792, controlBottom:832})).toThrow("covers the footer controls");
+  expect(() => assertConsentFootprint({...shown, paddingTop:70, footprint:123, height:123, top:721, controlTop:792, controlBottom:832})).toThrow("padding clearances");
   expect(() => assertConsentFootprint({...shown, footprint:160})).toThrow("footprint");
   expect(() => assertConsentFootprint({...shown, bottom:800, top:685})).toThrow("end of the page");
-  const accepted = {...shown, shown:false, footprint:65, height:65, top:779, paddingBottom:12, controlTop:792, controlBottom:832, consentTop:0, consentBottom:0, consentLeft:0, consentRight:0};
+  const accepted = {...shown, shown:false, footprint:65, height:65, top:779, paddingTop:12, controlTop:792, controlBottom:832, consentTop:0, consentBottom:0, consentLeft:0, consentRight:0};
   expect(() => assertConsentFootprint(accepted)).not.toThrow();
-  expect(() => assertConsentFootprint({...accepted, paddingBottom:62, footprint:115, height:115, top:729, controlTop:742, controlBottom:782})).toThrow("padding clearances");
+  expect(() => assertConsentFootprint({...accepted, paddingTop:62, footprint:115, height:115, top:729, controlTop:792, controlBottom:832})).toThrow("padding clearances");
   const wide = {...shown, width:1280, consentLeft:1058, consentRight:1268};
   expect(() => assertConsentFootprint(wide)).not.toThrow();
+});
+
+
+import { assertPinnedChromePath, CHROME_VERSION, mergeChromeArguments } from "../.agents/skills/verify-site-footer/scripts/browser-launch.js";
+
+test("browser selection rejects system Chrome, symlinks, and other versions", () => {
+  const pinned = `/home/runner/.agent-browser/browsers/chrome-${CHROME_VERSION}/chrome`;
+  expect(() => assertPinnedChromePath(pinned, pinned)).not.toThrow();
+  for (const path of ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/tmp/chrome", pinned.replace(CHROME_VERSION, "1.2.3.4")]) {
+    expect(() => assertPinnedChromePath(path, path)).toThrow();
+    expect(() => assertPinnedChromePath(pinned, path)).toThrow();
+  }
+});
+
+test("browser flags preserve driver features in one muted launch switch", () => {
+  const args = mergeChromeArguments(["--headless=new", "--disable-features=Translate", "--disable-features=PaintHolding,Other", "--mute-audio"]);
+  expect(args.filter((arg) => arg.startsWith("--disable-features="))).toEqual(["--disable-features=PaintHolding,MacAppCodeSignClone,Translate,Other"]);
+  expect(args.filter((arg) => arg === "--mute-audio")).toHaveLength(1);
+  expect(args).toContain("--headless=new");
 });
