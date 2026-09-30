@@ -1890,6 +1890,10 @@ function createSupportOffer(profile, source) {
   });
 }
 
+// src/consent.ts
+var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
+var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
+
 // src/internal.ts
 var DEFAULT_FOOTER_PRESENTATION = {
   locale: resolveFooterLocale(),
@@ -1908,8 +1912,6 @@ var HRANESS_MAILING_PAGE_FIELD = "page";
 var HRANESS_MAILING_PLACEMENT_FIELD = "placement";
 var HRANESS_MAILING_PLACEMENT = "footer";
 var HRANESS_MAX_PAGE_URL_LENGTH = 2048;
-var HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
-var HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
 var MAX_AUDIENCE_LENGTH = 24;
 var MAX_PRODUCT_NAME_LENGTH = 48;
 var PRODUCT_NAME_PATTERN = new RegExp("^[\\p{L}\\p{N}][\\p{L}\\p{N} .'&+-]{0,47}$", "u");
@@ -2204,4 +2206,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=6F525985FE00640A64756E2164756E21
+//# debugId=BFAF16FEA2FF7E3264756E2164756E21

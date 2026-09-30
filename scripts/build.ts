@@ -34,7 +34,7 @@ export async function buildPackage(repository: string): Promise<void> {
     const { collector, plugin, transformedSources } = packageStylexTransform(repository);
     // Both entry graphs contribute to one collector. Do not seal between builds
     // or race builds: React-only recipes must belong to the package manifest.
-    for (const entry of ["index.ts", "react.tsx"]) {
+    for (const entry of ["index.ts", "react.tsx", "consent.ts"]) {
       const result = await Bun.build({
         ...(entry === "react.tsx" ? { banner: CLIENT_COMPONENT_DIRECTIVE } : {}),
         conditions: ["production", "browser", "module"],
@@ -65,7 +65,7 @@ export async function buildPackage(repository: string): Promise<void> {
     await writeFile(reactOutput, normalized);
 
     const mappedSources = new Set<string>();
-    for (const entry of ["index", "react"]) {
+    for (const entry of ["index", "react", "consent"]) {
       const mapPath = join(outputDirectory, `${entry}.js.map`);
       const normalizedMap = normalizeStylexSourceMap(
         await readFile(mapPath, "utf8"),
@@ -98,7 +98,7 @@ export async function buildPackage(repository: string): Promise<void> {
       package: { name: record.name, version: record.version },
       rules,
       rulesSha256: stylexRulesSha256(rules),
-      runtime: await Promise.all(["dist/index.js", "dist/react.js"].map((path) => artifactForFile(repository, path))),
+      runtime: await Promise.all(["dist/consent.js", "dist/index.js", "dist/react.js"].map((path) => artifactForFile(repository, path))),
       schemaVersion: STYLEX_PACKAGE_MANIFEST_SCHEMA_VERSION,
       standaloneCss: await artifactForFile(repository, "dist/stylex.css"),
       standaloneSerializer: STANDALONE_SERIALIZER,

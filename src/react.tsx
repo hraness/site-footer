@@ -2,6 +2,7 @@
 import type { SupportProfile } from "./internal.js";
 
 import { attachFooterFoil } from "./foil.js";
+import { acceptCookieConsent, observeCookieConsent } from "./consent.js";
 import { footerClassName, footerClasses, footerInnerClassName, mailingStatusClassName } from "./footer.stylex.js";
 import { footerCopyLabel, footerCopyProductName, resolveFooterLocale, stableFooterMessages } from "./locales.js";
 import { initSiteSignals, reportSiteVisit } from "./telemetry.js";
@@ -12,9 +13,7 @@ export type { HranessFooterConversionEvent, HranessFooterConversionStage, Hranes
 
 import {
   HRANESS_CONSENT_ACCEPT_SLOT,
-  HRANESS_CONSENT_REGION_URL,
   HRANESS_CONSENT_SLOT,
-  HRANESS_CONSENT_STORAGE_KEY,
   HRANESS_FOOTER_LABEL,
   HRANESS_FOOTER_SLOT,
   HRANESS_MAILING_FORM_SLOT,
@@ -573,30 +572,7 @@ export function HranessSiteFooter({
     return attachFooterFoil(footer.current);
   }, [innerHtml, mailingListKey]);
 
-  // Cookie consent is a one-way localStorage decision; geo detection is advisory
-  // and fails toward showing the note.
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem(HRANESS_CONSENT_STORAGE_KEY) === "accepted") { setConsent("clear"); return; }
-    } catch {
-      // Storage disabled: the in-memory accept still applies for this page.
-    }
-    const controller = new AbortController();
-    void fetch(HRANESS_CONSENT_REGION_URL, {
-      cache: "no-store",
-      credentials: "omit",
-      headers: { accept: "application/json" },
-      signal: controller.signal,
-    }).then(async (response) => {
-      const body: unknown = await response.json();
-      const required = !response.ok || typeof body !== "object" || body === null
-        || Reflect.get(body, "required") !== false;
-      if (!controller.signal.aborted) setConsent(required ? "required" : "clear");
-    }).catch(() => {
-      if (!controller.signal.aborted) setConsent("required");
-    });
-    return () => { controller.abort(); };
-  }, []);
+  useEffect(() => observeCookieConsent(setConsent), []);
 
   // The dangerouslySetInnerHTML content is rebuilt on state changes, so the
   // revealed consent element must be re-marked whenever the markup changes.
@@ -627,13 +603,7 @@ export function HranessSiteFooter({
       }
       if (target.closest('[data-slot="hraness-mailing-close"]')) { closeModal.current("dismiss_button"); return; }
       if (target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"]`) === null) return;
-      try {
-        window.localStorage.setItem(HRANESS_CONSENT_STORAGE_KEY, "accepted");
-      } catch {
-        // Private browsing or disabled storage: hide for this page only.
-      }
-      window.dispatchEvent(new Event("hraness-consent-accepted"));
-      setConsent("clear");
+      acceptCookieConsent();
     },
     onSubmit: handleSubmit,
     onInputCapture: (event: { target: EventTarget | null }) => {

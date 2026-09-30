@@ -20,6 +20,9 @@ const requiredFiles = [
   "dist/react.js",
   "dist/react.js.map",
   "dist/react.d.ts",
+  "dist/consent.js",
+  "dist/consent.js.map",
+  "dist/consent.d.ts",
   "styles.css",
   "compiler-foundation.css",
   "dist/stylex.css",
@@ -50,6 +53,11 @@ if (typeof reactExport !== "object" || reactExport.import !== "./dist/react.js")
 if (packageJson.exports?.["./styles.css"] !== "./styles.css") {
   throw new Error("The stylesheet export is missing.");
 }
+
+const consent = await import(pathToFileURL(resolve(repository, "dist/consent.js")).href);
+assert.equal(typeof consent.initHranessCookieConsent, "function");
+assert.equal(typeof consent.observeCookieConsent, "function");
+assert.equal((packageJson.exports?.["./consent"] as Record<string, string>)?.import, "./dist/consent.js");
 
 const root = await import(pathToFileURL(resolve(repository, "dist/index.js")).href) as {
   HRANESS_MAILING_SUBSCRIBE_URL?: string;
