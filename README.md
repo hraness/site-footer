@@ -48,7 +48,7 @@ shared Accounts region endpoint whether consent applies, fails toward showing
 the note when detection is unavailable, and stores acceptance or refusal in local storage.
 A visible note is a small notice in the bottom corner of the window that never
 spans its width. The note uses a labelled question-mark disclosure for details. At the end of the page the footer adds room above its controls so
-the note never covers them. After either choice, a compact **Analytics preferences** control stays available in the same place. It opens accept and decline buttons, so visitors can withdraw or change their choice at any time. Both choices notify the shared analytics adapter immediately through `hraness-consent-accepted` or `hraness-consent-declined`, including when local storage is unavailable. Use `@hraness/posthog` 0.3.8 or newer to handle withdrawal.
+the note never covers them. After either choice, a compact **Analytics preferences** control stays available in the same place. It opens accept and decline buttons, so visitors can withdraw or change their choice at any time. Both choices notify the shared analytics adapter immediately through `hraness-consent-accepted` or `hraness-consent-declined`, including when local storage is unavailable. Pair this UI with an `@hraness/posthog` release that handles `hraness-consent-declined` to apply withdrawal immediately.
 The first render issues no request, sets no cookie, and writes no local
 storage. The links and inline decorative vectors work without client-side
 JavaScript.
