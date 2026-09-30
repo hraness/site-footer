@@ -37,7 +37,7 @@ try {
   await buildCopy(second);
   const files = (await readdir(join(first, "dist"))).sort();
   assert.deepEqual(files, (await readdir(join(second, "dist"))).sort());
-  assert.ok(files.includes("index.js") && files.includes("react.js") && files.includes("stylex-manifest.json") && files.includes("stylex.css"));
+  assert.ok(files.includes("consent.js") && files.includes("index.js") && files.includes("react.js") && files.includes("stylex-manifest.json") && files.includes("stylex.css"));
   for (const file of files) {
     assert.deepEqual(await readFile(join(first, "dist", file)), await readFile(join(second, "dist", file)),
       `Artifact differs across absolute roots: ${file}`);

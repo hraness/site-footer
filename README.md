@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.20.2
+bun add github:hraness/site-footer#v0.20.3
 ```
 
 Start with the network footer and no mailing form:
@@ -43,7 +43,7 @@ That render has the stable `id="hraness-site-footer"`, one Hraness home link
 reading “by Hraness”, four specifically named social
 links, and one hidden geo-gated cookie-consent note linking to the Hraness
 privacy policy. The consent note stays hidden
-without client-side JavaScript; after hydration the React adapter asks the
+without client-side JavaScript; the React adapter and static consent initializer ask the
 shared Accounts region endpoint whether consent applies, fails toward showing
 the note when detection is unavailable, and stores acceptance in local storage.
 A visible note is a small notice in the bottom corner of the window that never
@@ -59,6 +59,7 @@ JavaScript.
 | Import | Use it for | Runtime boundary |
 | --- | --- | --- |
 | `@hraness/site-footer` | Render complete HTML into a static template or server response | Framework-neutral ESM with no React import |
+| `@hraness/site-footer/consent` | Activate the cookie note in an existing static footer | Small browser module with no React, rendering, or analytics runtime |
 | `@hraness/site-footer/react` | Render the same contract in React and progressively enhance signup states | React client component for React 18 and 19 |
 | `@hraness/site-footer/styles.css` | Apply the responsive footer layout, theme fallbacks, and focus states | Compatibility import of checked atomic CSS, imported once by the consumer |
 | `@hraness/site-footer/stylex.css` | Resolve or copy the complete standalone stylesheet | Generated CSS with finite package priority layers |
@@ -74,6 +75,17 @@ const footerHtml = renderHranessSiteFooter({
   mailingList: { kind: "none" },
 });
 ```
+
+For a static site, initialize the note from a browser entry after inserting the footer. React initializes it automatically.
+
+```ts
+import { initHranessCookieConsent } from "@hraness/site-footer/consent";
+
+const cleanup = initHranessCookieConsent();
+// Call cleanup() before removing the page or replacing its footer.
+```
+
+The initializer checks the same region service, reveals the note when a choice is needed, and handles acceptance. Its cleanup removes listeners and cancels pending work. It does not install analytics or change the static signup form.
 
 Both renderers require `mailingList`. Both accept `showBrand: false` when the
 host page already supplies the Hraness identity, an optional `social` object
@@ -329,7 +341,7 @@ variables without creating another footer contract.
 
 With `mailingList: { kind: "none" }` or `{ kind: "account" }`, the package renders
 no signup form or external script and initiates no signup or experiment request.
-The shared React cookie-consent check and acceptance storage described above
+The shared browser cookie-consent check and acceptance storage described above
 remain independent of this mode.
 
 Signup changes that boundary in visible, bounded ways:

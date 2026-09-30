@@ -104,7 +104,7 @@ export async function checkStylexArtifacts(repository: string): Promise<void> {
   assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
   assert.equal(compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   assert.deepEqual(manifest.standaloneSerializer, STANDALONE_SERIALIZER);
-  assert.deepEqual(manifest.runtime.map(({ path }) => path), ["dist/index.js", "dist/react.js"]);
+  assert.deepEqual(manifest.runtime.map(({ path }) => path), ["dist/consent.js", "dist/index.js", "dist/react.js"]);
   assert.deepEqual(manifest.stylesheets.map(({ path }) => path), ["compiler-foundation.css", "styles.css"]);
   assert.equal(manifest.compilerFoundation, "compiler-foundation.css");
   assert.equal(manifest.rulesSha256, stylexRulesSha256(manifest.rules));
@@ -137,7 +137,7 @@ export async function checkStylexArtifacts(repository: string): Promise<void> {
   }
   assert.equal(canonicalJson(collector.seal()), canonicalJson(manifest.rules), "Manifest must contain every owned source recipe");
   const sourceMapFiles = (await readdir(join(repository, "dist"))).filter((path) => path.endsWith(".js.map")).sort();
-  assert.deepEqual(sourceMapFiles, ["index.js.map", "react.js.map"], "Package must emit exactly one external map per runtime");
+  assert.deepEqual(sourceMapFiles, ["consent.js.map", "index.js.map", "react.js.map"], "Package must emit exactly one external map per runtime");
   const mappedSources = new Set<string>();
   for (const path of sourceMapFiles) {
     for (const logical of verifyStylexSourceMap(
@@ -150,7 +150,7 @@ export async function checkStylexArtifacts(repository: string): Promise<void> {
   assert.deepEqual([...mappedSources].sort(), [...transformedSources.keys()].sort(),
     "Published external maps must cover every transformed owned source");
   const runtimeFiles = (await readdir(join(repository, "dist"))).filter((path) => path.endsWith(".js")).sort();
-  assert.deepEqual(runtimeFiles, ["index.js", "react.js"], "Manifest must inventory every emitted runtime");
+  assert.deepEqual(runtimeFiles, ["consent.js", "index.js", "react.js"], "Manifest must inventory every emitted runtime");
   for (const path of runtimeFiles) {
     const runtime = await readFile(join(repository, "dist", path), "utf8");
     assert.ok(!/stylex\.create|stylex-inject|stylexInject|stylesheet-group|jsxDEV|jsx-dev-runtime/u.test(runtime), `Uncompiled or development runtime in ${path}`);
@@ -164,7 +164,7 @@ export async function checkStylexArtifacts(repository: string): Promise<void> {
           `Unexpected package runtime import in ${path}: ${specifier.text}`);
       }
     }
-    if (path === "index.js") assert.ok(!/react[./-](?:development|production|jsx)|__require\("react/u.test(runtime), "Root must remain framework-neutral");
+    if (path === "index.js" || path === "consent.js") assert.ok(!/react[./-](?:development|production|jsx)|__require\("react/u.test(runtime), "Root must remain framework-neutral");
   }
   console.log("SiteFooter StyleX artifacts, complete source inventory, and framework boundaries verified");
 }

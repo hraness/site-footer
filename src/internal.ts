@@ -76,10 +76,8 @@ export const HRANESS_MAILING_PLACEMENT_FIELD = "placement";
 export const HRANESS_MAILING_PLACEMENT = "footer";
 /** Accounts stores at most 2,048 bytes of signup URL; longer pages send none. */
 export const HRANESS_MAX_PAGE_URL_LENGTH = 2048;
-export const HRANESS_CONSENT_REGION_URL = "https://account.hraness.com/api/consent/region";
-export const HRANESS_CONSENT_STORAGE_KEY = "hraness-consent-cookies-v1";
-export const HRANESS_CONSENT_SLOT = "hraness-cookie-consent";
-export const HRANESS_CONSENT_ACCEPT_SLOT = "hraness-cookie-consent-accept";
+import { HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT } from "./consent.js";
+export { HRANESS_CONSENT_REGION_URL, HRANESS_CONSENT_STORAGE_KEY, HRANESS_CONSENT_SLOT, HRANESS_CONSENT_ACCEPT_SLOT } from "./consent.js";
 
 const MAX_AUDIENCE_LENGTH = 24;
 const MAX_PRODUCT_NAME_LENGTH = 48;
