@@ -213,6 +213,8 @@ test("the React adapter reveals geo-gated cookie consent and persists acceptance
     );
     expect(revealed!.hasAttribute("hidden")).toBeFalse();
 
+    let acceptedEvents = 0;
+    window.addEventListener("hraness-consent-accepted", () => { acceptedEvents++; });
     await act(async () => {
       container!.querySelector<HTMLElement>(
         '[data-slot="hraness-cookie-consent-accept"]',
@@ -221,6 +223,7 @@ test("the React adapter reveals geo-gated cookie consent and persists acceptance
     });
 
     expect(storage.get("hraness-consent-cookies-v1")).toBe("accepted");
+    expect(acceptedEvents).toBe(1);
     expect(
       container!.querySelector<HTMLElement>('[data-slot="hraness-cookie-consent"]')!.hasAttribute("hidden"),
     ).toBeTrue();

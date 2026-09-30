@@ -85,8 +85,9 @@ const styles = stylex.create({
     "--hraness-site-footer-padding-block": "clamp(0.75rem, 2vw, 1rem)",
     "--hraness-site-footer-mailing-overlay-offset": "calc(var(--hraness-site-footer-mailing-overlay-clearance) + var(--hraness-site-footer-padding-block) + 1px)",
     "--hraness-site-footer-content-block-size": "var(--hraness-site-footer-control-block-size)",
+    "--_hraness-site-footer-control-rows": "1",
     // The visible cookie note floats in the viewport's end corner. While it is
-    // shown, the in-flow footer adds its height and offset below the controls
+    // shown, the in-flow footer adds its height and offset above the controls
     // so the note never covers them at the end of the page. Hidden consent
     // adds nothing.
     "--_hraness-site-footer-consent-clearance": {
@@ -252,8 +253,8 @@ const styles = stylex.create({
     "border-block-start-width": "1px", "border-block-start-style": "solid",
     "border-block-start-color": { default: "var(--hraness-site-footer-line)", "@media (forced-colors: active)": "ButtonText" },
     backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
-    "padding-block-start": "var(--hraness-site-footer-padding-block)",
-    "padding-block-end": "calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance, 0px) + env(safe-area-inset-bottom, 0px))",
+    "padding-block-start": "calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance, 0px))",
+    "padding-block-end": "calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px))",
     // An optional host content width aligns the row with the page column while
     // the hairline and surface still span the viewport.
     "padding-inline-start": "max(clamp(1rem, 4vw, 2rem), env(safe-area-inset-left), calc((100% - var(--hraness-site-footer-measure, 100%)) / 2))",
@@ -262,11 +263,13 @@ const styles = stylex.create({
   // Compact footers with a signup, account, or support control stack in
   // document order: the brand, the controls, then a full row of social links.
   innerSignup: {
+    "--_hraness-site-footer-control-rows": { default: "3", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand" "mailing" "links"', "@media (min-width: 47.5rem)": '"brand mailing . links"' },
     gridTemplateColumns: { default: "minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerAccount: {
+    "--_hraness-site-footer-control-rows": { default: "3", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand" "mailing" "links"', "@media (min-width: 47.5rem)": '"brand mailing . links"' },
     gridTemplateColumns: { default: "minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
@@ -279,6 +282,7 @@ const styles = stylex.create({
     gridTemplateColumns: { default: "minmax(0, 1fr)", "@media (min-width: 47.5rem)": "minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerMailingNoBrand: {
+    "--_hraness-site-footer-control-rows": { default: "2", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"mailing" "links"', "@media (min-width: 47.5rem)": '"mailing . links"' },
     gridTemplateColumns: { default: "minmax(0, 1fr)", "@media (min-width: 47.5rem)": "minmax(0, max-content) minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
@@ -289,6 +293,7 @@ const styles = stylex.create({
     gridTemplateColumns: { default: "auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerMailingSupportNoBrand: {
+    "--_hraness-site-footer-control-rows": { default: "2", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"mailing support" "links links"', "@media (min-width: 47.5rem)": '"mailing support . links"' },
     gridTemplateColumns: { default: "minmax(0, max-content) minmax(0, 1fr)", "@media (min-width: 47.5rem)": "minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
@@ -301,16 +306,19 @@ const styles = stylex.create({
     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
   },
   innerSupport: {
+    "--_hraness-site-footer-control-rows": { default: "2", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand support" "links links"', "@media (min-width: 47.5rem)": '"brand support . links"' },
     gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerSignupSupport: {
+    "--_hraness-site-footer-control-rows": { default: "3", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand brand" "mailing support" "links links"', "@media (min-width: 47.5rem)": '"brand mailing support . links"' },
     gridTemplateColumns: { default: "minmax(0, max-content) minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerAccountSupport: {
+    "--_hraness-site-footer-control-rows": { default: "3", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand brand" "mailing support" "links links"', "@media (min-width: 47.5rem)": '"brand mailing support . links"' },
     gridTemplateColumns: { default: "minmax(0, max-content) minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
@@ -393,7 +401,7 @@ const styles = stylex.create({
     // A compact note in the viewport's end corner. It never spans the width,
     // and the in-flow footer adds matching clearance while it is visible.
     position: "fixed", zIndex: 40,
-    "inset-block-end": "calc(0.75rem + env(safe-area-inset-bottom, 0px))",
+    "inset-block-end": "calc(var(--_hraness-site-footer-control-rows) * var(--hraness-site-footer-content-block-size) + (var(--_hraness-site-footer-control-rows) - 1) * var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-padding-block) + 0.75rem + env(safe-area-inset-bottom, 0px))",
     "inset-inline-end": "max(0.75rem, env(safe-area-inset-right))",
     display: { default: "flex", ":is([hidden])": "none" },
     alignItems: "center", "max-inline-size": "calc(100vw - 1.5rem)",
@@ -408,12 +416,12 @@ const styles = stylex.create({
     backgroundColor: { default: "transparent", "@media (hover: hover)": { ":hover": "color-mix(in srgb, currentColor 9%, transparent)" } },
     color: "var(--hraness-site-footer-foreground)", fontWeight: 550, textDecoration: "none",
   },
-  consentSeparator: { "margin-inline": 0 },
   consentMore: { display: "inline", position: "relative" },
   consentLearn: {
     cursor: "pointer", display: { default: "inline-flex", "::-webkit-details-marker": "none" },
-    alignItems: "center", "block-size": "var(--hraness-site-footer-control-block-size)",
-    "padding-inline": "0.625rem", borderRadius: "999px",
+    alignItems: "center", justifyContent: "center", "block-size": "var(--hraness-site-footer-control-block-size)",
+    "inline-size": "var(--hraness-site-footer-control-block-size)",
+    "padding-inline": 0, borderRadius: "999px",
     listStyleType: "none", marginInlineStart: 0,
     backgroundColor: { default: "transparent", "@media (hover: hover)": { ":hover": "color-mix(in srgb, currentColor 9%, transparent)" } },
     color: { default: "inherit", "@media (hover: hover)": { ":hover": "var(--hraness-site-footer-foreground)" } },
@@ -511,7 +519,6 @@ export const footerClasses = {
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
   consent: className("hraness-site-footer__consent", styles.box, styles.border, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
-  consentSeparator: className("hraness-site-footer__consent-separator", styles.consentSeparator),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
   consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),

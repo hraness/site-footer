@@ -171,6 +171,7 @@ var styles = {
     "--hraness-site-footer-padding-block": "x1a0dqq5",
     "--hraness-site-footer-mailing-overlay-offset": "x1h47zgc",
     "--hraness-site-footer-content-block-size": "x1ghcxmq",
+    "--_hraness-site-footer-control-rows": "xd04x30",
     "--_hraness-site-footer-consent-clearance": "xwk8b0x x1dsv906",
     "--hraness-site-footer-bar-block-size": "x1baz8l3",
     kULEZF: "xiuoait",
@@ -437,13 +438,14 @@ var styles = {
     kmc9e2: "x3so8kt",
     kpvK8V: "x1hdm9tg x1np48w9",
     kWkggS: "x1hhhz6w x9yvj25",
-    kS5dFF: "x1bhgv95",
-    kgDt7k: "x79o31f",
+    kS5dFF: "x1qtgzxc",
+    kgDt7k: "xpcvst1",
     kzfwIZ: "xhvvu7z",
     kO8tuG: "x1dyck8u",
     $$css: true
   },
   innerSignup: {
+    "--_hraness-site-footer-control-rows": "xh03epf xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x8wilts x63hp6x",
@@ -451,6 +453,7 @@ var styles = {
     $$css: true
   },
   innerAccount: {
+    "--_hraness-site-footer-control-rows": "xh03epf xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x8wilts x63hp6x",
@@ -465,6 +468,7 @@ var styles = {
     $$css: true
   },
   innerMailingNoBrand: {
+    "--_hraness-site-footer-control-rows": "xwhig44 xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x18vlmh1 x4fh1zb",
@@ -479,6 +483,7 @@ var styles = {
     $$css: true
   },
   innerMailingSupportNoBrand: {
+    "--_hraness-site-footer-control-rows": "xwhig44 xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x1snwzqd x1ja9pd9",
@@ -506,6 +511,7 @@ var styles = {
     $$css: true
   },
   innerSupport: {
+    "--_hraness-site-footer-control-rows": "xwhig44 xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x1ioy8xi x1essjf7",
@@ -513,6 +519,7 @@ var styles = {
     $$css: true
   },
   innerSignupSupport: {
+    "--_hraness-site-footer-control-rows": "xh03epf xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x17r4bj8 xhbf6pg",
@@ -520,6 +527,7 @@ var styles = {
     $$css: true
   },
   innerAccountSupport: {
+    "--_hraness-site-footer-control-rows": "xh03epf xrank7c",
     "--_hraness-site-footer-links-justify": "xm2onfb xdjmklf",
     "--_hraness-site-footer-links-offset": "x11dl3l8 xg6nurf",
     kC13JO: "x17r4bj8 xhbf6pg",
@@ -686,7 +694,7 @@ var styles = {
   consent: {
     kVAEAm: "xixxii4",
     kY2c9j: "xf5e64p",
-    kctUWg: "x1n7s8u9",
+    kctUWg: "xcc8yhp",
     k7w2rI: "xs1cnaw",
     k1xSpc: "x78zum5 xvgho8r",
     kGNEyG: "x6s0dn4",
@@ -716,10 +724,6 @@ var styles = {
     kybGjl: "x1hl2dhg",
     $$css: true
   },
-  consentSeparator: {
-    kYk0Dm: "xrxpjvj",
-    $$css: true
-  },
   consentMore: {
     k1xSpc: "xt0psk2",
     kVAEAm: "x1n2onr6",
@@ -729,8 +733,10 @@ var styles = {
     kkrTdU: "x1ypdohk",
     k1xSpc: "x3nfvp2 x1i5lizr",
     kGNEyG: "x6s0dn4",
+    kjj79g: "xl56j7k",
     kLWsYc: "xlashs9",
-    kJVvJu: "xvpgqt4",
+    kULEZF: "xtnhhbn",
+    kJVvJu: "xnjsko4",
     kaIpWk: "x1e6avla",
     kH6xsr: "x3ct3a4",
     keTefX: "x1lziwak",
@@ -921,7 +927,6 @@ var footerClasses = {
   socialIcon: className("hraness-site-footer__social-icon", styles.socialIcon),
   consent: className("hraness-site-footer__consent", styles.box, styles.border, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
-  consentSeparator: className("hraness-site-footer__consent-separator", styles.consentSeparator),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
   consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),
@@ -2132,10 +2137,10 @@ function renderMailingList(mailingList, state, presentation) {
   const classes = disclosureClassNames("button");
   return `<details class="${classes.root}" data-slot="hraness-mailing-disclosure"${localAttributes} data-layout="button" data-presentation="stable-modal-v1"><summary data-foil="" class="${classes.trigger}"><span class="${footerClasses.disclosureLabel}">${escapeAttribute(copy.button)}</span></summary><dialog open="" class="${footerClasses.dialog}" data-slot="hraness-mailing-dialog" aria-labelledby="${titleId}" aria-describedby="${descriptionId}"><div class="${footerClasses.dialogHeader}"><h2 class="${footerClasses.dialogTitle}" id="${titleId}">${escapeAttribute(copy.title)}</h2><button class="${footerClasses.dialogClose}" data-slot="hraness-mailing-close" type="button" aria-label="${escapeAttribute(copy.closeLabel)}" hidden=""><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" focusable="false"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg></button></div><p class="${footerClasses.dialogDescription}" id="${descriptionId}">${escapeAttribute(copy.description)}</p><form accept-charset="UTF-8" action="${HRANESS_MAILING_SUBSCRIBE_URL}" aria-label="${escapeAttribute(copy.formLabel)}"${localAttributes} class="${footerClasses.mailing}" data-slot="${HRANESS_MAILING_FORM_SLOT}" data-state="${state.kind}" enctype="multipart/form-data" method="post"${pending ? ' aria-busy="true"' : ""}${accepted ? ' hidden=""' : ""}><input name="audience" type="hidden" value="${escapeAttribute(mailingList.audience)}"><input name="source" type="hidden" value="${HRANESS_MAILING_SOURCE}">${renderPageInput(presentation.pageUrl)}<input name="${HRANESS_MAILING_PLACEMENT_FIELD}" type="hidden" value="${HRANESS_MAILING_PLACEMENT}"><input name="experimentToken" type="hidden" value="" disabled=""><div class="${footerClasses.mailingControls}"><label class="${footerClasses.mailingLabel}"><span class="${footerClasses.emailLabel}">${escapeAttribute(copy.emailLabel)}</span><input aria-describedby="${HRANESS_MAILING_STATUS_SLOT}" autocomplete="email" autocapitalize="none" class="${footerClasses.mailingInput}" inputmode="email" name="email" placeholder="${copy.placeholder}" maxlength="254" dir="ltr" required="" spellcheck="false" type="email"${email}${pending ? ' readonly=""' : ""}></label><button class="${footerClasses.mailingSubmit}" data-foil="" data-slot="${HRANESS_MAILING_FORM_SLOT}-submit" type="submit"${pending || accepted ? ' disabled="" aria-disabled="true"' : ""}>${escapeAttribute(pending ? copy.pending : copy.submit)}</button></div><input aria-hidden="true" autocomplete="off" class="${footerClasses.honeypot}" name="${HRANESS_MAILING_HONEYPOT_FIELD}" tabindex="-1" type="text" value=""></form><p aria-atomic="true" class="${mailingStatusClassName(state.kind)}" data-slot="${HRANESS_MAILING_STATUS_SLOT}" data-state="${state.kind}" id="${HRANESS_MAILING_STATUS_SLOT}" tabindex="-1" aria-live="${state.kind === "error" ? "assertive" : "polite"}" role="${state.kind === "error" ? "alert" : "status"}">${escapeAttribute(statusCopy)}</p></dialog></details>`;
 }
-var HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your browser remembers your appearance setting and this choice. None of it is used for advertising or cross-site tracking.";
-var HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. None of it is used for advertising or cross-site tracking.";
+var HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
+var HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
 function renderConsentHtml(signIn) {
-  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><span aria-hidden="true" class="${footerClasses.consentSeparator}">·</span><details class="${footerClasses.consentMore}"><summary class="${footerClasses.consentLearn}">Learn more</summary><span class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
+  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" class="${footerClasses.consentLearn}">${HRANESS_SUPPORT_ICON_HTML}</summary><span class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a></span></details></div>`;
 }
 function resolveSupportLink(profile) {
   if (profile === undefined)
@@ -2199,4 +2204,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=B5E1877FC7EA68EB64756E2164756E21
+//# debugId=6F525985FE00640A64756E2164756E21

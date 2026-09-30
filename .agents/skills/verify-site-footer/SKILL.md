@@ -17,15 +17,19 @@ bun run verify:browser:doctor
 
 Require Bun 1.3.14, `@hraness/direct` 0.7.18, agent-browser 0.32.3, the checked source tree, an unused loopback port, no active verifier ownership record, and a writable ignored evidence directory. Doctor is read-only and refuses ambiguous ownership.
 
+The browser is pinned to Chrome for Testing 151.0.7922.71 in the agent-browser browser cache. Doctor checks its real path and version; missing provisioning fails without falling back to system Chrome. The task-owned launcher merges `PaintHolding,MacAppCodeSignClone` with the driver’s disabled features and adds `--mute-audio`.
+
 ## Launch
 
-Run the complete verifier through the host browser lane:
+When an installed host scheduler is available, resolve its absolute command path and run the complete verifier through its `browser-auth` lane, following repository `AGENTS.md`:
 
 ```sh
 ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-browser -- bun run verify:browser
 ```
 
-Resolve `ABSOLUTE_HRA_HOST_RUN` with `command -v host-run` first. The verifier builds the fixture into one unique temporary directory, binds only `127.0.0.1:4187`, checks `/health`, launches one fresh contained Chromium process, and refuses to reuse another local server. It records exact server and browser ownership before driving.
+Resolve `ABSOLUTE_HRA_HOST_RUN` with `command -v host-run` first. If no supported host scheduler is installed, run `bun run verify:browser` directly using this verifier’s exact-process custody. Do not revive a retired source wrapper or install a global scheduler as a prerequisite.
+
+The verifier builds the fixture into one unique temporary directory, binds only `127.0.0.1:4187`, checks `/health`, launches one fresh contained Chromium process, and refuses to reuse another local server. It records exact server and browser ownership before driving.
 
 ## Drive
 
@@ -58,7 +62,7 @@ A separate consent layout context uses the existing synthetic region response to
 show the real notice at 320, 390, 760 and 1280 pixels, including account and wide-font
 variants. Measured at the end of the page, it requires a compact fixed note in the
 viewport's end corner that never spans the width, and an in-flow footer whose extra
-bottom padding exactly clears that note below the controls. It then clicks Accept
+top padding exactly clears that note above the controls. It then clicks Accept
 and reloads to prove the note and its clearance disappear together. Each case
 retains a full-page screenshot of the shown, accepted and reloaded states. It never
 changes component state directly or contacts Accounts.
@@ -105,7 +109,7 @@ Apply only the validated recorded cleanup:
 ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --apply
 ```
 
-Resolve the same reviewed absolute scheduler path used for launch. Cleanup refuses a mismatched repository, token, exact PID command, session name, or temporary path, and revalidates PID ownership before signal escalation. The browser idle timeout is a bounded fallback, not cleanup evidence.
+Use the same installed scheduler as launch when one is available. Otherwise run the shown Bun cleanup command directly, preserving its exact ownership checks. Cleanup refuses a mismatched repository, token, exact PID command, session name, or temporary path, and revalidates PID ownership before signal escalation. The browser idle timeout is a bounded fallback, not cleanup evidence.
 
 ## Feature Map
 

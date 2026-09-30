@@ -35,7 +35,6 @@ export declare const footerClasses: {
     socialIcon: string;
     consent: string;
     consentAccept: string;
-    consentSeparator: string;
     consentMore: string;
     consentLearn: string;
     consentPanel: string;

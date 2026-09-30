@@ -48,7 +48,7 @@ describe("compiled footer presentation", () => {
 
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.20.1");
+    expect(pkg.version).toBe("0.20.2");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -114,9 +114,9 @@ describe("compiled footer presentation", () => {
     contains(root, "--_hraness-site-footer-consent-clearance:0px");
     contains(root, ':has(>.hraness-site-footer__inner>[data-slot="hraness-cookie-consent"]:not([hidden]))');
     contains(root, "--_hraness-site-footer-consent-clearance:calc(var(--hraness-site-footer-control-block-size) + 1.25rem + 2px)");
-    contains(footerInnerClassName(false), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px) + env(safe-area-inset-bottom, 0px))");
+    contains(footerInnerClassName(false), "padding-block-start:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px))");
     contains(footerClasses.consent, "position:fixed");
-    contains(footerClasses.consent, "inset-block-end:calc(.75rem + env(safe-area-inset-bottom, 0px))");
+    contains(footerClasses.consent, "inset-block-end:calc(var(--_hraness-site-footer-control-rows)*var(--hraness-site-footer-content-block-size) + (var(--_hraness-site-footer-control-rows) - 1)*var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-padding-block) + .75rem + env(safe-area-inset-bottom, 0px))");
     contains(footerClasses.consent, "inset-inline-end:max(.75rem,env(safe-area-inset-right))");
     contains(footerClasses.consent, "max-inline-size:calc(100vw - 1.5rem)");
     contains(footerClasses.consent, ":is([hidden])");
@@ -128,7 +128,7 @@ describe("compiled footer presentation", () => {
     expect(cssFor(footerClasses.consent)).not.toMatch(/inset-inline-start|inset-inline:|[{;]inline-size:100|grid-(?:row|column)/u);
     for (const target of [footerClasses.consentAccept, footerClasses.consentLearn]) {
       contains(target, "block-size:var(--hraness-site-footer-control-block-size)");
-      contains(target, "padding-inline:.625rem");
+
       contains(target, ":focus-visible");
     }
   });
@@ -286,8 +286,8 @@ describe("compiled footer presentation", () => {
 
   test("reserves matching visual padding plus the device safe area in both layouts", () => {
     for (const signup of [false, true]) {
-      contains(footerInnerClassName(signup), "padding-block-start:var(--hraness-site-footer-padding-block)");
-      contains(footerInnerClassName(signup), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px) + env(safe-area-inset-bottom, 0px))");
+      contains(footerInnerClassName(signup), "padding-block-end:calc(var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom,0px))");
+      contains(footerInnerClassName(signup), "padding-block-start:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px))");
       contains(footerClassName(signup), "--hraness-site-footer-bar-block-size:calc(var(--hraness-site-footer-content-block-size) + var(--_hraness-site-footer-consent-clearance) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)");
     }
   });

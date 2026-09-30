@@ -589,9 +589,8 @@ export function HranessSiteFooter({
       signal: controller.signal,
     }).then(async (response) => {
       const body: unknown = await response.json();
-      const required = typeof body === "object" && body !== null
-        ? Reflect.get(body, "required") === true
-        : true;
+      const required = !response.ok || typeof body !== "object" || body === null
+        || Reflect.get(body, "required") !== false;
       if (!controller.signal.aborted) setConsent(required ? "required" : "clear");
     }).catch(() => {
       if (!controller.signal.aborted) setConsent("required");
@@ -633,6 +632,7 @@ export function HranessSiteFooter({
       } catch {
         // Private browsing or disabled storage: hide for this page only.
       }
+      window.dispatchEvent(new Event("hraness-consent-accepted"));
       setConsent("clear");
     },
     onSubmit: handleSubmit,
