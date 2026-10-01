@@ -116,7 +116,7 @@ const styles = stylex.create({
     "--hraness-site-footer-action-background": "light-dark(#1e40af, #93c5fd)",
     "--hraness-site-footer-action-foreground": "light-dark(#ffffff, #172554)",
   },
-  disclosure: { position: "static", gridArea: "mailing", justifySelf: "start", "min-inline-size": 0, "max-inline-size": "22rem" },
+  disclosure: { position: "static", gridArea: "mailing", justifySelf: "start", "min-inline-size": 0, "max-inline-size": "min(100%, 22rem)" },
   dialog: {
     position: { default: "absolute", ":modal": "fixed" },
     "inset-block-start": { default: "auto", ":modal": "var(--hraness-signup-viewport-top, 0px)" },
@@ -296,7 +296,7 @@ const styles = stylex.create({
     "--_hraness-site-footer-control-rows": { default: "2", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"mailing support" "links links"', "@media (min-width: 47.5rem)": '"mailing support . links"' },
-    gridTemplateColumns: { default: "minmax(0, max-content) minmax(0, 1fr)", "@media (min-width: 47.5rem)": "minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+    gridTemplateColumns: { default: "minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   account: {
     gridArea: "mailing", display: "inline-flex", alignItems: "center", justifyContent: "center", justifySelf: "start",
@@ -309,19 +309,20 @@ const styles = stylex.create({
     "--_hraness-site-footer-control-rows": { default: "2", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand support" "links links"', "@media (min-width: 47.5rem)": '"brand support . links"' },
-    gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+    gridTemplateColumns: { default: "auto minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerSignupSupport: {
     "--_hraness-site-footer-control-rows": { default: "3", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand brand" "mailing support" "links links"', "@media (min-width: 47.5rem)": '"brand mailing support . links"' },
-    gridTemplateColumns: { default: "minmax(0, max-content) minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+    // Reserve the icon target before the label receives its available width.
+    gridTemplateColumns: { default: "minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   innerAccountSupport: {
     "--_hraness-site-footer-control-rows": { default: "3", "@media (min-width: 47.5rem)": "1" },
     ...socialStack,
     gridTemplateAreas: { default: '"brand brand" "mailing support" "links links"', "@media (min-width: 47.5rem)": '"brand mailing support . links"' },
-    gridTemplateColumns: { default: "minmax(0, max-content) minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
+    gridTemplateColumns: { default: "minmax(0, max-content) minmax(var(--hraness-site-footer-social-target), 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, max-content) auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
   },
   // The optional Accounts support destination is an icon-only link that shares
   // the social targets' muted treatment, size, and hover behavior.

@@ -667,8 +667,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .x37z1gs {
-    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  .x1olarsd {
+    grid-template-columns: minmax(0,max-content) minmax(var(--hraness-site-footer-social-target),1fr);
   }
 
   .xif76xs {
@@ -864,16 +864,16 @@
     max-inline-size: 12rem;
   }
 
-  .x1n9s1zj {
-    max-inline-size: 22rem;
-  }
-
   .x15qkubi {
     max-inline-size: calc(100vw - 1.5rem);
   }
 
   .x1ljtl1n {
     max-inline-size: calc(100vw - 2rem);
+  }
+
+  .xlu39c9 {
+    max-inline-size: min(100%, 22rem);
   }
 
   .x1tec7hu {

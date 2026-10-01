@@ -16,6 +16,7 @@
 - Non-reserving idle status surface.
 - Minimum visible target sizes, viewport containment, no compact overflow, and settled geometry.
 - Independently cascaded control font palettes and inherited font language.
+- At 200% text size, signup, account, and support layouts retain the complete support target inside the padded footer, with and without the brand. A long signup label keeps its full accessible name and truncates inside its own control.
 - Signed-in account link at all four widths, with native navigation, normal border, no foil or signup/experiment requests, and keyboard focus.
 - Signup-disabled footer at all four widths, including visible keyboard focus through its five links and no provider interactions.
 
