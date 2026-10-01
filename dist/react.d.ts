@@ -6,9 +6,11 @@ import { type FormEvent } from "react";
 export interface HranessCookieConsentProps {
     /** Include the essential sign-in cookie explanation only on sites that use it. */
     readonly signIn?: boolean;
+    /** Resolved preferences stay in the corner by default; use flow near a route end. */
+    readonly placement?: "corner" | "flow";
 }
 /** The shared consent note for focused app routes that omit the site footer. */
-export declare function HranessCookieConsent({ signIn }?: HranessCookieConsentProps): import("react").DetailedReactHTMLElement<{
+export declare function HranessCookieConsent({ signIn, placement }?: HranessCookieConsentProps): import("react").DetailedReactHTMLElement<{
     ref: import("react").RefObject<HTMLDivElement | null>;
     className: string;
     dangerouslySetInnerHTML: {
@@ -74,6 +76,7 @@ export declare function HranessSiteFooter({ locale: localeInput, onConversion, a
     onClick: (event: {
         target: EventTarget | null;
         defaultPrevented: boolean;
+        detail: number;
         preventDefault: () => void;
     }) => void;
     onSubmit: (event: FormEvent<HTMLElement>) => void;

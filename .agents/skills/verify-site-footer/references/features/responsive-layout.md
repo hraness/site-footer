@@ -3,7 +3,7 @@
 ## Sub-features
 
 - One aligned wide row at 1280 by 900.
-- A compact stacked footer at 390 by 844: the brand, then the native signup disclosure and support link in one row, then the social row. Visible cookie consent is a compact fixed note in the viewport's end corner, and the in-flow footer clears it at the end of the page.
+- A compact stacked footer at 390 by 844: the brand, then the native signup disclosure and support link in one row, then the social row. The required cookie notice is a compact fixed note in the viewport's end corner, and the in-flow footer clears it at the end of the page; resolved preferences use a normal-flow row after the socials.
 - Constrained 320-pixel phones and the 760-pixel single-row breakpoint.
 - Visible brand, mailing, and social grouping.
 - One row at wide widths; compact footers with a signup, account, or support control stack those controls above one social row. Compact signup is a disclosure button, with Substack always visible and later socials revealed in priority order as space permits.
@@ -56,10 +56,18 @@ late/malformed attribution, callback churn, and duplicate submissions.
 Every fixture also enables the native optional Support link. Signup samples check its exact product/source destination, value proposition, containment, minimum target and separation from the other controls. No-signup and account contexts include it in geometry and keyboard-focus coverage. All scenarios remain synthetic and never navigate to Accounts.
 
 The consent cases scroll to the end of the page and compare the outer footprint
-and inner footer heights in shown, accepted and reloaded states. A visible note
-must be `position: fixed`, 12 CSS pixels from the viewport's inline end, at most
-85% of the viewport width, and 12 pixels above the footer controls. The footer's top
+and inner footer heights in required, accepted, declined and reloaded states. A required note
+must be `position: fixed`, 0.75rem from the viewport's inline end, at most
+85% of the viewport width, and 0.75rem above the footer controls. The footer's top
 padding must equal its bottom padding plus the note height and corner inset.
-Acceptance must retain the compact Analytics preferences control and its exact clearance at every width. Reopening, declining, reaccepting and reloading exercise the same real controls. Synthetic geometry
-controls reject a full-width or in-flow note, a note that covers the controls, and
-clearance that does not match the note.
+Resolved preferences must be `position: relative`, occupy their own row after socials,
+and release the required notice clearance. Their complete wrapped text remains reachable
+at 200% root text. Synthetic geometry rejects an overlapping row, retained corner positioning,
+and mismatched padding. React and static cases use the same state contract.
+
+Long-page cases exercise keyboard and pointer dismissal at the top of the page,
+restoration to a visible outside link, hidden-target rejection, a temporary main-landmark
+fallback, ordinary next-Tab navigation, intervening focus changes, and return to a
+reopened preference summary. Scrolling must move the resolved footer control with
+the document. Standalone cases preserve the default corner placement and check the
+explicit flow option; every case mounts one consent owner.

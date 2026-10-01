@@ -9,7 +9,10 @@ test("standalone consent is inert on the server and renders only the shared note
   const { document } = parseHTML(html);
   expect(document.querySelector("[data-slot=hraness-cookie-consent]")?.hasAttribute("hidden")).toBe(true);
   expect(document.querySelector("footer, form, .hraness-site-footer__brand, .hraness-site-footer__socials")).toBeNull();
+  expect(document.querySelector("[data-slot=hraness-cookie-consent]")?.getAttribute("data-consent-placement")).toBe("corner");
+  expect(renderToStaticMarkup(<HranessCookieConsent placement="flow" />)).toContain('data-consent-placement="flow"');
   expect(document.querySelector("summary")?.getAttribute("aria-label")).toBe("About cookies");
+  expect(() => renderToStaticMarkup(<HranessCookieConsent placement={'invalid' as 'flow'} />)).toThrow("Consent placement");
   expect(html).not.toContain("Cookies keep you signed in");
   expect(renderToStaticMarkup(<HranessCookieConsent signIn />)).toContain("Cookies keep you signed in");
 });

@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 
-import { HranessSiteFooter } from "../../../../src/react.js";
+import { HranessSiteFooter, HranessCookieConsent } from "../../../../src/react.js";
+import { renderHranessSiteFooter } from "../../../../src/index.js";
+import { initHranessCookieConsent } from "../../../../src/consent.js";
 import "../../../../styles.css";
 import "./fixture.css";
 
@@ -71,6 +73,9 @@ if (pageParams.get("font") === "wide") document.body.dataset.fixtureFont = "wide
 if (pageParams.get("textSize") === "200") document.documentElement.dataset.fixtureTextSize = "200";
 const accountEnabled = pageParams.get("mailing") === "account";
 const signupEnabled = !accountEnabled && pageParams.get("mailing") !== "none";
+const standalone = pageParams.get("standalone");
+const staticRenderer = pageParams.get("renderer") === "static";
+if (pageParams.get("long") === "true") document.body.dataset.fixtureLong = "true";
 const consentRequired = pageParams.get("consent") === "required";
 const experimentEnabled = pageParams.get("attribution") === "stable";
 const experimentRequests: unknown[] = [];
@@ -160,6 +165,12 @@ window.__siteFooterFixture = Object.freeze({
   }),
 });
 
+function StaticFooter() {
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => root.current ? initHranessCookieConsent(root.current) : undefined, []);
+  return <div ref={root} dangerouslySetInnerHTML={{ __html: renderHranessSiteFooter({ mailingList: { kind: "none" } }) }} />;
+}
+
 function Fixture() {
   useEffect(() => {
     document.body.dataset.fixtureReady = "true";
@@ -170,7 +181,9 @@ function Fixture() {
 
   return (
     <>
-      <main className="fixture-main">
+      <main className="fixture-main" id="fixture-main">
+        {pageParams.get("long") === "true" ? <a href="#fixture-main" id="fixture-outside-link">Read the example</a> : null}
+        {pageParams.get("focusTarget") === "temporary" ? <p id="fixture-temporary-focus" tabIndex={0}>Example description</p> : null}
         <article className="fixture-card">
           <p className="fixture-kicker">Package-owned browser fixture</p>
           <h1>One footer, every state.</h1>
@@ -181,7 +194,7 @@ function Fixture() {
           <p className="fixture-state">state: {selectedState}</p>
         </article>
       </main>
-      <HranessSiteFooter
+      {standalone ? <HranessCookieConsent placement={standalone === "flow" ? "flow" : "corner"} /> : staticRenderer ? <StaticFooter /> : <HranessSiteFooter
         // The deprecated placement prop is inert; `?placement=sticky` cases
         // prove it renders the same in-flow footer as the default.
         placement={placement}
@@ -194,7 +207,7 @@ function Fixture() {
           audience: "footer-fixture",
           kind: "signup",
         } : { kind: "none" }}
-      />
+      />}
     </>
   );
 }

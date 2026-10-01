@@ -1235,8 +1235,8 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const content = [...inner.querySelectorAll([
     ".hraness-site-footer__brand", ".hraness-site-footer__social-link", ".hraness-site-footer__support",
     ".hraness-site-footer__mailing-input", ".hraness-site-footer__mailing-submit",
-    ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger", ".hraness-site-footer__account",
-  ].join(","))].filter(element => !element.closest("dialog") && element.checkVisibility() && getComputedStyle(element).position !== "absolute")
+    ".hraness-site-footer__mailing-confirmation", ".hraness-site-footer__disclosure-trigger", ".hraness-site-footer__account", ".hraness-site-footer__consent",
+  ].join(","))].filter(element => !element.closest("dialog") && element.checkVisibility() && !["absolute", "fixed"].includes(getComputedStyle(element).position))
     .map(element => element.getBoundingClientRect())
     .filter(box => box.width > 0 && box.height > 0 && box.top >= inner.getBoundingClientRect().top);
   if (content.length < 2) {
@@ -1264,7 +1264,7 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const contentBottom = Math.max(...content.map(item => item.bottom));
   return {
     // The corner's 0.75rem gap scales with the root text size, including text zoom.
-    consentClearance: (() => { const consent = inner.querySelector('[data-slot="hraness-cookie-consent"]'); const cornerGap = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.75; return consent && !consent.hidden ? consent.getBoundingClientRect().height + cornerGap : 0; })(),
+    consentClearance: (() => { const consent = inner.querySelector('[data-slot="hraness-cookie-consent"]'); const cornerGap = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.75; return consent && !consent.hidden && consent.dataset.consentState === "required" ? consent.getBoundingClientRect().height + cornerGap : 0; })(),
     bottomClearance: box.bottom - borderBottom - contentBottom,
     bottomPadding,
     expectedHeight: contentBottom - contentTop + topPadding + bottomPadding + borderTop + borderBottom,
@@ -1928,7 +1928,7 @@ async function driveNoSignup(browser: BrowserDriver, runDirectory: string, boots
     evidence.push({ geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   await browser.run(["press", "Tab"]);
-  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Support Soundfish: optional paid membership", "Analytics preferences", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub"]) {
+  for (const name of ["Hraness home", ...(account ? ["My account"] : []), "Support Soundfish: optional paid membership", "Hraness on Substack", "Hraness on X", "Hraness on LinkedIn", "Hraness on GitHub", "Analytics preferences"]) {
     const focused = await browser.evaluate(`(() => {
       const element = document.activeElement;
       return { name: element?.getAttribute('aria-label') ?? element?.textContent, outline: element ? getComputedStyle(element).outlineStyle : null };
@@ -2054,38 +2054,45 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
   return evidence;
 }
 
-/** The visible cookie note floats this far from the viewport's end corner. */
-const CONSENT_CORNER_INSET = 12;
-
 /**
  * Independent measured boxes, taken at the end of the page: a visible note is
- * a compact fixed notice in the viewport's end corner that never spans the
- * width, and the in-flow footer clears exactly that notice above its controls.
+ * a compact fixed required notice is cleared above footer controls; resolved
+ * preferences use an ordinary row after the controls and release that clearance.
  */
 export function assertConsentFootprint(input: unknown): void {
-  const value = exactRecord(input, ["width", "viewportHeight", "shown", "position", "footprint", "height", "top", "bottom", "paddingTop", "paddingBottom", "borderTop", "borderBottom", "controlTop", "controlBottom", "consentTop", "consentBottom", "consentLeft", "consentRight"], "Consent footprint");
+  const value = exactRecord(input, ["width", "viewportHeight", "rootFont", "state", "shown", "position", "footprint", "height", "top", "bottom", "paddingTop", "paddingBottom", "borderTop", "borderBottom", "controlTop", "controlBottom", "consentTop", "consentBottom", "consentLeft", "consentRight"], "Consent footprint");
   if (typeof value.shown !== "boolean") throw new Error("Consent visibility is not a boolean.");
   const position = requiredString(value.position, "Consent position");
   const number = (name: string) => finiteNumber(value[name], `Consent ${name}`);
   const width = number("width"), height = number("height"), top = number("top"), bottom = number("bottom");
+  const cornerInset = number("rootFont") * 0.75;
+  const state = requiredString(value.state, "Consent state");
+  if (!["checking", "required", "clear", "declined"].includes(state)) throw new Error("Unknown consent state.");
   if (height <= 0 || Math.abs(number("footprint") - height) > 0.5 || Math.abs(bottom - top - height) > 0.5) throw new Error("Footer footprint must match the whole rendered footer.");
   if (Math.abs(bottom - number("viewportHeight")) > 0.5) throw new Error("Consent geometry must be measured at the end of the page.");
   const controlTop = number("controlTop"), controlBottom = number("controlBottom");
   if (controlBottom <= controlTop || controlTop < top || controlBottom > bottom) throw new Error("Control rows escape footer.");
   const paddingTop = number("paddingTop"), paddingBottom = number("paddingBottom");
   let clearance = 0;
-  if (value.shown) {
+  let contentBottom = controlBottom;
+  if (value.shown && state === "required") {
     const consentTop = number("consentTop"), consentBottom = number("consentBottom");
     const consentLeft = number("consentLeft"), consentRight = number("consentRight");
     if (position !== "fixed" || consentBottom <= consentTop || consentRight <= consentLeft) throw new Error("Visible consent must float as its own corner note.");
-    if (consentLeft < CONSENT_CORNER_INSET - 0.5 || consentRight - consentLeft > width * 0.85) throw new Error("Visible consent must stay compact and never span the width.");
-    if (Math.abs(width - consentRight - CONSENT_CORNER_INSET) > 0.5) throw new Error("Visible consent must sit in the viewport's end corner.");
-    if (consentBottom > controlTop - CONSENT_CORNER_INSET + 0.5 || consentTop < top + number("borderTop") + paddingBottom - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page.");
-    clearance = consentBottom - consentTop + CONSENT_CORNER_INSET;
+    if (consentLeft < cornerInset - 0.5 || consentRight - consentLeft > width * 0.85) throw new Error("Visible consent must stay compact and never span the width.");
+    if (Math.abs(width - consentRight - cornerInset) > 0.5) throw new Error("Visible consent must sit in the viewport's end corner.");
+    if (consentBottom > controlTop - cornerInset + 0.5 || consentTop < top + number("borderTop") + paddingBottom - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page.");
+    clearance = consentBottom - consentTop + cornerInset;
+  } else if (value.shown) {
+    if (position !== "relative") throw new Error("Resolved footer preferences must remain in normal flow.");
+    if (number("consentTop") < controlBottom + number("rootFont") * 0.5 - 0.5
+      || number("consentBottom") <= number("consentTop")
+      || number("consentLeft") < 0 || number("consentRight") > width) throw new Error("Resolved preferences must wrap in their own row after the controls.");
+    contentBottom = number("consentBottom");
   }
   if (Math.abs(controlTop - top - number("borderTop") - paddingTop) > 0.5
     || Math.abs(paddingTop - paddingBottom - clearance) > 0.5
-    || Math.abs(bottom - controlBottom - number("borderBottom") - number("paddingBottom")) > 0.5) throw new Error("Footer rows must retain their actual padding clearances.");
+    || Math.abs(bottom - contentBottom - number("borderBottom") - number("paddingBottom")) > 0.5) throw new Error("Footer rows must retain their actual padding clearances.");
 }
 
 async function driveConsentCases(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
@@ -2093,6 +2100,9 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
   await browser.run(["tab", "new"]);
   for (const sample of [
     { width: 320, query: "mailing=none&support=none" },
+    { width: 320, query: "mailing=none&support=none&textSize=200" },
+    { width: 390, query: "mailing=account&textSize=200" },
+    { width: 320, query: "renderer=static&mailing=none&support=none&textSize=200" },
     { width: 390, query: "lineHeight=2&font=wide" },
     { width: 390, query: "mailing=account&brand=hidden" },
     { width: 760, query: "mailing=none" },
@@ -2118,7 +2128,7 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
         if (style.backgroundColor === 'transparent' || style.backgroundColor === 'rgba(0, 0, 0, 0)') throw new Error('Footer surface must be opaque.');
         if (controls.some(r => r.left < box.left || r.right > box.right)) throw new Error('Control escapes bar width.');
         if (!consent.hidden && (notice.left < box.left || notice.right > box.right)) throw new Error('Consent escapes bar width.');
-        return {width:innerWidth, viewportHeight:innerHeight, shown:!consent.hidden, position:getComputedStyle(consent).position, footprint:footer.getBoundingClientRect().height, height:box.height, top:box.top, bottom:box.bottom, paddingTop:parseFloat(style.paddingTop), paddingBottom:parseFloat(style.paddingBottom), borderTop:parseFloat(style.borderTopWidth), borderBottom:parseFloat(style.borderBottomWidth), controlTop:Math.min(...controls.map(r=>r.top)), controlBottom:Math.max(...controls.map(r=>r.bottom)), consentTop:notice.top, consentBottom:notice.bottom, consentLeft:notice.left, consentRight:notice.right};
+        return {width:innerWidth, viewportHeight:innerHeight, rootFont:parseFloat(getComputedStyle(document.documentElement).fontSize), state:consent.dataset.consentState, shown:!consent.hidden, position:getComputedStyle(consent).position, footprint:footer.getBoundingClientRect().height, height:box.height, top:box.top, bottom:box.bottom, paddingTop:parseFloat(style.paddingTop), paddingBottom:parseFloat(style.paddingBottom), borderTop:parseFloat(style.borderTopWidth), borderBottom:parseFloat(style.borderBottomWidth), controlTop:Math.min(...controls.map(r=>r.top)), controlBottom:Math.max(...controls.map(r=>r.bottom)), consentTop:notice.top, consentBottom:notice.bottom, consentLeft:notice.left, consentRight:notice.right};
       })()`);
     };
     const shown = await measure(); assertConsentFootprint(shown);
@@ -2130,23 +2140,57 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     await browser.run(["wait", 'summary[aria-label="Analytics preferences"]', "--timeout", "5000"]);
     const accepted = await measure(); assertConsentFootprint(accepted);
     if (!isRecord(accepted) || accepted.shown !== true) throw new Error("Acceptance must keep analytics preferences available.");
-    if (Math.abs(Number(shown.height) - Number(accepted.height)) > .5) throw new Error("Analytics preferences changed footer clearance.");
+    if (accepted.position !== "relative" || accepted.state !== "clear") throw new Error("Accepted preferences must use their normal-flow state.");
     await browser.run(["click", 'summary[aria-label="Analytics preferences"]']);
     if (sample.width === 320) {
       await browser.run(["set", "viewport", "320", "300"]);
       await browser.evaluate(`(() => {
         const panel = document.querySelector('[data-slot="hraness-cookie-consent"] .hraness-site-footer__consent-panel');
         const button = panel.querySelector('[data-slot="hraness-cookie-consent-decline"]');
+        panel.scrollIntoView({block:'nearest'});
         button.scrollIntoView({block:'nearest'});
         const box = panel.getBoundingClientRect(), control = button.getBoundingClientRect();
-        if (box.top < 0 || box.bottom > innerHeight || box.left < 0 || box.right > innerWidth || control.top < box.top || control.bottom > box.bottom) throw new Error('Short viewport cannot reach analytics preferences.');
+        if (box.top < 0 || box.bottom > innerHeight || box.left < 0 || box.right > innerWidth || control.top < box.top || control.bottom > box.bottom) throw new Error('Short viewport cannot reach analytics preferences: '+JSON.stringify({panel:{top:box.top,bottom:box.bottom,left:box.left,right:box.right},control:{top:control.top,bottom:control.bottom},viewport:{width:innerWidth,height:innerHeight},scroll:scrollY}));
       })()`);
       await screenshot(browser, `${screenshotBase}-preferences-short.png`);
       await browser.run(["set", "viewport", "320", "844"]);
     }
+    await browser.evaluate(`(() => {
+      const button = document.querySelector('[data-slot="hraness-cookie-consent-decline"]');
+      const panel = button.closest('.hraness-site-footer__consent-panel');
+      panel.scrollIntoView({block:'nearest'});
+      button.scrollIntoView({block:'nearest'});
+      const box = button.getBoundingClientRect(), boundary = panel.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      if (boundary.top < -.5 || boundary.bottom > innerHeight + .5 || boundary.left < -.5 || boundary.right > innerWidth + .5
+        || box.top < boundary.top || box.bottom > boundary.bottom || box.left < boundary.left || box.right > boundary.right
+        || !button.contains(hit)) throw new Error('Withdrawal must be reachable by a real pointer after scrolling: '+JSON.stringify({button:box.toJSON(),panel:boundary.toJSON(),hit:hit?.closest('[data-slot]')?.dataset.slot}));
+    })()`);
+    await screenshot(browser, `${screenshotBase}-preferences-open.png`);
+    const withdrawalProbe = await browser.evaluate(`(() => {
+      const button = document.querySelector('[data-slot="hraness-cookie-consent-decline"]');
+      const panel = button.closest('.hraness-site-footer__consent-panel');
+      const box = button.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      const describe = element => element ? {tag:element.tagName,slot:element.closest('[data-slot]')?.dataset.slot,text:element.textContent?.slice(0,80)} : null;
+      window.__consentInputEvents = [];
+      for (const type of ['pointerdown', 'click']) document.addEventListener(type, event => window.__consentInputEvents.push({type,target:describe(event.target),x:event.clientX,y:event.clientY}), {capture:true,once:true});
+      return {button:box.toJSON(),panel:panel.getBoundingClientRect().toJSON(),panelScroll:panel.scrollTop,hit:describe(hit),viewport:{width:innerWidth,height:innerHeight},scroll:scrollY};
+    })()`);
     await browser.run(["click", '[data-slot="hraness-cookie-consent-decline"]']);
-    const declined = await browser.evaluate(`({choice:localStorage.getItem('hraness-consent-cookies-v1'),state:document.querySelector('[data-slot="hraness-cookie-consent"]').dataset.consentState,open:document.querySelector('[data-slot="hraness-cookie-consent"] details').open})`);
-    if (!isRecord(declined) || declined.choice !== "declined" || declined.state !== "declined" || declined.open !== false) throw new Error("Preferences must persist withdrawal and close the disclosure.");
+    const readWithdrawal = `({choice:localStorage.getItem('hraness-consent-cookies-v1'),state:document.querySelector('[data-slot="hraness-cookie-consent"]')?.dataset.consentState,open:document.querySelector('[data-slot="hraness-cookie-consent"] details')?.open})`;
+    const withdrawalInitial = await browser.evaluate(readWithdrawal);
+    let withdrawalWaitFailure: string | null = null;
+    try {
+      await browser.run(["wait", "--fn", `(() => {
+        const note = document.querySelector('[data-slot="hraness-cookie-consent"]');
+        return localStorage.getItem('hraness-consent-cookies-v1') === 'declined'
+          && note?.dataset.consentState === 'declined' && note.querySelector('details')?.open === false;
+      })()`, "--timeout", "5000"]);
+    } catch (error) { withdrawalWaitFailure = error instanceof Error ? error.message : String(error); }
+    const declined = await browser.evaluate(readWithdrawal);
+    const withdrawalInput = await browser.evaluate(`window.__consentInputEvents`);
+    if (withdrawalWaitFailure !== null || !isRecord(declined) || declined.choice !== "declined" || declined.state !== "declined" || declined.open !== false) throw new Error(`Preferences must persist withdrawal and close the disclosure: ${JSON.stringify({sample, withdrawalInitial, declined, withdrawalWaitFailure, withdrawalProbe, withdrawalInput})}`);
     await browser.run(["click", 'summary[aria-label="Analytics preferences"]']);
     await browser.run(["click", 'details [data-slot="hraness-cookie-consent-accept"]']);
     const acceptedScreenshotPath = `${screenshotBase}-accepted.png`;
@@ -2159,7 +2203,7 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
     const reloadedScreenshotPath = `${screenshotBase}-reloaded.png`;
     await screenshot(browser, reloadedScreenshotPath);
     evidence.push({
-      sample, shown, accepted, declined, reloaded,
+      sample, shown, accepted, withdrawalInitial, declined, withdrawalProbe, withdrawalInput, reloaded,
       screenshot: relative(REPOSITORY_ROOT, screenshotPath),
       acceptedScreenshot: relative(REPOSITORY_ROOT, acceptedScreenshotPath),
       reloadedScreenshot: relative(REPOSITORY_ROOT, reloadedScreenshotPath),
@@ -2173,6 +2217,106 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
   try { await browser.run(["tab", "close", tabId]); } catch (error) { if (!isRecoverableTabCloseRace(error)) throw error; }
   const inventory = await browser.run(["tab"]);
   if (activeTabId(inventory) !== bootstrapTabId || tabIds(inventory).includes(tabId)) throw new Error("Consent tab did not close back to the bootstrap tab.");
+  return evidence;
+}
+
+async function driveConsentFocusCases(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
+  const evidence: unknown[] = [];
+  await browser.run(["tab", "new"]);
+  const ready = async (query: string) => {
+    await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=none`]);
+    await browser.evaluate(`localStorage.removeItem('hraness-consent-cookies-v1')`);
+    await browser.run(["set", "viewport", "390", "844"]);
+    await browser.run(["open", `${DEFAULT_BASE_URL}/?consent=required&long=true&mailing=none&support=none&${query}`]);
+    await browser.run(["wait", '[data-consent-state="required"]', "--timeout", "5000"]);
+    await browser.evaluate("window.scrollTo(0, 0)");
+  };
+  const focusSnapshot = () => browser.evaluate(`(() => {
+    const note = document.querySelector('[data-slot="hraness-cookie-consent"]');
+    const active = document.activeElement, box = active.getBoundingClientRect();
+    return {state:note.dataset.consentState, focus:active.id || active.getAttribute('aria-label') || active.tagName, scroll:scrollY, visible:box.bottom>0&&box.top<innerHeight&&box.width>0&&box.height>0, mainTabindex:document.querySelector('main').getAttribute('tabindex'), position:getComputedStyle(note).position};
+  })()`);
+  for (const renderer of ["react", "static"]) {
+    await ready(`renderer=${renderer}`);
+    await browser.evaluate(`document.querySelector('#fixture-outside-link').focus(); document.querySelector('[data-consent-prompt]').focus({preventScroll:true})`);
+    await browser.run(["press", "Enter"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const restored = await focusSnapshot();
+    if (!isRecord(restored) || restored.focus !== "fixture-outside-link" || restored.scroll !== 0 || restored.visible !== true) throw new Error("Initial keyboard dismissal must restore the visible outside control without scrolling.");
+    await browser.run(["press", "Tab"]);
+    const next = await focusSnapshot();
+    if (!isRecord(next) || next.visible !== true || next.focus === "BODY") throw new Error("Next Tab must reach a visible meaningful control.");
+
+    await ready(`renderer=${renderer}`);
+    await browser.evaluate(`document.querySelector('[data-consent-prompt]').focus({preventScroll:true})`);
+    await browser.run(["press", "Enter"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const fallback = await focusSnapshot();
+    if (!isRecord(fallback) || fallback.focus !== "fixture-main" || fallback.scroll !== 0 || fallback.mainTabindex !== "-1") throw new Error("Keyboard dismissal without an outside target must focus the visible main landmark.");
+    await browser.run(["press", "Tab"]);
+    const afterFallback = await focusSnapshot();
+    if (!isRecord(afterFallback) || afterFallback.focus !== "fixture-outside-link" || afterFallback.mainTabindex !== null || afterFallback.scroll !== 0) throw new Error("The landmark fallback must restore tabindex and preserve normal next-Tab navigation.");
+
+    await ready(`renderer=${renderer}&focusTarget=temporary`);
+    await browser.evaluate(`const target=document.querySelector('#fixture-temporary-focus');target.focus();target.removeAttribute('tabindex');document.querySelector('[data-consent-prompt]').focus({preventScroll:true})`);
+    await browser.run(["press", "Enter"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const lostFocusability = await focusSnapshot();
+    if (!isRecord(lostFocusability) || lostFocusability.focus !== "fixture-main" || lostFocusability.scroll !== 0) throw new Error("A saved target that lost focusability must fall through to a working visible target.");
+
+    await ready(`renderer=${renderer}`);
+    await browser.evaluate(`const outside=document.querySelector('#fixture-outside-link');outside.focus();outside.hidden=true;document.querySelector('[data-consent-prompt]').focus({preventScroll:true})`);
+    await browser.run(["press", "Enter"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const hiddenOutside = await focusSnapshot();
+    if (!isRecord(hiddenOutside) || hiddenOutside.focus !== "fixture-main" || hiddenOutside.scroll !== 0) throw new Error("A hidden outside target must not receive restored focus.");
+
+    await ready(`renderer=${renderer}`);
+    await browser.evaluate(`const prompt=document.querySelector('[data-consent-prompt]');prompt.focus({preventScroll:true});prompt.click();document.querySelector('#fixture-outside-link').focus({preventScroll:true})`);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const intervening = await focusSnapshot();
+    if (!isRecord(intervening) || intervening.focus !== "fixture-outside-link" || intervening.scroll !== 0) throw new Error("An intervening focus move must supersede deferred consent restoration.");
+
+    await ready(`renderer=${renderer}`);
+    await browser.run(["click", '[data-consent-prompt]']);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const pointer = await focusSnapshot();
+    if (!isRecord(pointer) || pointer.scroll !== 0 || pointer.focus === "Analytics preferences") throw new Error("Pointer dismissal must not move focus or scroll to the footer.");
+    await browser.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)");
+    await browser.evaluate(SETTLE_EXPRESSION);
+    await browser.evaluate(`document.querySelector('summary[aria-label="Analytics preferences"]').focus()`);
+    await browser.run(["press", "Enter"]);
+    await browser.evaluate(`document.querySelector('[data-slot="hraness-cookie-consent-decline"]').focus()`);
+    await browser.run(["press", "Enter"]);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const reopened = await focusSnapshot();
+    if (!isRecord(reopened) || reopened.state !== "declined" || reopened.focus !== "Analytics preferences" || reopened.visible !== true) throw new Error("Reopened preferences must return keyboard focus to their summary.");
+    const end = await browser.evaluate(`({y:scrollY,top:document.querySelector('[data-slot="hraness-cookie-consent"]').getBoundingClientRect().top})`);
+    await browser.evaluate("window.scrollBy(0, -100)");
+    const moved = await browser.evaluate(`({y:scrollY,top:document.querySelector('[data-slot="hraness-cookie-consent"]').getBoundingClientRect().top})`);
+    if (!isRecord(end) || !isRecord(moved) || Math.abs(Number(moved.top)-Number(end.top)-(Number(end.y)-Number(moved.y)))>.5) throw new Error("Resolved preferences must scroll with the footer.");
+    await screenshot(browser, join(runDirectory, `consent-focus-${renderer}.png`));
+    evidence.push({renderer, restored, next, fallback, afterFallback, lostFocusability, hiddenOutside, intervening, pointer, reopened, end, moved});
+  }
+  for (const placement of ["corner", "flow"]) {
+    await ready(`standalone=${placement}&textSize=200`);
+    await browser.run(["click", '[data-consent-prompt]']);
+    await browser.evaluate(SETTLE_EXPRESSION);
+    const sample = await browser.evaluate(`(() => {
+      const note=document.querySelector('[data-slot="hraness-cookie-consent"]');
+      const box=note.getBoundingClientRect();
+      return {count:document.querySelectorAll('[data-slot="hraness-cookie-consent"]').length,footer:!!document.querySelector('footer'),position:getComputedStyle(note).position,overflow:document.documentElement.scrollWidth>innerWidth+.5,left:box.left,right:box.right};
+    })()`);
+    if (!isRecord(sample) || sample.count!==1 || sample.footer!==false || sample.position!==(placement==="corner"?"fixed":"relative") || sample.overflow!==false || Number(sample.left)<0 || Number(sample.right)>390) throw new Error("Standalone consent must preserve its explicit placement and fit enlarged text.");
+    await screenshot(browser, join(runDirectory, `consent-standalone-${placement}.png`));
+    evidence.push({placement, sample});
+  }
+  if (browserPageErrors(await browser.run(["errors"])).length || browserConsoleErrors(await browser.run(["console"])).length) throw new Error("Consent focus cases produced browser errors.");
+  const tabId = activeTabId(await browser.run(["tab"]));
+  await browser.run(["tab", bootstrapTabId]);
+  try { await browser.run(["tab", "close", tabId]); } catch (error) { if (!isRecoverableTabCloseRace(error)) throw error; }
+  const inventory = await browser.run(["tab"]);
+  if (activeTabId(inventory)!==bootstrapTabId || tabIds(inventory).includes(tabId)) throw new Error("Consent focus tab did not close.");
   return evidence;
 }
 
@@ -2290,7 +2434,7 @@ async function runVerifier(): Promise<string> {
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     accountEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId, true);
     alignmentEvidence = await driveAlignmentCases(browser, artifacts.runDirectory, bootstrapTabId);
-    consentEvidence = await driveConsentCases(browser, artifacts.runDirectory, bootstrapTabId);
+    consentEvidence = [...await driveConsentCases(browser, artifacts.runDirectory, bootstrapTabId), ...await driveConsentFocusCases(browser, artifacts.runDirectory, bootstrapTabId)];
     finalInventory = await browser.run(["tab"]);
     postDriveSource = sourceIdentity();
     assertSameSourceIdentity(initialSource, postDriveSource);

@@ -97,18 +97,117 @@ export function chooseCookieConsent(target: Element): boolean {
   else acceptCookieConsent();
   const note = button.closest(`[data-slot="${HRANESS_CONSENT_SLOT}"]`);
   note?.querySelector("details")?.removeAttribute("open");
-  (note?.querySelector("summary") as HTMLElement | null)?.focus?.();
   return true;
+}
+
+/** Coordinate dismissal focus with the renderer that has actually applied the choice. */
+export function createCookieConsentInteraction(root: Document | HTMLElement) {
+  const document = root.nodeType === 9 ? root as Document : root.ownerDocument!;
+  const view = document.defaultView;
+  let outside: HTMLElement | null = null;
+  let pending: { reopened: boolean; keyboard: boolean } | null = null;
+  let frame: ReturnType<typeof setTimeout> | null = null;
+  let disposed = false;
+  let restoreTabIndex: (() => void) | null = null;
+  const consentSelector = `[data-slot="${HRANESS_CONSENT_SLOT}"]`;
+  const visible = (element: HTMLElement | null): element is HTMLElement => {
+    if (!element?.isConnected || !view || typeof view.getComputedStyle !== "function" || typeof element.getBoundingClientRect !== "function"
+      || element.closest('[hidden], [inert], [aria-hidden="true"], [aria-disabled="true"]') || element.matches(":disabled")) return false;
+    if (typeof element.checkVisibility === "function" && !element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
+    const css = view.getComputedStyle(element), box = element.getBoundingClientRect();
+    return css.display !== "none" && css.visibility === "visible" && Number(css.opacity) !== 0
+      && box.width > 0 && box.height > 0 && box.bottom > 0 && box.right > 0
+      && box.top < view.innerHeight && box.left < view.innerWidth;
+  };
+  const cancelPending = (): void => { pending = null; if (frame !== null) clearTimeout(frame); frame = null; };
+  const isOutsideTarget = (element: HTMLElement): boolean => element !== document.body && element !== document.documentElement && !element.closest(consentSelector);
+  const focus = (element: HTMLElement | null): boolean => {
+    if (!visible(element)) return false;
+    element.focus({ preventScroll: true });
+    return document.activeElement === element;
+  };
+  const onFocus = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    if (typeof target?.closest !== "function") return;
+    if (pending) cancelPending();
+    if (isOutsideTarget(target)) {
+      if (visible(target)) outside = target;
+      // A real focus move after activation takes precedence over our restoration.
+      cancelPending();
+    }
+  };
+  const onPointer = (): void => { cancelPending(); };
+  document.addEventListener("focusin", onFocus);
+  document.addEventListener("pointerdown", onPointer, true);
+  const initial = document.activeElement as HTMLElement | null;
+  if (initial && isOutsideTarget(initial) && visible(initial)) outside = initial;
+
+  const afterUpdate = (): void => {
+    if (!pending || disposed || frame !== null) return;
+    const note = root.querySelector(consentSelector);
+    if (!note || note.getAttribute("data-consent-state") === "required" || note.hasAttribute("hidden")) return;
+    // Static renderers update synchronously; React updates through an effect.
+    // Defer layout inspection until that update, and query the current node again.
+    frame = setTimeout(() => {
+      frame = null;
+      const request = pending;
+      if (!request || disposed) return;
+      pending = null;
+      const currentNote = root.querySelector(consentSelector);
+      const active = document.activeElement;
+      if (active && active !== document.body && active !== document.documentElement && !currentNote?.contains(active)) return;
+      const summary = currentNote?.querySelector<HTMLElement>("summary") ?? null;
+      if ((request.reopened || request.keyboard) && focus(summary)) return;
+      if (!request.keyboard) return;
+      if (focus(outside)) return;
+      const candidates = [...document.querySelectorAll<HTMLElement>('main, [role="main"], a[href], button, input, select, textarea, [tabindex]')]
+        .filter(element => isOutsideTarget(element) && visible(element));
+      for (const candidate of candidates) {
+        restoreTabIndex?.();
+        if (!candidate.hasAttribute("tabindex") && candidate.matches('main, [role="main"]')) {
+          candidate.setAttribute("tabindex", "-1");
+          const restore = (): void => {
+            if (candidate.getAttribute("tabindex") === "-1") candidate.removeAttribute("tabindex");
+            candidate.removeEventListener("blur", restore);
+            if (restoreTabIndex === restore) restoreTabIndex = null;
+          };
+          restoreTabIndex = restore;
+          candidate.addEventListener("blur", restore, { once: true });
+        }
+        if (focus(candidate)) return;
+        restoreTabIndex?.();
+      }
+    }, 0);
+  };
+  return {
+    choose(target: Element, keyboard: boolean): boolean {
+      const button = target.closest(`[data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}"], [data-slot="${HRANESS_CONSENT_DECLINE_SLOT}"]`);
+      if (!button || !root.contains(button)) return false;
+      const note = button.closest(consentSelector);
+      cancelPending();
+      pending = { reopened: note?.getAttribute("data-consent-state") !== "required", keyboard };
+      const chosen = chooseCookieConsent(target);
+      afterUpdate();
+      return chosen;
+    },
+    afterUpdate,
+    dispose(): void {
+      disposed = true; cancelPending(); restoreTabIndex?.(); outside = null;
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("pointerdown", onPointer, true);
+    },
+  };
 }
 
 /** Activate package-rendered consent markup after inserting the static footer. */
 export function initHranessCookieConsent(root: Document | HTMLElement = document): () => void {
-  const removeConsent = observeCookieConsent(state => updateCookieConsent(root, state));
+  const interaction = createCookieConsentInteraction(root);
+  const removeConsent = observeCookieConsent(state => { updateCookieConsent(root, state); interaction.afterUpdate(); });
   const onClick = (event: Event): void => {
     const target = event.target as Element | null;
     if (typeof target?.closest !== "function" || !root.contains(target) || event.defaultPrevented) return;
-    chooseCookieConsent(target);
+    interaction.choose(target, (event as MouseEvent).detail === 0);
   };
   root.addEventListener("click", onClick);
-  return () => { removeConsent(); root.removeEventListener("click", onClick); };
+  return () => { removeConsent(); interaction.dispose(); root.removeEventListener("click", onClick); };
 }

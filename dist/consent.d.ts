@@ -14,6 +14,12 @@ export declare function observeCookieConsent(listener: (state: CookieConsentStat
 export declare function updateCookieConsent(root: Document | HTMLElement, state: CookieConsentState): void;
 /** Shared by the static enhancer and the React adapter. */
 export declare function chooseCookieConsent(target: Element): boolean;
+/** Coordinate dismissal focus with the renderer that has actually applied the choice. */
+export declare function createCookieConsentInteraction(root: Document | HTMLElement): {
+    choose(target: Element, keyboard: boolean): boolean;
+    afterUpdate: () => void;
+    dispose(): void;
+};
 /** Activate package-rendered consent markup after inserting the static footer. */
 export declare function initHranessCookieConsent(root?: Document | HTMLElement): () => void;
 //# sourceMappingURL=consent.d.ts.map

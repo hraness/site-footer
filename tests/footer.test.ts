@@ -121,12 +121,12 @@ describe("Hraness site footer", () => {
       expect(html).not.toMatch(/Ben Guo|Built by Ben/u);
 
       // Document order matches the wide visual order: identity and account or
-      // signup controls, optional support, consent, then socials.
+      // signup controls, optional support, socials, then consent.
       const order = ["hraness-mailing-list-signup", "hraness-account-link", "hraness-support-link", "hraness-cookie-consent"]
         .map((slot) => html.indexOf(`data-slot="${slot}"`))
         .filter((offset) => offset >= 0);
       expect(order).toEqual([...order].sort((left, right) => left - right));
-      expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeLessThan(html.indexOf('aria-label="Hraness links"'));
+      expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeGreaterThan(html.indexOf('aria-label="Hraness links"'));
       expect(footer.querySelectorAll(".hraness-site-footer__social-link")).toHaveLength(4);
     }
   });
@@ -202,7 +202,7 @@ describe("Hraness site footer", () => {
     expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeGreaterThan(
       html.indexOf('data-slot="hraness-mailing-list-signup"'),
     );
-    expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeLessThan(
+    expect(html.indexOf('data-slot="hraness-cookie-consent"')).toBeGreaterThan(
       html.indexOf('aria-label="Hraness links"'),
     );
   });
