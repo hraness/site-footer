@@ -48,7 +48,7 @@ describe("compiled footer presentation", () => {
 
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.20.6");
+    expect(pkg.version).toBe("0.20.7");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -85,7 +85,7 @@ describe("compiled footer presentation", () => {
     contains(footerInnerClassName(true), 'grid-template-areas:"brand" "mailing" "links"');
     contains(footerInnerClassName(true), 'grid-template-areas:"brand mailing . links"');
     contains(footerInnerClassName(true), "@media (min-width:47.5rem)");
-    contains(footerInnerClassName(true), "grid-auto-rows:var(--hraness-site-footer-content-block-size)");
+    contains(footerInnerClassName(true), "grid-auto-rows:minmax(var(--hraness-site-footer-content-block-size),auto)");
     // No containment on the row: the fixed cookie note must resolve against the viewport.
     expect(cssFor(footerInnerClassName(true))).not.toContain("container-type");
     contains(footerInnerClassName(true), "border-block-start-color:var(--hraness-site-footer-line)");
@@ -112,7 +112,7 @@ describe("compiled footer presentation", () => {
   test("floats visible consent as a compact end-corner note that the footer clears", () => {
     const root = footerClassName(false);
     contains(root, "--_hraness-site-footer-consent-clearance:0px");
-    contains(root, ':has(>.hraness-site-footer__inner>[data-slot="hraness-cookie-consent"]:not([hidden]))');
+    contains(root, ':has(>.hraness-site-footer__inner>[data-slot="hraness-cookie-consent"][data-consent-state="required"]:not([hidden]))');
     contains(root, "--_hraness-site-footer-consent-clearance:calc(var(--hraness-site-footer-control-block-size) + 1.25rem + 2px)");
     contains(footerInnerClassName(false), "padding-block-start:calc(var(--hraness-site-footer-padding-block) + var(--_hraness-site-footer-consent-clearance,0px))");
     contains(footerClasses.consent, "position:fixed");
@@ -125,7 +125,11 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.consent, "border-color:ButtonText");
     contains(footerClasses.consent, "box-shadow:none");
     // It never spans the viewport or joins the footer grid.
-    expect(cssFor(footerClasses.consent)).not.toMatch(/inset-inline-start|inset-inline:|[{;]inline-size:100|grid-(?:row|column)/u);
+    expect(cssFor(footerClasses.consent)).not.toMatch(/inset-inline-start|inset-inline:|[{;]inline-size:100/u);
+    contains(footerClasses.consent, '[data-consent-placement="flow"]:is([data-consent-state="clear"],[data-consent-state="declined"])');
+    contains(footerClasses.consent, "position:relative");
+    contains(footerClasses.consent, "grid-column:1/-1");
+    contains(footerClasses.consentLearn, "min-block-size:var(--hraness-site-footer-control-block-size)");
     for (const target of [footerClasses.consentAccept, footerClasses.consentLearn]) {
       contains(target, "block-size:var(--hraness-site-footer-control-block-size)");
 

@@ -87,12 +87,11 @@ const styles = stylex.create({
     "--hraness-site-footer-content-block-size": "var(--hraness-site-footer-control-block-size)",
     "--_hraness-site-footer-control-rows": "1",
     // The visible cookie note floats in the viewport's end corner. While it is
-    // shown, the in-flow footer adds its height and offset above the controls
-    // so the note never covers them at the end of the page. Hidden consent
-    // adds nothing.
+    // required, the footer clears it above the controls. Resolved preferences
+    // occupy their own normal-flow row after the social links.
     "--_hraness-site-footer-consent-clearance": {
       default: "0px",
-      ':has(> .hraness-site-footer__inner > [data-slot="hraness-cookie-consent"]:not([hidden]))': "calc(var(--hraness-site-footer-control-block-size) + 1.25rem + 2px)",
+      ':has(> .hraness-site-footer__inner > [data-slot="hraness-cookie-consent"][data-consent-state="required"]:not([hidden]))': "calc(var(--hraness-site-footer-control-block-size) + 1.25rem + 2px)",
     },
     "--hraness-site-footer-bar-block-size": "calc(var(--hraness-site-footer-content-block-size) + var(--_hraness-site-footer-consent-clearance) + var(--hraness-site-footer-padding-block) + var(--hraness-site-footer-padding-block) + env(safe-area-inset-bottom, 0px) + 1px)",
     "inline-size": "100%",
@@ -246,7 +245,7 @@ const styles = stylex.create({
     position: "relative", display: "grid",
     gridTemplateAreas: { default: '"brand links"', "@media (min-width: 47.5rem)": '"brand . links"' },
     gridTemplateColumns: { default: "auto minmax(0, 1fr)", "@media (min-width: 47.5rem)": "auto minmax(0, 1fr) minmax(var(--hraness-site-footer-social-target), var(--hraness-site-footer-socials-inline-size))" },
-    gridAutoRows: "var(--hraness-site-footer-content-block-size)",
+    gridAutoRows: "minmax(var(--hraness-site-footer-content-block-size), auto)",
     "inline-size": "100%", "block-size": "auto", "min-block-size": "var(--hraness-site-footer-bar-block-size)",
     "max-inline-size": "none", "min-inline-size": 0, alignContent: "center", alignItems: "center",
     columnGap: "clamp(0.5rem, 2vw, 1rem)", rowGap: "var(--hraness-site-footer-row-gap)",
@@ -401,15 +400,17 @@ const styles = stylex.create({
   consent: {
     // A compact note in the viewport's end corner. It never spans the width,
     // and the in-flow footer adds matching clearance while it is visible.
-    position: "fixed", zIndex: 40,
-    "inset-block-end": "calc(var(--_hraness-site-footer-control-rows) * var(--hraness-site-footer-content-block-size) + (var(--_hraness-site-footer-control-rows) - 1) * var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-padding-block) + 0.75rem + env(safe-area-inset-bottom, 0px))",
-    "inset-inline-end": "max(0.75rem, env(safe-area-inset-right))",
+    position: { default: "fixed", '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "relative" }, zIndex: 40, "min-inline-size": 0,
+    gridColumn: { default: null, '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "1 / -1" },
+    justifySelf: "end", "margin-block-start": { default: 0, '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "0.5rem" },
+    "inset-block-end": { default: "calc(var(--_hraness-site-footer-control-rows) * var(--hraness-site-footer-content-block-size) + (var(--_hraness-site-footer-control-rows) - 1) * var(--hraness-site-footer-row-gap) + var(--hraness-site-footer-padding-block) + 0.75rem + env(safe-area-inset-bottom, 0px))", '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "auto" },
+    "inset-inline-end": { default: "max(0.75rem, env(safe-area-inset-right))", '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "auto" },
     display: { default: "flex", ":is([hidden])": "none" },
-    alignItems: "center", "max-inline-size": "calc(100vw - 1.5rem)",
+    alignItems: "center", "max-inline-size": { default: "calc(100vw - 1.5rem)", '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "100%" },
     "padding-block": "0.25rem", "padding-inline": "0.25rem", borderRadius: "999px",
     backgroundColor: { default: "var(--hraness-site-footer-background)", "@media (forced-colors: active)": "Canvas" },
-    boxShadow: { default: "0 0.25rem 1rem color-mix(in srgb, var(--hraness-site-footer-foreground, CanvasText) 10%, transparent)", "@media (forced-colors: active)": "none" },
-    color: "var(--hraness-site-footer-muted)", fontSize: "0.8125rem", lineHeight: 1.25, whiteSpace: "nowrap",
+    boxShadow: { '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "none", default: "0 0.25rem 1rem color-mix(in srgb, var(--hraness-site-footer-foreground, CanvasText) 10%, transparent)", "@media (forced-colors: active)": "none" },
+    color: "var(--hraness-site-footer-muted)", fontSize: "0.8125rem", lineHeight: 1.25, whiteSpace: { default: "nowrap", '[data-consent-placement="flow"]:is([data-consent-state="clear"], [data-consent-state="declined"])': "normal" },
   },
   consentAccept: {
     display: { default: "inline-flex", ":is([hidden])": "none" }, alignItems: "center", "padding-block": 0, "padding-inline": "0.625rem",
@@ -417,18 +418,20 @@ const styles = stylex.create({
     backgroundColor: { default: "transparent", "@media (hover: hover)": { ":hover": "color-mix(in srgb, currentColor 9%, transparent)" } },
     color: "var(--hraness-site-footer-foreground)", fontWeight: 550, textDecoration: "none",
   },
-  consentMore: { display: "inline", position: "relative" },
+  consentMore: { display: "block", position: "relative", "min-inline-size": 0, "max-inline-size": "100%" },
   consentLearn: {
     cursor: "pointer", display: { default: "inline-flex", "::-webkit-details-marker": "none" },
-    alignItems: "center", justifyContent: "center", "block-size": "var(--hraness-site-footer-control-block-size)",
+    "max-inline-size": "100%",
+    alignItems: "center", justifyContent: "center", "min-block-size": "var(--hraness-site-footer-control-block-size)",
     "min-inline-size": "var(--hraness-site-footer-control-block-size)",
+    "padding-block": "0.25rem",
     "padding-inline": { default: "0.625rem", ':is([data-notice="required"])': 0 }, borderRadius: "999px",
     listStyleType: "none", marginInlineStart: 0,
     backgroundColor: { default: "transparent", "@media (hover: hover)": { ":hover": "color-mix(in srgb, currentColor 9%, transparent)" } },
     color: { default: "inherit", "@media (hover: hover)": { ":hover": "var(--hraness-site-footer-foreground)" } },
     textDecoration: "none",
   },
-  consentLabel: { display: { default: "inline-flex", ":is([hidden])": "none" }, alignItems: "center" },
+  consentLabel: { "min-inline-size": 0, overflowWrap: "anywhere", display: { default: "inline-flex", ":is([hidden])": "none" }, alignItems: "center" },
   consentActions: { display: "flex", flexWrap: "wrap", gap: "0.25rem", "margin-block-start": "0.625rem", justifyContent: "space-between" },
   consentPanel: {
     position: "absolute", zIndex: 2,
@@ -527,7 +530,7 @@ export const footerClasses = {
   consent: className("hraness-site-footer__consent", styles.box, styles.border, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
-  consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
+  consentLearn: className("hraness-site-footer__consent-learn", styles.box, styles.consentLearn, styles.focus, styles.motion),
   consentLabel: className("hraness-site-footer__consent-label", styles.consentLabel),
   consentActions: className("hraness-site-footer__consent-actions", styles.consentActions),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),

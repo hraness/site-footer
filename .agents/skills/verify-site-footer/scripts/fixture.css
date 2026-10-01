@@ -118,3 +118,5 @@ body[data-fixture-line-height="1"] { line-height: 1; }
 body[data-fixture-line-height="2"] { line-height: 2; }
 body[data-fixture-font="wide"] { --font-sans: "Courier New", monospace; font-size: 20px; }
 html[data-fixture-text-size="200"] { font-size: 200%; }
+
+body[data-fixture-long="true"] .fixture-main { min-block-size: 240vh; align-content: start; gap: 1rem; }

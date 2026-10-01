@@ -172,7 +172,7 @@ var styles = {
     "--hraness-site-footer-mailing-overlay-offset": "x1h47zgc",
     "--hraness-site-footer-content-block-size": "x1ghcxmq",
     "--_hraness-site-footer-control-rows": "xd04x30",
-    "--_hraness-site-footer-consent-clearance": "xwk8b0x x1dsv906",
+    "--_hraness-site-footer-consent-clearance": "xwk8b0x xvqzllu",
     "--hraness-site-footer-bar-block-size": "x1baz8l3",
     kULEZF: "xiuoait",
     kMwMTN: "x1g4142m",
@@ -424,7 +424,7 @@ var styles = {
     k1xSpc: "xrvj5dj",
     kC13JO: "x182hbjg x83lif4",
     kumcoG: "x1rkzygb x1o8kq85",
-    kJBjZk: "xx97v1z",
+    kJBjZk: "xd1cknm",
     kULEZF: "xiuoait",
     kLWsYc: "xzlj3eo",
     kVQ08L: "x5vl0wm",
@@ -692,22 +692,26 @@ var styles = {
     $$css: true
   },
   consent: {
-    kVAEAm: "xixxii4",
+    kVAEAm: "xixxii4 x1xp2ccn",
     kY2c9j: "xf5e64p",
-    kctUWg: "xcc8yhp",
-    k7w2rI: "xs1cnaw",
+    kdYMnH: "xesnm00",
+    kBCFzs: "x16dlxzb",
+    kFhvOy: "x1qab1bc",
+    kAiAap: "x1rjqi9y x1htdl82",
+    kctUWg: "xcc8yhp xmvc7ab",
+    k7w2rI: "xs1cnaw x1u21uqd",
     k1xSpc: "x78zum5 xvgho8r",
     kGNEyG: "x6s0dn4",
-    k2kXS: "x15qkubi",
+    k2kXS: "x15qkubi x949q27",
     kF3gjK: "x1o5vn8x",
     kJVvJu: "xllzysa",
     kaIpWk: "x1e6avla",
     kWkggS: "x1hhhz6w x9yvj25",
-    kGVxlE: "xim0ftz xwaqzdf",
+    kGVxlE: "x17ffzhg xim0ftz xwaqzdf",
     kMwMTN: "xj5idha",
     kGuDYH: "x1dcheo9",
     kLWn49: "x132q4wb",
-    khDVqt: "xuxw1ft",
+    khDVqt: "xuxw1ft x1ui8ta9",
     $$css: true
   },
   consentAccept: {
@@ -725,17 +729,21 @@ var styles = {
     $$css: true
   },
   consentMore: {
-    k1xSpc: "xt0psk2",
+    k1xSpc: "x1lliihq",
     kVAEAm: "x1n2onr6",
+    kdYMnH: "xesnm00",
+    k2kXS: "xgyk9h7",
     $$css: true
   },
   consentLearn: {
     kkrTdU: "x1ypdohk",
     k1xSpc: "x3nfvp2 x1i5lizr",
+    k2kXS: "xgyk9h7",
     kGNEyG: "x6s0dn4",
     kjj79g: "xl56j7k",
-    kLWsYc: "xlashs9",
+    kVQ08L: "xeuuy2l",
     kdYMnH: "xart1r9",
+    kF3gjK: "x1o5vn8x",
     kJVvJu: "xvpgqt4 x1m71csk",
     kaIpWk: "x1e6avla",
     kH6xsr: "x3ct3a4",
@@ -746,6 +754,8 @@ var styles = {
     $$css: true
   },
   consentLabel: {
+    kdYMnH: "xesnm00",
+    kHjlTd: "xj0a0fe",
     k1xSpc: "x3nfvp2 xvgho8r",
     kGNEyG: "x6s0dn4",
     $$css: true
@@ -944,7 +954,7 @@ var footerClasses = {
   consent: className("hraness-site-footer__consent", styles.box, styles.border, styles.consent),
   consentAccept: className("hraness-site-footer__consent-accept", styles.box, styles.backgroundReset, styles.border, styles.control, styles.consentAccept, styles.focus, styles.motion),
   consentMore: className("hraness-site-footer__consent-more", styles.consentMore),
-  consentLearn: className("hraness-site-footer__consent-learn", styles.consentLearn, styles.focus, styles.motion),
+  consentLearn: className("hraness-site-footer__consent-learn", styles.box, styles.consentLearn, styles.focus, styles.motion),
   consentLabel: className("hraness-site-footer__consent-label", styles.consentLabel),
   consentActions: className("hraness-site-footer__consent-actions", styles.consentActions),
   consentPanel: className("hraness-site-footer__consent-panel", styles.box, styles.border, styles.consentPanel),
@@ -2161,8 +2171,10 @@ function renderMailingList(mailingList, state, presentation) {
 }
 var HRANESS_CONSENT_TEXT_SIGNED_IN = "Cookies keep you signed in, and your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
 var HRANESS_CONSENT_TEXT = "Your browser remembers your appearance setting and this choice. We use analytics to understand how the site is used. None of it is used for advertising or cross-site tracking.";
-function renderConsentHtml(signIn) {
-  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" hidden=""><button class="${footerClasses.consentAccept}" data-consent-prompt="" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" data-notice="required" class="${footerClasses.consentLearn}"><span class="${footerClasses.consentLabel}" data-consent-icon="">${HRANESS_SUPPORT_ICON_HTML}</span><span class="${footerClasses.consentLabel}" data-consent-label="" hidden="">Analytics preferences</span></summary><div class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} You can change your analytics choice here at any time. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a><div class="${footerClasses.consentActions}"><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept analytics</button><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_DECLINE_SLOT}" type="button">Decline analytics</button></div></div></details></div>`;
+function renderConsentHtml(signIn, placement = "corner") {
+  if (placement !== "corner" && placement !== "flow")
+    throw new TypeError("Consent placement must be corner or flow.");
+  return `<div class="${footerClasses.consent}" data-slot="${HRANESS_CONSENT_SLOT}" data-consent-placement="${placement}" hidden=""><button class="${footerClasses.consentAccept}" data-consent-prompt="" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept cookies</button><details class="${footerClasses.consentMore}"><summary aria-label="About cookies" title="About cookies" data-notice="required" class="${footerClasses.consentLearn}"><span class="${footerClasses.consentLabel}" data-consent-icon="">${HRANESS_SUPPORT_ICON_HTML}</span><span class="${footerClasses.consentLabel}" data-consent-label="" hidden="">Analytics preferences</span></summary><div class="${footerClasses.consentPanel}">${signIn ? HRANESS_CONSENT_TEXT_SIGNED_IN : HRANESS_CONSENT_TEXT} You can change your analytics choice here at any time. <a class="${footerClasses.consentLink}" href="https://hraness.com/privacy">Privacy policy</a><div class="${footerClasses.consentActions}"><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_ACCEPT_SLOT}" type="button">Accept analytics</button><button class="${footerClasses.consentAccept}" data-slot="${HRANESS_CONSENT_DECLINE_SLOT}" type="button">Decline analytics</button></div></div></details></div>`;
 }
 function resolveSupportLink(profile) {
   if (profile === undefined)
@@ -2181,7 +2193,7 @@ function renderHranessSiteFooterInnerHtml(showBrand, mailingList, state = MAILIN
   const supportLink = resolveSupportLink(presentation.support);
   const supportHtml = supportLink === null ? "" : `<a class="${footerClasses.support}" data-slot="hraness-support-link" href="${escapeAttribute(supportLink.href)}" aria-label="${escapeAttribute(supportLink.label)}" title="${escapeAttribute(supportLink.title)}" lang="en" dir="ltr">${HRANESS_SUPPORT_ICON_HTML}</a>`;
   const mailingHtml = mailingList.kind === "none" ? "" : mailingList.kind === "account" ? `<a class="${footerClasses.account}" data-slot="hraness-account-link" href="${HRANESS_ACCOUNT_URL}" lang="${escapeAttribute(presentation.locale.locale)}" dir="${presentation.locale.dir}">${escapeAttribute(presentation.locale.accountLabel)}</a>` : renderMailingList(mailingList, state.kind !== "idle" && state.audience === mailingList.audience ? state : MAILING_IDLE_STATE, presentation);
-  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null, showBrand)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${renderConsentHtml(presentation.signIn === true)}${renderHranessSocialLinksHtml(socialLinks)}</div>`;
+  return `<div class="${footerInnerClassName(mailingList.kind === "signup", presentation.sticky, presentation.variant.color, mailingList.kind === "account", supportLink !== null, showBrand)}">${showBrand ? HRANESS_SITE_FOOTER_BRAND_HTML : ""}${mailingHtml}${supportHtml}${renderHranessSocialLinksHtml(socialLinks)}${renderConsentHtml(presentation.signIn === true, "flow")}</div>`;
 }
 
 // src/index.ts
@@ -2226,4 +2238,4 @@ export {
   HRANESS_ACCOUNT_URL
 };
 
-//# debugId=36A4C1393F3D93DA64756E2164756E21
+//# debugId=6765B6A3A597335E64756E2164756E21

@@ -2,7 +2,7 @@
 import type { SupportProfile } from "./internal.js";
 
 import { attachFooterFoil } from "./foil.js";
-import { chooseCookieConsent, initHranessCookieConsent, observeCookieConsent, updateCookieConsent, type CookieConsentState } from "./consent.js";
+import { createCookieConsentInteraction, initHranessCookieConsent, observeCookieConsent, updateCookieConsent, type CookieConsentState } from "./consent.js";
 import { footerClassName, footerClasses, footerInnerClassName, mailingStatusClassName } from "./footer.stylex.js";
 import { footerCopyLabel, footerCopyProductName, resolveFooterLocale, stableFooterMessages } from "./locales.js";
 import { initSiteSignals, reportSiteVisit } from "./telemetry.js";
@@ -48,18 +48,20 @@ import {
 export interface HranessCookieConsentProps {
   /** Include the essential sign-in cookie explanation only on sites that use it. */
   readonly signIn?: boolean;
+  /** Resolved preferences stay in the corner by default; use flow near a route end. */
+  readonly placement?: "corner" | "flow";
 }
 
 /** The shared consent note for focused app routes that omit the site footer. */
-export function HranessCookieConsent({ signIn = false }: HranessCookieConsentProps = {}) {
+export function HranessCookieConsent({ signIn = false, placement = "corner" }: HranessCookieConsentProps = {}) {
   const root = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     return root.current === null ? undefined : initHranessCookieConsent(root.current);
-  }, [signIn]);
+  }, [signIn, placement]);
   return createElement("div", {
     ref: root,
     className: footerClasses.consentRoot,
-    dangerouslySetInnerHTML: { __html: renderConsentHtml(signIn) },
+    dangerouslySetInnerHTML: { __html: renderConsentHtml(signIn, placement) },
   });
 }
 
@@ -140,6 +142,7 @@ export function HranessSiteFooter({
   const [state, setState] = useState<HranessMailingListRenderState>(IDLE_STATE);
   // "checking" until stored acceptance or the region lookup settles; only "clear" permits default measurement.
   const [consent, setConsent] = useState<CookieConsentState>("checking");
+  const consentInteraction = useRef<ReturnType<typeof createCookieConsentInteraction> | null>(null);
   const [locale, setLocale] = useState(() => resolveFooterLocale(localeInput));
   // Server renders and first hydration never measure; eligibility needs the browser.
   const [measurable, setMeasurable] = useState(false);
@@ -589,11 +592,18 @@ export function HranessSiteFooter({
     return attachFooterFoil(footer.current);
   }, [innerHtml, mailingListKey]);
 
-  useEffect(() => observeCookieConsent(setConsent), []);
+  useEffect(() => {
+    if (!footer.current) return;
+    const interaction = createCookieConsentInteraction(footer.current);
+    consentInteraction.current = interaction;
+    const removeConsent = observeCookieConsent(setConsent);
+    return () => { removeConsent(); interaction.dispose(); consentInteraction.current = null; };
+  }, []);
 
   // Reapply preference state whenever other footer content is rebuilt.
   useEffect(() => {
     if (footer.current) updateCookieConsent(footer.current, consent);
+    consentInteraction.current?.afterUpdate();
   }, [innerHtml, consent]);
 
   return createElement("footer", {
@@ -605,7 +615,7 @@ export function HranessSiteFooter({
     id: HRANESS_FOOTER_SLOT,
     // The HTML is composed only from validated package-owned constants and state.
     dangerouslySetInnerHTML: innerHtmlProp,
-    onClick: (event: { target: EventTarget | null; defaultPrevented: boolean; preventDefault: () => void }) => {
+    onClick: (event: { target: EventTarget | null; defaultPrevented: boolean; detail: number; preventDefault: () => void }) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
       const summary = target.closest('[data-slot="hraness-mailing-disclosure"] > summary');
@@ -615,7 +625,7 @@ export function HranessSiteFooter({
         return;
       }
       if (target.closest('[data-slot="hraness-mailing-close"]')) { closeModal.current("dismiss_button"); return; }
-      if (!event.defaultPrevented) chooseCookieConsent(target);
+      if (!event.defaultPrevented) consentInteraction.current?.choose(target, event.detail === 0);
     },
     onSubmit: handleSubmit,
     onInputCapture: (event: { target: EventTarget | null }) => {

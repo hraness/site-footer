@@ -18,7 +18,7 @@ the site sets `audience: "hraness"`.
 Pin the current immutable release:
 
 ```sh
-bun add github:hraness/site-footer#v0.20.6
+bun add github:hraness/site-footer#v0.20.7
 ```
 
 Start with the network footer and no mailing form:
@@ -48,7 +48,7 @@ shared Accounts region endpoint whether consent applies, fails toward showing
 the note when detection is unavailable, and stores acceptance or refusal in local storage.
 A visible note is a small notice in the bottom corner of the window that never
 spans its width. The note uses a labelled question-mark disclosure for details. At the end of the page the footer adds room above its controls so
-the note never covers them. After either choice, a compact **Analytics preferences** control stays available in the same place. It opens accept and decline buttons, so visitors can withdraw or change their choice at any time. Both choices notify the shared analytics adapter immediately through `hraness-consent-accepted` or `hraness-consent-declined`, including when local storage is unavailable. Pair this UI with an `@hraness/posthog` release that handles `hraness-consent-declined` to apply withdrawal immediately.
+the note never covers them. After either choice, a compact **Analytics preferences** control stays available in normal flow after the social links. The corner clearance is released, and the preference row grows when text wraps. It opens accept and decline buttons, so visitors can withdraw or change their choice at any time. Both choices notify the shared analytics adapter immediately through `hraness-consent-accepted` or `hraness-consent-declined`, including when local storage is unavailable. Pair this UI with an `@hraness/posthog` release that handles `hraness-consent-declined` to apply withdrawal immediately.
 The first render issues no request, sets no cookie, and writes no local
 storage. The links and inline decorative vectors work without client-side
 JavaScript.
@@ -368,8 +368,8 @@ the required client-component directive.
 
 The stylesheet follows `--plain-*` or common product theme variables when
 present and falls back to system colors. The footer sits in normal document flow
-where you render it, usually right after `<main>`. Only a visible cookie note
-floats, in the bottom corner of the window. Wide screens show one row. Below `47.5rem`, a footer with a signup, account, or
+where you render it, usually right after `<main>`. Only the required cookie notice
+floats, in the bottom corner of the window; saved preferences stay in the footer. Wide screens show one row. Below `47.5rem`, a footer with a signup, account, or
 support control stacks the home link, those controls, and one row of social links;
 a footer with only the home link and social links keeps one row. The `placement`
 prop is deprecated and has no effect.
@@ -461,12 +461,15 @@ and restore the document root's overflow; it never injects a stylesheet.
 Version 0.20.0 moves the footer into normal document flow. It is no longer fixed
 to the bottom of the window and no longer reserves room for a fixed bar, so it
 no longer covers page content. Phones get a stacked layout with 44px touch targets
-instead of one crowded row. The cookie note becomes a small notice in the bottom
-corner of the window that goes away when accepted. The `placement` prop is
+instead of one crowded row. The `placement` prop is
 deprecated and has no effect, and `--hraness-site-footer-measure` can align the
 footer's content with the page column.
 
-To upgrade, update the pin to `v0.20.0`, then:
+The required cookie notice remains in the bottom corner. After a choice, Analytics
+preferences occupy a normal-flow row after the social links.
+
+To upgrade, pin the current qualified release from the
+[Releases page](https://github.com/hraness/site-footer/releases), then:
 
 - Render the footer after the page content, as before. Pages that did so need no
   other change.
@@ -640,7 +643,9 @@ import "@hraness/site-footer/styles.css";
 ```
 
 Pass `signIn` only when the site uses essential sign-in cookies. The component
-contains no signup form, studio mark, social links, or footer landmark.
+contains no signup form, studio mark, social links, or footer landmark. Its default `placement="corner"` preserves the corner control after a choice. For a note mounted near the end of a route, pass `placement="flow"` to keep resolved preferences in document flow. Mount either the footer or the standalone component once per document.
+
+Closing reopened preferences returns focus to their summary. Keyboard dismissal of the initial notice keeps focus in the visible page, using the last eligible outside control or a visible main landmark when the footer is offscreen. Pointer dismissal does not force focus or scroll. Temporary landmark focusability is removed on blur or unmount.
 
 ## Questions
 

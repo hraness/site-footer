@@ -21,10 +21,10 @@ The browser is pinned to Chrome for Testing 151.0.7922.71 in the agent-browser b
 
 ## Launch
 
-When an installed host scheduler is available, resolve its absolute command path and run the complete verifier through its `browser-auth` lane, following repository `AGENTS.md`:
+When an installed host scheduler is available, resolve its absolute command path and run the complete verifier through its `browser` lane, following repository `AGENTS.md`:
 
 ```sh
-ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-browser -- bun run verify:browser
+ABSOLUTE_HRA_HOST_RUN --mode=shared --lane=browser --label=site-footer-browser -- bun run verify:browser
 ```
 
 Resolve `ABSOLUTE_HRA_HOST_RUN` with `command -v host-run` first. If no supported host scheduler is installed, run `bun run verify:browser` directly using this verifier’s exact-process custody. Do not revive a retired source wrapper or install a global scheduler as a prerequisite.
@@ -60,10 +60,10 @@ one social row), viewport containment and priority socials.
 
 A separate consent layout context uses the existing synthetic region response to
 show the real notice at 320, 390, 760 and 1280 pixels, including account and wide-font
-variants. Measured at the end of the page, it requires a compact fixed note in the
+variants. Measured at the end of the page, it requires a compact fixed required note in the
 viewport's end corner that never spans the width, and an in-flow footer whose extra
 top padding exactly clears that note above the controls. It then clicks Accept
-to reveal persistent Analytics preferences, reopens it to decline, then accepts again and reloads to prove the choice persists. The shared control and its clearance remain available after either choice. Each case
+to reveal persistent Analytics preferences, reopens it to decline, then accepts again and reloads to prove the choice persists. Resolved preferences occupy a normal-flow row after socials and release the required notice clearance. The cases include a static renderer and 200% root text. Separate long-page cases verify initial keyboard and pointer dismissal, visible outside-focus restoration, hidden targets, landmark fallback and next Tab, intervening focus changes, reopened preference focus, scroll behavior, and both standalone placement options. Each case
 retains a full-page screenshot of the shown, accepted and reloaded states. It never
 changes component state directly or contacts Accounts.
 
@@ -85,7 +85,7 @@ The verifier retains full-page PNGs, per-state JSON, and one bounded manifest be
 - actual visible content clearances matching both padding values, with the in-flow footer height including both clearances, in signup and no-signup layouts;
 - an in-flow footer row with a stable trigger independent of the modal request state;
 - no compact horizontal overflow;
-- visible consent as a compact end-corner note that never spans the width or covers the footer controls, with a footer footprint that clears exactly that note in the shown state and releases it in the accepted and reloaded states;
+- visible consent as a compact end-corner note that never spans the width or covers the footer controls, with a footer footprint that clears exactly that note in the shown state and releases it in the accepted and reloaded states, whose preferences scroll with the footer after its social links;
 - declared minimum target sizes; and
 - two-sample Direct stability with no named-layout violations.
 
@@ -100,13 +100,13 @@ Normal runs close the whole verifier-owned browser, terminate the exact server p
 After an interrupted run, inspect without mutation:
 
 ```sh
-ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --dry-run
+ABSOLUTE_HRA_HOST_RUN --mode=shared --lane=browser --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --dry-run
 ```
 
 Apply only the validated recorded cleanup:
 
 ```sh
-ABSOLUTE_HRA_HOST_RUN --mode=exclusive --lane=browser-auth --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --apply
+ABSOLUTE_HRA_HOST_RUN --mode=shared --lane=browser --label=site-footer-cleanup -- bun run ./.agents/skills/verify-site-footer/scripts/verify.ts cleanup --apply
 ```
 
 Use the same installed scheduler as launch when one is available. Otherwise run the shown Bun cleanup command directly, preserving its exact ownership checks. Cleanup refuses a mismatched repository, token, exact PID command, session name, or temporary path, and revalidates PID ownership before signal escalation. The browser idle timeout is a bounded fallback, not cleanup evidence.

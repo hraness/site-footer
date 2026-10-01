@@ -225,7 +225,7 @@ test("wide layout rejects a padded inline panel even when its inner form remains
 test("consent geometry requires a compact corner note that the in-flow footer clears", () => {
   // A 390x844 page scrolled to its end: 12px padding, a 28px control row, and
   // a 38px note 12px from the corner, cleared by 50px of extra bottom padding.
-  const shown = { width:390, viewportHeight:844, shown:true, position:"fixed", footprint:115, height:115, top:729, bottom:844, paddingTop:62, paddingBottom:12, borderTop:1, borderBottom:0, controlTop:792, controlBottom:832, consentTop:742, consentBottom:780, consentLeft:168, consentRight:378 };
+  const shown = { width:390, viewportHeight:844, rootFont:16, state:"required", shown:true, position:"fixed", footprint:115, height:115, top:729, bottom:844, paddingTop:62, paddingBottom:12, borderTop:1, borderBottom:0, controlTop:792, controlBottom:832, consentTop:742, consentBottom:780, consentLeft:168, consentRight:378 };
   expect(() => assertConsentFootprint(shown)).not.toThrow();
   expect(() => assertConsentFootprint({...shown, position:"static"})).toThrow("corner note");
   expect(() => assertConsentFootprint({...shown, consentLeft:0})).toThrow("never span");
@@ -235,9 +235,15 @@ test("consent geometry requires a compact corner note that the in-flow footer cl
   expect(() => assertConsentFootprint({...shown, paddingTop:70, footprint:123, height:123, top:721, controlTop:792, controlBottom:832})).toThrow("padding clearances");
   expect(() => assertConsentFootprint({...shown, footprint:160})).toThrow("footprint");
   expect(() => assertConsentFootprint({...shown, bottom:800, top:685})).toThrow("end of the page");
-  const accepted = {...shown, shown:false, footprint:65, height:65, top:779, paddingTop:12, controlTop:792, controlBottom:832, consentTop:0, consentBottom:0, consentLeft:0, consentRight:0};
+  const accepted = {...shown, state:"checking", shown:false, footprint:65, height:65, top:779, paddingTop:12, controlTop:792, controlBottom:832, consentTop:0, consentBottom:0, consentLeft:0, consentRight:0};
   expect(() => assertConsentFootprint(accepted)).not.toThrow();
   expect(() => assertConsentFootprint({...accepted, paddingTop:62, footprint:115, height:115, top:729, controlTop:792, controlBottom:832})).toThrow("padding clearances");
+  const resolved = {...shown, state:"clear", position:"relative", paddingTop:12, height:119, footprint:119, top:725, controlTop:738, controlBottom:778, consentTop:794, consentBottom:832};
+  expect(() => assertConsentFootprint(resolved)).not.toThrow();
+  expect(() => assertConsentFootprint({...resolved, state:"declined"})).not.toThrow();
+  expect(() => assertConsentFootprint({...resolved, position:"fixed"})).toThrow("normal flow");
+  expect(() => assertConsentFootprint({...resolved, consentTop:770})).toThrow("own row");
+  expect(() => assertConsentFootprint({...resolved, paddingTop:62})).toThrow("padding clearances");
   const wide = {...shown, width:1280, consentLeft:1058, consentRight:1268};
   expect(() => assertConsentFootprint(wide)).not.toThrow();
 });
