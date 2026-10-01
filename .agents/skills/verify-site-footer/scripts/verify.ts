@@ -1263,7 +1263,8 @@ const FOOTER_SPACING_EXPRESSION = `(() => {
   const contentTop = Math.min(...content.map(item => item.top));
   const contentBottom = Math.max(...content.map(item => item.bottom));
   return {
-    consentClearance: (() => { const consent = inner.querySelector('[data-slot="hraness-cookie-consent"]'); return consent && !consent.hidden ? consent.getBoundingClientRect().height + 12 : 0; })(),
+    // The corner's 0.75rem gap scales with the root text size, including text zoom.
+    consentClearance: (() => { const consent = inner.querySelector('[data-slot="hraness-cookie-consent"]'); const cornerGap = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.75; return consent && !consent.hidden ? consent.getBoundingClientRect().height + cornerGap : 0; })(),
     bottomClearance: box.bottom - borderBottom - contentBottom,
     bottomPadding,
     expectedHeight: contentBottom - contentTop + topPadding + bottomPadding + borderTop + borderBottom,
@@ -1291,12 +1292,12 @@ function assertFooterSpacing(input: unknown, label: string): FooterSpacing {
   });
   if (spacing.topPadding <= 0 || spacing.safeAreaInset < 0
     || Math.abs(spacing.bottomPadding - spacing.topPadding - spacing.safeAreaInset + spacing.consentClearance) > 0.5) {
-    throw new Error(`${label} must retain matching visual padding above the device safe area.`);
+    throw new Error(`${label} must retain matching visual padding above the device safe area: ${JSON.stringify(spacing)}`);
   }
   if (Math.abs(spacing.topClearance - spacing.topPadding) > 0.5
     || Math.abs(spacing.bottomClearance - spacing.bottomPadding) > 0.5
     || Math.abs(spacing.innerHeight - spacing.expectedHeight) > 0.5) {
-    throw new Error(`${label} rendered content does not clear the footer edges by its declared padding.`);
+    throw new Error(`${label} rendered content does not clear the footer edges by its declared padding: ${JSON.stringify(spacing)}`);
   }
   return spacing;
 }
@@ -1968,6 +1969,14 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
     // stress cases. The compiled coarse-target rules are proven in styles.test.
     { name: "narrow-long-label", width: 320, query: "locale=fr&font=wide&lineHeight=2&support=none" },
     { name: "narrow-hidden-long-label", width: 390, query: "brand=hidden&locale=fr&font=wide&lineHeight=1&placement=sticky" },
+    { name: "enlarged-signup", width: 320, query: "textSize=200" },
+    { name: "enlarged-signup-360", width: 360, query: "textSize=200" },
+    { name: "enlarged-hidden-signup", width: 320, query: "textSize=200&brand=hidden" },
+    { name: "enlarged-account", width: 320, query: "textSize=200&mailing=account" },
+    { name: "enlarged-hidden-account", width: 320, query: "textSize=200&mailing=account&brand=hidden" },
+    { name: "enlarged-support", width: 320, query: "textSize=200&mailing=none" },
+    { name: "enlarged-hidden-support", width: 320, query: "textSize=200&mailing=none&brand=hidden" },
+    { name: "enlarged-wide", width: 1280, query: "textSize=200" },
   ] as const;
   const evidence: unknown[] = [];
   await browser.run(["tab", "new"]);
@@ -1976,7 +1985,9 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
     await browser.run(["wait", "body[data-fixture-ready='true']", "--timeout", "5000"]);
     await browser.run(["set", "viewport", String(sample.width), "844"]);
     await browser.evaluate(SETTLE_EXPRESSION);
-    const geometry = await browser.evaluate(`(() => {
+    let geometry: unknown;
+    try {
+      geometry = await browser.evaluate(`(() => {
       const footer = document.querySelector('#hraness-site-footer');
       const inner = footer.querySelector('.hraness-site-footer__inner');
       const innerBox = inner.getBoundingClientRect();
@@ -1986,7 +1997,24 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
       if (!substack.checkVisibility()) throw new Error('Layout pressure hid Substack.');
       const summary = footer.querySelector('.hraness-site-footer__disclosure-trigger');
       const leading = summary ?? footer.querySelector('[data-slot="hraness-account-link"]') ?? footer.querySelector('[data-slot="hraness-support-link"]');
-      const result = { label: null, firstInset: null, footerHeight: innerBox.height };
+      const result = { label: null, firstInset: null, support: null, footerHeight: innerBox.height };
+      const support = footer.querySelector('[data-slot="hraness-support-link"]');
+      if (support) {
+        const targetProbe = document.createElement('span');
+        targetProbe.style.cssText = 'position:absolute;display:block;inline-size:var(--hraness-site-footer-social-target);block-size:0;visibility:hidden;pointer-events:none';
+        footer.append(targetProbe);
+        const targetSize = targetProbe.getBoundingClientRect().width;
+        targetProbe.remove();
+        const box = support.getBoundingClientRect();
+        const left = innerBox.left + parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
+        const right = innerBox.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth);
+        if (targetSize <= 0 || box.left < left - 0.5 || box.right > right + 0.5 || box.width < targetSize - 0.5 || box.height < targetSize - 0.5) throw new Error('Support target escapes the padded footer or loses its computed target size.');
+        if (leading && leading !== support) {
+          const control = leading.getBoundingClientRect();
+          if (control.right > box.left + 0.5 && control.bottom > box.top && control.top < box.bottom) throw new Error('Support target overlaps the signup or account control: ' + JSON.stringify({control:control.toJSON(),support:box.toJSON(),columns:style.gridTemplateColumns}));
+        }
+        result.support = { left: box.left, right: box.right, width: box.width, height: box.height, targetSize, track: style.gridTemplateColumns };
+      }
       if (footer.dataset.brand === 'hidden' && leading) {
         const inset = leading.getBoundingClientRect().left - innerBox.left;
         const expected = parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
@@ -2005,10 +2033,14 @@ async function driveAlignmentCases(browser: BrowserDriver, runDirectory: string,
         result.label = { centerDelta, height: box.height, lineHeight: getComputedStyle(summary).lineHeight, fullText: label.textContent, truncated: label.scrollWidth > label.clientWidth };
       }
       return result;
-    })()`);
-    const spacing = assertFooterSpacing(await browser.evaluate(FOOTER_SPACING_EXPRESSION), sample.name);
+      })()`);
+    } catch (error) {
+      await screenshot(browser, join(runDirectory, `alignment-${sample.name}-failure.png`));
+      throw new Error(`Footer alignment case ${sample.name} failed: ${renderUnknown(error)}`);
+    }
     const screenshotPath = join(runDirectory, `alignment-${sample.name}.png`);
     await screenshot(browser, screenshotPath);
+    const spacing = assertFooterSpacing(await browser.evaluate(FOOTER_SPACING_EXPRESSION), sample.name);
     evidence.push({ name: sample.name, geometry, spacing, screenshot: relative(REPOSITORY_ROOT, screenshotPath) });
   }
   const errors = browserPageErrors(await browser.run(["errors"]));

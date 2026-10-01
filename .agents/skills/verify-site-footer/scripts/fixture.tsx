@@ -68,6 +68,7 @@ const placement = pageParams.get("placement") === "sticky" ? "sticky" : "flow";
 const fixtureLineHeight = pageParams.get("lineHeight");
 if (fixtureLineHeight === "1" || fixtureLineHeight === "2") document.body.dataset.fixtureLineHeight = fixtureLineHeight;
 if (pageParams.get("font") === "wide") document.body.dataset.fixtureFont = "wide";
+if (pageParams.get("textSize") === "200") document.documentElement.dataset.fixtureTextSize = "200";
 const accountEnabled = pageParams.get("mailing") === "account";
 const signupEnabled = !accountEnabled && pageParams.get("mailing") !== "none";
 const consentRequired = pageParams.get("consent") === "required";

@@ -43,6 +43,8 @@ body {
 }
 
 .fixture-card {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   inline-size: min(100%, 44rem);
   border: 1px solid var(--line);
   border-radius: 1rem;
@@ -115,3 +117,4 @@ body {
 body[data-fixture-line-height="1"] { line-height: 1; }
 body[data-fixture-line-height="2"] { line-height: 2; }
 body[data-fixture-font="wide"] { --font-sans: "Courier New", monospace; font-size: 20px; }
+html[data-fixture-text-size="200"] { font-size: 200%; }
