@@ -2081,7 +2081,7 @@ export function assertConsentFootprint(input: unknown): void {
     if (position !== "fixed" || consentBottom <= consentTop || consentRight <= consentLeft) throw new Error("Visible consent must float as its own corner note.");
     if (consentLeft < cornerInset - 0.5 || consentRight - consentLeft > width * 0.85) throw new Error("Visible consent must stay compact and never span the width.");
     if (Math.abs(width - consentRight - cornerInset) > 0.5) throw new Error("Visible consent must sit in the viewport's end corner.");
-    if (consentBottom > controlTop - cornerInset + 0.5 || consentTop < top + number("borderTop") + paddingBottom - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page.");
+    if (consentBottom > controlTop - cornerInset + 0.5 || consentTop < top + number("borderTop") + paddingBottom - 0.5) throw new Error("Visible consent covers the footer controls at the end of the page: " + JSON.stringify(value));
     clearance = consentBottom - consentTop + cornerInset;
   } else if (value.shown) {
     if (position !== "relative") throw new Error("Resolved footer preferences must remain in normal flow.");
@@ -2131,7 +2131,11 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
         return {width:innerWidth, viewportHeight:innerHeight, rootFont:parseFloat(getComputedStyle(document.documentElement).fontSize), state:consent.dataset.consentState, shown:!consent.hidden, position:getComputedStyle(consent).position, footprint:footer.getBoundingClientRect().height, height:box.height, top:box.top, bottom:box.bottom, paddingTop:parseFloat(style.paddingTop), paddingBottom:parseFloat(style.paddingBottom), borderTop:parseFloat(style.borderTopWidth), borderBottom:parseFloat(style.borderBottomWidth), controlTop:Math.min(...controls.map(r=>r.top)), controlBottom:Math.max(...controls.map(r=>r.bottom)), consentTop:notice.top, consentBottom:notice.bottom, consentLeft:notice.left, consentRight:notice.right};
       })()`);
     };
-    const shown = await measure(); assertConsentFootprint(shown);
+    const shown = await measure();
+    try { assertConsentFootprint(shown); } catch (error) {
+      await screenshot(browser, join(runDirectory, `consent-failure-${String(sample.width)}-${evidence.length}-shown.png`));
+      throw error;
+    }
     if (!isRecord(shown) || shown.width !== sample.width || shown.shown !== true) throw new Error("Consent case did not use its requested visible state.");
     const screenshotBase = join(runDirectory, `consent-${String(sample.width)}-${evidence.length}`);
     const screenshotPath = `${screenshotBase}-shown.png`;
@@ -2217,6 +2221,85 @@ async function driveConsentCases(browser: BrowserDriver, runDirectory: string, b
   try { await browser.run(["tab", "close", tabId]); } catch (error) { if (!isRecoverableTabCloseRace(error)) throw error; }
   const inventory = await browser.run(["tab"]);
   if (activeTabId(inventory) !== bootstrapTabId || tabIds(inventory).includes(tabId)) throw new Error("Consent tab did not close back to the bootstrap tab.");
+  return evidence;
+}
+
+async function driveInsetConsentCases(browser: BrowserDriver, runDirectory: string, bootstrapTabId: string): Promise<readonly unknown[]> {
+  const evidence: unknown[] = [];
+  await browser.run(["tab", "new"]);
+  for (const renderer of ["react", "static"]) for (const width of [320, 360]) for (const textSize of [100, 200]) {
+    await browser.run(["open", `${DEFAULT_BASE_URL}/?mailing=none`]);
+    await browser.evaluate(`localStorage.removeItem('hraness-consent-cookies-v1')`);
+    await browser.run(["set", "viewport", String(width), "844"]);
+    await browser.run(["open", `${DEFAULT_BASE_URL}/?consent=required&mailing=none&support=none&insetFooter=true&renderer=${renderer}&textSize=${String(textSize)}`]);
+    await browser.run(["wait", '[data-consent-state="required"]', "--timeout", "5000"]);
+    // A nested flow container must not capture the initial fixed corner note.
+    await browser.evaluate(`(() => {
+      const note = document.querySelector('[data-slot="hraness-cookie-consent"]');
+      const rootFont = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const box = note.getBoundingClientRect();
+      if (Math.abs(rootFont - ${String(textSize === 200 ? 32 : 16)}) > .5
+        || getComputedStyle(note).position !== 'fixed'
+        || Math.abs(innerWidth - box.right - rootFont * .75) > .5)
+        throw new Error('Nested footer changed text size or required corner anchoring.');
+    })()`);
+    await browser.run(["click", '[data-consent-prompt]']);
+    for (const state of ["clear", "declined"]) {
+      await browser.run(["wait", `[data-consent-state="${state}"]`, "--timeout", "5000"]);
+      await browser.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)");
+      await browser.evaluate(SETTLE_EXPRESSION);
+      const closed = await browser.evaluate(`(() => {
+        const note = document.querySelector('[data-slot="hraness-cookie-consent"]');
+        const details = note.querySelector('details');
+        const box = note.getBoundingClientRect();
+        const width = document.documentElement.scrollWidth;
+        if (details.open || getComputedStyle(note).position !== 'relative'
+          || width > innerWidth + .5 || box.left < -.5 || box.right > innerWidth + .5)
+          throw new Error('Closed nested preferences overflow: '+JSON.stringify({width,viewport:innerWidth,note:box.toJSON()}));
+        return {rootFont:parseFloat(getComputedStyle(document.documentElement).fontSize),width,note:box.toJSON()};
+      })()`);
+      await browser.run(["click", 'summary[aria-label="Analytics preferences"]']);
+      const opened = await browser.evaluate(`(() => {
+        const panel = document.querySelector('.hraness-site-footer__consent-panel');
+        panel.scrollIntoView({block:'nearest'});
+        const box = panel.getBoundingClientRect();
+        if (box.left < -.5 || box.right > innerWidth + .5 || box.top < -.5 || box.bottom > innerHeight + .5
+          || panel.scrollWidth > panel.clientWidth + 1 || document.documentElement.scrollWidth > innerWidth + .5)
+          throw new Error('Opened nested preferences overflow: '+JSON.stringify({panel:box.toJSON(),scroll:panel.scrollWidth,client:panel.clientWidth,viewport:innerWidth}));
+        const controls = [...panel.querySelectorAll('button,a')].filter(node => !node.hidden).map(node => {
+          node.scrollIntoView({block:'nearest'});
+          const control = node.getBoundingClientRect(), boundary = panel.getBoundingClientRect();
+          // An inline privacy link may wrap: the center of its bounding union
+          // can lie between its lines. Verify every painted, clickable fragment.
+          const fragments = [...node.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0);
+          const obscured = !fragments.length || fragments.some(rect => !node.contains(
+            document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)));
+          if (control.left < boundary.left || control.right > boundary.right || control.top < boundary.top
+            || control.bottom > boundary.bottom || node.scrollHeight > node.clientHeight + 1 || obscured)
+            throw new Error('Nested preference control is clipped or obscured: '+JSON.stringify({control:control.toJSON(),panel:boundary.toJSON(),text:node.textContent,scrollHeight:node.scrollHeight,clientHeight:node.clientHeight,obscured,fragments:fragments.map(rect=>rect.toJSON()),font:getComputedStyle(node).font,lineHeight:getComputedStyle(node).lineHeight,whiteSpace:getComputedStyle(node).whiteSpace}));
+          return {text:node.textContent,box:control.toJSON(),fragments:fragments.map(rect=>rect.toJSON())};
+        });
+        if (controls.length < 2) throw new Error('Nested preferences omitted their controls.');
+        return {panel:box.toJSON(),controls};
+      })()`).catch(async error => {
+        await screenshot(browser, join(runDirectory, `inset-consent-failure-${renderer}-${String(width)}-${String(textSize)}-${state}.png`));
+        throw error;
+      });
+      const path = join(runDirectory, `inset-consent-${renderer}-${String(width)}-${String(textSize)}-${state}.png`);
+      await screenshot(browser, path);
+      evidence.push({kind:"inset-consent",renderer,width,textSize,state,closed,opened,screenshot:relative(REPOSITORY_ROOT,path)});
+      if (state === "clear") await browser.run(["click", '[data-slot="hraness-cookie-consent-decline"]']);
+      else await browser.run(["click", 'summary[aria-label="Analytics preferences"]']);
+    }
+  }
+  const errors = browserPageErrors(await browser.run(["errors"]));
+  const consoleErrors = browserConsoleErrors(await browser.run(["console"]));
+  if (errors.length || consoleErrors.length) throw new Error("Nested consent cases produced browser errors.");
+  const tabId = activeTabId(await browser.run(["tab"]));
+  await browser.run(["tab", bootstrapTabId]);
+  try { await browser.run(["tab", "close", tabId]); } catch (error) { if (!isRecoverableTabCloseRace(error)) throw error; }
+  const inventory = await browser.run(["tab"]);
+  if (activeTabId(inventory) !== bootstrapTabId || tabIds(inventory).includes(tabId)) throw new Error("Nested consent tab did not close back to bootstrap.");
   return evidence;
 }
 
@@ -2417,6 +2500,7 @@ async function runVerifier(): Promise<string> {
     await browser.run(["open"]);
     bootstrapInventory = await browser.run(["tab"]);
     const bootstrapTabId = activeTabId(bootstrapInventory);
+    consentEvidence = [...await driveConsentCases(browser, artifacts.runDirectory, bootstrapTabId), ...await driveInsetConsentCases(browser, artifacts.runDirectory, bootstrapTabId)];
     for (const state of fixtureStates) {
       console.log(`Verifying shared footer state: ${state}`);
       evidence.push(await driveState({
@@ -2434,7 +2518,7 @@ async function runVerifier(): Promise<string> {
     noSignupEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId);
     accountEvidence = await driveNoSignup(browser, artifacts.runDirectory, bootstrapTabId, true);
     alignmentEvidence = await driveAlignmentCases(browser, artifacts.runDirectory, bootstrapTabId);
-    consentEvidence = [...await driveConsentCases(browser, artifacts.runDirectory, bootstrapTabId), ...await driveConsentFocusCases(browser, artifacts.runDirectory, bootstrapTabId)];
+    consentEvidence = [...consentEvidence, ...await driveConsentFocusCases(browser, artifacts.runDirectory, bootstrapTabId)];
     finalInventory = await browser.run(["tab"]);
     postDriveSource = sourceIdentity();
     assertSameSourceIdentity(initialSource, postDriveSource);

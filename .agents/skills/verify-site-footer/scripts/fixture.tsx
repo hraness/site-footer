@@ -74,6 +74,7 @@ if (pageParams.get("textSize") === "200") document.documentElement.dataset.fixtu
 const accountEnabled = pageParams.get("mailing") === "account";
 const signupEnabled = !accountEnabled && pageParams.get("mailing") !== "none";
 const standalone = pageParams.get("standalone");
+if (pageParams.get("insetFooter") === "true") document.body.dataset.fixtureInsetFooter = "true";
 const staticRenderer = pageParams.get("renderer") === "static";
 if (pageParams.get("long") === "true") document.body.dataset.fixtureLong = "true";
 const consentRequired = pageParams.get("consent") === "required";
@@ -194,6 +195,7 @@ function Fixture() {
           <p className="fixture-state">state: {selectedState}</p>
         </article>
       </main>
+      <div className="fixture-footer-host">
       {standalone ? <HranessCookieConsent placement={standalone === "flow" ? "flow" : "corner"} /> : staticRenderer ? <StaticFooter /> : <HranessSiteFooter
         // The deprecated placement prop is inert; `?placement=sticky` cases
         // prove it renders the same in-flow footer as the default.
@@ -208,6 +210,7 @@ function Fixture() {
           kind: "signup",
         } : { kind: "none" }}
       />}
+      </div>
     </>
   );
 }
