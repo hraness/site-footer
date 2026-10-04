@@ -13,6 +13,17 @@ colors, and security policy. `mailingList` is required and has no default
 audience, so a product site's signup goes to the general Hraness list only when
 the site sets `audience: "hraness"`.
 
+## Add only the footer features your site needs
+
+Start with [Install and first render](#install-and-first-render) for a footer without a signup form. Choose [the static or React interface](#choose-an-interface), then add the features your host supports:
+
+- [Mailing-list signup](#configure-the-account-or-mailing-list-mode): choose an audience and record the signup page.
+- [Signed-in navigation](#signed-in-account-navigation): show the account link only after your host confirms the session.
+- [Optional paid support](#optional-paid-support): link to the product's Accounts support page.
+- [Social destinations](#retarget-owned-social-destinations): retarget the supported platforms.
+- [Layout and theme](#compatibility-and-layout): align the footer without adding a second spacer.
+- [Content Security Policy](#content-security-policy): allow signup requests without replacing your existing policy.
+
 ## Install and first render
 
 Pin the current immutable release:
