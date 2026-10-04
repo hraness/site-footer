@@ -120,3 +120,10 @@ body[data-fixture-font="wide"] { --font-sans: "Courier New", monospace; font-siz
 html[data-fixture-text-size="200"] { font-size: 200%; }
 
 body[data-fixture-long="true"] .fixture-main { min-block-size: 240vh; align-content: start; gap: 1rem; }
+
+.fixture-footer-host { display: contents; }
+/* Match a consumer that nests the shared bar inside its own padded footer. */
+body[data-fixture-inset-footer="true"] .fixture-footer-host {
+  display: block;
+  padding: 1.5rem 1.25rem 0;
+}

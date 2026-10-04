@@ -3,7 +3,7 @@ import * as stylex from "@stylexjs/stylex";
 import { createStylexTransformCollector, readStylexPackageManifest } from "@hraness/ui/stylex-build";
 import { resolve } from "node:path";
 import {
-  disclosureClassNames, disclosureMarker, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, rootMarker, socialItemClassName,
+  consentMarker, disclosureClassNames, disclosureMarker, footerClasses, footerClassName, footerInnerClassName, mailingStatusClassName, rootMarker, socialItemClassName,
 } from "../src/footer.stylex.js";
 import { assertPresentationBoundary, assertSourceBoundary } from "../scripts/check-stylex-artifacts.js";
 
@@ -12,12 +12,13 @@ const manifest = await readStylexPackageManifest(resolve(repository, "dist/style
 const rules = new Map(manifest.rules.map(([key, value]) => [key, value.ltr]));
 const disclosureMarkerClass = stylex.props(disclosureMarker).className;
 const rootMarkerClass = stylex.props(rootMarker).className;
+const consentMarkerClass = stylex.props(consentMarker).className;
 function cssFor(classes: string): string {
   const atomic = classes.split(/\s+/u).filter((name) => name.startsWith("x"));
   expect(atomic.length).toBeGreaterThan(0);
   return atomic.map((name) => {
     // Retained public markers may have no dependent rules in the stable surface.
-    if (name === disclosureMarkerClass || name === rootMarkerClass) return "";
+    if (name === disclosureMarkerClass || name === rootMarkerClass || name === consentMarkerClass) return "";
     expect(rules.has(name)).toBeTrue();
     return rules.get(name) ?? "";
   }).join("\n").replace(/\s+/gu, "");
@@ -48,7 +49,7 @@ describe("compiled footer presentation", () => {
 
   test("binds the fail-fast compiler and portable support dependency", async () => {
     const pkg = await Bun.file(new URL("../package.json", import.meta.url)).json();
-    expect(pkg.version).toBe("0.20.8");
+    expect(pkg.version).toBe("0.20.9");
     expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
     expect(pkg.peerDependencies).toEqual({ react: ">=18 <20" });
     expect(pkg.peerDependenciesMeta).toEqual({ react: { optional: true } });
@@ -124,14 +125,22 @@ describe("compiled footer presentation", () => {
     contains(footerClasses.consent, "background-color:Canvas");
     contains(footerClasses.consent, "border-color:ButtonText");
     contains(footerClasses.consent, "box-shadow:none");
-    // It never spans the viewport or joins the footer grid.
-    expect(cssFor(footerClasses.consent)).not.toMatch(/inset-inline-start|inset-inline:|[{;]inline-size:100/u);
+    // The initial fixed note stays compact. Settled preferences use the flow
+    // row as their disclosure boundary without stretching the visible summary.
+    expect(cssFor(footerClasses.consent)).not.toMatch(/inset-inline-start|inset-inline:/u);
     contains(footerClasses.consent, '[data-consent-placement="flow"]:is([data-consent-state="clear"],[data-consent-state="declined"])');
     contains(footerClasses.consent, "position:relative");
     contains(footerClasses.consent, "grid-column:1/-1");
+    contains(footerClasses.consent, "inline-size:100%");
+    contains(footerClasses.consentMore, "inline-size:100%");
+    contains(footerClasses.consent, "border-width:1px");
+    contains(footerClasses.consentLearn, "inline-size:fit-content");
+    contains(footerClasses.consentLearn, "margin-inline-start:auto");
+    contains(footerClasses.consentPanel, "max-inline-size:100%");
     contains(footerClasses.consentLearn, "min-block-size:var(--hraness-site-footer-control-block-size)");
+    contains(footerClasses.consentAccept, "block-size:auto");
     for (const target of [footerClasses.consentAccept, footerClasses.consentLearn]) {
-      contains(target, "block-size:var(--hraness-site-footer-control-block-size)");
+      contains(target, "min-block-size:var(--hraness-site-footer-control-block-size)");
 
       contains(target, ":focus-visible");
     }

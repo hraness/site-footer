@@ -7,6 +7,9 @@ export declare const disclosureMarker: Readonly<{
 export declare const rootMarker: Readonly<{
     readonly marker: stylex.StyleXClassNameFor<"marker", symbol>;
 }>;
+export declare const consentMarker: Readonly<{
+    readonly marker: stylex.StyleXClassNameFor<"marker", symbol>;
+}>;
 export declare const footerClasses: {
     account: string;
     support: string;
