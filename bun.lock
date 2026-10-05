@@ -6,7 +6,7 @@
       "name": "@hraness/site-footer",
       "devDependencies": {
         "@babel/core": "7.29.7",
-        "@hraness/direct": "0.7.18",
+        "@hraness/direct": "https://github.com/hraness/direct/releases/download/v0.7.29/hraness-direct-0.7.29.tgz",
         "@hraness/support-foundation": "github:hraness/support-foundation#ed89e584c2c420e3e0547bbe8f32baf8e3a2ae4d",
         "@hraness/ui": "github:hraness/ui#v0.5.12",
         "@hugeicons/core-free-icons": "4.2.2",
@@ -67,7 +67,7 @@
 
     "@dual-bundle/import-meta-resolve": ["@dual-bundle/import-meta-resolve@4.2.1", "", {}, "sha512-id+7YRUgoUX6CgV0DtuhirQWodeeA7Lf4i2x71JS/vtA5pRb/hIGWlw+G6MeXvsM+MXrz0VAydTGElX1rAfgPg=="],
 
-    "@hraness/direct": ["@hraness/direct@0.7.18", "", { "peerDependencies": { "@antithesishq/bombadil": "0.7.2", "agent-browser": "0.32.3", "react": ">=18 <20" }, "optionalPeers": ["@antithesishq/bombadil", "agent-browser", "react"] }, "sha512-Ee04UsCYHfbXAQ5Y2VDFm/nn8Jh3TG9s1ai+n/cOTvOYdPwaIbaYQaqRRaKh2DSiB8bnGS3OSrU+EiWpmwEw8A=="],
+    "@hraness/direct": ["@hraness/direct@https://github.com/hraness/direct/releases/download/v0.7.29/hraness-direct-0.7.29.tgz", { "peerDependencies": { "@antithesishq/bombadil": "0.7.2", "agent-browser": "0.32.3", "effect": "3.22.1", "react": ">=18 <20" }, "optionalPeers": ["@antithesishq/bombadil", "agent-browser", "effect", "react"] }, "sha512-AS4pfDeoLCMM9ZrZOMhoSA8QxCd0+Xeuj6J2D6/ZbljLOtxK937IGahzMclRvo/kOHw3YqKMLVA88JsCv9AbpQ=="],
 
     "@hraness/support-foundation": ["@hraness/support-foundation@github:hraness/support-foundation#ed89e58", {}, "hraness-support-foundation-ed89e58", "sha512-coc1EedClcs0ZweGOp8+iu4ICMY11NGAbXWKFdTSIzcj6MjrHN3AyjNU1HfeA8WZ2IQLTcXuJbG4JmH3nfZ1mQ=="],
 
