@@ -91,7 +91,7 @@ const server = Bun.serve({
       return new Response(html, {
         headers: {
           "cache-control": "no-store",
-          "content-security-policy": "default-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+          "content-security-policy": "default-src 'self'; connect-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'",
           "content-type": "text/html; charset=utf-8",
         },
       });
